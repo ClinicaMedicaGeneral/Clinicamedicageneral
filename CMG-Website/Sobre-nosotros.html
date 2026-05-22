@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sobre nosotros · Clínica Médica General CMG</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<link rel="stylesheet" href="styles.css">
+<style>
+/* ── Sobre Nosotros page styles ───────────────────────────── */
+
+/* ─ Hero ─ */
+.sn-hero {
+  position: relative; background: var(--cmg-navy); color: #fff;
+  padding: 100px 0 120px; overflow: hidden;
+  min-height: 460px; display: flex; align-items: center;
+}
+.sn-hero-photo {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 0;
+  filter: saturate(.8);
+}
+.sn-hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(110deg, var(--cmg-navy) 40%, rgba(33,60,125,.65) 100%);
+}
+.sn-hero-wm {
+  position: absolute; right: -60px; bottom: -200px; z-index: 1;
+  font-family: var(--font-display); font-weight: 900; font-size: 480px;
+  color: rgba(255,255,255,.04); letter-spacing: -.06em; line-height: .85;
+  pointer-events: none;
+}
+.sn-hero-content {
+  position: relative; z-index: 2;
+}
+.sn-hero h1 {
+  font-family: var(--font-display); font-weight: 900;
+  font-size: clamp(56px, 7.5vw, 110px); line-height: .9;
+  letter-spacing: -.025em; text-transform: uppercase;
+  margin: 14px 0 0; color: #fff;
+}
+.sn-hero h1 .y { color: var(--cmg-yellow); }
+.sn-hero-script {
+  font-family: var(--font-script); color: var(--cmg-red);
+  font-size: clamp(36px, 4.5vw, 60px); line-height: 1;
+  margin: 4px 0 0 100px; transform: rotate(-3deg);
+}
+.sn-hero-lead {
+  font-size: 19px; line-height: 1.6; color: rgba(255,255,255,.85);
+  max-width: 600px; margin: 28px 0 0;
+}
+
+/* ─ Historia ─ */
+.sn-historia {
+  padding: 100px 0; background: #fff;
+}
+.sn-historia-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+  align-items: center;
+}
+.sn-historia-photo {
+  border-radius: var(--r-xl); overflow: hidden;
+  aspect-ratio: 4/3; position: relative;
+}
+.sn-historia-photo img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.sn-historia-photo::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(33,60,125,.35), transparent 60%);
+  border-radius: var(--r-xl);
+}
+.sn-historia-badge {
+  position: absolute; bottom: 24px; left: 24px; z-index: 2;
+  background: var(--cmg-yellow); color: var(--cmg-navy);
+  padding: 16px 24px; border-radius: var(--r-lg);
+  font-family: var(--font-display); font-weight: 900;
+}
+.sn-historia-badge .big {
+  display: block; font-size: 48px; line-height: .85; letter-spacing: -.03em;
+}
+.sn-historia-badge .small {
+  display: block; font-size: 13px; letter-spacing: .12em;
+  text-transform: uppercase; margin-top: 4px; font-weight: 700;
+}
+.sn-historia-text p {
+  font-size: 18px; line-height: 1.65; color: var(--neutral-600);
+  margin: 0 0 20px;
+}
+.sn-historia-text p:last-child { margin: 0; }
+.sn-historia-text strong { color: var(--cmg-navy); font-weight: 700; }
+
+/* ─ MVV (Misión / Visión / Propósito) ─ */
+.sn-mvv {
+  padding: 100px 0; background: var(--cmg-navy); color: #fff;
+  position: relative; overflow: hidden;
+}
+.sn-mvv::before {
+  content: ''; position: absolute; inset: 0;
+  background: url('assets/photo-clinic-3.jpg') center/cover no-repeat;
+  opacity: .08; z-index: 0;
+}
+.sn-mvv .container { position: relative; z-index: 1; }
+.sn-mvv-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;
+  margin-top: 56px;
+}
+.sn-mvv-card {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: var(--r-xl); padding: 40px 32px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.sn-mvv-card-icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  background: var(--cmg-yellow); color: var(--cmg-navy);
+  display: flex; align-items: center; justify-content: center;
+}
+.sn-mvv-card-icon svg { width: 28px; height: 28px; }
+.sn-mvv-card-label {
+  font-family: var(--font-body); font-weight: 700;
+  font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--cmg-yellow);
+}
+.sn-mvv-card h3 {
+  font-family: var(--font-display); font-weight: 900;
+  font-size: 32px; line-height: .95; text-transform: uppercase;
+  letter-spacing: -.015em; color: #fff; margin: 0;
+}
+.sn-mvv-card p {
+  font-size: 16px; line-height: 1.6; color: rgba(255,255,255,.82); margin: 0;
+}
+
+/* ─ Valores ─ */
+.sn-valores {
+  padding: 100px 0; background: var(--neutral-100);
+}
+.sn-valores-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px;
+  margin-top: 56px;
+}
+.sn-valor {
+  background: #fff; border-radius: var(--r-xl); padding: 32px 24px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 14px;
+  transition: transform var(--dur-base) var(--easing-decel),
+              box-shadow var(--dur-base) var(--easing-decel);
+}
+.sn-valor:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(33,60,125,.1);
+}
+.sn-valor-icon {
+  width: 64px; height: 64px; border-radius: 16px;
+  background: var(--cmg-navy); color: var(--cmg-yellow);
+  display: flex; align-items: center; justify-content: center;
+}
+.sn-valor-icon svg { width: 30px; height: 30px; }
+.sn-valor h4 {
+  font-family: var(--font-display); font-weight: 900;
+  font-size: 20px; text-transform: uppercase; letter-spacing: -.01em;
+  color: var(--cmg-navy); margin: 0;
+}
+.sn-valor p {
+  font-size: 14px; line-height: 1.55; color: var(--neutral-600); margin: 0;
+}
+
+/* ─ Tagline strip (3 items: Rápido, Profesional, Accesible) ─ */
+.sn-tagline {
+  background: var(--cmg-yellow); padding: 64px 0;
+}
+.sn-tagline-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: rgba(33,60,125,.15);
+  border: 1px solid rgba(33,60,125,.15); border-radius: var(--r-xl);
+  overflow: hidden;
+}
+.sn-tag-item {
+  background: var(--cmg-yellow); padding: 36px 28px;
+  text-align: center;
+}
+.sn-tag-num {
+  font-family: var(--font-display); font-weight: 900;
+  font-size: 14px; letter-spacing: .18em; color: var(--cmg-red);
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.sn-tag-word {
+  font-family: var(--font-display); font-weight: 900;
+  font-size: 36px; line-height: 1; text-transform: uppercase;
+  letter-spacing: -.015em; color: var(--cmg-navy);
+}
+
+/* ─ CTA Doctor 365 ─ */
+.sn-cta {
+  padding: 100px 0; background: var(--cmg-navy); color: #fff;
+  text-align: center; position: relative; overflow: hidden;
+}
+.sn-cta::before {
+  content: '365'; position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display); font-weight: 900;
+  font-size: 480px; color: rgba(255,255,255,.035);
+  letter-spacing: -.06em; line-height: .85; pointer-events: none;
+}
+.sn-cta .container { position: relative; z-index: 1; }
+.sn-cta h2 {
+  font-family: var(--font-display); font-weight: 900;
+  font-size: clamp(48px, 6vw, 84px); line-height: .9;
+  letter-spacing: -.025em; text-transform: uppercase;
+  color: #fff; margin: 14px 0 0;
+}
+.sn-cta h2 .y { color: var(--cmg-yellow); }
+.sn-cta p {
+  font-size: 18px; line-height: 1.6; color: rgba(255,255,255,.85);
+  max-width: 560px; margin: 24px auto 36px;
+}
+.sn-cta-btns {
+  display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;
+}
+
+@media (max-width: 960px) {
+  .sn-historia-grid { grid-template-columns: 1fr; gap: 40px; }
+  .sn-mvv-grid { grid-template-columns: 1fr; }
+  .sn-valores-grid { grid-template-columns: repeat(2, 1fr); }
+  .sn-tagline-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .sn-valores-grid { grid-template-columns: 1fr; }
+  .sn-tagline-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body data-screen-label="Sobre nosotros" data-lang="es">
+
+<!-- Top promo strip -->
+<div class="promo-strip">
+  <div class="container promo-row">
+    <span class="dot"></span>
+    <span class="promo-msgs">
+      <span class="promo-msg is-active" data-msg="hours">
+        <span class="lang lang-es"><b>ABIERTO</b> <span id="promo-hours-es">6:00 AM – 10:00 PM</span> <span id="promo-day-es"></span> · City Mall S2 E214</span>
+        <span class="lang lang-en"><b>OPEN</b> <span id="promo-hours-en">6:00 AM – 10:00 PM</span> <span id="promo-day-en"></span> · City Mall S2 E214</span>
+      </span>
+      <span class="promo-msg" data-msg="d365">
+        <span class="lang lang-es"><b>NUEVO · DOCTOR 365</b> L900/año · Suero Complejo B de regalo · Sin citas</span>
+        <span class="lang lang-en"><b>NEW · DOCTOR 365</b> L900/year · free Complex B IV therapy · Walk-in</span>
+      </span>
+    </span>
+    <a href="https://wa.me/50431555162" class="promo-wa">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+      +504 3155-5162
+    </a>
+  </div>
+</div>
+
+<!-- Sticky header -->
+<header class="site-header">
+  <div class="container header-row">
+    <a class="brand-lockup" href="Inicio.html">
+      <img class="brand-logo" src="assets/cmg-logo-white.png" alt="CMG">
+    </a>
+    <nav class="site-nav">
+      <a href="Inicio.html"><span class="lang lang-es">Inicio</span><span class="lang lang-en">Home</span></a>
+      <a href="Sobre-nosotros.html" class="is-active"><span class="lang lang-es">Sobre nosotros</span><span class="lang lang-en">About</span></a>
+      <a href="Cotizador.html"><span class="lang lang-es">Cotizador</span><span class="lang lang-en">Quote builder</span></a>
+    </nav>
+    <div class="header-actions">
+      <div class="lang-toggle">
+        <button data-set-lang="es" class="is-on" type="button">ES</button>
+        <button data-set-lang="en" type="button">EN</button>
+      </div>
+      <a href="Doctor-365.html" class="cta-pill cta-pill--yellow">
+        <span class="lang lang-es">DOCTOR 365</span>
+        <span class="lang lang-en">DOCTOR 365</span>
+      </a>
+      <button class="nav-toggle" type="button" aria-label="Menú">
+        <svg class="icon-open" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg class="icon-close" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="sn-hero">
+  <img class="sn-hero-photo" src="assets/photo-signage.jpg" alt="">
+  <div class="sn-hero-overlay"></div>
+  <div class="sn-hero-wm" aria-hidden="true">CMG</div>
+  <div class="container sn-hero-content">
+    <div class="eyebrow eyebrow--yellow">
+      <span class="lang lang-es">Clínica Médica General · Tegucigalpa</span>
+      <span class="lang lang-en">Clínica Médica General · Tegucigalpa</span>
+    </div>
+    <h1>
+      <span class="lang lang-es"><span class="y">SOBRE</span><br>NOSOTROS</span>
+      <span class="lang lang-en"><span class="y">ABOUT</span><br>US</span>
+    </h1>
+    <div class="sn-hero-script">
+      <span class="lang lang-es">Cuidamos de tu salud</span>
+      <span class="lang lang-en">We care for your health</span>
+    </div>
+    <p class="sn-hero-lead">
+      <span class="lang lang-es">Somos una clínica médica general ubicada en el corazón de Tegucigalpa — comprometidos con brindarte atención accesible, rápida y profesional todos los días del año.</span>
+      <span class="lang lang-en">We are a general medical clinic in the heart of Tegucigalpa — committed to delivering accessible, fast and professional care every day of the year.</span>
+    </p>
+  </div>
+</section>
+
+<!-- HISTORIA -->
+<section class="sn-historia">
+  <div class="container sn-historia-grid">
+    <div class="sn-historia-photo">
+      <img src="assets/photo-signage-night.jpg" alt="CMG · City Mall Tegucigalpa">
+      <div class="sn-historia-badge">
+        <span class="big">365</span>
+        <span class="small"><span class="lang lang-es">días al año</span><span class="lang lang-en">days a year</span></span>
+      </div>
+    </div>
+    <div class="sn-historia-text">
+      <div class="eyebrow eyebrow--red">
+        <span class="lang lang-es">Nuestra historia</span>
+        <span class="lang lang-en">Our story</span>
+      </div>
+      <h2 class="section-h2">
+        <span class="lang lang-es">Salud sin<br><span class="y">barreras</span></span>
+        <span class="lang lang-en">Health without<br><span class="y">barriers</span></span>
+      </h2>
+      <p>
+        <span class="lang lang-es"><strong>Clínica Médica General CMG</strong> nace como una alternativa de salud de alta calidad para las familias de Tegucigalpa. Desde nuestra apertura en <strong>City Mall</strong>, hemos atendido a miles de personas con un modelo simple pero transformador: <strong>sin citas, todos los días, con precios al alcance de todos.</strong></span>
+        <span class="lang lang-en"><strong>Clínica Médica General CMG</strong> was born as a high-quality health alternative for families in Tegucigalpa. Since opening at <strong>City Mall</strong>, we have served thousands of people with a simple but transformative model: <strong>no appointments, every day, at prices everyone can afford.</strong></span>
+      </p>
+      <p>
+        <span class="lang lang-es">Creemos que la salud no debe ser un privilegio. Por eso unificamos bajo un mismo techo la <strong>consulta médica general</strong>, los <strong>exámenes de laboratorio</strong> y las <strong>sueroterapias intravenosas</strong> — todo con personal entrenado, insumos certificados y la calidez humana que mereces.</span>
+        <span class="lang lang-en">We believe health should not be a privilege. That's why we bring together under one roof <strong>general medical consults</strong>, <strong>lab tests</strong>, and <strong>IV vitamin therapy</strong> — all with trained staff, certified supplies, and the human warmth you deserve.</span>
+      </p>
+      <p>
+        <span class="lang lang-es">Hoy somos parte del día a día de las familias tegucigalpenses — y seguimos creciendo para estar más cerca de ti.</span>
+        <span class="lang lang-en">Today we are part of the daily lives of families in Tegucigalpa — and we continue to grow to be closer to you.</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- MISIÓN / VISIÓN / PROPÓSITO -->
+<section class="sn-mvv">
+  <div class="container">
+    <header class="section-head section-head--center" style="max-width:100%">
+      <div class="eyebrow eyebrow--yellow">
+        <span class="lang lang-es">Nuestra esencia</span>
+        <span class="lang lang-en">Our essence</span>
+      </div>
+      <h2 class="section-h2 section-h2--light">
+        <span class="lang lang-es">Misión · Visión · Propósito</span>
+        <span class="lang lang-en">Mission · Vision · Purpose</span>
+      </h2>
+    </header>
+    <div class="sn-mvv-grid">
+      <div class="sn-mvv-card">
+        <div class="sn-mvv-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="sn-mvv-card-label">
+          <span class="lang lang-es">Misión</span><span class="lang lang-en">Mission</span>
+        </div>
+        <h3>
+          <span class="lang lang-es">Cuidamos</span><span class="lang lang-en">We care</span>
+        </h3>
+        <p>
+          <span class="lang lang-es">Ofrecer atención médica accesible, profesional y cercana — sin citas, todos los días, a precios al alcance de las familias hondureñas.</span>
+          <span class="lang lang-en">Offer accessible, professional and personal medical care — no appointments, every day, at prices Honduran families can afford.</span>
+        </p>
+      </div>
+      <div class="sn-mvv-card">
+        <div class="sn-mvv-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        </div>
+        <div class="sn-mvv-card-label">
+          <span class="lang lang-es">Visión</span><span class="lang lang-en">Vision</span>
+        </div>
+        <h3>
+          <span class="lang lang-es">Ser el primer paso</span><span class="lang lang-en">First choice</span>
+        </h3>
+        <p>
+          <span class="lang lang-es">Convertirnos en la primera opción de salud cotidiana en Tegucigalpa: el lugar donde la familia confía cuando necesita un médico ya.</span>
+          <span class="lang lang-en">Become the first everyday health choice in Tegucigalpa: the place families trust when they need a doctor now.</span>
+        </p>
+      </div>
+      <div class="sn-mvv-card">
+        <div class="sn-mvv-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.5-2 9-7 9-13V5l-9-3-9 3v4c0 6 3.5 11 9 13z"/></svg>
+        </div>
+        <div class="sn-mvv-card-label">
+          <span class="lang lang-es">Propósito</span><span class="lang lang-en">Purpose</span>
+        </div>
+        <h3>
+          <span class="lang lang-es">Salud sin barreras</span><span class="lang lang-en">Health for all</span>
+        </h3>
+        <p>
+          <span class="lang lang-es">Hacer que ir al médico deje de ser un trámite caro, lento o intimidante — y se convierta en un acto natural de cuidado familiar.</span>
+          <span class="lang lang-en">Make going to the doctor stop being expensive, slow or intimidating — and turn it into a natural act of family care.</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALORES -->
+<section class="sn-valores">
+  <div class="container">
+    <header class="section-head section-head--center" style="max-width:100%">
+      <div class="eyebrow eyebrow--red">
+        <span class="lang lang-es">Nuestros valores</span>
+        <span class="lang lang-en">Our values</span>
+      </div>
+      <h2 class="section-h2">
+        <span class="lang lang-es">Lo que nos define</span>
+        <span class="lang lang-en">What defines us</span>
+      </h2>
+    </header>
+    <div class="sn-valores-grid">
+      <div class="sn-valor">
+        <div class="sn-valor-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h4><span class="lang lang-es">Compromiso</span><span class="lang lang-en">Commitment</span></h4>
+        <p><span class="lang lang-es">Cumplimos lo que prometemos, cada visita, cada día.</span><span class="lang lang-en">We deliver on our promise — every visit, every day.</span></p>
+      </div>
+      <div class="sn-valor">
+        <div class="sn-valor-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9.5 17 14 19 21 12 17 5 21 7 14 2 9.5 9 9 12 2"/></svg>
+        </div>
+        <h4><span class="lang lang-es">Calidad</span><span class="lang lang-en">Quality</span></h4>
+        <p><span class="lang lang-es">Procedimientos certificados e insumos médicos garantizados.</span><span class="lang lang-en">Certified procedures and guaranteed medical supplies.</span></p>
+      </div>
+      <div class="sn-valor">
+        <div class="sn-valor-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        </div>
+        <h4><span class="lang lang-es">Respeto</span><span class="lang lang-en">Respect</span></h4>
+        <p><span class="lang lang-es">Trato digno e información clara para cada persona.</span><span class="lang lang-en">Dignified treatment and clear information for every person.</span></p>
+      </div>
+      <div class="sn-valor">
+        <div class="sn-valor-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        </div>
+        <h4><span class="lang lang-es">Calidez humana</span><span class="lang lang-en">Human warmth</span></h4>
+        <p><span class="lang lang-es">Atendemos como quisiéramos que atiendan a los nuestros.</span><span class="lang lang-en">We care the way we'd want our own family cared for.</span></p>
+      </div>
+      <div class="sn-valor">
+        <div class="sn-valor-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h4><span class="lang lang-es">Solidaridad</span><span class="lang lang-en">Solidarity</span></h4>
+        <p><span class="lang lang-es">Precios justos y descuentos para tercera y cuarta edad.</span><span class="lang lang-en">Fair prices and discounts for seniors and retirees.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TAGLINE STRIP -->
+<section class="sn-tagline">
+  <div class="container">
+    <div class="sn-tagline-grid">
+      <div class="sn-tag-item">
+        <div class="sn-tag-num">01</div>
+        <div class="sn-tag-word"><span class="lang lang-es">Rápido</span><span class="lang lang-en">Quick</span></div>
+      </div>
+      <div class="sn-tag-item">
+        <div class="sn-tag-num">02</div>
+        <div class="sn-tag-word"><span class="lang lang-es">Profesional</span><span class="lang lang-en">Professional</span></div>
+      </div>
+      <div class="sn-tag-item">
+        <div class="sn-tag-num">03</div>
+        <div class="sn-tag-word"><span class="lang lang-es">Accesible</span><span class="lang lang-en">Accessible</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA DOCTOR 365 -->
+<section class="sn-cta">
+  <div class="container">
+    <div class="eyebrow eyebrow--yellow">
+      <span class="lang lang-es">Únete a la familia CMG</span>
+      <span class="lang lang-en">Join the CMG family</span>
+    </div>
+    <h2>
+      <span class="lang lang-es"><span class="y">DOCTOR 365</span><br>para tu familia</span>
+      <span class="lang lang-en"><span class="y">DOCTOR 365</span><br>for your family</span>
+    </h2>
+    <p>
+      <span class="lang lang-es">Atención continua, descuentos en laboratorio y sueroterapia — y una Sueroterapia Complejo B de regalo al inscribirte. Todo por L900 al año.</span>
+      <span class="lang lang-en">Continuous care, lab and IV therapy discounts — plus a free Complex B IV therapy when you join. All for L900 a year.</span>
+    </p>
+    <div class="sn-cta-btns">
+      <a href="Doctor-365.html" class="cta-pill cta-pill--yellow cta-pill--lg">
+        <span class="lang lang-es">CONOCER DOCTOR 365</span>
+        <span class="lang lang-en">DISCOVER DOCTOR 365</span>
+      </a>
+      <a href="https://wa.me/50433010466?text=Quiero%20hablar%20con%20un%20representante%20de%20CMG" class="cta-pill cta-pill--ghost cta-pill--lg">
+        <span class="lang lang-es">Hablar con nosotros</span>
+        <span class="lang lang-en">Talk to us</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <div class="footer-lockup">
+        <img class="footer-logo" src="assets/cmg-logo-white.png" alt="CMG">
+      </div>
+      <p class="footer-script">
+        <span class="lang lang-es">Cuidamos de tu salud</span>
+        <span class="lang lang-en">We care for your health</span>
+      </p>
+      <p class="footer-strap">
+        <span class="lang lang-es">Atención médica accesible y profesional · sin citas · todos los días del año.</span>
+        <span class="lang lang-en">Accessible, professional medical care · walk-in · every day of the year.</span>
+      </p>
+    </div>
+    <div class="footer-col">
+      <h5><span class="lang lang-es">Sitio</span><span class="lang lang-en">Site</span></h5>
+      <a href="Inicio.html"><span class="lang lang-es">Inicio</span><span class="lang lang-en">Home</span></a>
+      <a href="Sobre-nosotros.html"><span class="lang lang-es">Sobre nosotros</span><span class="lang lang-en">About</span></a>
+      <a href="Cotizador.html"><span class="lang lang-es">Cotizador</span><span class="lang lang-en">Quote builder</span></a>
+    </div>
+    <div class="footer-col">
+      <h5><span class="lang lang-es">Programas</span><span class="lang lang-en">Programs</span></h5>
+      <a href="Doctor-365.html">Doctor 365</a>
+      <a href="Cotizador.html">Sueroterapias</a>
+      <a href="Cotizador.html"><span class="lang lang-es">Laboratorio</span><span class="lang lang-en">Lab</span></a>
+      <a href="Cotizador.html"><span class="lang lang-es">Consulta</span><span class="lang lang-en">Consults</span></a>
+    </div>
+    <div class="footer-col footer-contact">
+      <h5><span class="lang lang-es">Contacto</span><span class="lang lang-en">Contact</span></h5>
+      <p>City Mall, Sótano 2 · Local E214<br>Tegucigalpa, Honduras</p>
+      <p>+504 3155-5162<br>clinicamedicacmg.net</p>
+      <div class="footer-socials">
+        <a href="https://www.facebook.com/ClinicaMedicaGeneralCMG/" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9.198 21.5h4v-8.01h3.604l.396-3.98h-4V7.5a1 1 0 0 1 1-1h3v-4h-3a5 5 0 0 0-5 5v2.01h-2l-.396 3.98h2.396v8.01Z"/></svg></a>
+        <a href="https://www.instagram.com/clinicamedicacmg/" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor"/></svg></a>
+        <a href="https://wa.me/50431555162" aria-label="WhatsApp"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg></a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-base">
+    <div class="container footer-base-row">
+      <span class="lang lang-es">© 2026 Clínica Médica General CMG · Tegucigalpa, Honduras</span>
+      <span class="lang lang-en">© 2026 Clínica Médica General CMG · Tegucigalpa, Honduras</span>
+      <span class="footer-promise">Rápido · Profesional · Accesible</span>
+    </div>
+  </div>
+</footer>
+
+<a class="float-wa" href="https://wa.me/50431555162" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+</a>
+
+<script>
+(function () {
+  var KEY = 'cmg-lang';
+  var root = document.body;
+  var stored = localStorage.getItem(KEY);
+  if (stored === 'en' || stored === 'es') root.dataset.lang = stored;
+  document.querySelectorAll('[data-set-lang]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.dataset.setLang;
+      root.dataset.lang = lang;
+      localStorage.setItem(KEY, lang);
+      document.querySelectorAll('[data-set-lang]').forEach(function(b) {
+        b.classList.toggle('is-on', b.dataset.setLang === lang);
+      });
+    });
+  });
+  document.querySelectorAll('[data-set-lang]').forEach(function(b) {
+    b.classList.toggle('is-on', b.dataset.setLang === root.dataset.lang);
+  });
+
+  var header = document.querySelector('.site-header');
+  window.addEventListener('scroll', function() {
+    header.classList.toggle('is-scrolled', window.scrollY > 8);
+  }, { passive: true });
+
+  // Mobile nav toggle
+  var navBtn = document.querySelector('.nav-toggle');
+  if (navBtn) {
+    navBtn.addEventListener('click', function() {
+      document.body.classList.toggle('nav-open');
+    });
+    document.querySelectorAll('.site-nav a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        document.body.classList.remove('nav-open');
+      });
+    });
+  }
+
+  // Promo strip dynamic hours
+  var DAYS_ES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var DAYS_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var d = new Date().getDay();
+  var hoursStr = d === 0 ? '8:00 AM – 7:00 PM' : '6:00 AM – 10:00 PM';
+  ['es','en'].forEach(function(l) {
+    var h = document.getElementById('promo-hours-' + l);
+    var day = document.getElementById('promo-day-' + l);
+    if (h) h.textContent = hoursStr;
+    if (day) day.textContent = '(' + (l === 'es' ? DAYS_ES[d] : DAYS_EN[d]) + ')';
+  });
+  var msgs = document.querySelectorAll('.promo-msg');
+  if (msgs.length > 1) {
+    var idx = Math.floor(Math.random() * msgs.length);
+    msgs.forEach(function(m, i) { m.classList.toggle('is-active', i === idx); });
+    setInterval(function() {
+      msgs[idx].classList.remove('is-active');
+      idx = (idx + 1) % msgs.length;
+      msgs[idx].classList.add('is-active');
+    }, 6000);
+  }
+})();
+</script>
+</body>
+</html>

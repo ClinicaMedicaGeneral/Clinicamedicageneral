@@ -1319,25 +1319,64 @@ var CS = (function () {
       await generatePDF(true);
       toast('✅ PDF descargado. Adjúntalo en WhatsApp.');
 
-      /* 2. Construir mensaje CORTO para WhatsApp */
-      var name   = state.client.name || 'cliente';
-      var phone  = state.waNum.replace(/\D/g, '');
-      var wa504  = phone
+      /* 2. Construir mensaje con detalle completo de la cotización */
+      var clientName = state.client.name || 'cliente';
+      var phone = state.waNum.replace(/\D/g, '');
+      var wa504 = phone
         ? (phone.startsWith('504') ? phone : '504' + phone)
         : '';
 
-      var msg = encodeURIComponent(
-        'Hola ' + name + ', te envío tu cotización N° ' + state.quotNum + ' de Clínica Médica General CMG. ' +
-        'Por favor revisa el archivo PDF adjunto. ¡Estamos a tu disposición! 😊'
-      );
+      /* Líneas de ítems */
+      var itemLines = state.items.map(function(it) {
+        var lineAmt = (parseFloat(it.price)||0) * (parseInt(it.qty)||0) - (parseFloat(it.disc)||0);
+        var line = '• ' + (it.desc || '—') + ' ×' + it.qty + ' — L ' + lineAmt.toFixed(2);
+        if (it.comment) line += ' (' + it.comment + ')';
+        return line;
+      }).join('\n');
+
+      /* Totales */
+      var sub   = subtotal();
+      var disc  = parseFloat(state.discount)  || 0;
+      var tax   = parseFloat(state.tax)       || 0;
+      var ship  = parseFloat(state.shipping)  || 0;
+      var other = parseFloat(state.other)     || 0;
+      var grand = grandTotal();
+
+      /* Armar mensaje */
+      var lines = [];
+      lines.push('🏥 *Clínica Médica General CMG*');
+      lines.push('📋 *Cotización N° ' + state.quotNum + '*');
+      lines.push('📅 Válida hasta: ' + fmtDate(state.expiry));
+      lines.push('');
+      lines.push('Hola *' + clientName + '*, aquí tienes el detalle de tu cotización:');
+      lines.push('');
+      lines.push('*SERVICIOS*');
+      lines.push(itemLines);
+      lines.push('');
+      lines.push('─────────────────────');
+      lines.push('Subtotal:      L ' + sub.toFixed(2));
+      if (disc  > 0) lines.push('Descuento:    −L ' + disc.toFixed(2));
+      if (tax   > 0) lines.push('Impuesto:      L ' + tax.toFixed(2));
+      if (ship  > 0) lines.push('Envío:         L ' + ship.toFixed(2));
+      if (other > 0) lines.push('Otro:          L ' + other.toFixed(2));
+      lines.push('─────────────────────');
+      lines.push('*TOTAL:        L ' + grand.toFixed(2) + '*');
+      lines.push('');
+      if (state.notes) lines.push('📝 ' + state.notes + '\n');
+      lines.push('📍 City Mall, LC-214, Tegucigalpa');
+      lines.push('📞 +504 3155-5162');
+      lines.push('');
+      lines.push('¡Quedamos a tu disposición! 😊');
+
+      var msg = encodeURIComponent(lines.join('\n'));
 
       var url = wa504
         ? 'https://wa.me/' + wa504 + '?text=' + msg
-        : 'https://web.whatsapp.com/';
+        : 'https://web.whatsapp.com/?text=' + msg;
 
       /* 3. Abrir WhatsApp */
       window.open(url, '_blank');
-      toast('📲 WhatsApp abierto. Adjunta el PDF descargado.');
+      toast('📲 WhatsApp abierto con la cotización completa.');
 
     } catch (err) {
       console.error(err);

@@ -8,7 +8,8 @@
 <link rel="stylesheet" href="assets/cmg-tokens.css">
 <link rel="stylesheet" href="styles.css">
 <!-- html2pdf.js: convierte el DOM al PDF sin backend -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+  onerror="document.getElementById('cs-cdn-warn').style.display='block'"></script>
 
 <style>
 /* ============================================================
@@ -792,9 +793,14 @@
         </div>
       </div>
 
+      <!-- Aviso si el CDN no carga (oculto por defecto) -->
+      <div id="cs-cdn-warn" style="display:none;background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;padding:12px 14px;font-size:12px;color:#92400E;margin-bottom:8px;">
+        ⚠️ No se pudo cargar html2pdf.js. Verifica tu conexión a internet e intenta recargar la página.
+      </div>
+
       <!-- Botones de acción -->
       <div class="cs-actions">
-        <button class="cs-btn cs-btn--dl" onclick="CS.generatePDF(true)">
+        <button class="cs-btn cs-btn--dl" id="cs-btn-dl" onclick="CS.downloadPDF()">
           ⬇ Descargar PDF
         </button>
         <button class="cs-btn cs-btn--wa" id="cs-btn-wa" onclick="CS.sendWhatsApp()">
@@ -1277,20 +1283,53 @@ var CS = (function () {
   /* ----------------------------------------------------------
      GENERAR PDF
   ---------------------------------------------------------- */
-  function generatePDF(download) {
-    var el = $id('cs-pdf-doc');
-    var opts = {
+
+  /* Opciones compartidas de html2pdf */
+  function pdfOpts() {
+    return {
       margin      : [8, 8, 8, 8],
       filename    : 'CMG-Cotizacion-' + state.quotNum + '.pdf',
       image       : { type: 'jpeg', quality: 0.98 },
-      html2canvas : { scale: 2.5, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+      html2canvas : { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', allowTaint: true },
       jsPDF       : { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
-    if (download) {
-      return html2pdf().set(opts).from(el).save();
-    } else {
-      return html2pdf().set(opts).from(el).output('blob');
+  }
+
+  /* Descarga directa — llamada desde el botón "Descargar PDF" */
+  async function downloadPDF() {
+    if (state.items.length === 0) {
+      toast('⚠️ Agrega al menos un servicio antes de generar el PDF.');
+      return;
     }
+
+    if (typeof html2pdf === 'undefined') {
+      toast('❌ html2pdf no está disponible. Recarga la página.');
+      return;
+    }
+
+    var btn = $id('cs-btn-dl');
+    var orig = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="cs-spin"></span> Generando...'; }
+
+    try {
+      var el = $id('cs-pdf-doc');
+      await html2pdf().set(pdfOpts()).from(el).save();
+      toast('✅ PDF descargado correctamente.');
+    } catch (err) {
+      console.error('[CMG PDF]', err);
+      toast('❌ Error al generar el PDF: ' + (err.message || err));
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+    }
+  }
+
+  /* Genera el PDF y devuelve Blob (para el flujo de WhatsApp) */
+  async function generatePDF() {
+    if (typeof html2pdf === 'undefined') {
+      throw new Error('html2pdf no está disponible. Recarga la página.');
+    }
+    var el = $id('cs-pdf-doc');
+    await html2pdf().set(pdfOpts()).from(el).save();
   }
 
   /* ----------------------------------------------------------
@@ -1518,6 +1557,7 @@ var CS = (function () {
     addItem     : addItem,
     removeItem  : removeItem,
     updateItem  : updateItem,
+    downloadPDF : downloadPDF,
     generatePDF : generatePDF,
     sendWhatsApp: sendWhatsApp
   };

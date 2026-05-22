@@ -1412,6 +1412,36 @@ var CS = (function () {
   }
 
   /* ----------------------------------------------------------
+     CARGAR DATOS DESDE COTIZADOR.HTML (localStorage)
+  ---------------------------------------------------------- */
+  function loadFromCotizador(data) {
+    /* Mapear ítems del carrito al formato del sistema */
+    state.items = (data.items || []).map(function(it) {
+      var comment = '';
+      if (it.isD365Free && data.disc === 'd365') comment = 'Gratis con Doctor 365';
+      return { desc: it.name, comment: comment, price: it.price, qty: it.qty, disc: 0, tax: 0 };
+    });
+
+    /* Descuento global */
+    state.discount = parseFloat(data.discount) || 0;
+    var discEl = $id('f-discount');
+    if (discEl) discEl.value = state.discount.toFixed(2);
+
+    /* Nota automática con el tipo de descuento */
+    if (data.discountLabel) {
+      state.notes = 'Descuento aplicado: ' + data.discountLabel;
+      var notesEl = $id('f-notes');
+      if (notesEl) notesEl.value = state.notes;
+    }
+
+    renderEditorItems();
+    syncTotals();
+
+    /* Banner informativo */
+    toast('✅ Cotización importada desde el Cotizador (' + state.items.length + ' servicio' + (state.items.length !== 1 ? 's' : '') + ')');
+  }
+
+  /* ----------------------------------------------------------
      INICIALIZAR
   ---------------------------------------------------------- */
   function init() {
@@ -1424,7 +1454,22 @@ var CS = (function () {
     if (ex) ex.value = state.expiry.toISOString().split('T')[0];
 
     bindForm();
-    addItem(); /* un ítem vacío por defecto */
+
+    /* ¿Vienen datos del Cotizador? */
+    var raw = localStorage.getItem('cmg-quote-data');
+    if (raw) {
+      try {
+        var data = JSON.parse(raw);
+        localStorage.removeItem('cmg-quote-data'); /* limpiar para no reutilizar */
+        loadFromCotizador(data);
+      } catch (e) {
+        console.warn('[CMG] Error al leer cmg-quote-data:', e);
+        addItem(); /* fallback: ítem vacío */
+      }
+    } else {
+      addItem(); /* ítem vacío por defecto */
+    }
+
     syncPreview();
   }
 

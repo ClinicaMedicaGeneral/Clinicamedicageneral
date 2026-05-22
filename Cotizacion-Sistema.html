@@ -7,9 +7,7 @@
 <link rel="icon" href="assets/isotipo-color.png">
 <link rel="stylesheet" href="assets/cmg-tokens.css">
 <link rel="stylesheet" href="styles.css">
-<!-- html2pdf.js: convierte el DOM al PDF sin backend -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
-  onerror="document.getElementById('cs-cdn-warn').style.display='block'"></script>
+<!-- Sin dependencias externas: el PDF se genera con window.print() -->
 
 <style>
 /* ============================================================
@@ -583,6 +581,58 @@
   .cs-preview-frame { max-height: none; }
   #cs-pdf-doc { width: 100%; min-width: 0; padding: 20px; }
 }
+
+/* ============================================================
+   MODO IMPRESIÓN — oculta todo excepto el documento PDF
+   El usuario selecciona "Guardar como PDF" en el diálogo
+   ============================================================ */
+@media print {
+  /* Ocultar toda la UI del sitio */
+  .promo-strip,
+  .site-header,
+  .site-footer,
+  .float-wa,
+  .cs-toast,
+  .cs-page-header,
+  .cs-editor,
+  .cs-preview-label,
+  .cs-cdn-warn,
+  #cs-cdn-warn { display: none !important; }
+
+  /* Reset de márgenes del body */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  /* Mostrar solo el documento */
+  .cs-page       { background: #fff !important; padding: 0 !important; }
+  .cs-workspace  { display: block !important; padding: 0 !important; margin: 0 !important; }
+  .cs-preview-panel { position: static !important; display: block !important; }
+  .cs-preview-frame {
+    background: none !important;
+    padding: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+  }
+
+  /* El documento PDF imprime perfectamente */
+  #cs-pdf-doc {
+    width: 100% !important;
+    box-shadow: none !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    font-size: 11px !important;
+    page-break-after: avoid !important;
+  }
+
+  /* Evitar que la tabla se corte entre páginas */
+  .pdf-tbl tr { page-break-inside: avoid; }
+  .pdf-totals-wrap { page-break-inside: avoid; }
+}
 </style>
 </head>
 <body data-screen-label="Cotización · Sistema" data-lang="es">
@@ -801,7 +851,7 @@
       <!-- Botones de acción -->
       <div class="cs-actions">
         <button class="cs-btn cs-btn--dl" id="cs-btn-dl" onclick="CS.downloadPDF()">
-          ⬇ Descargar PDF
+          🖨️ Guardar como PDF
         </button>
         <button class="cs-btn cs-btn--wa" id="cs-btn-wa" onclick="CS.sendWhatsApp()">
           📲 Generar PDF y Enviar por WhatsApp
@@ -1281,55 +1331,36 @@ var CS = (function () {
   }
 
   /* ----------------------------------------------------------
-     GENERAR PDF
+     GENERAR PDF — usa window.print() para máxima compatibilidad
+     El navegador abre el diálogo de impresión; el usuario
+     selecciona "Guardar como PDF" o "Destino: PDF".
+     Funciona en Chrome, Firefox, Safari, Edge — sin librerías.
   ---------------------------------------------------------- */
 
-  /* Opciones compartidas de html2pdf */
-  function pdfOpts() {
-    return {
-      margin      : [8, 8, 8, 8],
-      filename    : 'CMG-Cotizacion-' + state.quotNum + '.pdf',
-      image       : { type: 'jpeg', quality: 0.98 },
-      html2canvas : { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff', allowTaint: true },
-      jsPDF       : { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-  }
-
-  /* Descarga directa — llamada desde el botón "Descargar PDF" */
-  async function downloadPDF() {
+  function downloadPDF() {
     if (state.items.length === 0) {
       toast('⚠️ Agrega al menos un servicio antes de generar el PDF.');
       return;
     }
 
-    if (typeof html2pdf === 'undefined') {
-      toast('❌ html2pdf no está disponible. Recarga la página.');
-      return;
-    }
+    /* Actualizar el título del documento para que el nombre del
+       archivo sugerido sea el número de cotización */
+    var prevTitle = document.title;
+    document.title = 'CMG-Cotizacion-' + state.quotNum;
 
-    var btn = $id('cs-btn-dl');
-    var orig = btn ? btn.innerHTML : '';
-    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="cs-spin"></span> Generando...'; }
-
-    try {
-      var el = $id('cs-pdf-doc');
-      await html2pdf().set(pdfOpts()).from(el).save();
-      toast('✅ PDF descargado correctamente.');
-    } catch (err) {
-      console.error('[CMG PDF]', err);
-      toast('❌ Error al generar el PDF: ' + (err.message || err));
-    } finally {
-      if (btn) { btn.disabled = false; btn.innerHTML = orig; }
-    }
+    /* Pequeña pausa para que el DOM esté listo antes de imprimir */
+    setTimeout(function () {
+      window.print();
+      /* Restaurar título después del diálogo */
+      setTimeout(function () {
+        document.title = prevTitle;
+      }, 1000);
+    }, 150);
   }
 
-  /* Genera el PDF y devuelve Blob (para el flujo de WhatsApp) */
-  async function generatePDF() {
-    if (typeof html2pdf === 'undefined') {
-      throw new Error('html2pdf no está disponible. Recarga la página.');
-    }
-    var el = $id('cs-pdf-doc');
-    await html2pdf().set(pdfOpts()).from(el).save();
+  /* Alias usado internamente por sendWhatsApp */
+  function generatePDF() {
+    downloadPDF();
   }
 
   /* ----------------------------------------------------------
@@ -1354,9 +1385,8 @@ var CS = (function () {
 
     setLoading(true);
     try {
-      /* 1. Generar y descargar PDF */
-      await generatePDF(true);
-      toast('✅ PDF descargado. Adjúntalo en WhatsApp.');
+      /* 1. Abrir diálogo de impresión para guardar el PDF */
+      generatePDF();
 
       /* 2. Construir mensaje con detalle completo de la cotización */
       var clientName = state.client.name || 'cliente';
@@ -1413,9 +1443,11 @@ var CS = (function () {
         ? 'https://wa.me/' + wa504 + '?text=' + msg
         : 'https://web.whatsapp.com/?text=' + msg;
 
-      /* 3. Abrir WhatsApp */
-      window.open(url, '_blank');
-      toast('📲 WhatsApp abierto con la cotización completa.');
+      /* 3. Abrir WhatsApp después del diálogo de impresión */
+      setTimeout(function () {
+        window.open(url, '_blank');
+        toast('📲 WhatsApp abierto con la cotización completa.');
+      }, 800);
 
     } catch (err) {
       console.error(err);

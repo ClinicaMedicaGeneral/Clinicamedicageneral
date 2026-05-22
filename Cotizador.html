@@ -1973,7 +1973,8 @@
     const body = items.length === 0 ?
       (lang === 'en' ? 'Hi CMG! I have a quote question.' : '¡Hola CMG! Tengo una consulta sobre una cotización.') :
       (intro + '\n\n' + items.map(i => '• ' + i.name + ' ×' + i.qty + ' — ' + fmt(i.line)).join('\n') + '\n\n' + totalLabel + ': ' + fmt(total) + memberLine);
-    document.getElementById('coti-wa-cta').href = 'https://wa.me/50431555162?text=' + encodeURIComponent(body);
+    const waAnchor = document.getElementById('coti-wa-cta');
+    if (waAnchor) waAnchor.href = 'https://wa.me/50431555162?text=' + encodeURIComponent(body);
   }
 
   function escapeHtml(s) {

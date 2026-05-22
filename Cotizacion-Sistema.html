@@ -318,7 +318,12 @@
   border-radius: 50%;
   animation: cs-spin .7s linear infinite;
 }
-@keyframes cs-spin { to { transform: rotate(360deg); } }
+@keyframes cs-spin  { to { transform: rotate(360deg); } }
+@keyframes cs-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(37,211,102,.6); }
+  70%  { box-shadow: 0 0 0 12px rgba(37,211,102,0); }
+  100% { box-shadow: 0 0 0 0 rgba(37,211,102,0); }
+}
 
 /* --- Toast ------------------------------------------------- */
 .cs-toast {
@@ -1547,8 +1552,26 @@ var CS = (function () {
     renderEditorItems();
     syncTotals();
 
-    /* Banner informativo */
-    toast('✅ Cotización importada desde el Cotizador (' + state.items.length + ' servicio' + (state.items.length !== 1 ? 's' : '') + ')');
+    /* Ejecutar acción automática según el botón que presionó el usuario */
+    var action = data.autoAction || 'pdf';
+
+    if (action === 'whatsapp') {
+      /* Resaltar el botón de WhatsApp y mostrar instrucción */
+      toast('✅ ' + state.items.length + ' servicio(s) importado(s). Completa tus datos y envía por WhatsApp.');
+      setTimeout(function () {
+        var btn = $id('cs-btn-wa');
+        if (btn) {
+          btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          btn.style.animation = 'cs-pulse 1s ease 3';
+        }
+      }, 400);
+    } else {
+      /* PDF: iniciar impresión directamente */
+      toast('✅ ' + state.items.length + ' servicio(s) importado(s). Abriendo vista de impresión...');
+      setTimeout(function () {
+        downloadPDF();
+      }, 600);
+    }
   }
 
   /* ----------------------------------------------------------

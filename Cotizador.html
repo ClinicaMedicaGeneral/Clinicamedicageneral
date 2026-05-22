@@ -1674,12 +1674,13 @@
       </div>
     </div>
 
-    <a href="#" id="coti-wa-cta" class="cta-pill cta-pill--yellow cta-pill--lg coti-cart-cta">
+    <button onclick="exportToSistema('whatsapp')" class="cta-pill cta-pill--yellow cta-pill--lg coti-cart-cta"
+      style="border:none;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
       <span class="lang lang-es">ENVIAR POR WHATSAPP</span>
       <span class="lang lang-en">SEND VIA WHATSAPP</span>
-    </a>
-    <button onclick="exportToSistema()" class="cta-pill cta-pill--lg coti-cart-cta"
+    </button>
+    <button onclick="exportToSistema('pdf')" class="cta-pill cta-pill--lg coti-cart-cta"
       style="background:#213C7D;color:#fff;border:none;cursor:pointer;width:100%;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
       <span class="lang lang-es">GENERAR PDF</span>
@@ -1980,7 +1981,7 @@
   }
 
   // ── Exportar carrito al Sistema de Cotizaciones ─────────────
-  function exportToSistema() {
+  function exportToSistema(action) {
     const lang = document.body.dataset.lang;
     const disc = currentDiscount();
     const cartItems = [];
@@ -2018,7 +2019,8 @@
       items: cartItems,
       disc, discountLabel,
       subtotal, discount,
-      total: subtotal - discount
+      total: subtotal - discount,
+      autoAction: action || 'pdf'   // 'pdf' | 'whatsapp'
     }));
 
     window.location.href = 'Cotizacion-Sistema.html';

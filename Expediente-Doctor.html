@@ -473,6 +473,92 @@
 .ed-empty-icon { font-size: 48px; margin-bottom: 12px; }
 .ed-empty p { margin: 0; font-size: 14px; }
 
+/* ── Patient list table ── */
+.ed-pt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.ed-pt-table th {
+  background: #213C7D;
+  color: #fff;
+  font-weight: 700;
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.ed-pt-table th:first-child { border-radius: 8px 0 0 8px; }
+.ed-pt-table th:last-child  { border-radius: 0 8px 8px 0; }
+.ed-pt-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid #F3F4F6;
+  color: #1F2937;
+  vertical-align: middle;
+}
+.ed-pt-table tr:last-child td { border-bottom: none; }
+.ed-pt-table tr:hover td { background: #F9FAFB; cursor: pointer; }
+.ed-pt-code-chip {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  background: #213C7D;
+  color: #FDD22C;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+}
+.ed-pt-filter {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.ed-pt-filter-input {
+  flex: 1;
+  min-width: 200px;
+  height: 40px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+.ed-pt-filter-input:focus { border-color: #213C7D; }
+.ed-pt-count {
+  font-size: 13px;
+  color: #6B7280;
+  margin-bottom: 12px;
+}
+.ed-pt-count strong { color: #213C7D; }
+
+/* ── Search type pills ── */
+.ed-search-types {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.ed-search-type-btn {
+  padding: 6px 14px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 20px;
+  background: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all .15s;
+}
+.ed-search-type-btn.is-active {
+  background: #213C7D;
+  color: #fff;
+  border-color: #213C7D;
+}
+
 /* ── Patient summary ── */
 .ed-patient-summary {
   background: linear-gradient(90deg, #FDD22C 0%, #FFE070 100%);
@@ -606,11 +692,12 @@
 
     <!-- Tabs -->
     <div class="ed-tabs">
-      <button class="ed-tab is-active" data-tab="nuevo">📋 Nuevo Expediente</button>
-      <button class="ed-tab" data-tab="buscar">🔍 Buscar Paciente</button>
-      <button class="ed-tab" data-tab="editar">✏️ Editar Expediente</button>
-      <button class="ed-tab" data-tab="consulta">📝 Nueva Consulta</button>
-      <button class="ed-tab" data-tab="historial">📂 Ver Historial</button>
+      <button class="ed-tab is-active" data-tab="nuevo">📋 Nuevo</button>
+      <button class="ed-tab" data-tab="pacientes">👥 Pacientes</button>
+      <button class="ed-tab" data-tab="buscar">🔍 Buscar</button>
+      <button class="ed-tab" data-tab="editar">✏️ Editar</button>
+      <button class="ed-tab" data-tab="consulta">📝 Consulta</button>
+      <button class="ed-tab" data-tab="historial">📂 Historial</button>
     </div>
 
     <!-- Alerts -->
@@ -628,6 +715,10 @@
           <div class="ed-fgroup full">
             <label class="ed-label">Nombre completo *</label>
             <input type="text" class="ed-input" id="nuevo-nombre" placeholder="Ej. Juan Pérez González">
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Número de identidad</label>
+            <input type="text" class="ed-input" id="nuevo-identidad" placeholder="0801-1990-12345">
           </div>
           <div class="ed-fgroup">
             <label class="ed-label">Fecha de nacimiento</label>
@@ -750,14 +841,34 @@
       </div>
     </section>
 
+    <!-- ─── TAB: PACIENTES ─── -->
+    <section id="tab-pacientes" class="ed-tab-content" style="display:none">
+      <div class="ed-card">
+        <h2 class="ed-card-title">👥 Lista de pacientes</h2>
+        <p class="ed-card-subtitle">Todos los expedientes registrados en el sistema. Haz clic en un paciente para seleccionarlo.</p>
+        <div class="ed-pt-filter">
+          <input type="text" class="ed-pt-filter-input" id="pt-filtro" placeholder="🔍 Filtrar por nombre, identidad o código...">
+          <button class="ed-btn ed-btn-primary" id="btn-pt-recargar">↺ Recargar</button>
+        </div>
+        <div class="ed-pt-count" id="pt-count"></div>
+        <div id="pt-tabla-wrap"></div>
+      </div>
+    </section>
+
     <!-- ─── TAB: BUSCAR ─── -->
     <section id="tab-buscar" class="ed-tab-content" style="display:none">
       <div class="ed-card">
-        <h2 class="ed-card-title">🔍 Buscar paciente por código</h2>
-        <p class="ed-card-subtitle">Ingresa el código del paciente para acceder a su expediente clínico.</p>
+        <h2 class="ed-card-title">🔍 Buscar paciente</h2>
+        <p class="ed-card-subtitle">Busca por código de expediente, número de identidad o fecha de nacimiento.</p>
+
+        <div class="ed-search-types">
+          <button class="ed-search-type-btn is-active" data-tipo="codigo">📋 Código CMG</button>
+          <button class="ed-search-type-btn" data-tipo="identidad">🪪 N° Identidad</button>
+          <button class="ed-search-type-btn" data-tipo="fecha">📅 Fecha nacimiento</button>
+        </div>
 
         <div class="ed-search-bar">
-          <input type="text" class="ed-search-input" id="buscar-codigo" placeholder="CMG-XXXXXX" maxlength="11">
+          <input type="text" class="ed-search-input" id="buscar-valor" placeholder="CMG-XXXXXX" maxlength="30">
           <button class="ed-btn ed-btn-primary" id="btn-buscar">Buscar</button>
         </div>
 
@@ -1026,6 +1137,7 @@
     var section = $id('tab-' + name);
     if (section) section.style.display = '';
     /* Render contenido contextual */
+    if (name === 'pacientes') cargarListaPacientes();
     if (name === 'editar') renderEditarTab();
     if (name === 'consulta') renderConsultaTab();
     if (name === 'historial') renderHistorialTab();
@@ -1097,8 +1209,12 @@
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       createdByEmail: cmgAuth.currentUser.email,
+      /* Campos de búsqueda indexados al nivel raíz para queries eficientes */
+      _searchIdentidad: $val('nuevo-identidad').replace(/\D/g, ''),
+      _searchFechaNac: $val('nuevo-fecnac'),
       datosGenerales: {
         nombreCompleto: nombre,
+        numeroIdentidad: $val('nuevo-identidad'),
         fechaNacimiento: $val('nuevo-fecnac'),
         sexo: $val('nuevo-sexo'),
         tipoSangre: $val('nuevo-sangre'),
@@ -1169,37 +1285,208 @@
   });
 
   /* ════════════════════════════════════════════════════════════
-     BUSCAR PACIENTE
+     LISTA DE PACIENTES
      ════════════════════════════════════════════════════════════ */
-  $id('buscar-codigo').addEventListener('input', function (e) {
-    e.target.value = e.target.value.toUpperCase();
-  });
-  $id('buscar-codigo').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') $id('btn-buscar').click();
-  });
-  $id('btn-buscar').addEventListener('click', function () {
-    var codigo = $val('buscar-codigo').toUpperCase();
-    if (!codigo) { showAlert('Ingresa un código de paciente.', 'error'); return; }
-    /* Normalizar: si no empieza con CMG-, lo añadimos */
-    if (codigo.indexOf('CMG-') !== 0) codigo = 'CMG-' + codigo;
+  var _todosLosPacientes = [];
 
-    showOverlay('Buscando expediente...');
-    cmgDb.collection('expedientes').doc(codigo).get()
+  function cargarListaPacientes() {
+    $id('pt-tabla-wrap').innerHTML = '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto 10px"></div><p>Cargando pacientes...</p></div>';
+    $id('pt-count').textContent = '';
+    cmgDb.collection('expedientes')
+      .orderBy('createdAt', 'desc')
+      .get()
       .then(function (snap) {
-        hideOverlay();
-        if (!snap.exists) {
-          $id('buscar-resultado').innerHTML =
-            '<div class="ed-alert ed-alert-error is-visible">No se encontró ningún expediente con el código <strong>' + esc(codigo) + '</strong>.</div>';
-          pacienteActual = null;
-          return;
-        }
-        pacienteActual = Object.assign({ codigoPaciente: codigo }, snap.data());
-        renderBuscarResultado();
+        _todosLosPacientes = [];
+        snap.forEach(function (doc) {
+          _todosLosPacientes.push(Object.assign({ codigoPaciente: doc.id }, doc.data()));
+        });
+        renderTablaFiltrada($val('pt-filtro') || '');
       })
       .catch(function (err) {
-        hideOverlay();
-        showAlert('Error al buscar: ' + err.message, 'error');
+        $id('pt-tabla-wrap').innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar: ' + esc(err.message) + '</div>';
       });
+  }
+
+  function renderTablaFiltrada(filtro) {
+    var f = (filtro || '').toLowerCase().trim();
+    var lista = f ? _todosLosPacientes.filter(function (p) {
+      var dg = p.datosGenerales || {};
+      return (dg.nombreCompleto || '').toLowerCase().includes(f)
+        || (p.codigoPaciente || '').toLowerCase().includes(f)
+        || (dg.numeroIdentidad || '').replace(/\D/g,'').includes(f.replace(/\D/g,''))
+        || (dg.numeroIdentidad || '').toLowerCase().includes(f)
+        || (dg.telefono || '').includes(f);
+    }) : _todosLosPacientes;
+
+    $id('pt-count').innerHTML = '<strong>' + lista.length + '</strong> paciente' + (lista.length !== 1 ? 's' : '');
+
+    if (!lista.length) {
+      $id('pt-tabla-wrap').innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">👥</div><p>' + (f ? 'Sin resultados para "' + esc(f) + '"' : 'Aún no hay expedientes registrados') + '</p></div>';
+      return;
+    }
+
+    var html = '<div style="overflow-x:auto"><table class="ed-pt-table"><thead><tr>' +
+      '<th>Paciente</th><th>N° Identidad</th><th>Código</th><th>Edad</th><th>Teléfono</th><th>Registrado</th><th></th>' +
+      '</tr></thead><tbody>';
+
+    lista.forEach(function (p) {
+      var dg = p.datosGenerales || {};
+      var edad = calcEdad(dg.fechaNacimiento);
+      var fecha = p.createdAt ? fmtDate(p.createdAt).split('·')[0].trim() : '—';
+      html += '<tr data-codigo="' + esc(p.codigoPaciente) + '">' +
+        '<td><strong>' + esc(dg.nombreCompleto || '—') + '</strong>' +
+          (dg.sexo ? '<br><span style="font-size:11px;color:#6B7280">' + (dg.sexo === 'M' ? 'Masculino' : dg.sexo === 'F' ? 'Femenino' : dg.sexo) + '</span>' : '') +
+        '</td>' +
+        '<td>' + esc(dg.numeroIdentidad || '—') + '</td>' +
+        '<td><span class="ed-pt-code-chip">' + esc(p.codigoPaciente) + '</span></td>' +
+        '<td>' + (edad || '—') + '</td>' +
+        '<td>' + esc(dg.telefono || '—') + '</td>' +
+        '<td style="font-size:12px;color:#6B7280">' + esc(fecha) + '</td>' +
+        '<td>' +
+          '<button class="ed-btn ed-btn-yellow" style="height:32px;padding:0 12px;font-size:12px" data-sel="' + esc(p.codigoPaciente) + '">Seleccionar →</button>' +
+        '</td>' +
+      '</tr>';
+    });
+    html += '</tbody></table></div>';
+    $id('pt-tabla-wrap').innerHTML = html;
+
+    $id('pt-tabla-wrap').querySelectorAll('[data-sel]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var codigo = btn.dataset.sel;
+        var p = _todosLosPacientes.find(function (x) { return x.codigoPaciente === codigo; });
+        if (p) {
+          pacienteActual = p;
+          switchTab('buscar');
+          renderBuscarResultado();
+        }
+      });
+    });
+    /* Clic en fila también selecciona */
+    $id('pt-tabla-wrap').querySelectorAll('tr[data-codigo]').forEach(function (tr) {
+      tr.addEventListener('click', function (e) {
+        if (e.target.tagName === 'BUTTON') return;
+        var codigo = tr.dataset.codigo;
+        var p = _todosLosPacientes.find(function (x) { return x.codigoPaciente === codigo; });
+        if (p) { pacienteActual = p; switchTab('buscar'); renderBuscarResultado(); }
+      });
+    });
+  }
+
+  $id('pt-filtro').addEventListener('input', function () {
+    renderTablaFiltrada(this.value);
+  });
+  $id('btn-pt-recargar').addEventListener('click', cargarListaPacientes);
+
+  /* ════════════════════════════════════════════════════════════
+     BUSCAR PACIENTE (multi-criterio)
+     ════════════════════════════════════════════════════════════ */
+  var _tipoBusqueda = 'codigo';
+
+  document.querySelectorAll('.ed-search-type-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      _tipoBusqueda = btn.dataset.tipo;
+      document.querySelectorAll('.ed-search-type-btn').forEach(function (b) {
+        b.classList.toggle('is-active', b === btn);
+      });
+      var inp = $id('buscar-valor');
+      if (_tipoBusqueda === 'codigo') {
+        inp.placeholder = 'CMG-XXXXXX';
+        inp.type = 'text';
+        inp.maxLength = 11;
+      } else if (_tipoBusqueda === 'identidad') {
+        inp.placeholder = '0801-1990-12345';
+        inp.type = 'text';
+        inp.maxLength = 30;
+      } else {
+        inp.placeholder = 'YYYY-MM-DD';
+        inp.type = 'date';
+        inp.maxLength = 10;
+      }
+      inp.value = '';
+      $id('buscar-resultado').innerHTML = '';
+    });
+  });
+
+  $id('buscar-valor').addEventListener('input', function (e) {
+    if (_tipoBusqueda === 'codigo') e.target.value = e.target.value.toUpperCase();
+  });
+  $id('buscar-valor').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') $id('btn-buscar').click();
+  });
+
+  $id('btn-buscar').addEventListener('click', function () {
+    var valor = $val('buscar-valor');
+    if (!valor) { showAlert('Ingresa un valor para buscar.', 'error'); return; }
+    $id('buscar-resultado').innerHTML = '';
+    showOverlay('Buscando...');
+
+    var promise;
+    if (_tipoBusqueda === 'codigo') {
+      var codigo = valor.toUpperCase();
+      if (codigo.indexOf('CMG-') !== 0) codigo = 'CMG-' + codigo;
+      promise = cmgDb.collection('expedientes').doc(codigo).get()
+        .then(function (snap) {
+          if (!snap.exists) return [];
+          return [Object.assign({ codigoPaciente: codigo }, snap.data())];
+        });
+    } else if (_tipoBusqueda === 'identidad') {
+      var numLimpio = valor.replace(/\D/g, '');
+      promise = cmgDb.collection('expedientes')
+        .where('_searchIdentidad', '==', numLimpio)
+        .get()
+        .then(function (snap) {
+          var r = [];
+          snap.forEach(function (doc) { r.push(Object.assign({ codigoPaciente: doc.id }, doc.data())); });
+          return r;
+        });
+    } else {
+      /* fecha de nacimiento */
+      promise = cmgDb.collection('expedientes')
+        .where('_searchFechaNac', '==', valor)
+        .get()
+        .then(function (snap) {
+          var r = [];
+          snap.forEach(function (doc) { r.push(Object.assign({ codigoPaciente: doc.id }, doc.data())); });
+          return r;
+        });
+    }
+
+    promise.then(function (resultados) {
+      hideOverlay();
+      if (!resultados.length) {
+        $id('buscar-resultado').innerHTML =
+          '<div class="ed-alert ed-alert-error is-visible">No se encontró ningún expediente con ese criterio.</div>';
+        return;
+      }
+      if (resultados.length === 1) {
+        pacienteActual = resultados[0];
+        renderBuscarResultado();
+      } else {
+        /* Múltiples resultados (posible en búsqueda por fecha) */
+        var html = '<div class="ed-alert ed-alert-info is-visible">Se encontraron ' + resultados.length + ' resultados. Selecciona uno:</div>';
+        html += '<div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">';
+        resultados.forEach(function (p) {
+          var dg = p.datosGenerales || {};
+          html += '<div style="background:#F9FAFB;border:1.5px solid #E5E7EB;border-radius:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px">' +
+            '<div><strong>' + esc(dg.nombreCompleto || '—') + '</strong>' +
+            '<div style="font-size:12px;color:#6B7280">' + esc(p.codigoPaciente) +
+            (dg.fechaNacimiento ? ' · ' + new Date(dg.fechaNacimiento).toLocaleDateString('es-HN') : '') +
+            (dg.numeroIdentidad ? ' · ' + esc(dg.numeroIdentidad) : '') + '</div></div>' +
+            '<button class="ed-btn ed-btn-primary" style="height:34px;font-size:12px" data-sel="' + esc(p.codigoPaciente) + '">Seleccionar</button></div>';
+        });
+        html += '</div>';
+        $id('buscar-resultado').innerHTML = html;
+        $id('buscar-resultado').querySelectorAll('[data-sel]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            pacienteActual = resultados.find(function (x) { return x.codigoPaciente === btn.dataset.sel; });
+            renderBuscarResultado();
+          });
+        });
+      }
+    }).catch(function (err) {
+      hideOverlay();
+      showAlert('Error al buscar: ' + err.message, 'error');
+    });
   });
 
   function renderBuscarResultado() {
@@ -1274,6 +1561,7 @@
     return '<div class="ed-section-title">👤 Datos Generales</div>' +
       '<div class="ed-grid ed-grid-2">' +
         '<div class="ed-fgroup full"><label class="ed-label">Nombre completo</label>' + inp('edit-nombre', dg.nombreCompleto) + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Número de identidad</label>' + inp('edit-identidad', dg.numeroIdentidad) + '</div>' +
         '<div class="ed-fgroup"><label class="ed-label">Fecha nacimiento</label>' + inp('edit-fecnac', dg.fechaNacimiento, 'date') + '</div>' +
         '<div class="ed-fgroup"><label class="ed-label">Sexo</label>' + sel('edit-sexo', dg.sexo, [{v:'',l:'—'},{v:'M',l:'Masculino'},{v:'F',l:'Femenino'},{v:'O',l:'Otro'}]) + '</div>' +
         '<div class="ed-fgroup"><label class="ed-label">Tipo sangre</label>' + sel('edit-sangre', dg.tipoSangre, ['','A+','A-','B+','B-','O+','O-','AB+','AB-']) + '</div>' +
@@ -1300,8 +1588,11 @@
     if (!pacienteActual) return;
     var update = {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      _searchIdentidad: $val('edit-identidad').replace(/\D/g, ''),
+      _searchFechaNac: $val('edit-fecnac'),
       datosGenerales: {
         nombreCompleto: $val('edit-nombre'),
+        numeroIdentidad: $val('edit-identidad'),
         fechaNacimiento: $val('edit-fecnac'),
         sexo: $val('edit-sexo'),
         tipoSangre: $val('edit-sangre'),
@@ -1511,6 +1802,7 @@
       y += 5;
     }
     row('Nombre', dg.nombreCompleto);
+    row('Identidad', dg.numeroIdentidad);
     row('Código', paciente.codigoPaciente);
     row('Edad', calcEdad(dg.fechaNacimiento) + (dg.sexo ? ' · ' + (dg.sexo === 'M' ? 'Masculino' : dg.sexo === 'F' ? 'Femenino' : dg.sexo) : ''));
     row('Tipo sangre', dg.tipoSangre);
@@ -1758,6 +2050,7 @@
       }),
       H('1. DATOS GENERALES'),
       P('Nombre completo', dg.nombreCompleto),
+      P('Número de identidad', dg.numeroIdentidad),
       P('Fecha de nacimiento', dg.fechaNacimiento),
       P('Edad', calcEdad(dg.fechaNacimiento)),
       P('Sexo', dg.sexo === 'M' ? 'Masculino' : dg.sexo === 'F' ? 'Femenino' : dg.sexo),

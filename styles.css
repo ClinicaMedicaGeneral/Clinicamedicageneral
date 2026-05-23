@@ -861,4 +861,11 @@ body.nav-open .nav-toggle .icon-close { display: block; }
   /* Move WhatsApp button up so it clears the iOS Safari browser toolbar
      (≈49 px) and the home-indicator safe area on notched iPhones.          */
   .float-wa { bottom: 80px; right: 16px; }
+  /* ── Script decorators (rotated red italic text) ───────────── */
+  /* On mobile the 80-100 px left-margin combined with the script text
+     width overflows the container, making the page wider than the
+     viewport and causing the layout to appear shifted / off-centre.
+     Removing the indent on small screens eliminates this overflow.   */
+  .hero-script   { margin-left: 0; }
+  .doc365-script { margin-left: 0; }
 }

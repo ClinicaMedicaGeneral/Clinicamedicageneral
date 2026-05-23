@@ -228,6 +228,10 @@
 @media (max-width: 600px) {
   .sn-valores-grid { grid-template-columns: 1fr; }
   .sn-tagline-grid { grid-template-columns: 1fr; }
+  /* Remove left indent on the script decorator so the long text
+     "Cuidamos de tu salud" (+ 100 px margin) doesn't overflow the
+     hero container and shift the page layout on mobile.            */
+  .sn-hero-script { margin-left: 0; }
 }
 </style>
 </head>

@@ -872,7 +872,13 @@
         snap.forEach(function (d) { _deps.push(Object.assign({ _id: d.id }, d.data())); });
         renderDeps(_deps);
       })
-      .catch(function (err) { console.error('[CMG] Dependientes:', err); });
+      .catch(function (err) {
+        console.error('[CMG] Dependientes:', err);
+        /* If the subcollection query fails (permission or network error),
+           fall back to an empty list so the "Agregar" button still renders
+           for active members instead of staying permanently hidden.        */
+        renderDeps([]);
+      });
   }
 
   function renderDeps(deps) {
@@ -906,7 +912,24 @@
         }).join('');
       }
     }
-    if (addBtn) addBtn.style.display = (_depCanAdd && deps.length < 3) ? '' : 'none';
+
+    var canAddMore = _depCanAdd && deps.length < 3;
+    if (addBtn) addBtn.style.display = canAddMore ? '' : 'none';
+
+    /* When the 3-dependent limit is reached, show a brief note so the user
+       knows why the button is gone instead of wondering if it's a bug.     */
+    var limitNote = $id('dep-limit-note');
+    if (_depCanAdd && deps.length >= 3) {
+      if (!limitNote) {
+        limitNote = document.createElement('p');
+        limitNote.id = 'dep-limit-note';
+        limitNote.style.cssText = 'font-size:12px;color:#9CA3AF;text-align:center;padding:4px 0 8px;font-style:italic;';
+        limitNote.textContent = 'Límite de 3 dependientes alcanzado. Para hacer cambios visita Caja CMG.';
+        if (addBtn && addBtn.parentNode) addBtn.parentNode.insertBefore(limitNote, addBtn);
+      }
+    } else if (limitNote) {
+      limitNote.parentNode.removeChild(limitNote);
+    }
   }
 
   function showDepForm() {

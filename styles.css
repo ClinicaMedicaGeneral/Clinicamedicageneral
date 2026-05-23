@@ -99,6 +99,9 @@ body[data-lang="en"] .visit-h .lang-en { display: block; }
   background: var(--cmg-yellow);
   color: var(--cmg-navy); font-size: 13px; font-weight: 600;
   border-bottom: 1px solid rgba(33,60,125,.12);
+  /* Safety net: ensures nothing inside the strip ever widens the page,
+     regardless of iOS Safari overflow-clip quirks at inner levels.      */
+  overflow-x: hidden;
 }
 .promo-row {
   display: flex; align-items: center; gap: 16px;
@@ -125,13 +128,17 @@ body[data-lang="en"] .visit-h .lang-en { display: block; }
 }
 .promo-msg {
   position: absolute; inset: 0;
-  opacity: 0; transform: translateY(4px);
-  transition: opacity .35s var(--easing-decel), transform .35s var(--easing-decel);
+  opacity: 0;
+  /* NOTE: transform was removed (was translateY 4px).
+     On iOS Safari, transform + overflow:hidden on the SAME element disables
+     the clip, letting white-space:nowrap text bleed out and widen the page.
+     Pure opacity fade avoids the bug entirely.                              */
+  transition: opacity .35s var(--easing-decel);
   pointer-events: none;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .promo-msg.is-active {
-  opacity: 1; transform: translateY(0);
+  opacity: 1;
   pointer-events: auto;
 }
 .promo-wa {

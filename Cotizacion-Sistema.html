@@ -1770,7 +1770,7 @@ if (typeof cmgAuth !== 'undefined') {
       if (link) link.href = 'Mis-Cotizaciones.html';
       if (name) name.textContent = displayName;
       /* Admin pill */
-      if (user.email === 'ventasymercadeocmg@gmail.com') {
+      if (['ventasymercadeocmg@gmail.com','rubenwainwrightba@gmail.com'].indexOf(user.email) !== -1) {
         var adminPill = document.getElementById('cmg-nav-admin');
         if (adminPill) adminPill.style.display = 'inline-flex';
       }

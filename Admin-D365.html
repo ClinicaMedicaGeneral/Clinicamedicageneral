@@ -343,7 +343,8 @@
 
 <script>
 (function () {
-  var ADMIN_EMAIL = 'ventasymercadeocmg@gmail.com';
+  var ADMIN_EMAILS = ['ventasymercadeocmg@gmail.com', 'rubenwainwrightba@gmail.com'];
+  function isAdmin(email) { return ADMIN_EMAILS.indexOf(email) !== -1; }
   var allMembers  = [];
 
   /* ── Toast ── */
@@ -377,7 +378,7 @@
       window.location.href = 'Auth.html?returnTo=Admin-D365.html';
       return;
     }
-    if (user.email !== ADMIN_EMAIL) {
+    if (!isAdmin(user.email)) {
       window.location.href = 'Inicio.html';
       return;
     }

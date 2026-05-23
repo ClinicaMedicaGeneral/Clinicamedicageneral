@@ -117,6 +117,11 @@ body[data-lang="en"] .visit-h .lang-en { display: block; }
   position: relative;
   flex: 1; min-width: 0;
   min-height: 18px;
+  /* Each .promo-msg child is position:absolute with transform+overflow:hidden.
+     On iOS Safari the transform breaks the child's own overflow clip, allowing
+     the white-space:nowrap text to bleed beyond .promo-msgs and widen the body.
+     Clipping here (no transform on this element) reliably contains it.         */
+  overflow: hidden;
 }
 .promo-msg {
   position: absolute; inset: 0;
@@ -848,7 +853,8 @@ body.nav-open .nav-toggle .icon-close { display: block; }
   .header-row { padding: 12px 20px; gap: 12px; }
   .brand-line-2 { font-size: 20px; }
   .promo-row { padding: 8px 20px; font-size: 12px; }
-  .promo-wa { margin-left: 0; }
+  /* Hide phone-number link in strip — floating WA button serves this purpose */
+  .promo-wa { display: none; }
   .footer-grid { grid-template-columns: 1fr; }
   .audience-grid { grid-template-columns: 1fr; }
   .trust-grid { grid-template-columns: 1fr; }

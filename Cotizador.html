@@ -405,11 +405,22 @@
     .coti-qty { grid-column: 1 / -1; justify-self: end; }
     .coti-search { padding: 16px 20px; top: 64px; }
     .coti-cat-h { padding: 18px 20px; }
+    /* Sub-category header: remove the 88px desktop indent so it fits on mobile */
+    .coti-subcat-h { padding: 12px 20px; }
+    /* Sub-category items: specificity override (.coti-subcat-items .coti-item
+       beats .coti-item alone), so we need the same 2-class selector here      */
+    .coti-subcat-items .coti-item { padding-left: 20px; }
   }
   @media (max-width: 600px) {
     .coti-layout { padding: 0 16px; }
     .coti-cat-title { font-size: 18px; }
     .coti-categories, .coti-cart { border-radius: 16px; }
+    /* Script decorator: same margin-left fix applied to Inicio/.hero-script etc. */
+    .coti-hero .script { margin-left: 0; }
+    /* Reduce cart padding on narrow screens to give content more breathing room */
+    .coti-cart { padding: 20px 16px; }
+    /* Adjust the negative-margin scroll track to match the new cart padding     */
+    .coti-cart-items { margin: 0 -16px; padding: 0 16px; }
     .coti-cart-grand-amt { font-size: 36px; }
   }
 </style>

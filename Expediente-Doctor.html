@@ -1,0 +1,1825 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portal Médico · Expedientes · CMG</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<link rel="stylesheet" href="styles.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ── Layout ── */
+.ed-page { background: #F4F6FB; min-height: 100vh; padding-bottom: 80px; }
+
+.ed-hero {
+  background: #213C7D;
+  padding: 40px 0 32px;
+  border-bottom: 4px solid #FDD22C;
+}
+.ed-hero-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.ed-hero-title { margin: 0; }
+.ed-hero-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #FDD22C;
+  margin-bottom: 8px;
+}
+.ed-hero-h1 {
+  font-size: clamp(22px, 4vw, 32px);
+  font-weight: 900;
+  color: #fff;
+  margin: 0;
+}
+.ed-user-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 50px;
+  padding: 8px 18px 8px 12px;
+  color: #fff;
+  font-size: 13px;
+}
+.ed-user-chip strong { color: #FDD22C; }
+.ed-logout {
+  border: 1px solid rgba(255,255,255,.25);
+  background: transparent;
+  color: rgba(255,255,255,.75);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.ed-logout:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+/* ── Content ── */
+.ed-content {
+  max-width: 1200px;
+  margin: 28px auto 0;
+  padding: 0 28px;
+}
+
+/* ── Tabs ── */
+.ed-tabs {
+  display: flex;
+  gap: 4px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 6px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 10px rgba(33,60,125,.06);
+  overflow-x: auto;
+}
+.ed-tab {
+  flex: 1;
+  min-width: 140px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all .18s;
+  white-space: nowrap;
+}
+.ed-tab:hover { background: #F4F6FB; color: #213C7D; }
+.ed-tab.is-active {
+  background: #213C7D;
+  color: #fff;
+}
+
+/* ── Cards ── */
+.ed-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(33,60,125,.08);
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.ed-card-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #213C7D;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ed-card-subtitle {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0 0 22px;
+}
+
+/* ── Form fields ── */
+.ed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+.ed-grid-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.ed-grid-3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+.ed-fgroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ed-fgroup.full { grid-column: 1 / -1; }
+.ed-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+.ed-input, .ed-select, .ed-textarea {
+  height: 42px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-family: inherit;
+  font-size: 14px;
+  color: #1F2937;
+  outline: none;
+  transition: border-color .18s;
+  background: #fff;
+  width: 100%;
+}
+.ed-textarea {
+  height: auto;
+  padding: 10px 12px;
+  min-height: 90px;
+  resize: vertical;
+  line-height: 1.5;
+}
+.ed-input:focus, .ed-select:focus, .ed-textarea:focus { border-color: #213C7D; }
+
+/* ── Section divider ── */
+.ed-section {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 2px solid #F3F4F6;
+}
+.ed-section-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #213C7D;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.ed-section-title::before {
+  content: '';
+  width: 4px; height: 18px;
+  background: #FDD22C;
+  border-radius: 2px;
+}
+
+/* ── Antecedente row (Sí/No + detalle) ── */
+.ed-ant-row {
+  display: grid;
+  grid-template-columns: 200px 110px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #F3F4F6;
+}
+.ed-ant-row:last-child { border-bottom: none; }
+.ed-ant-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1F2937;
+}
+.ed-ant-toggle {
+  display: flex;
+  gap: 4px;
+  background: #F4F6FB;
+  border-radius: 6px;
+  padding: 3px;
+}
+.ed-ant-btn {
+  flex: 1;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6B7280;
+  cursor: pointer;
+  transition: all .15s;
+}
+.ed-ant-btn.is-yes-active {
+  background: #213C7D;
+  color: #fff;
+}
+.ed-ant-btn.is-no-active {
+  background: #E5E7EB;
+  color: #1F2937;
+}
+.ed-ant-detail {
+  height: 38px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 6px;
+  padding: 0 10px;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  width: 100%;
+}
+.ed-ant-detail:focus { border-color: #213C7D; }
+.ed-ant-detail:disabled { background: #F9FAFB; color: #9CA3AF; }
+
+/* ── Buttons ── */
+.ed-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .18s;
+  text-decoration: none;
+}
+.ed-btn-primary {
+  background: #213C7D;
+  color: #fff;
+}
+.ed-btn-primary:hover { opacity: .9; }
+.ed-btn-yellow {
+  background: #FDD22C;
+  color: #213C7D;
+}
+.ed-btn-yellow:hover { background: #f5c800; }
+.ed-btn-ghost {
+  background: #fff;
+  color: #213C7D;
+  border: 1.5px solid #E5E7EB;
+}
+.ed-btn-ghost:hover { border-color: #213C7D; }
+.ed-btn-danger {
+  background: #FEE2E2;
+  color: #991B1B;
+  border: 1.5px solid #FECACA;
+}
+.ed-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.ed-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ── Code badge ── */
+.ed-code-display {
+  background: linear-gradient(135deg, #213C7D 0%, #2d4d9b 100%);
+  border-radius: 14px;
+  padding: 28px;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 20px;
+  border: 2px solid #FDD22C;
+}
+.ed-code-label {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #FDD22C;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.ed-code-value {
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  font-family: 'Courier New', monospace;
+  margin: 0 0 8px;
+}
+.ed-code-help {
+  font-size: 13px;
+  color: rgba(255,255,255,.7);
+  margin: 0;
+}
+.ed-copy-btn {
+  margin-top: 14px;
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.3);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.ed-copy-btn:hover { background: rgba(255,255,255,.25); }
+
+/* ── Search ── */
+.ed-search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.ed-search-input {
+  flex: 1;
+  height: 50px;
+  border: 2px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #213C7D;
+  outline: none;
+}
+.ed-search-input:focus { border-color: #213C7D; }
+
+/* ── Consultas list ── */
+.ed-consulta-item {
+  background: #F9FAFB;
+  border-left: 4px solid #213C7D;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.ed-consulta-fecha {
+  font-size: 13px;
+  font-weight: 700;
+  color: #213C7D;
+}
+.ed-consulta-motivo {
+  font-size: 13px;
+  color: #4B5563;
+  margin-top: 3px;
+}
+.ed-consulta-actions {
+  display: flex;
+  gap: 8px;
+}
+.ed-consulta-link {
+  font-size: 12px;
+  color: #213C7D;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  font-weight: 600;
+}
+.ed-consulta-link:hover { background: #FDD22C; border-color: #FDD22C; }
+
+/* ── Alert ── */
+.ed-alert {
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  display: none;
+}
+.ed-alert.is-visible { display: block; }
+.ed-alert-success {
+  background: #D1FAE5;
+  color: #065F46;
+  border: 1px solid #A7F3D0;
+}
+.ed-alert-error {
+  background: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+.ed-alert-info {
+  background: #DBEAFE;
+  color: #1E40AF;
+  border: 1px solid #BFDBFE;
+}
+
+/* ── Spinner overlay ── */
+.ed-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(33,60,125,.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+.ed-overlay.is-visible { display: flex; }
+.ed-overlay-box {
+  background: #fff;
+  padding: 28px 36px;
+  border-radius: 14px;
+  text-align: center;
+}
+.ed-overlay-spinner {
+  width: 44px; height: 44px;
+  border: 4px solid #E5E7EB;
+  border-top-color: #213C7D;
+  border-radius: 50%;
+  animation: ed-spin 1s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes ed-spin { to { transform: rotate(360deg); } }
+.ed-overlay-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #213C7D;
+}
+
+/* ── Empty state ── */
+.ed-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #9CA3AF;
+}
+.ed-empty-icon { font-size: 48px; margin-bottom: 12px; }
+.ed-empty p { margin: 0; font-size: 14px; }
+
+/* ── Patient summary ── */
+.ed-patient-summary {
+  background: linear-gradient(90deg, #FDD22C 0%, #FFE070 100%);
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.ed-patient-name {
+  font-size: 18px;
+  font-weight: 900;
+  color: #213C7D;
+  margin: 0;
+}
+.ed-patient-meta {
+  font-size: 12px;
+  color: rgba(33,60,125,.7);
+  margin-top: 3px;
+}
+.ed-patient-code {
+  background: #213C7D;
+  color: #FDD22C;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+/* ── Vital signs grid ── */
+.ed-vitals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+.ed-vital {
+  background: #F9FAFB;
+  border-radius: 8px;
+  padding: 12px;
+}
+.ed-vital-label {
+  font-size: 11px;
+  color: #6B7280;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.ed-vital input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 700;
+  color: #213C7D;
+  outline: none;
+  padding: 0;
+}
+
+@media (max-width: 640px) {
+  .ed-ant-row { grid-template-columns: 1fr; gap: 6px; }
+  .ed-ant-name { font-size: 13px; }
+  .ed-card { padding: 20px; }
+  .ed-code-value { font-size: 26px; letter-spacing: 2px; }
+}
+</style>
+</head>
+<body data-lang="es">
+
+<!-- ═══ PROMO STRIP ═══ -->
+<div class="promo-strip">
+  <div class="container promo-row">
+    <span class="dot"></span>
+    <span class="promo-msgs">
+      <span class="promo-msg is-active" data-msg="hours">
+        <b>ABIERTO</b> <span id="promo-hours-es">6:00 AM – 10:00 PM</span> <span id="promo-day-es"></span> · City Mall S2 E214
+      </span>
+    </span>
+    <a href="https://wa.me/50431555162" class="promo-wa">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+      +504 3155-5162
+    </a>
+  </div>
+</div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="site-header">
+  <div class="container header-row">
+    <a class="brand-lockup" href="Inicio.html" aria-label="CMG">
+      <img class="brand-logo" src="assets/cmg-logo-white.png" alt="CMG">
+    </a>
+    <nav class="site-nav" aria-label="Principal">
+      <a href="Inicio.html">Inicio</a>
+      <a href="Sobre-nosotros.html">Sobre nosotros</a>
+      <a href="Cotizador.html">Cotizador</a>
+    </nav>
+    <div class="header-actions">
+      <button class="nav-toggle" type="button" aria-label="Menú">
+        <svg class="icon-open" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg class="icon-close" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<main class="ed-page">
+
+  <!-- Hero -->
+  <div class="ed-hero">
+    <div class="ed-hero-inner">
+      <div class="ed-hero-title">
+        <div class="ed-hero-eyebrow">🩺 Portal Médico · Expedientes Clínicos</div>
+        <h1 class="ed-hero-h1">Sistema de Historial Médico</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div class="ed-user-chip" id="ed-user-chip" style="display:none">
+          <span>Dr. <strong id="ed-user-name">—</strong></span>
+        </div>
+        <button class="ed-logout" id="ed-logout">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="ed-content">
+
+    <!-- Tabs -->
+    <div class="ed-tabs">
+      <button class="ed-tab is-active" data-tab="nuevo">📋 Nuevo Expediente</button>
+      <button class="ed-tab" data-tab="buscar">🔍 Buscar Paciente</button>
+      <button class="ed-tab" data-tab="editar">✏️ Editar Expediente</button>
+      <button class="ed-tab" data-tab="consulta">📝 Nueva Consulta</button>
+      <button class="ed-tab" data-tab="historial">📂 Ver Historial</button>
+    </div>
+
+    <!-- Alerts -->
+    <div id="ed-alert" class="ed-alert"></div>
+
+    <!-- ─── TAB: NUEVO EXPEDIENTE ─── -->
+    <section id="tab-nuevo" class="ed-tab-content">
+      <div class="ed-card">
+        <h2 class="ed-card-title">📋 Crear nuevo expediente clínico</h2>
+        <p class="ed-card-subtitle">Genera un código único para el paciente. Comparte este código con él para que pueda vincular su cuenta y ver su historial.</p>
+
+        <!-- Datos generales -->
+        <div class="ed-section-title">👤 Datos Generales del Paciente</div>
+        <div class="ed-grid ed-grid-2">
+          <div class="ed-fgroup full">
+            <label class="ed-label">Nombre completo *</label>
+            <input type="text" class="ed-input" id="nuevo-nombre" placeholder="Ej. Juan Pérez González">
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Fecha de nacimiento</label>
+            <input type="date" class="ed-input" id="nuevo-fecnac">
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Sexo</label>
+            <select class="ed-select" id="nuevo-sexo">
+              <option value="">— Seleccionar —</option>
+              <option value="M">Masculino</option>
+              <option value="F">Femenino</option>
+              <option value="O">Otro</option>
+            </select>
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Tipo de sangre</label>
+            <select class="ed-select" id="nuevo-sangre">
+              <option value="">— Seleccionar —</option>
+              <option>A+</option><option>A-</option>
+              <option>B+</option><option>B-</option>
+              <option>O+</option><option>O-</option>
+              <option>AB+</option><option>AB-</option>
+            </select>
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Teléfono</label>
+            <input type="tel" class="ed-input" id="nuevo-tel" placeholder="9999-9999">
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Correo (opcional)</label>
+            <input type="email" class="ed-input" id="nuevo-email" placeholder="paciente@correo.com">
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Estado civil</label>
+            <select class="ed-select" id="nuevo-edocivil">
+              <option value="">— Seleccionar —</option>
+              <option>Soltero(a)</option>
+              <option>Casado(a)</option>
+              <option>Unión libre</option>
+              <option>Divorciado(a)</option>
+              <option>Viudo(a)</option>
+            </select>
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Ocupación</label>
+            <input type="text" class="ed-input" id="nuevo-ocupacion">
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Escolaridad</label>
+            <input type="text" class="ed-input" id="nuevo-escolaridad">
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Religión</label>
+            <input type="text" class="ed-input" id="nuevo-religion">
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Lugar de nacimiento</label>
+            <input type="text" class="ed-input" id="nuevo-lugarnac">
+          </div>
+          <div class="ed-fgroup full">
+            <label class="ed-label">Dirección</label>
+            <input type="text" class="ed-input" id="nuevo-direccion">
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Contacto emergencia (nombre)</label>
+            <input type="text" class="ed-input" id="nuevo-emerg-nombre">
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Contacto emergencia (tel)</label>
+            <input type="tel" class="ed-input" id="nuevo-emerg-tel">
+          </div>
+          <div class="ed-fgroup full">
+            <label class="ed-label">Alergias conocidas</label>
+            <input type="text" class="ed-input" id="nuevo-alergias" placeholder="Penicilina, mariscos, polvo...">
+          </div>
+        </div>
+
+        <!-- Antecedentes Patológicos -->
+        <div class="ed-section">
+          <div class="ed-section-title">🏥 Antecedentes Personales Patológicos</div>
+          <div id="nuevo-pat-container"></div>
+        </div>
+
+        <!-- Antecedentes No Patológicos -->
+        <div class="ed-section">
+          <div class="ed-section-title">🚭 Antecedentes Personales No Patológicos</div>
+          <div id="nuevo-nopat-container"></div>
+        </div>
+
+        <!-- Antecedentes Familiares -->
+        <div class="ed-section">
+          <div class="ed-section-title">👨‍👩‍👧 Antecedentes Familiares</div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Detalle (padre, madre, hermanos, abuelos)</label>
+            <textarea class="ed-textarea" id="nuevo-familiares" rows="4" placeholder="Ej. Padre: diabetes tipo 2. Madre: hipertensión. Abuelo paterno: cáncer de próstata..."></textarea>
+          </div>
+        </div>
+
+        <div class="ed-actions">
+          <button class="ed-btn ed-btn-ghost" id="btn-nuevo-limpiar">Limpiar</button>
+          <button class="ed-btn ed-btn-primary" id="btn-nuevo-guardar">
+            ✓ Crear Expediente + Generar Código
+          </button>
+        </div>
+      </div>
+
+      <!-- Resultado código generado -->
+      <div class="ed-card" id="nuevo-resultado" style="display:none">
+        <div class="ed-code-display">
+          <div class="ed-code-label">Código del Paciente</div>
+          <div class="ed-code-value" id="nuevo-codigo-generado">CMG-XXXX</div>
+          <p class="ed-code-help">Comparte este código con el paciente. Lo usará para vincular su cuenta en "Mi Historial Médico".</p>
+          <button class="ed-copy-btn" id="btn-copiar-codigo">📋 Copiar código</button>
+        </div>
+        <div style="text-align:center">
+          <button class="ed-btn ed-btn-yellow" id="btn-ir-consulta">
+            📝 Registrar primera consulta para este paciente →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── TAB: BUSCAR ─── -->
+    <section id="tab-buscar" class="ed-tab-content" style="display:none">
+      <div class="ed-card">
+        <h2 class="ed-card-title">🔍 Buscar paciente por código</h2>
+        <p class="ed-card-subtitle">Ingresa el código del paciente para acceder a su expediente clínico.</p>
+
+        <div class="ed-search-bar">
+          <input type="text" class="ed-search-input" id="buscar-codigo" placeholder="CMG-XXXXXX" maxlength="11">
+          <button class="ed-btn ed-btn-primary" id="btn-buscar">Buscar</button>
+        </div>
+
+        <div id="buscar-resultado"></div>
+      </div>
+    </section>
+
+    <!-- ─── TAB: EDITAR ─── -->
+    <section id="tab-editar" class="ed-tab-content" style="display:none">
+      <div class="ed-card">
+        <h2 class="ed-card-title">✏️ Editar expediente clínico</h2>
+        <p class="ed-card-subtitle">Primero busca un paciente. Luego edita sus datos y guarda los cambios.</p>
+        <div id="editar-contenido">
+          <div class="ed-empty">
+            <div class="ed-empty-icon">🔍</div>
+            <p>Primero busca un paciente en la pestaña "Buscar Paciente"</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── TAB: NUEVA CONSULTA ─── -->
+    <section id="tab-consulta" class="ed-tab-content" style="display:none">
+      <div class="ed-card">
+        <h2 class="ed-card-title">📝 Registrar nueva hoja de consulta</h2>
+        <p class="ed-card-subtitle">Primero selecciona un paciente. Cada consulta genera un PDF que se guarda en su historial.</p>
+        <div id="consulta-contenido">
+          <div class="ed-empty">
+            <div class="ed-empty-icon">🔍</div>
+            <p>Primero busca un paciente en la pestaña "Buscar Paciente"</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── TAB: HISTORIAL ─── -->
+    <section id="tab-historial" class="ed-tab-content" style="display:none">
+      <div class="ed-card">
+        <h2 class="ed-card-title">📂 Ver historial del paciente</h2>
+        <p class="ed-card-subtitle">Primero busca un paciente. Aquí verás todas sus consultas previas en orden cronológico.</p>
+        <div id="historial-contenido">
+          <div class="ed-empty">
+            <div class="ed-empty-icon">🔍</div>
+            <p>Primero busca un paciente en la pestaña "Buscar Paciente"</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- Overlay -->
+<div class="ed-overlay" id="ed-overlay">
+  <div class="ed-overlay-box">
+    <div class="ed-overlay-spinner"></div>
+    <div class="ed-overlay-text" id="ed-overlay-text">Procesando...</div>
+  </div>
+</div>
+
+<!-- Float WhatsApp -->
+<a class="float-wa" href="https://wa.me/50431555162" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+</a>
+
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-init.js"></script>
+
+<!-- jsPDF para generar PDF de consultas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- docx.js para generar Word del expediente -->
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+
+<script>
+(function () {
+  /* ════════════════════════════════════════════════════════════
+     CONFIGURACIÓN
+     ════════════════════════════════════════════════════════════ */
+  var DOCTOR_EMAILS = [
+    'expedientes.clinicamedicacmg@gmail.com',
+    'rubenwainwrightba@gmail.com',
+    'ventasymercadeocmg@gmail.com'
+  ];
+
+  var ANTECEDENTES_PATOLOGICOS = [
+    'Diabetes mellitus',
+    'Hipertensión arterial',
+    'Cardiopatías',
+    'Asma / EPOC',
+    'Cáncer',
+    'Tuberculosis',
+    'VIH / SIDA',
+    'Hepatitis',
+    'Epilepsia / crisis convulsivas',
+    'Enfermedad renal',
+    'Tiroides (hipo/hiper)',
+    'Trastornos mentales',
+    'Cirugías previas',
+    'Hospitalizaciones previas',
+    'Transfusiones sanguíneas',
+    'Traumatismos importantes',
+    'Otras enfermedades crónicas'
+  ];
+
+  var ANTECEDENTES_NO_PATOLOGICOS = [
+    'Tabaquismo',
+    'Alcoholismo',
+    'Drogas / sustancias',
+    'Actividad física regular',
+    'Alimentación balanceada',
+    'Calidad del sueño',
+    'Vivienda con servicios básicos',
+    'Esquema de vacunación completo',
+    'Métodos anticonceptivos',
+    'Vida sexual activa'
+  ];
+
+  /* Almacena el estado del paciente actualmente cargado */
+  var pacienteActual = null;
+
+  /* ════════════════════════════════════════════════════════════
+     HELPERS
+     ════════════════════════════════════════════════════════════ */
+  function $id(id) { return document.getElementById(id); }
+  function $val(id) { var el = $id(id); return el ? el.value.trim() : ''; }
+
+  function showOverlay(text) {
+    $id('ed-overlay-text').textContent = text || 'Procesando...';
+    $id('ed-overlay').classList.add('is-visible');
+  }
+  function hideOverlay() {
+    $id('ed-overlay').classList.remove('is-visible');
+  }
+
+  function showAlert(msg, type) {
+    var el = $id('ed-alert');
+    el.className = 'ed-alert is-visible ed-alert-' + (type || 'info');
+    el.textContent = msg;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(function () { el.classList.remove('is-visible'); }, 6000);
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function fmtDate(ts) {
+    if (!ts) return '—';
+    var d = ts.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
+    return d.toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: 'numeric' }) +
+           ' · ' + d.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function calcEdad(fechaNac) {
+    if (!fechaNac) return '';
+    var fn = new Date(fechaNac);
+    if (isNaN(fn)) return '';
+    var hoy = new Date();
+    var e = hoy.getFullYear() - fn.getFullYear();
+    var m = hoy.getMonth() - fn.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < fn.getDate())) e--;
+    return e + ' años';
+  }
+
+  /* Genera un código único: CMG-XXXXXX (6 chars, sin caracteres confusos) */
+  function generarCodigo() {
+    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sin O,0,I,1
+    var s = '';
+    for (var i = 0; i < 6; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
+    return 'CMG-' + s;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     CONSTRUCCIÓN DE FILAS DE ANTECEDENTES
+     ════════════════════════════════════════════════════════════ */
+  function buildAntecedentesRow(prefix, idx, nombre) {
+    var rowId = prefix + '-' + idx;
+    var row = document.createElement('div');
+    row.className = 'ed-ant-row';
+    row.innerHTML =
+      '<div class="ed-ant-name">' + esc(nombre) + '</div>' +
+      '<div class="ed-ant-toggle">' +
+        '<button type="button" class="ed-ant-btn" data-val="si">SÍ</button>' +
+        '<button type="button" class="ed-ant-btn is-no-active" data-val="no">NO</button>' +
+      '</div>' +
+      '<input type="text" class="ed-ant-detail" placeholder="Detalle (opcional)" disabled>';
+    row.dataset.nombre = nombre;
+    row.dataset.id = rowId;
+    row.dataset.valor = 'no';
+
+    var btns = row.querySelectorAll('.ed-ant-btn');
+    var detail = row.querySelector('.ed-ant-detail');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var v = b.dataset.val;
+        row.dataset.valor = v;
+        btns.forEach(function (x) {
+          x.classList.remove('is-yes-active', 'is-no-active');
+          if (x.dataset.val === 'si' && v === 'si') x.classList.add('is-yes-active');
+          if (x.dataset.val === 'no' && v === 'no') x.classList.add('is-no-active');
+        });
+        detail.disabled = (v === 'no');
+        if (v === 'no') detail.value = '';
+      });
+    });
+    return row;
+  }
+
+  function renderAntecedentes(containerId, lista, prefix) {
+    var container = $id(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    lista.forEach(function (nombre, i) {
+      container.appendChild(buildAntecedentesRow(prefix, i, nombre));
+    });
+  }
+
+  function collectAntecedentes(containerId) {
+    var container = $id(containerId);
+    var out = {};
+    container.querySelectorAll('.ed-ant-row').forEach(function (row) {
+      var n = row.dataset.nombre;
+      var v = row.dataset.valor;
+      var detail = row.querySelector('.ed-ant-detail').value.trim();
+      out[n] = { tiene: v === 'si', detalle: detail };
+    });
+    return out;
+  }
+
+  function setAntecedentes(containerId, data) {
+    if (!data) return;
+    var container = $id(containerId);
+    container.querySelectorAll('.ed-ant-row').forEach(function (row) {
+      var n = row.dataset.nombre;
+      var item = data[n];
+      if (!item) return;
+      var btns = row.querySelectorAll('.ed-ant-btn');
+      var detail = row.querySelector('.ed-ant-detail');
+      row.dataset.valor = item.tiene ? 'si' : 'no';
+      btns.forEach(function (x) {
+        x.classList.remove('is-yes-active', 'is-no-active');
+        if (x.dataset.val === 'si' && item.tiene) x.classList.add('is-yes-active');
+        if (x.dataset.val === 'no' && !item.tiene) x.classList.add('is-no-active');
+      });
+      detail.disabled = !item.tiene;
+      detail.value = item.detalle || '';
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     TABS
+     ════════════════════════════════════════════════════════════ */
+  function switchTab(name) {
+    document.querySelectorAll('.ed-tab').forEach(function (t) {
+      t.classList.toggle('is-active', t.dataset.tab === name);
+    });
+    document.querySelectorAll('.ed-tab-content').forEach(function (c) {
+      c.style.display = 'none';
+    });
+    var section = $id('tab-' + name);
+    if (section) section.style.display = '';
+    /* Render contenido contextual */
+    if (name === 'editar') renderEditarTab();
+    if (name === 'consulta') renderConsultaTab();
+    if (name === 'historial') renderHistorialTab();
+  }
+  document.querySelectorAll('.ed-tab').forEach(function (t) {
+    t.addEventListener('click', function () { switchTab(t.dataset.tab); });
+  });
+
+  /* ════════════════════════════════════════════════════════════
+     AUTH GUARD
+     ════════════════════════════════════════════════════════════ */
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) {
+      window.location.href = 'Auth.html?returnTo=Expediente-Doctor.html';
+      return;
+    }
+    if (DOCTOR_EMAILS.indexOf(user.email) === -1) {
+      document.body.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;font-family:system-ui">' +
+        '<div><h1 style="color:#991B1B">🚫 Acceso restringido</h1>' +
+        '<p style="color:#6B7280;margin:14px 0 24px">Solo el personal médico autorizado puede acceder a este portal.</p>' +
+        '<a href="Inicio.html" style="background:#213C7D;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">Volver al sitio</a>' +
+        '</div></div>';
+      return;
+    }
+    /* Mostrar nombre del doctor */
+    $id('ed-user-chip').style.display = '';
+    $id('ed-user-name').textContent = user.displayName || user.email.split('@')[0];
+    /* Inicializar antecedentes */
+    renderAntecedentes('nuevo-pat-container', ANTECEDENTES_PATOLOGICOS, 'nvopat');
+    renderAntecedentes('nuevo-nopat-container', ANTECEDENTES_NO_PATOLOGICOS, 'nvonopat');
+  });
+
+  /* Logout */
+  $id('ed-logout').addEventListener('click', function () {
+    cmgAuth.signOut().then(function () { window.location.href = 'Inicio.html'; });
+  });
+
+  /* Promo */
+  var DAYS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var d = new Date().getDay();
+  var hEl = $id('promo-hours-es'); if (hEl) hEl.textContent = d === 0 ? '8:00 AM – 7:00 PM' : '6:00 AM – 10:00 PM';
+  var dEl = $id('promo-day-es');   if (dEl) dEl.textContent = '(' + DAYS[d] + ')';
+  var header = document.querySelector('.site-header');
+  if (header) {
+    var onScroll = function () { header.classList.toggle('is-scrolled', window.scrollY > 8); };
+    window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     CREAR NUEVO EXPEDIENTE
+     ════════════════════════════════════════════════════════════ */
+  $id('btn-nuevo-limpiar').addEventListener('click', function () {
+    document.querySelectorAll('#tab-nuevo .ed-input, #tab-nuevo .ed-select, #tab-nuevo .ed-textarea')
+      .forEach(function (el) { el.value = ''; });
+    renderAntecedentes('nuevo-pat-container', ANTECEDENTES_PATOLOGICOS, 'nvopat');
+    renderAntecedentes('nuevo-nopat-container', ANTECEDENTES_NO_PATOLOGICOS, 'nvonopat');
+    $id('nuevo-resultado').style.display = 'none';
+  });
+
+  $id('btn-nuevo-guardar').addEventListener('click', function () {
+    var nombre = $val('nuevo-nombre');
+    if (!nombre) { showAlert('El nombre del paciente es obligatorio.', 'error'); return; }
+
+    var expediente = {
+      codigoPaciente: '',
+      ownerUid: null,
+      ownerVinculado: false,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdByEmail: cmgAuth.currentUser.email,
+      datosGenerales: {
+        nombreCompleto: nombre,
+        fechaNacimiento: $val('nuevo-fecnac'),
+        sexo: $val('nuevo-sexo'),
+        tipoSangre: $val('nuevo-sangre'),
+        telefono: $val('nuevo-tel'),
+        email: $val('nuevo-email'),
+        estadoCivil: $val('nuevo-edocivil'),
+        ocupacion: $val('nuevo-ocupacion'),
+        escolaridad: $val('nuevo-escolaridad'),
+        religion: $val('nuevo-religion'),
+        lugarNacimiento: $val('nuevo-lugarnac'),
+        direccion: $val('nuevo-direccion'),
+        contactoEmergencia: $val('nuevo-emerg-nombre'),
+        telefonoEmergencia: $val('nuevo-emerg-tel'),
+        alergias: $val('nuevo-alergias')
+      },
+      antecedentesPatologicos: collectAntecedentes('nuevo-pat-container'),
+      antecedentesNoPatologicos: collectAntecedentes('nuevo-nopat-container'),
+      antecedentesFamiliares: $val('nuevo-familiares')
+    };
+
+    /* Generar código único (reintenta si colisiona) */
+    showOverlay('Generando código único...');
+    crearExpedienteConCodigoUnico(expediente, 0);
+  });
+
+  function crearExpedienteConCodigoUnico(expediente, intento) {
+    if (intento > 5) {
+      hideOverlay();
+      showAlert('No se pudo generar un código único. Intenta de nuevo.', 'error');
+      return;
+    }
+    var codigo = generarCodigo();
+    cmgDb.collection('expedientes').doc(codigo).get()
+      .then(function (snap) {
+        if (snap.exists) {
+          /* Colisión, reintentar */
+          crearExpedienteConCodigoUnico(expediente, intento + 1);
+          return;
+        }
+        expediente.codigoPaciente = codigo;
+        return cmgDb.collection('expedientes').doc(codigo).set(expediente)
+          .then(function () {
+            hideOverlay();
+            pacienteActual = Object.assign({}, expediente, { codigoPaciente: codigo });
+            $id('nuevo-codigo-generado').textContent = codigo;
+            $id('nuevo-resultado').style.display = '';
+            $id('nuevo-resultado').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showAlert('✓ Expediente creado exitosamente. Código: ' + codigo, 'success');
+          });
+      })
+      .catch(function (err) {
+        hideOverlay();
+        console.error('[CMG] Error creando expediente:', err);
+        showAlert('Error al crear el expediente: ' + err.message, 'error');
+      });
+  }
+
+  $id('btn-copiar-codigo').addEventListener('click', function () {
+    var c = $id('nuevo-codigo-generado').textContent;
+    navigator.clipboard.writeText(c).then(function () {
+      $id('btn-copiar-codigo').textContent = '✓ Copiado';
+      setTimeout(function () { $id('btn-copiar-codigo').textContent = '📋 Copiar código'; }, 2000);
+    });
+  });
+
+  $id('btn-ir-consulta').addEventListener('click', function () {
+    switchTab('consulta');
+  });
+
+  /* ════════════════════════════════════════════════════════════
+     BUSCAR PACIENTE
+     ════════════════════════════════════════════════════════════ */
+  $id('buscar-codigo').addEventListener('input', function (e) {
+    e.target.value = e.target.value.toUpperCase();
+  });
+  $id('buscar-codigo').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') $id('btn-buscar').click();
+  });
+  $id('btn-buscar').addEventListener('click', function () {
+    var codigo = $val('buscar-codigo').toUpperCase();
+    if (!codigo) { showAlert('Ingresa un código de paciente.', 'error'); return; }
+    /* Normalizar: si no empieza con CMG-, lo añadimos */
+    if (codigo.indexOf('CMG-') !== 0) codigo = 'CMG-' + codigo;
+
+    showOverlay('Buscando expediente...');
+    cmgDb.collection('expedientes').doc(codigo).get()
+      .then(function (snap) {
+        hideOverlay();
+        if (!snap.exists) {
+          $id('buscar-resultado').innerHTML =
+            '<div class="ed-alert ed-alert-error is-visible">No se encontró ningún expediente con el código <strong>' + esc(codigo) + '</strong>.</div>';
+          pacienteActual = null;
+          return;
+        }
+        pacienteActual = Object.assign({ codigoPaciente: codigo }, snap.data());
+        renderBuscarResultado();
+      })
+      .catch(function (err) {
+        hideOverlay();
+        showAlert('Error al buscar: ' + err.message, 'error');
+      });
+  });
+
+  function renderBuscarResultado() {
+    var p = pacienteActual;
+    var dg = p.datosGenerales || {};
+    $id('buscar-resultado').innerHTML =
+      '<div class="ed-patient-summary">' +
+        '<div>' +
+          '<p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
+          '<p class="ed-patient-meta">' +
+            (calcEdad(dg.fechaNacimiento) ? calcEdad(dg.fechaNacimiento) + ' · ' : '') +
+            esc(dg.sexo === 'M' ? 'Masculino' : (dg.sexo === 'F' ? 'Femenino' : (dg.sexo || ''))) +
+            (dg.telefono ? ' · 📞 ' + esc(dg.telefono) : '') +
+          '</p>' +
+        '</div>' +
+        '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+        '<button class="ed-btn ed-btn-primary" data-goto="editar">✏️ Editar expediente</button>' +
+        '<button class="ed-btn ed-btn-yellow" data-goto="consulta">📝 Nueva consulta</button>' +
+        '<button class="ed-btn ed-btn-ghost" data-goto="historial">📂 Ver historial</button>' +
+      '</div>';
+
+    document.querySelectorAll('#buscar-resultado [data-goto]').forEach(function (btn) {
+      btn.addEventListener('click', function () { switchTab(btn.dataset.goto); });
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     EDITAR EXPEDIENTE
+     ════════════════════════════════════════════════════════════ */
+  function renderEditarTab() {
+    var cont = $id('editar-contenido');
+    if (!pacienteActual) {
+      cont.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔍</div><p>Primero busca un paciente en la pestaña "Buscar Paciente"</p></div>';
+      return;
+    }
+    var p = pacienteActual;
+    var dg = p.datosGenerales || {};
+    cont.innerHTML =
+      '<div class="ed-patient-summary">' +
+        '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
+        '<p class="ed-patient-meta">Editando expediente</p></div>' +
+        '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
+      '</div>' +
+      buildEditarForm(p) +
+      '<div class="ed-actions">' +
+        '<button class="ed-btn ed-btn-primary" id="btn-editar-guardar">💾 Guardar cambios</button>' +
+      '</div>';
+
+    /* Render antecedentes con datos */
+    renderAntecedentes('edit-pat-container', ANTECEDENTES_PATOLOGICOS, 'edpat');
+    renderAntecedentes('edit-nopat-container', ANTECEDENTES_NO_PATOLOGICOS, 'ednopat');
+    setAntecedentes('edit-pat-container', p.antecedentesPatologicos);
+    setAntecedentes('edit-nopat-container', p.antecedentesNoPatologicos);
+
+    $id('btn-editar-guardar').addEventListener('click', guardarEdicion);
+  }
+
+  function buildEditarForm(p) {
+    var dg = p.datosGenerales || {};
+    function inp(id, v, t) { return '<input type="' + (t || 'text') + '" class="ed-input" id="' + id + '" value="' + esc(v || '') + '">'; }
+    function sel(id, v, opts) {
+      var html = '<select class="ed-select" id="' + id + '">';
+      opts.forEach(function (o) {
+        var val = typeof o === 'string' ? o : o.v;
+        var lbl = typeof o === 'string' ? o : o.l;
+        html += '<option value="' + esc(val) + '"' + (v === val ? ' selected' : '') + '>' + esc(lbl) + '</option>';
+      });
+      return html + '</select>';
+    }
+    return '<div class="ed-section-title">👤 Datos Generales</div>' +
+      '<div class="ed-grid ed-grid-2">' +
+        '<div class="ed-fgroup full"><label class="ed-label">Nombre completo</label>' + inp('edit-nombre', dg.nombreCompleto) + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Fecha nacimiento</label>' + inp('edit-fecnac', dg.fechaNacimiento, 'date') + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Sexo</label>' + sel('edit-sexo', dg.sexo, [{v:'',l:'—'},{v:'M',l:'Masculino'},{v:'F',l:'Femenino'},{v:'O',l:'Otro'}]) + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Tipo sangre</label>' + sel('edit-sangre', dg.tipoSangre, ['','A+','A-','B+','B-','O+','O-','AB+','AB-']) + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Teléfono</label>' + inp('edit-tel', dg.telefono, 'tel') + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Correo</label>' + inp('edit-email', dg.email, 'email') + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Estado civil</label>' + sel('edit-edocivil', dg.estadoCivil, ['','Soltero(a)','Casado(a)','Unión libre','Divorciado(a)','Viudo(a)']) + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Ocupación</label>' + inp('edit-ocupacion', dg.ocupacion) + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Escolaridad</label>' + inp('edit-escolaridad', dg.escolaridad) + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Religión</label>' + inp('edit-religion', dg.religion) + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Lugar nacimiento</label>' + inp('edit-lugarnac', dg.lugarNacimiento) + '</div>' +
+        '<div class="ed-fgroup full"><label class="ed-label">Dirección</label>' + inp('edit-direccion', dg.direccion) + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Contacto emergencia (nombre)</label>' + inp('edit-emerg-nombre', dg.contactoEmergencia) + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Contacto emergencia (tel)</label>' + inp('edit-emerg-tel', dg.telefonoEmergencia, 'tel') + '</div>' +
+        '<div class="ed-fgroup full"><label class="ed-label">Alergias</label>' + inp('edit-alergias', dg.alergias) + '</div>' +
+      '</div>' +
+      '<div class="ed-section"><div class="ed-section-title">🏥 Antecedentes Patológicos</div><div id="edit-pat-container"></div></div>' +
+      '<div class="ed-section"><div class="ed-section-title">🚭 Antecedentes No Patológicos</div><div id="edit-nopat-container"></div></div>' +
+      '<div class="ed-section"><div class="ed-section-title">👨‍👩‍👧 Antecedentes Familiares</div>' +
+        '<textarea class="ed-textarea" id="edit-familiares" rows="4">' + esc(p.antecedentesFamiliares || '') + '</textarea>' +
+      '</div>';
+  }
+
+  function guardarEdicion() {
+    if (!pacienteActual) return;
+    var update = {
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      datosGenerales: {
+        nombreCompleto: $val('edit-nombre'),
+        fechaNacimiento: $val('edit-fecnac'),
+        sexo: $val('edit-sexo'),
+        tipoSangre: $val('edit-sangre'),
+        telefono: $val('edit-tel'),
+        email: $val('edit-email'),
+        estadoCivil: $val('edit-edocivil'),
+        ocupacion: $val('edit-ocupacion'),
+        escolaridad: $val('edit-escolaridad'),
+        religion: $val('edit-religion'),
+        lugarNacimiento: $val('edit-lugarnac'),
+        direccion: $val('edit-direccion'),
+        contactoEmergencia: $val('edit-emerg-nombre'),
+        telefonoEmergencia: $val('edit-emerg-tel'),
+        alergias: $val('edit-alergias')
+      },
+      antecedentesPatologicos: collectAntecedentes('edit-pat-container'),
+      antecedentesNoPatologicos: collectAntecedentes('edit-nopat-container'),
+      antecedentesFamiliares: $val('edit-familiares')
+    };
+    showOverlay('Guardando cambios...');
+    cmgDb.collection('expedientes').doc(pacienteActual.codigoPaciente).update(update)
+      .then(function () {
+        hideOverlay();
+        Object.assign(pacienteActual, update);
+        showAlert('✓ Cambios guardados correctamente.', 'success');
+      })
+      .catch(function (err) {
+        hideOverlay();
+        showAlert('Error al guardar: ' + err.message, 'error');
+      });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     NUEVA CONSULTA
+     ════════════════════════════════════════════════════════════ */
+  function renderConsultaTab() {
+    var cont = $id('consulta-contenido');
+    if (!pacienteActual) {
+      cont.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔍</div><p>Primero busca un paciente en la pestaña "Buscar Paciente"</p></div>';
+      return;
+    }
+    var p = pacienteActual;
+    var dg = p.datosGenerales || {};
+    cont.innerHTML =
+      '<div class="ed-patient-summary">' +
+        '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
+        '<p class="ed-patient-meta">' + (calcEdad(dg.fechaNacimiento) || '') +
+        (dg.tipoSangre ? ' · Sangre ' + esc(dg.tipoSangre) : '') +
+        (dg.alergias ? ' · ⚠️ ' + esc(dg.alergias) : '') + '</p></div>' +
+        '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
+      '</div>' +
+      '<div class="ed-section-title">📊 Signos vitales</div>' +
+      '<div class="ed-vitals">' +
+        '<div class="ed-vital"><div class="ed-vital-label">TA (mmHg)</div><input id="cons-ta" placeholder="120/80"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">FC (lpm)</div><input id="cons-fc" placeholder="72"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">FR (rpm)</div><input id="cons-fr" placeholder="16"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">Temp (°C)</div><input id="cons-temp" placeholder="36.5"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">Peso (kg)</div><input id="cons-peso" placeholder="70"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">Talla (m)</div><input id="cons-talla" placeholder="1.70"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">SpO2 (%)</div><input id="cons-spo2" placeholder="98"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">Glucosa (mg/dL)</div><input id="cons-glucosa" placeholder="90"></div>' +
+      '</div>' +
+      '<div class="ed-section">' +
+        '<div class="ed-grid ed-grid-2">' +
+          '<div class="ed-fgroup full"><label class="ed-label">Motivo de consulta *</label>' +
+            '<textarea class="ed-textarea" id="cons-motivo" rows="2" placeholder="Razón principal de la visita"></textarea></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Padecimiento actual / Síntomas</label>' +
+            '<textarea class="ed-textarea" id="cons-sintomas" rows="3" placeholder="Descripción detallada de los síntomas"></textarea></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Exploración física</label>' +
+            '<textarea class="ed-textarea" id="cons-exploracion" rows="3" placeholder="Hallazgos al examen físico"></textarea></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Diagnóstico *</label>' +
+            '<textarea class="ed-textarea" id="cons-diagnostico" rows="2" placeholder="Diagnóstico principal y diferenciales"></textarea></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Plan / Tratamiento</label>' +
+            '<textarea class="ed-textarea" id="cons-tratamiento" rows="3" placeholder="Medicamentos, dosis, duración. Estudios solicitados."></textarea></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Indicaciones al paciente</label>' +
+            '<textarea class="ed-textarea" id="cons-indicaciones" rows="2" placeholder="Recomendaciones generales, dieta, reposo, signos de alarma"></textarea></div>' +
+          '<div class="ed-fgroup"><label class="ed-label">Próxima cita</label>' +
+            '<input type="date" class="ed-input" id="cons-proxcita"></div>' +
+          '<div class="ed-fgroup"><label class="ed-label">Médico tratante</label>' +
+            '<input type="text" class="ed-input" id="cons-medico" value="' + esc(cmgAuth.currentUser.displayName || cmgAuth.currentUser.email) + '"></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ed-actions">' +
+        '<button class="ed-btn ed-btn-primary" id="btn-cons-guardar">' +
+          '💾 Guardar consulta + Generar PDF' +
+        '</button>' +
+      '</div>';
+
+    $id('btn-cons-guardar').addEventListener('click', guardarConsulta);
+  }
+
+  function guardarConsulta() {
+    if (!pacienteActual) return;
+    var motivo = $val('cons-motivo');
+    var diagnostico = $val('cons-diagnostico');
+    if (!motivo || !diagnostico) {
+      showAlert('Motivo y diagnóstico son obligatorios.', 'error');
+      return;
+    }
+    var consulta = {
+      codigoPaciente: pacienteActual.codigoPaciente,
+      fecha: firebase.firestore.FieldValue.serverTimestamp(),
+      fechaLocal: new Date().toISOString(),
+      doctorEmail: cmgAuth.currentUser.email,
+      doctorNombre: $val('cons-medico'),
+      signosVitales: {
+        ta: $val('cons-ta'), fc: $val('cons-fc'), fr: $val('cons-fr'),
+        temp: $val('cons-temp'), peso: $val('cons-peso'), talla: $val('cons-talla'),
+        spo2: $val('cons-spo2'), glucosa: $val('cons-glucosa')
+      },
+      motivoConsulta: motivo,
+      sintomas: $val('cons-sintomas'),
+      exploracion: $val('cons-exploracion'),
+      diagnostico: diagnostico,
+      tratamiento: $val('cons-tratamiento'),
+      indicaciones: $val('cons-indicaciones'),
+      proximaCita: $val('cons-proxcita'),
+      pdfUrl: null
+    };
+
+    showOverlay('Generando PDF y guardando consulta...');
+
+    /* Paso 1: Generar PDF como blob */
+    var pdfBlob;
+    try {
+      pdfBlob = generarPdfConsulta(pacienteActual, consulta);
+    } catch (e) {
+      hideOverlay();
+      showAlert('Error generando PDF: ' + e.message, 'error');
+      return;
+    }
+
+    /* Paso 2: Subir PDF a Firebase Storage */
+    var fechaStr = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+    var storagePath = 'expedientes/' + pacienteActual.codigoPaciente + '/consultas/' + fechaStr + '.pdf';
+    var storageRef = firebase.storage().ref(storagePath);
+    storageRef.put(pdfBlob)
+      .then(function (snap) { return snap.ref.getDownloadURL(); })
+      .then(function (url) {
+        consulta.pdfUrl = url;
+        consulta.storagePath = storagePath;
+        /* Paso 3: Guardar consulta en Firestore */
+        return cmgDb.collection('consultas').add(consulta);
+      })
+      .then(function () {
+        hideOverlay();
+        showAlert('✓ Consulta guardada exitosamente. PDF generado.', 'success');
+        /* Limpiar formulario */
+        document.querySelectorAll('#consulta-contenido .ed-input, #consulta-contenido .ed-textarea, #consulta-contenido .ed-vital input')
+          .forEach(function (el) { if (el.id !== 'cons-medico') el.value = ''; });
+      })
+      .catch(function (err) {
+        hideOverlay();
+        console.error('[CMG] Error guardando consulta:', err);
+        showAlert('Error al guardar consulta: ' + err.message, 'error');
+      });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     GENERAR PDF DE CONSULTA
+     ════════════════════════════════════════════════════════════ */
+  function generarPdfConsulta(paciente, consulta) {
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({ unit: 'mm', format: 'letter' });
+    var pageW = doc.internal.pageSize.getWidth();
+    var marginX = 18;
+    var y = 18;
+
+    /* Cabecera azul */
+    doc.setFillColor(33, 60, 125);
+    doc.rect(0, 0, pageW, 24, 'F');
+    doc.setFillColor(253, 210, 44);
+    doc.rect(0, 24, pageW, 2, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text('CLÍNICA MÉDICA GENERAL CMG', marginX, 12);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Hoja de Consulta Médica', marginX, 18);
+    doc.setFontSize(8);
+    doc.text('City Mall, Sótano 2 · Local E214 · Tegucigalpa · Tel. +504 3155-5162', pageW - marginX, 18, { align: 'right' });
+
+    y = 36;
+    var dg = paciente.datosGenerales || {};
+
+    /* Bloque paciente */
+    doc.setTextColor(33, 60, 125);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text('DATOS DEL PACIENTE', marginX, y);
+    y += 5;
+    doc.setDrawColor(33, 60, 125);
+    doc.setLineWidth(0.5);
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 5;
+
+    doc.setTextColor(50, 50, 50);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    function row(label, val) {
+      doc.setFont('helvetica', 'bold');
+      doc.text(label + ':', marginX, y);
+      doc.setFont('helvetica', 'normal');
+      doc.text(String(val || '—'), marginX + 38, y);
+      y += 5;
+    }
+    row('Nombre', dg.nombreCompleto);
+    row('Código', paciente.codigoPaciente);
+    row('Edad', calcEdad(dg.fechaNacimiento) + (dg.sexo ? ' · ' + (dg.sexo === 'M' ? 'Masculino' : dg.sexo === 'F' ? 'Femenino' : dg.sexo) : ''));
+    row('Tipo sangre', dg.tipoSangre);
+    row('Alergias', dg.alergias);
+    row('Teléfono', dg.telefono);
+
+    y += 4;
+
+    /* Fecha consulta */
+    doc.setFillColor(253, 210, 44);
+    doc.rect(marginX, y, pageW - marginX * 2, 8, 'F');
+    doc.setTextColor(33, 60, 125);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('FECHA DE CONSULTA: ' + new Date().toLocaleString('es-HN', {
+      day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    }), marginX + 3, y + 5);
+    y += 14;
+
+    /* Signos vitales */
+    doc.setTextColor(33, 60, 125);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text('SIGNOS VITALES', marginX, y);
+    y += 5;
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 6;
+
+    var sv = consulta.signosVitales;
+    var vitalsLine = [];
+    if (sv.ta) vitalsLine.push('TA: ' + sv.ta);
+    if (sv.fc) vitalsLine.push('FC: ' + sv.fc);
+    if (sv.fr) vitalsLine.push('FR: ' + sv.fr);
+    if (sv.temp) vitalsLine.push('T°: ' + sv.temp + '°C');
+    if (sv.peso) vitalsLine.push('Peso: ' + sv.peso + ' kg');
+    if (sv.talla) vitalsLine.push('Talla: ' + sv.talla + ' m');
+    if (sv.spo2) vitalsLine.push('SpO2: ' + sv.spo2 + '%');
+    if (sv.glucosa) vitalsLine.push('Glucosa: ' + sv.glucosa);
+    doc.setTextColor(50, 50, 50);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    var vLine = vitalsLine.join(' · ') || '— sin registrar —';
+    var vLines = doc.splitTextToSize(vLine, pageW - marginX * 2);
+    doc.text(vLines, marginX, y);
+    y += vLines.length * 5 + 4;
+
+    /* Secciones de texto */
+    function bloque(titulo, texto) {
+      if (y > 250) { doc.addPage(); y = 20; }
+      doc.setTextColor(33, 60, 125);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text(titulo, marginX, y);
+      y += 5;
+      doc.setDrawColor(33, 60, 125);
+      doc.line(marginX, y, pageW - marginX, y);
+      y += 6;
+      doc.setTextColor(50, 50, 50);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      var t = texto || '— sin registrar —';
+      var lines = doc.splitTextToSize(t, pageW - marginX * 2);
+      doc.text(lines, marginX, y);
+      y += lines.length * 5 + 6;
+    }
+
+    bloque('MOTIVO DE CONSULTA', consulta.motivoConsulta);
+    bloque('PADECIMIENTO ACTUAL', consulta.sintomas);
+    bloque('EXPLORACIÓN FÍSICA', consulta.exploracion);
+    bloque('DIAGNÓSTICO', consulta.diagnostico);
+    bloque('PLAN / TRATAMIENTO', consulta.tratamiento);
+    bloque('INDICACIONES', consulta.indicaciones);
+
+    if (consulta.proximaCita) {
+      bloque('PRÓXIMA CITA', new Date(consulta.proximaCita).toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' }));
+    }
+
+    /* Firma */
+    if (y > 240) { doc.addPage(); y = 30; } else { y = Math.max(y + 16, 240); }
+    doc.setDrawColor(100, 100, 100);
+    doc.setLineWidth(0.3);
+    doc.line(pageW - marginX - 70, y, pageW - marginX, y);
+    y += 4;
+    doc.setTextColor(80, 80, 80);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text(consulta.doctorNombre || cmgAuth.currentUser.email, pageW - marginX, y, { align: 'right' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text('Médico tratante', pageW - marginX, y + 4, { align: 'right' });
+
+    /* Pie de página */
+    var pages = doc.internal.getNumberOfPages();
+    for (var i = 1; i <= pages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(7);
+      doc.setTextColor(150, 150, 150);
+      doc.text('CMG · Expediente: ' + paciente.codigoPaciente +
+        ' · Documento confidencial · Página ' + i + ' de ' + pages,
+        pageW / 2, 285, { align: 'center' });
+    }
+
+    return doc.output('blob');
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     HISTORIAL DE CONSULTAS
+     ════════════════════════════════════════════════════════════ */
+  function renderHistorialTab() {
+    var cont = $id('historial-contenido');
+    if (!pacienteActual) {
+      cont.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔍</div><p>Primero busca un paciente en la pestaña "Buscar Paciente"</p></div>';
+      return;
+    }
+    var p = pacienteActual;
+    var dg = p.datosGenerales || {};
+    cont.innerHTML =
+      '<div class="ed-patient-summary">' +
+        '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
+        '<p class="ed-patient-meta">Historial completo de consultas</p></div>' +
+        '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
+      '</div>' +
+      '<div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap">' +
+        '<button class="ed-btn ed-btn-yellow" id="btn-gen-word">📄 Generar Word del expediente principal</button>' +
+      '</div>' +
+      '<div id="historial-lista"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>';
+
+    $id('btn-gen-word').addEventListener('click', generarWordExpediente);
+
+    /* Cargar consultas */
+    cmgDb.collection('consultas')
+      .where('codigoPaciente', '==', p.codigoPaciente)
+      .get()
+      .then(function (snap) {
+        var consultas = [];
+        snap.forEach(function (doc) { consultas.push(Object.assign({ _id: doc.id }, doc.data())); });
+        consultas.sort(function (a, b) {
+          var ta = a.fecha && a.fecha.toMillis ? a.fecha.toMillis() : 0;
+          var tb = b.fecha && b.fecha.toMillis ? b.fecha.toMillis() : 0;
+          return tb - ta;
+        });
+        renderConsultasLista(consultas);
+      })
+      .catch(function (err) {
+        $id('historial-lista').innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar consultas: ' + esc(err.message) + '</div>';
+      });
+  }
+
+  function renderConsultasLista(consultas) {
+    var lista = $id('historial-lista');
+    if (!consultas.length) {
+      lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">📋</div><p>Aún no hay consultas registradas para este paciente.</p></div>';
+      return;
+    }
+    lista.innerHTML = consultas.map(function (c) {
+      return '<div class="ed-consulta-item">' +
+        '<div>' +
+          '<div class="ed-consulta-fecha">📅 ' + fmtDate(c.fecha) + '</div>' +
+          '<div class="ed-consulta-motivo">' + esc(c.motivoConsulta || '').slice(0, 120) + (c.motivoConsulta && c.motivoConsulta.length > 120 ? '...' : '') + '</div>' +
+          (c.diagnostico ? '<div class="ed-consulta-motivo"><strong>Dx:</strong> ' + esc(c.diagnostico).slice(0, 100) + '</div>' : '') +
+        '</div>' +
+        '<div class="ed-consulta-actions">' +
+          (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Ver PDF</a>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     GENERAR WORD DEL EXPEDIENTE PRINCIPAL
+     ════════════════════════════════════════════════════════════ */
+  function generarWordExpediente() {
+    if (!pacienteActual) return;
+    var p = pacienteActual;
+    var dg = p.datosGenerales || {};
+
+    if (!window.docx) {
+      showAlert('Librería docx no cargada. Recarga la página.', 'error');
+      return;
+    }
+    showOverlay('Generando documento Word...');
+
+    var d = window.docx;
+    var Paragraph = d.Paragraph;
+    var TextRun = d.TextRun;
+    var HeadingLevel = d.HeadingLevel;
+    var AlignmentType = d.AlignmentType;
+    var Document = d.Document;
+    var Packer = d.Packer;
+    var Table = d.Table;
+    var TableRow = d.TableRow;
+    var TableCell = d.TableCell;
+    var WidthType = d.WidthType;
+    var BorderStyle = d.BorderStyle;
+
+    function H(text, level) {
+      return new Paragraph({
+        heading: level || HeadingLevel.HEADING_2,
+        spacing: { before: 240, after: 120 },
+        children: [new TextRun({ text: text, bold: true, color: '213C7D' })]
+      });
+    }
+    function P(label, value) {
+      return new Paragraph({
+        spacing: { after: 60 },
+        children: [
+          new TextRun({ text: label + ': ', bold: true }),
+          new TextRun({ text: String(value || '—') })
+        ]
+      });
+    }
+    function antRows(data) {
+      var rows = [];
+      Object.keys(data || {}).forEach(function (k) {
+        var item = data[k];
+        rows.push(new Paragraph({
+          spacing: { after: 40 },
+          children: [
+            new TextRun({ text: '• ' + k + ': ', bold: true }),
+            new TextRun({ text: item.tiene ? 'SÍ' : 'NO', bold: true, color: item.tiene ? 'C00000' : '666666' }),
+            new TextRun({ text: item.detalle ? '  —  ' + item.detalle : '' })
+          ]
+        }));
+      });
+      return rows;
+    }
+
+    var children = [
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: 'CLÍNICA MÉDICA GENERAL CMG', bold: true, size: 32, color: '213C7D' })]
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 200 },
+        children: [new TextRun({ text: 'HOJA PRINCIPAL DEL EXPEDIENTE CLÍNICO', bold: true, size: 24 })]
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 300 },
+        children: [
+          new TextRun({ text: 'Código de paciente: ', bold: true }),
+          new TextRun({ text: p.codigoPaciente, bold: true, color: '213C7D' })
+        ]
+      }),
+      H('1. DATOS GENERALES'),
+      P('Nombre completo', dg.nombreCompleto),
+      P('Fecha de nacimiento', dg.fechaNacimiento),
+      P('Edad', calcEdad(dg.fechaNacimiento)),
+      P('Sexo', dg.sexo === 'M' ? 'Masculino' : dg.sexo === 'F' ? 'Femenino' : dg.sexo),
+      P('Tipo de sangre', dg.tipoSangre),
+      P('Teléfono', dg.telefono),
+      P('Correo', dg.email),
+      P('Estado civil', dg.estadoCivil),
+      P('Ocupación', dg.ocupacion),
+      P('Escolaridad', dg.escolaridad),
+      P('Religión', dg.religion),
+      P('Lugar de nacimiento', dg.lugarNacimiento),
+      P('Dirección', dg.direccion),
+      P('Contacto emergencia', (dg.contactoEmergencia || '') + (dg.telefonoEmergencia ? ' · ' + dg.telefonoEmergencia : '')),
+      P('Alergias', dg.alergias),
+      H('2. ANTECEDENTES PERSONALES PATOLÓGICOS')
+    ].concat(antRows(p.antecedentesPatologicos))
+     .concat([H('3. ANTECEDENTES PERSONALES NO PATOLÓGICOS')])
+     .concat(antRows(p.antecedentesNoPatologicos))
+     .concat([
+       H('4. ANTECEDENTES FAMILIARES'),
+       new Paragraph({ children: [new TextRun({ text: p.antecedentesFamiliares || '— sin registrar —' })] }),
+       new Paragraph({
+         spacing: { before: 400 },
+         alignment: AlignmentType.CENTER,
+         children: [
+           new TextRun({ text: 'Documento generado el ', italics: true, size: 18 }),
+           new TextRun({ text: new Date().toLocaleString('es-HN'), italics: true, bold: true, size: 18 })
+         ]
+       })
+     ]);
+
+    var doc = new Document({
+      creator: 'CMG',
+      title: 'Expediente ' + p.codigoPaciente,
+      sections: [{ properties: {}, children: children }]
+    });
+
+    Packer.toBlob(doc).then(function (blob) {
+      /* Subir a Storage */
+      var storagePath = 'expedientes/' + p.codigoPaciente + '/expediente-principal.docx';
+      var storageRef = firebase.storage().ref(storagePath);
+      return storageRef.put(blob).then(function (snap) { return snap.ref.getDownloadURL(); });
+    }).then(function (url) {
+      /* Guardar referencia en Firestore */
+      return cmgDb.collection('expedientes').doc(p.codigoPaciente).update({
+        wordExpedienteUrl: url,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(function () {
+        hideOverlay();
+        showAlert('✓ Word del expediente generado y guardado.', 'success');
+        window.open(url, '_blank');
+      });
+    }).catch(function (err) {
+      hideOverlay();
+      console.error('[CMG] Error generando Word:', err);
+      showAlert('Error al generar Word: ' + err.message, 'error');
+    });
+  }
+
+})();
+</script>
+
+<script src="cmg-d365-banner.js"></script>
+</body>
+</html>

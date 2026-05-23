@@ -7,7 +7,11 @@
 <link rel="icon" href="assets/isotipo-color.png">
 <link rel="stylesheet" href="assets/cmg-tokens.css">
 <link rel="stylesheet" href="styles.css">
-<!-- Sin dependencias externas: el PDF se genera con window.print() -->
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
 
 <style>
 /* ============================================================
@@ -27,6 +31,31 @@
   --cs-shadow   : 0 2px 12px rgba(33,60,125,.08);
   --cs-shadow-lg: 0 8px 40px rgba(33,60,125,.13);
 }
+
+/* ── Auth nav pill ─────────────────────────────────────── */
+.cmg-nav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,.85);
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.25);
+  transition: all .18s;
+  white-space: nowrap;
+}
+.cmg-nav-pill:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+/* ── Botón guardar ─────────────────────────────────────── */
+.cs-btn--save {
+  background: #599FB2;
+  color: #fff;
+  font-weight: 700;
+}
+.cs-btn--save:hover:not(:disabled) { background: #4a8a9b; }
 
 /* --- Layout página ----------------------------------------- */
 .cs-page {
@@ -679,6 +708,11 @@
         <button data-set-lang="es" class="is-on" type="button">ES</button>
         <button data-set-lang="en" type="button">EN</button>
       </div>
+      <a id="cmg-nav-account" href="Auth.html?returnTo=Cotizacion-Sistema.html"
+         class="cmg-nav-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <span id="cmg-nav-name">Mi Cuenta</span>
+      </a>
       <a href="Doctor-365.html" class="cta-pill cta-pill--yellow">
         <span class="lang lang-es">DOCTOR 365</span>
         <span class="lang lang-en">DOCTOR 365</span>
@@ -855,6 +889,9 @@
 
       <!-- Botones de acción -->
       <div class="cs-actions">
+        <button class="cs-btn cs-btn--save" id="cs-btn-save" onclick="CS.saveQuote()">
+          💾 Guardar Cotización en mi Cuenta
+        </button>
         <button class="cs-btn cs-btn--dl" id="cs-btn-dl" onclick="CS.downloadPDF()">
           🖨️ Guardar como PDF
         </button>
@@ -1527,6 +1564,93 @@ var CS = (function () {
   }
 
   /* ----------------------------------------------------------
+     GUARDAR COTIZACIÓN EN FIRESTORE
+  ---------------------------------------------------------- */
+  function saveQuote() {
+    if (state.items.length === 0) {
+      toast('⚠️ Agrega al menos un servicio antes de guardar.');
+      return;
+    }
+    /* ¿Usuario logueado? */
+    if (typeof cmgAuth === 'undefined' || !cmgAuth.currentUser) {
+      /* Guardar estado pendiente para recuperar tras el login */
+      localStorage.setItem('cmg-pending-save', JSON.stringify(buildSavePayload(null)));
+      window.location.href = 'Auth.html?returnTo=Cotizacion-Sistema.html';
+      return;
+    }
+    var btn = $id('cs-btn-save');
+    if (btn) { btn.disabled = true; btn.textContent = '💾 Guardando...'; }
+    var user    = cmgAuth.currentUser;
+    var payload = buildSavePayload(user);
+    cmgDb.collection('quotations').add(payload)
+      .then(function () {
+        toast('✅ Cotización guardada en tu cuenta.');
+        if (btn) { btn.disabled = false; btn.textContent = '💾 Guardar Cotización en mi Cuenta'; }
+      })
+      .catch(function (err) {
+        toast('❌ Error al guardar: ' + err.message);
+        if (btn) { btn.disabled = false; btn.textContent = '💾 Guardar Cotización en mi Cuenta'; }
+      });
+  }
+
+  function buildSavePayload(user) {
+    return {
+      userId    : user ? user.uid   : null,
+      userEmail : user ? user.email : null,
+      savedAt   : firebase.firestore.FieldValue.serverTimestamp(),
+      quotNum   : state.quotNum,
+      expiry    : state.expiry ? state.expiry.toISOString().split('T')[0] : null,
+      client    : state.client,
+      waNum     : state.waNum,
+      items     : state.items,
+      discount  : state.discount,
+      tax       : state.tax,
+      shipping  : state.shipping,
+      other     : state.other,
+      notes     : state.notes,
+      subtotal  : subtotal(),
+      grandTotal: grandTotal()
+    };
+  }
+
+  /* ----------------------------------------------------------
+     RESTAURAR COTIZACIÓN GUARDADA (desde Mis-Cotizaciones)
+  ---------------------------------------------------------- */
+  function restoreFromSaved(data) {
+    state.items    = data.items    || [];
+    state.discount = parseFloat(data.discount)  || 0;
+    state.tax      = parseFloat(data.tax)       || 0;
+    state.shipping = parseFloat(data.shipping)  || 0;
+    state.other    = parseFloat(data.other)     || 0;
+    state.notes    = data.notes   || '';
+    state.waNum    = data.waNum   || '';
+    if (data.client)  state.client  = data.client;
+    if (data.quotNum) state.quotNum = data.quotNum;
+    if (data.expiry) {
+      state.expiry = new Date(data.expiry);
+      var ex = $id('f-expiry');
+      if (ex) ex.value = data.expiry;
+    }
+    /* Rellenar campos cliente */
+    ['name','rtn','email','phone','addr'].forEach(function(k) {
+      var el = $id('f-client-' + k);
+      if (el && state.client[k]) el.value = state.client[k];
+    });
+    var wn = $id('f-wa-num');
+    if (wn) wn.value = state.waNum;
+    var fn = $id('f-notes');
+    if (fn) fn.value = state.notes;
+    var fd = $id('f-discount');
+    if (fd) fd.value = state.discount.toFixed(2);
+    var qn = $id('f-quot-num');
+    if (qn) qn.value = state.quotNum;
+    renderEditorItems();
+    syncTotals();
+    syncPreview();
+    toast('✅ Cotización cargada desde tu historial.');
+  }
+
+  /* ----------------------------------------------------------
      CARGAR DATOS DESDE COTIZADOR.HTML (localStorage)
   ---------------------------------------------------------- */
   function loadFromCotizador(data) {
@@ -1589,16 +1713,30 @@ var CS = (function () {
     bindForm();
 
     /* ¿Vienen datos del Cotizador? */
-    var raw = localStorage.getItem('cmg-quote-data');
-    if (raw) {
+    var raw        = localStorage.getItem('cmg-quote-data');
+    var savedRaw   = localStorage.getItem('cmg-saved-quote');
+    var pendingRaw = localStorage.getItem('cmg-pending-save');
+
+    if (savedRaw) {
+      /* Restaurar cotización guardada desde Mis-Cotizaciones */
+      localStorage.removeItem('cmg-saved-quote');
+      try { restoreFromSaved(JSON.parse(savedRaw)); }
+      catch (e) { console.warn('[CMG] Error al restaurar cotización:', e); addItem(); }
+    } else if (pendingRaw) {
+      /* Restaurar estado pendiente (después de login) */
+      localStorage.removeItem('cmg-pending-save');
       try {
-        var data = JSON.parse(raw);
-        localStorage.removeItem('cmg-quote-data'); /* limpiar para no reutilizar */
-        loadFromCotizador(data);
-      } catch (e) {
-        console.warn('[CMG] Error al leer cmg-quote-data:', e);
-        addItem(); /* fallback: ítem vacío */
+        var pending = JSON.parse(pendingRaw);
+        restoreFromSaved(pending);
+        /* Auto-guardar si ya hay sesión */
+        window._cmgAutoSave = true;
       }
+      catch (e) { console.warn('[CMG] Error al restaurar pendiente:', e); addItem(); }
+    } else if (raw) {
+      /* Datos del Cotizador público */
+      localStorage.removeItem('cmg-quote-data');
+      try { loadFromCotizador(JSON.parse(raw)); }
+      catch (e) { console.warn('[CMG] Error al leer cmg-quote-data:', e); addItem(); }
     } else {
       addItem(); /* ítem vacío por defecto */
     }
@@ -1614,11 +1752,33 @@ var CS = (function () {
     updateItem  : updateItem,
     downloadPDF : downloadPDF,
     generatePDF : generatePDF,
-    sendWhatsApp: sendWhatsApp
+    sendWhatsApp: sendWhatsApp,
+    saveQuote   : saveQuote
   };
 })();
 
 document.addEventListener('DOMContentLoaded', CS.init);
+
+/* ── Auth state: actualiza nav + auto-guarda si hay pendiente ── */
+if (typeof cmgAuth !== 'undefined') {
+  cmgAuth.onAuthStateChanged(function (user) {
+    var link = document.getElementById('cmg-nav-account');
+    var name = document.getElementById('cmg-nav-name');
+    if (user) {
+      var displayName = user.displayName || user.email.split('@')[0];
+      if (link) link.href = 'Mis-Cotizaciones.html';
+      if (name) name.textContent = displayName;
+      /* Auto-guardar cotización pendiente tras login */
+      if (window._cmgAutoSave) {
+        window._cmgAutoSave = false;
+        CS.saveQuote();
+      }
+    } else {
+      if (link) link.href = 'Auth.html?returnTo=Cotizacion-Sistema.html';
+      if (name) name.textContent = 'Mi Cuenta';
+    }
+  });
+}
 </script>
 
 </body>

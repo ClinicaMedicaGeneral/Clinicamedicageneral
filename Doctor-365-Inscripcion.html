@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inscripción Doctor 365 · CMG</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<link rel="stylesheet" href="styles.css">
+<style>
+/* ── Inscripción D365 ────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+.ins-page { background: #F4F6FB; min-height: 100vh; padding-bottom: 60px; }
+
+/* Hero */
+.ins-hero {
+  background: #213C7D;
+  padding: 48px 0 40px;
+  border-bottom: 4px solid #FDD22C;
+}
+.ins-hero-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+.ins-hero-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: #FDD22C; margin-bottom: 10px;
+}
+.ins-hero h1 {
+  font-size: clamp(24px, 4vw, 40px);
+  font-weight: 900; color: #fff; margin: 0 0 10px;
+}
+.ins-hero h1 span { color: #FDD22C; }
+.ins-hero p { font-size: 15px; color: rgba(255,255,255,.65); margin: 0; }
+
+/* Wrapper */
+.ins-wrap {
+  max-width: 900px;
+  margin: 36px auto 0;
+  padding: 0 28px;
+}
+
+/* Resumen de beneficios (strip) */
+.ins-benefits {
+  display: flex;
+  gap: 0;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(33,60,125,.08);
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+.ins-benefit {
+  flex: 1;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-right: 1px solid #F3F4F6;
+}
+.ins-benefit:last-child { border-right: none; }
+.ins-benefit-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: #EEF2FF; display: flex; align-items: center;
+  justify-content: center; font-size: 18px; flex-shrink: 0;
+}
+.ins-benefit-text { font-size: 13px; color: #374151; line-height: 1.4; }
+.ins-benefit-text strong { display: block; color: #213C7D; font-size: 14px; }
+@media (max-width: 700px) {
+  .ins-benefits { flex-direction: column; }
+  .ins-benefit { border-right: none; border-bottom: 1px solid #F3F4F6; }
+  .ins-benefit:last-child { border-bottom: none; }
+}
+
+/* Formulario card */
+.ins-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(33,60,125,.10);
+  overflow: hidden;
+}
+.ins-card-head {
+  background: #213C7D;
+  padding: 20px 28px;
+  display: flex; align-items: center; gap: 12px;
+}
+.ins-card-head h2 {
+  font-size: 18px; font-weight: 800; color: #fff; margin: 0;
+}
+.ins-card-body { padding: 28px; }
+
+/* Grid 2 columnas */
+.ins-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+@media (max-width: 600px) { .ins-grid2 { grid-template-columns: 1fr; } }
+
+.ins-fgroup { display: flex; flex-direction: column; gap: 6px; }
+.ins-label {
+  font-size: 13px; font-weight: 600; color: #374151;
+}
+.ins-label .opt { font-weight: 400; color: #9CA3AF; font-size: 12px; }
+.ins-input, .ins-select {
+  height: 46px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-family: inherit;
+  font-size: 15px;
+  color: #1F2937;
+  outline: none;
+  transition: border-color .18s;
+  width: 100%;
+  background: #fff;
+}
+.ins-input:focus, .ins-select:focus { border-color: #213C7D; }
+.ins-input[readonly] {
+  background: #F9FAFB;
+  color: #6B7280;
+  cursor: default;
+}
+.ins-hint { font-size: 12px; color: #9CA3AF; }
+
+.ins-divider {
+  border: none; border-top: 1px solid #F3F4F6;
+  margin: 24px 0;
+}
+
+/* Error */
+.ins-error {
+  background: #FEE2E2; border: 1px solid #FECACA;
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 13px; color: #991B1B;
+  display: none; margin-bottom: 16px;
+}
+.ins-error.is-visible { display: block; }
+
+/* Botón */
+.ins-submit {
+  width: 100%; height: 54px;
+  border: none; border-radius: 12px;
+  background: #FDD22C; color: #213C7D;
+  font-family: inherit; font-size: 16px; font-weight: 900;
+  cursor: pointer;
+  transition: opacity .18s, transform .1s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-top: 24px;
+}
+.ins-submit:hover { opacity: .9; }
+.ins-submit:active { transform: scale(.98); }
+.ins-submit:disabled { opacity: .5; cursor: wait; }
+.ins-spinner {
+  width: 20px; height: 20px;
+  border: 2.5px solid rgba(33,60,125,.2);
+  border-top-color: #213C7D;
+  border-radius: 50%;
+  animation: ins-spin .7s linear infinite;
+  display: none;
+}
+.ins-submit.is-loading .ins-spinner { display: block; }
+.ins-submit.is-loading .ins-btn-text { display: none; }
+@keyframes ins-spin { to { transform: rotate(360deg); } }
+
+.ins-fine {
+  text-align: center; font-size: 12px; color: #9CA3AF;
+  margin-top: 14px; line-height: 1.6;
+}
+
+/* Info del usuario logueado */
+.ins-user-info {
+  display: flex; align-items: center; gap: 12px;
+  background: #EEF2FF; border: 1px solid #C7D2FE;
+  border-radius: 10px; padding: 12px 16px;
+  margin-bottom: 24px;
+}
+.ins-user-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #213C7D; color: #FDD22C;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 15px; flex-shrink: 0;
+}
+.ins-user-text { font-size: 13px; color: #374151; }
+.ins-user-text strong { display: block; color: #213C7D; }
+
+/* Nav auth pill */
+.cmg-nav-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: rgba(255,255,255,.85);
+  text-decoration: none; padding: 6px 14px;
+  border-radius: 20px; border: 1px solid rgba(255,255,255,.25);
+  transition: all .18s; white-space: nowrap;
+}
+.cmg-nav-pill:hover { background: rgba(255,255,255,.12); color: #fff; }
+</style>
+</head>
+<body data-lang="es" data-no-d365-banner="true">
+
+<!-- ═══ PROMO STRIP ═══ -->
+<div class="promo-strip">
+  <div class="container promo-row">
+    <span class="dot"></span>
+    <span class="promo-msgs">
+      <span class="promo-msg is-active" data-msg="hours">
+        <b>ABIERTO</b> <span id="promo-hours-es">6:00 AM – 10:00 PM</span> <span id="promo-day-es"></span> · City Mall S2 E214
+      </span>
+    </span>
+    <a href="https://wa.me/50431555162" class="promo-wa">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+      +504 3155-5162
+    </a>
+  </div>
+</div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="site-header">
+  <div class="container header-row">
+    <a class="brand-lockup" href="Inicio.html" aria-label="CMG">
+      <img class="brand-logo" src="assets/cmg-logo-white.png" alt="CMG">
+    </a>
+    <nav class="site-nav" aria-label="Principal">
+      <a href="Inicio.html">Inicio</a>
+      <a href="Doctor-365.html" class="is-active">Doctor 365</a>
+      <a href="Cotizador.html">Cotizador</a>
+    </nav>
+    <div class="header-actions">
+      <a id="cmg-nav-account" href="Auth.html?returnTo=Doctor-365-Inscripcion.html"
+         class="cmg-nav-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <span id="cmg-nav-name">Mi Cuenta</span>
+      </a>
+      <a href="Doctor-365.html" class="cta-pill cta-pill--yellow">DOCTOR 365</a>
+      <button class="nav-toggle" type="button" aria-label="Menú">
+        <svg class="icon-open" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg class="icon-close" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<main class="ins-page">
+
+  <!-- Hero -->
+  <div class="ins-hero">
+    <div class="ins-hero-inner">
+      <div class="ins-hero-eyebrow">Membresía anual · L900</div>
+      <h1>Inscripción <span>Doctor 365</span></h1>
+      <p>Completa el formulario y recibe tu contrato de membresía al instante.</p>
+    </div>
+  </div>
+
+  <div class="ins-wrap">
+
+    <!-- Resumen de beneficios -->
+    <div class="ins-benefits">
+      <div class="ins-benefit">
+        <div class="ins-benefit-icon">🩺</div>
+        <div class="ins-benefit-text">
+          <strong>Consulta gratis</strong>
+          1 por año incluida
+        </div>
+      </div>
+      <div class="ins-benefit">
+        <div class="ins-benefit-icon">💉</div>
+        <div class="ins-benefit-text">
+          <strong>Suero Complejo B</strong>
+          De regalo al inscribirte
+        </div>
+      </div>
+      <div class="ins-benefit">
+        <div class="ins-benefit-icon">🏷️</div>
+        <div class="ins-benefit-text">
+          <strong>15% descuento</strong>
+          En todos los servicios
+        </div>
+      </div>
+      <div class="ins-benefit">
+        <div class="ins-benefit-icon">🚶</div>
+        <div class="ins-benefit-text">
+          <strong>Sin citas</strong>
+          Walk-in siempre
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="ins-card">
+      <div class="ins-card-head">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FDD22C" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <h2>Formulario de Solicitud</h2>
+      </div>
+      <div class="ins-card-body">
+
+        <!-- Info usuario logueado -->
+        <div class="ins-user-info" id="ins-user-info" style="display:none">
+          <div class="ins-user-avatar" id="ins-avatar">?</div>
+          <div class="ins-user-text">
+            <strong id="ins-user-name">—</strong>
+            <span id="ins-user-email">—</span>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div class="ins-error" id="ins-error"></div>
+
+        <form id="ins-form" novalidate>
+
+          <!-- Nombres -->
+          <div class="ins-grid2">
+            <div class="ins-fgroup">
+              <label class="ins-label" for="f-nombre">Primer Nombre <span style="color:#F20F10">*</span></label>
+              <input type="text" id="f-nombre" class="ins-input" placeholder="Ej. Juan" autocomplete="given-name">
+            </div>
+            <div class="ins-fgroup">
+              <label class="ins-label" for="f-segundo-nombre">Segundo Nombre <span class="opt">(opcional)</span></label>
+              <input type="text" id="f-segundo-nombre" class="ins-input" placeholder="Ej. Carlos" autocomplete="additional-name">
+            </div>
+          </div>
+
+          <!-- Apellidos -->
+          <div class="ins-grid2" style="margin-top:18px">
+            <div class="ins-fgroup">
+              <label class="ins-label" for="f-apellido">Primer Apellido <span style="color:#F20F10">*</span></label>
+              <input type="text" id="f-apellido" class="ins-input" placeholder="Ej. Pérez" autocomplete="family-name">
+            </div>
+            <div class="ins-fgroup">
+              <label class="ins-label" for="f-segundo-apellido">Segundo Apellido <span class="opt">(opcional)</span></label>
+              <input type="text" id="f-segundo-apellido" class="ins-input" placeholder="Ej. García">
+            </div>
+          </div>
+
+          <hr class="ins-divider">
+
+          <!-- Contacto -->
+          <div class="ins-grid2">
+            <div class="ins-fgroup">
+              <label class="ins-label" for="f-telefono">Número Telefónico <span style="color:#F20F10">*</span></label>
+              <input type="tel" id="f-telefono" class="ins-input" placeholder="9999-9999" inputmode="numeric">
+            </div>
+            <div class="ins-fgroup">
+              <label class="ins-label" for="f-email">Correo Electrónico <span style="color:#F20F10">*</span></label>
+              <input type="email" id="f-email" class="ins-input" placeholder="tu@correo.com" autocomplete="email">
+            </div>
+          </div>
+
+          <hr class="ins-divider">
+
+          <!-- Nacimiento y edad -->
+          <div class="ins-grid2">
+            <div class="ins-fgroup">
+              <label class="ins-label" for="f-nacimiento">Fecha de Nacimiento <span style="color:#F20F10">*</span></label>
+              <input type="date" id="f-nacimiento" class="ins-input">
+              <span class="ins-hint">La edad se calcula automáticamente</span>
+            </div>
+            <div class="ins-fgroup">
+              <label class="ins-label" for="f-edad">Edad</label>
+              <input type="text" id="f-edad" class="ins-input" readonly placeholder="Se calcula sola">
+            </div>
+          </div>
+
+          <hr class="ins-divider">
+
+          <!-- Fecha solicitud (info) -->
+          <div class="ins-fgroup">
+            <label class="ins-label">Fecha de Solicitud</label>
+            <input type="text" id="f-fecha-sol" class="ins-input" readonly>
+            <span class="ins-hint">Generada automáticamente en el momento de envío</span>
+          </div>
+
+          <button type="submit" class="ins-submit" id="ins-submit-btn">
+            <div class="ins-spinner"></div>
+            <span class="ins-btn-text">🩺 Enviar Solicitud de Membresía</span>
+          </button>
+
+          <p class="ins-fine">
+            Al enviar, aceptas los términos de la membresía Doctor 365.<br>
+            La activación ocurre al realizar el pago de <strong>L900</strong> en caja CMG.
+          </p>
+
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <div class="footer-lockup"><img class="footer-logo" src="assets/cmg-logo-white.png" alt="CMG"></div>
+      <p class="footer-script">Cuidamos de tu salud</p>
+      <p class="footer-strap">Atención médica accesible y profesional · sin citas · todos los días del año.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Sitio</h5>
+      <a href="Inicio.html">Inicio</a>
+      <a href="Doctor-365.html">Doctor 365</a>
+      <a href="Cotizador.html">Cotizador</a>
+    </div>
+    <div class="footer-col footer-contact">
+      <h5>Contacto</h5>
+      <p>City Mall, Sótano 2 · Local E214<br>Tegucigalda, Honduras</p>
+      <p>+504 3155-5162</p>
+    </div>
+  </div>
+  <div class="footer-base">
+    <div class="container footer-base-row">
+      <span>© 2026 Clínica Médica General CMG · Tegucigalpa, Honduras</span>
+      <span class="footer-promise">Rápido · Profesional · Accesible</span>
+    </div>
+  </div>
+</footer>
+
+<a class="float-wa" href="https://wa.me/50431555162" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+</a>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+
+<script>
+(function () {
+  /* ── Helpers ── */
+  var DAYS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var d = new Date().getDay();
+  var hEl = document.getElementById('promo-hours-es'); if (hEl) hEl.textContent = d === 0 ? '8:00 AM – 7:00 PM' : '6:00 AM – 10:00 PM';
+  var dEl = document.getElementById('promo-day-es');   if (dEl) dEl.textContent = '(' + DAYS[d] + ')';
+
+  var header = document.querySelector('.site-header');
+  if (header) {
+    var onScroll = function () { header.classList.toggle('is-scrolled', window.scrollY > 8); };
+    window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  }
+  var navBtn = document.querySelector('.nav-toggle');
+  if (navBtn) navBtn.addEventListener('click', function () { document.body.classList.toggle('nav-open'); });
+
+  /* ── Pre-fill fecha solicitud ── */
+  var hoy = new Date();
+  var fSol = document.getElementById('f-fecha-sol');
+  if (fSol) fSol.value = hoy.toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' });
+
+  /* ── Calcular edad automáticamente ── */
+  var nacEl  = document.getElementById('f-nacimiento');
+  var edadEl = document.getElementById('f-edad');
+  function calcEdad(dob) {
+    if (!dob) return;
+    var hoy  = new Date();
+    var nac  = new Date(dob);
+    var edad = hoy.getFullYear() - nac.getFullYear();
+    var m    = hoy.getMonth() - nac.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--;
+    if (edadEl) edadEl.value = edad + ' años';
+  }
+  if (nacEl) nacEl.addEventListener('change', function () { calcEdad(nacEl.value); });
+
+  /* ── Error ── */
+  function showError(msg) {
+    var el = document.getElementById('ins-error');
+    el.textContent = msg; el.classList.add('is-visible');
+    el.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+  function clearError() {
+    var el = document.getElementById('ins-error');
+    el.textContent = ''; el.classList.remove('is-visible');
+  }
+
+  /* ── Auth state ── */
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) {
+      window.location.href = 'Auth.html?returnTo=Doctor-365-Inscripcion.html';
+      return;
+    }
+
+    /* Actualizar nav */
+    var navLink = document.getElementById('cmg-nav-account');
+    var navName = document.getElementById('cmg-nav-name');
+    if (navLink) navLink.href = 'Mis-Cotizaciones.html';
+    if (navName) navName.textContent = (user.displayName || user.email).split(' ')[0];
+
+    /* Info en formulario */
+    var uInfo  = document.getElementById('ins-user-info');
+    var uAv    = document.getElementById('ins-avatar');
+    var uName  = document.getElementById('ins-user-name');
+    var uEmail = document.getElementById('ins-user-email');
+    var fEmail = document.getElementById('f-email');
+    if (uInfo)  uInfo.style.display = '';
+    if (uAv)    uAv.textContent   = (user.displayName || user.email).charAt(0).toUpperCase();
+    if (uName)  uName.textContent  = user.displayName || '—';
+    if (uEmail) uEmail.textContent = user.email;
+    if (fEmail && !fEmail.value)   fEmail.value = user.email;
+
+    /* ¿Ya tiene solicitud D365? → redirigir a Felicitaciones */
+    cmgDb.collection('d365solicitudes')
+      .where('userId', '==', user.uid)
+      .limit(1)
+      .get()
+      .then(function (snap) {
+        if (!snap.empty) {
+          window.location.href = 'Felicitaciones.html';
+        }
+      });
+
+    /* ── Submit ── */
+    document.getElementById('ins-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      clearError();
+
+      var nombre          = document.getElementById('f-nombre').value.trim();
+      var segundoNombre   = document.getElementById('f-segundo-nombre').value.trim();
+      var apellido        = document.getElementById('f-apellido').value.trim();
+      var segundoApellido = document.getElementById('f-segundo-apellido').value.trim();
+      var telefono        = document.getElementById('f-telefono').value.trim();
+      var email           = document.getElementById('f-email').value.trim();
+      var nacimiento      = document.getElementById('f-nacimiento').value;
+      var edadTxt         = (edadEl && edadEl.value) ? parseInt(edadEl.value) : 0;
+
+      if (!nombre)    { showError('El primer nombre es obligatorio.'); return; }
+      if (!apellido)  { showError('El primer apellido es obligatorio.'); return; }
+      if (!telefono)  { showError('El número telefónico es obligatorio.'); return; }
+      if (!email)     { showError('El correo electrónico es obligatorio.'); return; }
+      if (!nacimiento){ showError('La fecha de nacimiento es obligatoria.'); return; }
+
+      /* Generar número de solicitud */
+      var now   = new Date();
+      var ymd   = now.getFullYear().toString() +
+                  String(now.getMonth()+1).padStart(2,'0') +
+                  String(now.getDate()).padStart(2,'0');
+      var rnd   = String(Math.floor(Math.random() * 9000) + 1000);
+      var numSol = 'D365-' + ymd + '-' + rnd;
+
+      var btn = document.getElementById('ins-submit-btn');
+      if (btn) { btn.classList.add('is-loading'); btn.disabled = true; }
+
+      var payload = {
+        userId         : user.uid,
+        userEmail      : user.email,
+        nombre         : nombre,
+        segundoNombre  : segundoNombre,
+        apellido       : apellido,
+        segundoApellido: segundoApellido,
+        telefono       : telefono,
+        email          : email,
+        fechaNacimiento: nacimiento,
+        edad           : edadTxt,
+        fechaSolicitud : firebase.firestore.FieldValue.serverTimestamp(),
+        numSolicitud   : numSol,
+        estado         : 'pendiente'
+      };
+
+      cmgDb.collection('d365solicitudes').add(payload)
+        .then(function () {
+          /* Guardar en localStorage para Felicitaciones.html */
+          localStorage.setItem('cmg-d365-member', JSON.stringify(Object.assign({}, payload, {
+            fechaSolicitud: new Date().toISOString()
+          })));
+          /* Limpiar caché del banner para forzar recarga */
+          localStorage.removeItem('cmg-d365-status');
+          window.location.href = 'Felicitaciones.html';
+        })
+        .catch(function (err) {
+          if (btn) { btn.classList.remove('is-loading'); btn.disabled = false; }
+          showError('Error al guardar: ' + err.message);
+        });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

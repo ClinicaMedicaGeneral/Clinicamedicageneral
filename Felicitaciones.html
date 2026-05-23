@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¡Felicitaciones! · Doctor 365 · CMG</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<link rel="stylesheet" href="styles.css">
+<style>
+/* ── Felicitaciones ──────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+.fel-page { background: #F4F6FB; min-height: 100vh; padding-bottom: 80px; }
+
+/* Hero celebración */
+.fel-hero {
+  background: linear-gradient(135deg, #213C7D 0%, #1a3068 100%);
+  padding: 60px 0 52px;
+  border-bottom: 4px solid #FDD22C;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.fel-hero::before {
+  content: '🎉';
+  position: absolute;
+  font-size: 300px;
+  opacity: .04;
+  top: -60px; right: -60px;
+  pointer-events: none;
+}
+.fel-hero-eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: #FDD22C; margin-bottom: 16px;
+}
+.fel-hero h1 {
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 900; color: #fff; margin: 0 0 8px;
+  line-height: 1.15;
+}
+.fel-hero h1 .y { color: #FDD22C; }
+.fel-hero-name {
+  font-size: clamp(18px, 3vw, 28px);
+  color: rgba(255,255,255,.8);
+  margin: 0 0 28px;
+}
+.fel-hero-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: #FDD22C; color: #213C7D;
+  border-radius: 50px; padding: 10px 24px;
+  font-size: 14px; font-weight: 900;
+  letter-spacing: .5px; text-transform: uppercase;
+}
+
+/* Contenido */
+.fel-content {
+  max-width: 860px;
+  margin: 40px auto 0;
+  padding: 0 24px;
+}
+
+/* Pasos */
+.fel-steps {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(33,60,125,.10);
+  padding: 32px;
+  margin-bottom: 28px;
+}
+.fel-steps h2 {
+  font-size: 20px; font-weight: 800; color: #213C7D;
+  margin: 0 0 24px; display: flex; align-items: center; gap: 10px;
+}
+.fel-step-list {
+  display: flex; flex-direction: column; gap: 18px;
+}
+.fel-step {
+  display: flex; align-items: flex-start; gap: 16px;
+}
+.fel-step-num {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: #213C7D; color: #FDD22C;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 16px; flex-shrink: 0;
+}
+.fel-step-text h4 { font-size: 16px; color: #1F2937; margin: 0 0 4px; }
+.fel-step-text p { font-size: 14px; color: #6B7280; margin: 0; line-height: 1.5; }
+
+/* Acciones */
+.fel-actions {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+.fel-btn {
+  flex: 1; min-width: 200px;
+  height: 54px; border: none; border-radius: 12px;
+  font-family: inherit; font-size: 15px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: center; gap: 10px;
+  transition: opacity .18s, transform .1s;
+  text-decoration: none;
+}
+.fel-btn:hover { opacity: .88; }
+.fel-btn:active { transform: scale(.98); }
+.fel-btn-print { background: #213C7D; color: #fff; }
+.fel-btn-wa    { background: #25D366; color: #fff; }
+.fel-btn-home  { background: #F4F6FB; color: #213C7D; border: 2px solid #E5E7EB; }
+
+/* ════════════════════════════
+   CONTRATO IMPRIMIBLE
+   ════════════════════════════ */
+.contract-section {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(33,60,125,.10);
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+.contract-section-head {
+  background: #213C7D;
+  padding: 20px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.contract-section-head h2 {
+  font-size: 18px; font-weight: 800; color: #fff; margin: 0;
+}
+.contract-section-body { padding: 32px; }
+
+/* El documento del contrato */
+#fel-contrato {
+  font-family: 'Times New Roman', serif;
+  font-size: 13px;
+  color: #1F2937;
+  line-height: 1.65;
+}
+.ctr-header {
+  text-align: center;
+  border-bottom: 2px solid #213C7D;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}
+.ctr-logo {
+  width: 56px; margin-bottom: 10px;
+}
+.ctr-company {
+  font-size: 14px; font-weight: 700; color: #213C7D;
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.ctr-sub {
+  font-size: 12px; color: #6B7280; margin-top: 2px;
+}
+.ctr-title {
+  font-size: 16px; font-weight: 700; color: #213C7D;
+  text-transform: uppercase; letter-spacing: 1px;
+  margin: 14px 0 4px;
+}
+.ctr-num {
+  font-size: 13px; color: #6B7280;
+}
+
+.ctr-section { margin: 20px 0; }
+.ctr-section-title {
+  font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: #213C7D;
+  border-bottom: 1px solid #E5E7EB;
+  padding-bottom: 6px; margin-bottom: 12px;
+}
+.ctr-row {
+  display: flex; gap: 8px; margin-bottom: 6px;
+  font-size: 13px;
+}
+.ctr-row-label {
+  font-weight: 700; min-width: 170px; color: #374151; flex-shrink: 0;
+}
+.ctr-row-val { color: #1F2937; }
+.ctr-row-val.blank {
+  border-bottom: 1px solid #9CA3AF;
+  min-width: 160px;
+  display: inline-block;
+}
+
+.ctr-benefits {
+  list-style: none; padding: 0; margin: 8px 0;
+}
+.ctr-benefits li {
+  padding: 5px 0; border-bottom: 1px solid #F3F4F6;
+  font-size: 13px; display: flex; gap: 8px;
+}
+.ctr-benefits li::before {
+  content: '✓'; color: #213C7D; font-weight: 700; flex-shrink: 0;
+}
+
+.ctr-terms {
+  font-size: 12px; color: #6B7280; line-height: 1.6; margin-top: 8px;
+}
+
+.ctr-signatures {
+  display: flex; gap: 40px; margin-top: 36px;
+}
+.ctr-sig {
+  flex: 1;
+  border-top: 1px solid #374151;
+  padding-top: 8px;
+  font-size: 12px; color: #374151;
+}
+.ctr-sig strong { display: block; margin-bottom: 18px; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+
+/* ── Nav auth pill ── */
+.cmg-nav-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: rgba(255,255,255,.85);
+  text-decoration: none; padding: 6px 14px;
+  border-radius: 20px; border: 1px solid rgba(255,255,255,.25);
+  transition: all .18s; white-space: nowrap;
+}
+.cmg-nav-pill:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+/* ════════════════════════════
+   ESTILOS DE IMPRESIÓN
+   ════════════════════════════ */
+@media print {
+  .promo-strip, .site-header, .site-footer, .float-wa,
+  .fel-hero, .fel-steps, .fel-actions, .contract-section-head,
+  .no-print { display: none !important; }
+
+  html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+  .fel-page { background: #fff !important; padding: 0 !important; }
+  .fel-content { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+  .contract-section {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+  .contract-section-body { padding: 20px !important; }
+  #fel-contrato { font-size: 12px !important; }
+  .ctr-signatures { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body data-lang="es" data-no-d365-banner="true">
+
+<!-- ═══ PROMO STRIP ═══ -->
+<div class="promo-strip no-print">
+  <div class="container promo-row">
+    <span class="dot"></span>
+    <span class="promo-msgs">
+      <span class="promo-msg is-active">
+        <b>ABIERTO</b> <span id="promo-hours-es">6:00 AM – 10:00 PM</span> · City Mall S2 E214
+      </span>
+    </span>
+    <a href="https://wa.me/50431555162" class="promo-wa">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+      +504 3155-5162
+    </a>
+  </div>
+</div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="site-header no-print">
+  <div class="container header-row">
+    <a class="brand-lockup" href="Inicio.html" aria-label="CMG">
+      <img class="brand-logo" src="assets/cmg-logo-white.png" alt="CMG">
+    </a>
+    <nav class="site-nav">
+      <a href="Inicio.html">Inicio</a>
+      <a href="Doctor-365.html">Doctor 365</a>
+      <a href="Cotizador.html">Cotizador</a>
+    </nav>
+    <div class="header-actions">
+      <a id="cmg-nav-account" href="Mis-Cotizaciones.html" class="cmg-nav-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <span id="cmg-nav-name">Mi Cuenta</span>
+      </a>
+      <a href="Doctor-365.html" class="cta-pill cta-pill--yellow">DOCTOR 365</a>
+      <button class="nav-toggle" type="button" aria-label="Menú">
+        <svg class="icon-open" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg class="icon-close" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<main class="fel-page">
+
+  <!-- Hero -->
+  <div class="fel-hero no-print">
+    <div class="container">
+      <div class="fel-hero-eyebrow">Clínica Médica General · Doctor 365</div>
+      <h1>¡<span class="y">Felicitaciones</span>,<br><span id="fel-nombre-hero">nuevo miembro</span>!</h1>
+      <p class="fel-hero-name">Ya formas parte de la familia Doctor 365</p>
+      <div class="fel-hero-badge">
+        🩺 Membresía enviada · Solicitud N° <span id="fel-num-hero">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="fel-content">
+
+    <!-- Próximos pasos -->
+    <div class="fel-steps no-print">
+      <h2>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#213C7D" stroke-width="2.5" stroke-linecap="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        ¿Qué sigue ahora?
+      </h2>
+      <div class="fel-step-list">
+        <div class="fel-step">
+          <div class="fel-step-num">1</div>
+          <div class="fel-step-text">
+            <h4>Imprime o descarga tu contrato</h4>
+            <p>Haz clic en "Imprimir Contrato" aquí abajo. Puedes firmarlo en casa o hacerlo directamente en caja.</p>
+          </div>
+        </div>
+        <div class="fel-step">
+          <div class="fel-step-num">2</div>
+          <div class="fel-step-text">
+            <h4>Preséntate en Caja CMG</h4>
+            <p>Visítanos en City Mall, Sótano 2, Local E214 — sin cita. Te atendemos todos los días del año.</p>
+          </div>
+        </div>
+        <div class="fel-step">
+          <div class="fel-step-num">3</div>
+          <div class="fel-step-text">
+            <h4>Realiza el pago de <strong>L900</strong></h4>
+            <p>Pago único anual. En ese momento activamos tu membresía y ya puedes usar todos los beneficios.</p>
+          </div>
+        </div>
+        <div class="fel-step">
+          <div class="fel-step-num">4</div>
+          <div class="fel-step-text">
+            <h4>¡Disfruta tus beneficios desde el primer día!</h4>
+            <p>Consulta gratis, suero Complejo B de regalo, 15% en todos los servicios y atención preferencial.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="fel-actions no-print">
+      <button class="fel-btn fel-btn-print" onclick="window.print()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Imprimir Contrato
+      </button>
+      <a id="fel-wa-btn" href="https://wa.me/50431555162" target="_blank" class="fel-btn fel-btn-wa">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+        Avisar por WhatsApp
+      </a>
+      <a href="Inicio.html" class="fel-btn fel-btn-home">
+        ← Volver al sitio
+      </a>
+    </div>
+
+    <!-- ════ CONTRATO ════ -->
+    <div class="contract-section">
+      <div class="contract-section-head no-print">
+        <h2>📄 Contrato de Membresía</h2>
+        <span style="font-size:13px;color:rgba(255,255,255,.6);">Imprimible · Firmable en casa o en caja</span>
+      </div>
+      <div class="contract-section-body">
+
+        <div id="fel-contrato">
+
+          <!-- Encabezado empresa -->
+          <div class="ctr-header">
+            <img class="ctr-logo" src="assets/isotipo-color.png" alt="CMG">
+            <div class="ctr-company">Clínica Médica General S. de R.L.</div>
+            <div class="ctr-sub">Boulevard Económica Europea · City Mall LC-214 · Tegucigalpa, Honduras</div>
+            <div class="ctr-sub">Tel. +504 3155-5162 · clinicamedicacmg@gmail.com</div>
+            <div class="ctr-title">Contrato de Membresía · Doctor 365</div>
+            <div class="ctr-num">N° de Solicitud: <strong id="ctr-num-sol">—</strong> &nbsp;·&nbsp; Fecha: <strong id="ctr-fecha">—</strong></div>
+          </div>
+
+          <!-- Datos del miembro -->
+          <div class="ctr-section">
+            <div class="ctr-section-title">Datos del Solicitante</div>
+            <div class="ctr-row">
+              <span class="ctr-row-label">Nombre completo:</span>
+              <span class="ctr-row-val" id="ctr-nombre-completo">—</span>
+            </div>
+            <div class="ctr-row">
+              <span class="ctr-row-label">Fecha de nacimiento:</span>
+              <span class="ctr-row-val" id="ctr-nacimiento">—</span>
+            </div>
+            <div class="ctr-row">
+              <span class="ctr-row-label">Edad:</span>
+              <span class="ctr-row-val" id="ctr-edad">—</span>
+            </div>
+            <div class="ctr-row">
+              <span class="ctr-row-label">Número telefónico:</span>
+              <span class="ctr-row-val" id="ctr-telefono">—</span>
+            </div>
+            <div class="ctr-row">
+              <span class="ctr-row-label">Correo electrónico:</span>
+              <span class="ctr-row-val" id="ctr-email">—</span>
+            </div>
+          </div>
+
+          <!-- Términos -->
+          <div class="ctr-section">
+            <div class="ctr-section-title">Términos de la Membresía</div>
+            <p>El presente contrato establece los derechos y obligaciones entre <strong>Clínica Médica General S. de R.L.</strong> (en adelante "CMG") y el solicitante identificado arriba (en adelante "Miembro"), en relación con la membresía anual <em>Doctor 365</em>.</p>
+          </div>
+
+          <!-- Beneficios -->
+          <div class="ctr-section">
+            <div class="ctr-section-title">Derechos del Miembro</div>
+            <ul class="ctr-benefits">
+              <li>Una (1) consulta médica general gratuita por año de membresía</li>
+              <li>Una (1) sueroterapia de Complejo B de regalo por año</li>
+              <li>15% de descuento en todos los servicios de la Clínica durante la vigencia</li>
+              <li>Atención preferencial sin necesidad de cita previa (walk-in)</li>
+              <li>Acceso a promociones y beneficios exclusivos para miembros</li>
+            </ul>
+          </div>
+
+          <!-- Condiciones -->
+          <div class="ctr-section">
+            <div class="ctr-section-title">Condiciones y Vigencia</div>
+            <div class="ctr-terms">
+              <strong>Pago:</strong> La membresía tiene un costo único anual de <strong>L900.00 (Novecientos Lempiras exactos)</strong>, pagadero en caja CMG al momento de la activación.<br>
+              <strong>Vigencia:</strong> La membresía inicia en la fecha de pago en caja y tiene una duración de 365 (trescientos sesenta y cinco) días calendario.<br>
+              <strong>Intransferibilidad:</strong> La membresía es personal e intransferible. No puede cederse a terceros.<br>
+              <strong>Cancelación:</strong> CMG se reserva el derecho de cancelar la membresía en caso de incumplimiento de los presentes términos.<br>
+              <strong>Modificaciones:</strong> CMG podrá modificar los beneficios del plan con un aviso previo de 30 días.<br>
+              <strong>Renovación:</strong> Al vencimiento, la membresía podrá renovarse por un nuevo período anual bajo las tarifas vigentes.
+            </div>
+          </div>
+
+          <!-- Firmas -->
+          <div class="ctr-signatures">
+            <div class="ctr-sig">
+              <strong>Firma del Miembro</strong>
+              Nombre: <span class="ctr-row-val blank" id="ctr-firma-nombre">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br><br>
+              Fecha: ______ / ______ / ________<br><br>
+              <div style="border-top:1px solid #374151;margin-top:40px;padding-top:6px;font-size:11px;color:#6B7280;">Firma</div>
+            </div>
+            <div class="ctr-sig">
+              <strong>Representante CMG</strong>
+              Nombre: <span class="ctr-row-val blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br><br>
+              Fecha: ______ / ______ / ________<br><br>
+              <div style="border-top:1px solid #374151;margin-top:40px;padding-top:6px;font-size:11px;color:#6B7280;">Sello y Firma Autorizada</div>
+            </div>
+          </div>
+
+          <p style="margin-top:24px;font-size:11px;color:#9CA3AF;text-align:center;">
+            Clínica Médica General S. de R.L. · City Mall, Sótano 2, Local E214 · Tegucigalpa, Honduras · © 2026
+          </p>
+
+        </div><!-- /fel-contrato -->
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- Footer -->
+<footer class="site-footer no-print">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <div class="footer-lockup"><img class="footer-logo" src="assets/cmg-logo-white.png" alt="CMG"></div>
+      <p class="footer-script">Cuidamos de tu salud</p>
+    </div>
+    <div class="footer-col">
+      <h5>Sitio</h5>
+      <a href="Inicio.html">Inicio</a>
+      <a href="Doctor-365.html">Doctor 365</a>
+      <a href="Cotizador.html">Cotizador</a>
+    </div>
+    <div class="footer-col footer-contact">
+      <h5>Contacto</h5>
+      <p>City Mall, Sótano 2 · Local E214<br>Tegucigalpa, Honduras</p>
+      <p>+504 3155-5162</p>
+    </div>
+  </div>
+  <div class="footer-base">
+    <div class="container footer-base-row">
+      <span>© 2026 Clínica Médica General CMG</span>
+      <span class="footer-promise">Rápido · Profesional · Accesible</span>
+    </div>
+  </div>
+</footer>
+
+<a class="float-wa no-print" href="https://wa.me/50431555162" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+</a>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+
+<script>
+(function () {
+  /* ── Básico ── */
+  var header = document.querySelector('.site-header');
+  if (header) {
+    var onScroll = function () { header.classList.toggle('is-scrolled', window.scrollY > 8); };
+    window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  }
+  var navBtn = document.querySelector('.nav-toggle');
+  if (navBtn) navBtn.addEventListener('click', function () { document.body.classList.toggle('nav-open'); });
+
+  /* ── Helpers ── */
+  function $id(id) { return document.getElementById(id); }
+  function setText(id, val) { var el = $id(id); if (el) el.textContent = val || '—'; }
+
+  function fmtFecha(val) {
+    if (!val) return '—';
+    if (val.toDate) val = val.toDate();
+    var d = new Date(val);
+    if (isNaN(d)) return String(val);
+    return d.toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' });
+  }
+
+  function fmtNacimiento(dob) {
+    if (!dob) return '—';
+    var d = new Date(dob + 'T00:00:00');
+    return d.toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' });
+  }
+
+  /* ── Rellenar el contrato ── */
+  function fillContract(data) {
+    var nombreCompleto = [
+      data.nombre, data.segundoNombre,
+      data.apellido, data.segundoApellido
+    ].filter(Boolean).join(' ');
+
+    /* Hero */
+    setText('fel-nombre-hero', data.nombre || 'nuevo miembro');
+    setText('fel-num-hero', data.numSolicitud);
+
+    /* Contrato */
+    setText('ctr-num-sol', data.numSolicitud);
+    setText('ctr-fecha', fmtFecha(data.fechaSolicitud));
+    setText('ctr-nombre-completo', nombreCompleto);
+    setText('ctr-nacimiento', fmtNacimiento(data.fechaNacimiento));
+    setText('ctr-edad', data.edad ? data.edad + ' años' : '—');
+    setText('ctr-telefono', data.telefono);
+    setText('ctr-email', data.email);
+    setText('ctr-firma-nombre', nombreCompleto);
+
+    /* WhatsApp link */
+    var waMsg = '¡Hola CMG! Me inscribí a Doctor 365 en línea.\n' +
+      'N° Solicitud: ' + data.numSolicitud + '\n' +
+      'Nombre: ' + nombreCompleto + '\n' +
+      'Teléfono: ' + (data.telefono || '—') + '\n' +
+      '¿Cuándo puedo ir a pagar y activar mi membresía?';
+    var waBtn = $id('fel-wa-btn');
+    if (waBtn) waBtn.href = 'https://wa.me/50431555162?text=' + encodeURIComponent(waMsg);
+  }
+
+  /* ── Auth guard + cargar datos ── */
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) {
+      window.location.href = 'Auth.html?returnTo=Felicitaciones.html';
+      return;
+    }
+
+    /* Actualizar nav */
+    var navLink = $id('cmg-nav-account');
+    var navName = $id('cmg-nav-name');
+    if (navLink) navLink.href = 'Mis-Cotizaciones.html';
+    if (navName) navName.textContent = (user.displayName || user.email).split(' ')[0];
+
+    /* 1. Intentar desde localStorage (recién inscrito) */
+    try {
+      var raw = localStorage.getItem('cmg-d365-member');
+      if (raw) {
+        fillContract(JSON.parse(raw));
+        localStorage.removeItem('cmg-d365-member');
+        return;
+      }
+    } catch (e) { /* continuar con Firestore */ }
+
+    /* 2. Cargar desde Firestore */
+    cmgDb.collection('d365solicitudes')
+      .where('userId', '==', user.uid)
+      .limit(1)
+      .get()
+      .then(function (snap) {
+        if (snap.empty) {
+          /* No tiene solicitud → redirigir al formulario */
+          window.location.href = 'Doctor-365-Inscripcion.html';
+          return;
+        }
+        fillContract(snap.docs[0].data());
+      })
+      .catch(function (err) {
+        console.error('[CMG] Error Firestore:', err);
+      });
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -594,6 +594,10 @@
               <input class="fel-dep-input" type="text" id="dep-nombre" placeholder="Nombre y apellidos">
             </div>
             <div>
+              <label for="dep-identidad">Número de identidad</label>
+              <input class="fel-dep-input" type="text" id="dep-identidad" placeholder="0801-1990-01234" maxlength="15" inputmode="numeric">
+            </div>
+            <div>
               <label for="dep-dob">Fecha de nacimiento</label>
               <input class="fel-dep-input" type="date" id="dep-dob" oninput="calcDepAge()">
             </div>
@@ -601,7 +605,7 @@
               <label for="dep-edad">Edad</label>
               <input class="fel-dep-input" type="text" id="dep-edad" readonly placeholder="Auto-calculada">
             </div>
-            <div class="fel-dep-form-full">
+            <div>
               <label>Menor de edad</label>
               <input class="fel-dep-input" type="text" id="dep-menor" readonly placeholder="Auto">
             </div>
@@ -937,9 +941,37 @@
     var btn  = $id('fel-dep-add-btn');
     if (form) form.style.display = '';
     if (btn)  btn.style.display  = 'none';
-    ['dep-tipo','dep-nombre','dep-dob','dep-edad','dep-menor'].forEach(function(id){
+    ['dep-tipo','dep-nombre','dep-identidad','dep-dob','dep-edad','dep-menor'].forEach(function(id){
       var el = $id(id); if (el) el.value = '';
     });
+    updateTipoSelect();
+  }
+
+  /* Filtra las opciones del select según los dependientes ya registrados:
+     - Solo 1 cónyuge permitido (deshabilita la opción si ya existe)
+     - Solo 2 hijos/hijas permitidos en total (deshabilita ambas si ya hay 2) */
+  function updateTipoSelect() {
+    var sel = $id('dep-tipo');
+    if (!sel) return;
+    var conyugueCount = _deps.filter(function(d){ return d.tipo === 'conyugue'; }).length;
+    var hijosCount    = _deps.filter(function(d){ return d.tipo === 'hijo' || d.tipo === 'hija'; }).length;
+    for (var i = 0; i < sel.options.length; i++) {
+      var opt = sel.options[i];
+      if (opt.value === 'conyugue') {
+        opt.disabled    = conyugueCount >= 1;
+        opt.textContent = 'Cónyuge (Esposa/o)' + (conyugueCount >= 1 ? ' — ya registrado' : '');
+      } else if (opt.value === 'hijo') {
+        opt.disabled    = hijosCount >= 2;
+        opt.textContent = 'Hijo' + (hijosCount >= 2 ? ' — límite alcanzado' : '');
+      } else if (opt.value === 'hija') {
+        opt.disabled    = hijosCount >= 2;
+        opt.textContent = 'Hija' + (hijosCount >= 2 ? ' — límite alcanzado' : '');
+      }
+    }
+    /* Si la opción actualmente seleccionada quedó deshabilitada, limpiar */
+    if (sel.value && sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].disabled) {
+      sel.value = '';
+    }
   }
 
   function hideDepForm() {
@@ -964,18 +996,28 @@
   }
 
   function submitDependent() {
-    var tipo   = ($id('dep-tipo')   || {}).value || '';
-    var nombre = (($id('dep-nombre') || {}).value || '').trim();
-    var dob    = ($id('dep-dob')    || {}).value || '';
-    var edadTx = ($id('dep-edad')   || {}).value || '';
-    var menorTx= ($id('dep-menor')  || {}).value || '';
+    var tipo      = ($id('dep-tipo')       || {}).value || '';
+    var nombre    = (($id('dep-nombre')     || {}).value || '').trim();
+    var identidad = (($id('dep-identidad')  || {}).value || '').trim();
+    var dob       = ($id('dep-dob')        || {}).value || '';
+    var edadTx    = ($id('dep-edad')       || {}).value || '';
+    var menorTx   = ($id('dep-menor')      || {}).value || '';
 
-    if (!tipo || !nombre || !dob) {
-      alert('Por favor completa todos los campos.');
+    if (!tipo || !nombre || !identidad || !dob) {
+      alert('Por favor completa todos los campos, incluyendo el número de identidad.');
       return;
     }
-    if (tipo === 'conyugue' && _deps.some(function(d){ return d.tipo === 'conyugue'; })) {
+
+    /* Validar reglas de tipo */
+    var conyugueCount = _deps.filter(function(d){ return d.tipo === 'conyugue'; }).length;
+    var hijosCount    = _deps.filter(function(d){ return d.tipo === 'hijo' || d.tipo === 'hija'; }).length;
+
+    if (tipo === 'conyugue' && conyugueCount >= 1) {
       alert('Ya tienes un cónyuge registrado. Solo se permite uno.');
+      return;
+    }
+    if ((tipo === 'hijo' || tipo === 'hija') && hijosCount >= 2) {
+      alert('Ya tienes 2 hijos/hijas registrados. El límite es 2.');
       return;
     }
     if (_deps.length >= 3) {
@@ -988,6 +1030,7 @@
     var payload = {
       tipo           : tipo,
       nombreCompleto : nombre,
+      identidad      : identidad,
       fechaNacimiento: dob,
       edad           : isNaN(edad) ? null : edad,
       esMenor        : esMenor,

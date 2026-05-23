@@ -615,6 +615,21 @@
   .cs-preview-frame { max-height: none; }
   #cs-pdf-doc { width: 100%; min-width: 0; padding: 20px; }
 }
+@media (max-width: 600px) {
+  /* Editor form: stack 2-col grids to single column */
+  .cs-grid2 { grid-template-columns: 1fr; }
+  /* PDF preview: reduce padding so it's not eating into the narrow viewport */
+  .cs-preview-frame { padding: 10px; }
+  /* PDF header: stack brand info and meta box vertically instead of side-by-side */
+  .pdf-top { flex-direction: column; gap: 10px; }
+  .pdf-meta { width: 100%; }
+  /* PDF client section: stack client-left and client-right vertically */
+  .pdf-client { flex-direction: column; gap: 6px; }
+  .pdf-client-r { width: 100%; }
+  /* PDF totals: stretch box to full width */
+  .pdf-totals-wrap { justify-content: stretch; }
+  .pdf-totals-box { width: 100%; }
+}
 
 /* ============================================================
    MODO IMPRESIÓN — oculta todo excepto el documento PDF

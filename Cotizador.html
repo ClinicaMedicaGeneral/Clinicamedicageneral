@@ -417,11 +417,18 @@
     .coti-categories, .coti-cart { border-radius: 16px; }
     /* Script decorator: same margin-left fix applied to Inicio/.hero-script etc. */
     .coti-hero .script { margin-left: 0; }
+    /* overflow:clip (used at desktop) is not supported in older Android Chrome;
+       override to hidden on mobile so the categories box reliably clips its children */
+    .coti-categories { overflow: hidden; }
     /* Reduce cart padding on narrow screens to give content more breathing room */
     .coti-cart { padding: 20px 16px; }
     /* Adjust the negative-margin scroll track to match the new cart padding     */
     .coti-cart-items { margin: 0 -16px; padding: 0 16px; }
     .coti-cart-grand-amt { font-size: 36px; }
+    /* Scale item price down so it doesn't squeeze the name column on 375 px */
+    .coti-item-price { font-size: 18px; min-width: 68px; }
+    /* Reduce category header gap to give the title more horizontal room      */
+    .coti-cat-h { gap: 12px; }
   }
 </style>
 </head>

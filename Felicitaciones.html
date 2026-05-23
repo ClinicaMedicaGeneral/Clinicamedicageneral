@@ -949,23 +949,22 @@
 
   /* Filtra las opciones del select según los dependientes ya registrados:
      - Solo 1 cónyuge permitido (deshabilita la opción si ya existe)
-     - Solo 2 hijos/hijas permitidos en total (deshabilita ambas si ya hay 2) */
+     - Hijos/hijas: sin límite propio, solo aplica el límite total de 3 */
   function updateTipoSelect() {
     var sel = $id('dep-tipo');
     if (!sel) return;
     var conyugueCount = _deps.filter(function(d){ return d.tipo === 'conyugue'; }).length;
-    var hijosCount    = _deps.filter(function(d){ return d.tipo === 'hijo' || d.tipo === 'hija'; }).length;
     for (var i = 0; i < sel.options.length; i++) {
       var opt = sel.options[i];
       if (opt.value === 'conyugue') {
         opt.disabled    = conyugueCount >= 1;
         opt.textContent = 'Cónyuge (Esposa/o)' + (conyugueCount >= 1 ? ' — ya registrado' : '');
       } else if (opt.value === 'hijo') {
-        opt.disabled    = hijosCount >= 2;
-        opt.textContent = 'Hijo' + (hijosCount >= 2 ? ' — límite alcanzado' : '');
+        opt.disabled    = false;
+        opt.textContent = 'Hijo';
       } else if (opt.value === 'hija') {
-        opt.disabled    = hijosCount >= 2;
-        opt.textContent = 'Hija' + (hijosCount >= 2 ? ' — límite alcanzado' : '');
+        opt.disabled    = false;
+        opt.textContent = 'Hija';
       }
     }
     /* Si la opción actualmente seleccionada quedó deshabilitada, limpiar */
@@ -1008,16 +1007,13 @@
       return;
     }
 
-    /* Validar reglas de tipo */
+    /* Validar reglas de tipo:
+       - Máximo 1 cónyuge
+       - Hijos/hijas sin límite propio; solo aplica el total de 3 */
     var conyugueCount = _deps.filter(function(d){ return d.tipo === 'conyugue'; }).length;
-    var hijosCount    = _deps.filter(function(d){ return d.tipo === 'hijo' || d.tipo === 'hija'; }).length;
 
     if (tipo === 'conyugue' && conyugueCount >= 1) {
       alert('Ya tienes un cónyuge registrado. Solo se permite uno.');
-      return;
-    }
-    if ((tipo === 'hijo' || tipo === 'hija') && hijosCount >= 2) {
-      alert('Ya tienes 2 hijos/hijas registrados. El límite es 2.');
       return;
     }
     if (_deps.length >= 3) {

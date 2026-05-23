@@ -67,7 +67,7 @@
 /* ── Stats ── */
 .adm-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -158,6 +158,7 @@
   font-weight: 900; font-size: 14px; flex-shrink: 0;
 }
 .adm-avatar.is-active { background: #16a34a; color: #fff; }
+.adm-avatar.is-susp   { background: #F97316; color: #fff; }
 .adm-member-name { font-weight: 700; color: #1F2937; font-size: 14px; }
 .adm-member-num  { font-size: 11px; color: #9CA3AF; margin-top: 1px; }
 
@@ -170,6 +171,7 @@
 }
 .adm-badge--pend   { background: #FEF3C7; color: #92400E; }
 .adm-badge--active { background: #DCFCE7; color: #166534; }
+.adm-badge--susp   { background: #FFEDD5; color: #9A3412; }
 
 /* Fechas de membresía */
 .adm-dates { font-size: 12px; color: #6B7280; line-height: 1.6; }
@@ -223,6 +225,9 @@
 .adm-toast.is-visible { transform: translateY(0); opacity: 1; }
 
 /* Responsive */
+@media (max-width: 1100px) {
+  .adm-stats { grid-template-columns: 1fr 1fr; }
+}
 @media (max-width: 900px) {
   .adm-stats { grid-template-columns: 1fr 1fr; }
   .adm-table-wrap { overflow-x: auto; }
@@ -273,6 +278,13 @@
         </div>
       </div>
       <div class="adm-stat">
+        <div class="adm-stat-icon" style="background:#FFEDD5;">⚠️</div>
+        <div>
+          <div class="adm-stat-val" id="adm-susp" style="color:#C2410C;">—</div>
+          <div class="adm-stat-label">En Revisión</div>
+        </div>
+      </div>
+      <div class="adm-stat">
         <div class="adm-stat-icon adm-stat-icon--active">✅</div>
         <div>
           <div class="adm-stat-val" id="adm-active">—</div>
@@ -287,6 +299,7 @@
         placeholder="Buscar por nombre, correo o teléfono...">
       <select class="adm-filter" id="adm-filter">
         <option value="all">Todos los estados</option>
+        <option value="suspendida">En Revisión</option>
         <option value="pendiente">Pendientes</option>
         <option value="activo">Activos</option>
       </select>
@@ -386,14 +399,15 @@
         snap.forEach(function (doc) {
           allMembers.push(Object.assign({ _id: doc.id }, doc.data()));
         });
-        /* Ordenar: pendientes primero, luego activos; más recientes arriba */
+        /* Ordenar: suspendidas primero (urgente), luego pendientes, luego activos */
+        var ORDER = { suspendida: 0, pendiente: 1, activo: 2 };
         allMembers.sort(function (a, b) {
-          if (a.estado === b.estado) {
-            var ta = a.fechaSolicitud && a.fechaSolicitud.toMillis ? a.fechaSolicitud.toMillis() : 0;
-            var tb = b.fechaSolicitud && b.fechaSolicitud.toMillis ? b.fechaSolicitud.toMillis() : 0;
-            return tb - ta;
-          }
-          return a.estado === 'pendiente' ? -1 : 1;
+          var oa = ORDER[a.estado] !== undefined ? ORDER[a.estado] : 1;
+          var ob = ORDER[b.estado] !== undefined ? ORDER[b.estado] : 1;
+          if (oa !== ob) return oa - ob;
+          var ta = a.fechaSolicitud && a.fechaSolicitud.toMillis ? a.fechaSolicitud.toMillis() : 0;
+          var tb = b.fechaSolicitud && b.fechaSolicitud.toMillis ? b.fechaSolicitud.toMillis() : 0;
+          return tb - ta;
         });
         updateStats();
         renderTable(allMembers);
@@ -409,9 +423,11 @@
   function updateStats() {
     var total  = allMembers.length;
     var active = allMembers.filter(function(m){ return m.estado === 'activo'; }).length;
-    var pend   = total - active;
+    var susp   = allMembers.filter(function(m){ return m.estado === 'suspendida'; }).length;
+    var pend   = allMembers.filter(function(m){ return m.estado === 'pendiente'; }).length;
     document.getElementById('adm-total').textContent  = total;
     document.getElementById('adm-pend').textContent   = pend;
+    document.getElementById('adm-susp').textContent   = susp;
     document.getElementById('adm-active').textContent = active;
   }
 
@@ -432,22 +448,38 @@
       var nombreCompleto = [m.nombre, m.segundoNombre, m.apellido, m.segundoApellido].filter(Boolean).join(' ');
       var initl    = (m.nombre || '?').charAt(0).toUpperCase();
       var isActive = m.estado === 'activo';
+      var isSusp   = m.estado === 'suspendida';
 
-      var badgeHtml = isActive
-        ? '<span class="adm-badge adm-badge--active">✅ Activo</span>'
-        : '<span class="adm-badge adm-badge--pend">⏳ Pendiente</span>';
+      var badgeHtml;
+      if (isActive) {
+        badgeHtml = '<span class="adm-badge adm-badge--active">✅ Activo</span>';
+      } else if (isSusp) {
+        badgeHtml = '<span class="adm-badge adm-badge--susp">⚠️ En Revisión</span>';
+      } else {
+        badgeHtml = '<span class="adm-badge adm-badge--pend">⏳ Pendiente</span>';
+      }
 
-      var datesHtml = isActive
-        ? '<div class="adm-dates">' +
-            '<strong>Desde:</strong> ' + fmtDate(m.fechaActivacion) + '<br>' +
-            '<strong>Hasta:</strong> ' + fmtDate(m.fechaVencimiento) +
-          '</div>'
-        : '<span style="color:#9CA3AF;font-size:12px;">Sin activar</span>';
+      var datesHtml;
+      if (isActive) {
+        datesHtml = '<div class="adm-dates">' +
+          '<strong>Desde:</strong> ' + fmtDate(m.fechaActivacion) + '<br>' +
+          '<strong>Hasta:</strong> ' + fmtDate(m.fechaVencimiento) +
+          '</div>';
+      } else if (isSusp) {
+        datesHtml = '<div class="adm-dates" style="color:#9A3412;">' +
+          '<strong style="color:#C2410C;">Período:</strong> ' + fmtDate(m.fechaActivacion) + '<br>' +
+          '<strong style="color:#C2410C;">Vence:</strong> ' + fmtDate(m.fechaVencimiento) +
+          '</div>';
+      } else {
+        datesHtml = '<span style="color:#9CA3AF;font-size:12px;">Sin activar</span>';
+      }
+
+      var avatarClass = 'adm-avatar' + (isActive ? ' is-active' : isSusp ? ' is-susp' : '');
 
       return '<tr data-id="' + esc(m._id) + '" data-estado="' + esc(m.estado) + '">' +
         '<td>' +
           '<div class="adm-member-cell">' +
-            '<div class="adm-avatar' + (isActive ? ' is-active' : '') + '">' + esc(initl) + '</div>' +
+            '<div class="' + avatarClass + '">' + esc(initl) + '</div>' +
             '<div>' +
               '<div class="adm-member-name">' + esc(nombreCompleto) + '</div>' +
               '<div class="adm-member-num">' + esc(m.numSolicitud || '—') + '</div>' +
@@ -466,8 +498,8 @@
         '<td>' + badgeHtml + '</td>' +
         '<td>' + datesHtml + '</td>' +
         '<td style="text-align:center">' +
-          '<label class="adm-switch" title="' + (isActive ? 'Clic para desactivar' : 'Clic para activar') + '">' +
-            '<input type="checkbox" class="adm-toggle" data-id="' + esc(m._id) + '" data-nombre="' + esc(nombreCompleto) + '" ' + (isActive ? 'checked' : '') + '>' +
+          '<label class="adm-switch" title="' + (isActive ? 'Clic para suspender' : isSusp ? 'Clic para reactivar' : 'Clic para activar') + '">' +
+            '<input type="checkbox" class="adm-toggle" data-id="' + esc(m._id) + '" data-nombre="' + esc(nombreCompleto) + '" data-estado="' + esc(m.estado) + '" ' + (isActive ? 'checked' : '') + '>' +
             '<span class="adm-slider"></span>' +
           '</label>' +
         '</td>' +
@@ -482,18 +514,24 @@
     });
   }
 
-  /* ── Activar / Desactivar ── */
+  /* ── Activar / Suspender / Desactivar ── */
   function handleToggle(chk) {
-    var docId   = chk.dataset.id;
-    var nombre  = chk.dataset.nombre;
-    var turning = chk.checked; /* true = activar, false = desactivar */
+    var docId        = chk.dataset.id;
+    var nombre       = chk.dataset.nombre;
+    var estadoActual = chk.dataset.estado; /* 'activo' | 'suspendida' | 'pendiente' */
+    var turning      = chk.checked;        /* true = activar, false = apagar */
+
+    /* Buscar datos actuales del miembro */
+    var member = allMembers.find(function(m) { return m._id === docId; });
 
     var msg = turning
-      ? '¿Activar membresía para ' + nombre + '?'
-      : '¿Desactivar membresía de ' + nombre + '?';
+      ? '¿Activar membresía de ' + nombre + '?'
+      : estadoActual === 'activo'
+        ? '¿Suspender membresía de ' + nombre + '? (si está dentro del plazo quedará "En Revisión")'
+        : '¿Desactivar membresía de ' + nombre + '?';
 
     if (!confirm(msg)) {
-      chk.checked = !turning; /* revertir visualmente */
+      chk.checked = !turning;
       return;
     }
 
@@ -501,8 +539,9 @@
 
     var update;
     if (turning) {
-      var ahora     = new Date();
-      var vence     = new Date(ahora);
+      /* Activar — siempre reinicia el plazo desde hoy */
+      var ahora = new Date();
+      var vence = new Date(ahora);
       vence.setFullYear(vence.getFullYear() + 1);
       update = {
         estado          : 'activo',
@@ -510,23 +549,40 @@
         fechaVencimiento: firebase.firestore.Timestamp.fromDate(vence)
       };
     } else {
-      update = {
-        estado          : 'pendiente',
-        fechaActivacion : null,
-        fechaVencimiento: null
-      };
+      /* Apagar — ¿sigue dentro del plazo original? */
+      var dentroDePlazo = false;
+      if (member && member.fechaVencimiento) {
+        var venceDate = member.fechaVencimiento.toDate
+          ? member.fechaVencimiento.toDate()
+          : new Date(member.fechaVencimiento);
+        dentroDePlazo = venceDate > new Date();
+      }
+
+      if (dentroDePlazo) {
+        /* Dentro del plazo → suspender (conservar fechas) */
+        update = { estado: 'suspendida' };
+      } else {
+        /* Fuera del plazo o sin fechas → volver a pendiente */
+        update = {
+          estado          : 'pendiente',
+          fechaActivacion : null,
+          fechaVencimiento: null
+        };
+      }
     }
 
     cmgDb.collection('d365solicitudes').doc(docId).update(update)
       .then(function () {
-        var verb = turning ? 'activada ✅' : 'desactivada';
+        var verb;
+        if (turning)                        verb = 'activada ✅';
+        else if (update.estado === 'suspendida') verb = 'suspendida ⚠️';
+        else                                verb = 'desactivada';
         toast('Membresía de ' + nombre + ' ' + verb, 3500);
-        /* Recargar datos y re-renderizar */
         return loadMembersAndRender();
       })
       .catch(function (err) {
-        chk.disabled  = false;
-        chk.checked   = !turning;
+        chk.disabled = false;
+        chk.checked  = !turning;
         toast('❌ Error: ' + err.message, 4000);
       });
   }
@@ -538,13 +594,14 @@
         snap.forEach(function (doc) {
           allMembers.push(Object.assign({ _id: doc.id }, doc.data()));
         });
+        var ORDER2 = { suspendida: 0, pendiente: 1, activo: 2 };
         allMembers.sort(function (a, b) {
-          if (a.estado === b.estado) {
-            var ta = a.fechaSolicitud && a.fechaSolicitud.toMillis ? a.fechaSolicitud.toMillis() : 0;
-            var tb = b.fechaSolicitud && b.fechaSolicitud.toMillis ? b.fechaSolicitud.toMillis() : 0;
-            return tb - ta;
-          }
-          return a.estado === 'pendiente' ? -1 : 1;
+          var oa = ORDER2[a.estado] !== undefined ? ORDER2[a.estado] : 1;
+          var ob = ORDER2[b.estado] !== undefined ? ORDER2[b.estado] : 1;
+          if (oa !== ob) return oa - ob;
+          var ta = a.fechaSolicitud && a.fechaSolicitud.toMillis ? a.fechaSolicitud.toMillis() : 0;
+          var tb = b.fechaSolicitud && b.fechaSolicitud.toMillis ? b.fechaSolicitud.toMillis() : 0;
+          return tb - ta;
         });
         updateStats();
         applyFilters();

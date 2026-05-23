@@ -263,6 +263,33 @@
   font-size: 16px; font-weight: 800; color: #1F2937;
 }
 
+/* ── En Revisión Card ── */
+.fel-susp-card {
+  display: none;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(33,60,125,.10);
+  padding: 36px 32px;
+  margin-bottom: 28px;
+  border: 2px solid #F97316;
+  text-align: center;
+}
+.fel-susp-title {
+  font-size: 22px; font-weight: 900; color: #C2410C;
+  margin: 0 0 6px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.fel-susp-sub {
+  font-size: 14px; color: #6B7280; margin: 0 0 28px;
+}
+.fel-susp-dates {
+  display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
+}
+.fel-susp-date-item {
+  background: #FFF7ED; border: 1.5px solid #FED7AA;
+  border-radius: 14px; padding: 16px 28px; min-width: 190px;
+}
+
 /* ── Nav auth pill ── */
 .cmg-nav-pill {
   display: inline-flex; align-items: center; gap: 6px;
@@ -375,6 +402,25 @@
         <div class="fel-active-date-item">
           <div class="fel-date-lbl">Válida hasta</div>
           <div class="fel-date-val" id="fel-activa-hasta">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Tarjeta "En Revisión" (mostrada si estado === 'suspendida') ══ -->
+    <div class="fel-susp-card no-print" id="fel-susp-card">
+      <div class="fel-susp-title">⚠️ Membresía en Revisión</div>
+      <p class="fel-susp-sub">
+        Tu membresía fue suspendida temporalmente por el equipo CMG.<br>
+        Visítanos en caja o contáctanos por WhatsApp para más información.
+      </p>
+      <div class="fel-susp-dates">
+        <div class="fel-susp-date-item">
+          <div class="fel-date-lbl" style="color:#C2410C;">Activada originalmente</div>
+          <div class="fel-date-val" id="fel-susp-desde">—</div>
+        </div>
+        <div class="fel-susp-date-item">
+          <div class="fel-date-lbl" style="color:#C2410C;">Vigencia hasta</div>
+          <div class="fel-date-val" id="fel-susp-hasta">—</div>
         </div>
       </div>
     </div>
@@ -632,17 +678,27 @@
     var waBtn = $id('fel-wa-btn');
     if (waBtn) waBtn.href = 'https://wa.me/50431555162?text=' + encodeURIComponent(waMsg);
 
-    /* ── Estado: activo vs pendiente ── */
+    /* ── Estado: activo / suspendida / pendiente ── */
     var activeCard = $id('fel-active-card');
+    var suspCard   = $id('fel-susp-card');
     var stepsCard  = document.querySelector('.fel-steps');
+
+    /* Ocultar todo primero */
+    if (activeCard) activeCard.style.display = 'none';
+    if (suspCard)   suspCard.style.display   = 'none';
+    if (stepsCard)  stepsCard.style.display  = 'none';
+
     if (data.estado === 'activo') {
       if (activeCard) activeCard.style.display = 'block';
-      if (stepsCard)  stepsCard.style.display  = 'none';
       setText('fel-activa-desde', fmtFecha(data.fechaActivacion));
       setText('fel-activa-hasta', fmtFecha(data.fechaVencimiento));
+    } else if (data.estado === 'suspendida') {
+      if (suspCard) suspCard.style.display = 'block';
+      setText('fel-susp-desde', fmtFecha(data.fechaActivacion));
+      setText('fel-susp-hasta', fmtFecha(data.fechaVencimiento));
     } else {
-      if (activeCard) activeCard.style.display = 'none';
-      if (stepsCard)  stepsCard.style.display  = '';
+      /* pendiente — mostrar pasos */
+      if (stepsCard) stepsCard.style.display = '';
     }
   }
 

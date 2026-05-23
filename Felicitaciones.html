@@ -1027,6 +1027,12 @@
         console.error('[CMG] Error Firestore:', err);
       });
   });
+  /* ── Exponer al scope global para los onclick del HTML ── */
+  window.showDepForm    = showDepForm;
+  window.hideDepForm    = hideDepForm;
+  window.calcDepAge     = calcDepAge;
+  window.submitDependent = submitDependent;
+
 })();
 </script>
 

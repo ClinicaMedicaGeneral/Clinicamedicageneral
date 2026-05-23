@@ -284,6 +284,45 @@
 }
 .cmg-nav-pill:hover { background: rgba(255,255,255,.12); color: #fff; }
 .cmg-nav-pill.is-active-page { background: rgba(255,255,255,.15); color: #fff; }
+
+/* Admin nav pill */
+.cmg-nav-admin {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #213C7D;
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #FDD22C;
+  background: #FDD22C;
+  transition: all .18s;
+  white-space: nowrap;
+  letter-spacing: .2px;
+}
+.cmg-nav-admin:hover { background: #f5c800; border-color: #f5c800; }
+
+/* Admin hero button */
+.mc-admin-hero-btn {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: #FDD22C;
+  color: #213C7D;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .18s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.mc-admin-hero-btn:hover { background: #f5c800; transform: translateY(-1px); }
 </style>
 </head>
 <body data-lang="es">
@@ -316,6 +355,9 @@
       <a href="Cotizador.html">Cotizador</a>
     </nav>
     <div class="header-actions">
+      <a id="cmg-nav-admin" href="Admin-D365.html" class="cmg-nav-admin">
+        🛡️ Admin D365
+      </a>
       <a id="cmg-nav-account" href="Mis-Cotizaciones.html"
          class="cmg-nav-pill is-active-page">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -341,6 +383,9 @@
         <h1 class="mc-hero-h1">Mis Cotizaciones</h1>
       </div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <a id="mc-admin-hero-btn" href="Admin-D365.html" class="mc-admin-hero-btn">
+          🛡️ Panel Administrador
+        </a>
         <div class="mc-hero-user" id="mc-user-badge" style="display:none">
           <div class="mc-hero-avatar" id="mc-avatar">?</div>
           <div class="mc-hero-info">
@@ -489,6 +534,14 @@
     var un = $id('mc-user-name');  if (un) un.textContent = name;
     var ue = $id('mc-user-email'); if (ue) ue.textContent = user.email;
     var nn = $id('cmg-nav-name');  if (nn) nn.textContent = name;
+
+    /* Mostrar botones de admin si corresponde */
+    if (user.email === 'ventasymercadeocmg@gmail.com') {
+      var adminNav  = $id('cmg-nav-admin');
+      var adminHero = $id('mc-admin-hero-btn');
+      if (adminNav)  adminNav.style.display  = 'inline-flex';
+      if (adminHero) adminHero.style.display = 'inline-flex';
+    }
 
     /* Cargar cotizaciones */
     loadQuotes(user.uid);

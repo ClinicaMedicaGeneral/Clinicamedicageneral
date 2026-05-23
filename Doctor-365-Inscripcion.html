@@ -227,6 +227,7 @@
       <a href="Cotizador.html">Cotizador</a>
     </nav>
     <div class="header-actions">
+      <a id="cmg-nav-admin" href="Admin-D365.html" style="display:none;align-items:center;gap:6px;font-size:13px;font-weight:800;color:#213C7D;text-decoration:none;padding:6px 14px;border-radius:20px;border:1.5px solid #FDD22C;background:#FDD22C;white-space:nowrap;transition:all .18s;">🛡️ Admin D365</a>
       <a id="cmg-nav-account" href="Auth.html?returnTo=Doctor-365-Inscripcion.html"
          class="cmg-nav-pill">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -485,6 +486,12 @@
     var navName = document.getElementById('cmg-nav-name');
     if (navLink) navLink.href = 'Mis-Cotizaciones.html';
     if (navName) navName.textContent = (user.displayName || user.email).split(' ')[0];
+
+    /* Admin pill */
+    if (user.email === 'ventasymercadeocmg@gmail.com') {
+      var adminPill = document.getElementById('cmg-nav-admin');
+      if (adminPill) adminPill.style.display = 'inline-flex';
+    }
 
     /* Info en formulario */
     var uInfo  = document.getElementById('ins-user-info');

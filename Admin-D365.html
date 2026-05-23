@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin · Doctor 365 · CMG</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<link rel="stylesheet" href="styles.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+
+.adm-page { background: #F4F6FB; min-height: 100vh; padding-bottom: 80px; }
+
+/* ── Header ── */
+.adm-header {
+  background: #213C7D;
+  border-bottom: 4px solid #FDD22C;
+  padding: 20px 0;
+}
+.adm-header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.adm-brand {
+  display: flex; align-items: center; gap: 14px;
+  text-decoration: none;
+}
+.adm-brand img { width: 44px; }
+.adm-brand-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: #FDD22C;
+}
+.adm-brand-title {
+  font-size: 18px; font-weight: 900; color: #fff; line-height: 1;
+}
+.adm-user-info {
+  display: flex; align-items: center; gap: 12px;
+}
+.adm-user-badge {
+  font-size: 13px; color: rgba(255,255,255,.7);
+}
+.adm-user-badge strong { color: #FDD22C; }
+.adm-logout {
+  border: 1px solid rgba(255,255,255,.25);
+  background: transparent; color: rgba(255,255,255,.75);
+  border-radius: 20px; padding: 6px 16px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  transition: all .18s;
+}
+.adm-logout:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+/* ── Content ── */
+.adm-content {
+  max-width: 1200px;
+  margin: 32px auto 0;
+  padding: 0 28px;
+}
+
+/* ── Stats ── */
+.adm-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.adm-stat {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(33,60,125,.08);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.adm-stat-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.adm-stat-icon--total   { background: #EEF2FF; }
+.adm-stat-icon--pend    { background: #FEF3C7; }
+.adm-stat-icon--active  { background: #DCFCE7; }
+.adm-stat-val {
+  font-size: 32px; font-weight: 900; color: #213C7D;
+  line-height: 1;
+}
+.adm-stat-label { font-size: 13px; color: #6B7280; margin-top: 4px; }
+
+/* ── Toolbar ── */
+.adm-toolbar {
+  display: flex; gap: 12px; align-items: center;
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.adm-search {
+  flex: 1; min-width: 240px;
+  height: 44px; border: 1.5px solid #E5E7EB;
+  border-radius: 10px; padding: 0 16px 0 42px;
+  font-family: inherit; font-size: 14px; color: #1F2937;
+  outline: none; background: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 14px center;
+  transition: border-color .18s;
+}
+.adm-search:focus { border-color: #213C7D; }
+.adm-filter {
+  height: 44px; border: 1.5px solid #E5E7EB;
+  border-radius: 10px; padding: 0 14px;
+  font-family: inherit; font-size: 14px; color: #1F2937;
+  background: #fff; outline: none; cursor: pointer;
+}
+
+/* ── Tabla ── */
+.adm-table-wrap {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(33,60,125,.08);
+  overflow: hidden;
+}
+.adm-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.adm-table thead tr {
+  background: #213C7D;
+}
+.adm-table th {
+  padding: 13px 16px;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .8px;
+  color: rgba(255,255,255,.75);
+  text-align: left; white-space: nowrap;
+}
+.adm-table td {
+  padding: 14px 16px;
+  font-size: 14px; color: #374151;
+  border-bottom: 1px solid #F3F4F6;
+  vertical-align: middle;
+}
+.adm-table tr:last-child td { border-bottom: none; }
+.adm-table tr:hover td { background: #FAFBFD; }
+
+/* Nombre con avatar */
+.adm-member-cell { display: flex; align-items: center; gap: 12px; }
+.adm-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #213C7D; color: #FDD22C;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 14px; flex-shrink: 0;
+}
+.adm-avatar.is-active { background: #16a34a; color: #fff; }
+.adm-member-name { font-weight: 700; color: #1F2937; font-size: 14px; }
+.adm-member-num  { font-size: 11px; color: #9CA3AF; margin-top: 1px; }
+
+/* Badges de estado */
+.adm-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+  white-space: nowrap;
+}
+.adm-badge--pend   { background: #FEF3C7; color: #92400E; }
+.adm-badge--active { background: #DCFCE7; color: #166534; }
+
+/* Fechas de membresía */
+.adm-dates { font-size: 12px; color: #6B7280; line-height: 1.6; }
+.adm-dates strong { color: #166534; }
+
+/* ── Toggle switch ── */
+.adm-switch { position: relative; display: inline-block; width: 52px; height: 28px; }
+.adm-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.adm-slider {
+  position: absolute; cursor: pointer;
+  inset: 0; background: #D1D5DB;
+  transition: background .3s; border-radius: 28px;
+}
+.adm-slider::before {
+  content: ''; position: absolute;
+  width: 20px; height: 20px; border-radius: 50%;
+  left: 4px; top: 4px; background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,.2);
+  transition: transform .3s;
+}
+.adm-switch input:checked + .adm-slider { background: #22c55e; }
+.adm-switch input:checked + .adm-slider::before { transform: translateX(24px); }
+.adm-switch input:disabled + .adm-slider { opacity: .5; cursor: wait; }
+
+/* Loading/empty states */
+.adm-state {
+  text-align: center; padding: 60px 20px;
+  color: #6B7280; font-size: 15px;
+}
+.adm-spinner-wrap { display: flex; justify-content: center; padding: 60px; }
+.adm-spin {
+  width: 36px; height: 36px;
+  border: 3px solid #E5E7EB;
+  border-top-color: #213C7D;
+  border-radius: 50%;
+  animation: adm-spin .8s linear infinite;
+}
+@keyframes adm-spin { to { transform: rotate(360deg); } }
+
+/* Toast */
+.adm-toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: #1F2937; color: #fff;
+  padding: 12px 20px; border-radius: 10px;
+  font-size: 14px; font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  transform: translateY(80px); opacity: 0;
+  transition: all .3s; z-index: 9999;
+  pointer-events: none;
+}
+.adm-toast.is-visible { transform: translateY(0); opacity: 1; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .adm-stats { grid-template-columns: 1fr 1fr; }
+  .adm-table-wrap { overflow-x: auto; }
+  .adm-table { min-width: 720px; }
+}
+@media (max-width: 600px) {
+  .adm-stats { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="adm-header">
+  <div class="adm-header-inner">
+    <a class="adm-brand" href="Inicio.html">
+      <img src="assets/cmg-logo-white.png" alt="CMG">
+      <div>
+        <div class="adm-brand-label">Panel Administrativo</div>
+        <div class="adm-brand-title">Doctor 365</div>
+      </div>
+    </a>
+    <div class="adm-user-info">
+      <span class="adm-user-badge">Sesión: <strong id="adm-user-email">—</strong></span>
+      <button class="adm-logout" id="adm-logout-btn">Cerrar sesión</button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<main class="adm-page">
+  <div class="adm-content">
+
+    <!-- Stats -->
+    <div class="adm-stats">
+      <div class="adm-stat">
+        <div class="adm-stat-icon adm-stat-icon--total">🩺</div>
+        <div>
+          <div class="adm-stat-val" id="adm-total">—</div>
+          <div class="adm-stat-label">Solicitudes totales</div>
+        </div>
+      </div>
+      <div class="adm-stat">
+        <div class="adm-stat-icon adm-stat-icon--pend">⏳</div>
+        <div>
+          <div class="adm-stat-val" id="adm-pend">—</div>
+          <div class="adm-stat-label">Pendientes de pago</div>
+        </div>
+      </div>
+      <div class="adm-stat">
+        <div class="adm-stat-icon adm-stat-icon--active">✅</div>
+        <div>
+          <div class="adm-stat-val" id="adm-active">—</div>
+          <div class="adm-stat-label">Membresías activas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="adm-toolbar">
+      <input type="search" class="adm-search" id="adm-search"
+        placeholder="Buscar por nombre, correo o teléfono...">
+      <select class="adm-filter" id="adm-filter">
+        <option value="all">Todos los estados</option>
+        <option value="pendiente">Pendientes</option>
+        <option value="activo">Activos</option>
+      </select>
+    </div>
+
+    <!-- Tabla -->
+    <div class="adm-table-wrap">
+      <div class="adm-spinner-wrap" id="adm-loading">
+        <div class="adm-spin"></div>
+      </div>
+      <div id="adm-empty" class="adm-state" style="display:none">
+        📋 No hay solicitudes que mostrar.
+      </div>
+      <table class="adm-table" id="adm-table" style="display:none">
+        <thead>
+          <tr>
+            <th>Miembro</th>
+            <th>Contacto</th>
+            <th>Fecha Solicitud</th>
+            <th>Nacimiento / Edad</th>
+            <th>Estado</th>
+            <th>Vigencia</th>
+            <th style="text-align:center">Activar</th>
+          </tr>
+        </thead>
+        <tbody id="adm-tbody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</main>
+
+<!-- Toast -->
+<div class="adm-toast" id="adm-toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+
+<script>
+(function () {
+  var ADMIN_EMAIL = 'ventasymercadeocmg@gmail.com';
+  var allMembers  = [];
+
+  /* ── Toast ── */
+  var toastEl   = document.getElementById('adm-toast');
+  var toastTimer;
+  function toast(msg, dur) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('is-visible'); }, dur || 3000);
+  }
+
+  /* ── Helpers ── */
+  function fmtDate(ts) {
+    if (!ts) return '—';
+    var d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleDateString('es-HN', { day:'2-digit', month:'short', year:'numeric' });
+  }
+  function fmtNac(dob) {
+    if (!dob) return '—';
+    var d = new Date(dob + 'T00:00:00');
+    return d.toLocaleDateString('es-HN', { day:'2-digit', month:'short', year:'numeric' });
+  }
+  function esc(s) {
+    return String(s||'').replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+  }
+
+  /* ── Auth guard ── */
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) {
+      window.location.href = 'Auth.html?returnTo=Admin-D365.html';
+      return;
+    }
+    if (user.email !== ADMIN_EMAIL) {
+      window.location.href = 'Inicio.html';
+      return;
+    }
+    document.getElementById('adm-user-email').textContent = user.email;
+    loadMembers();
+  });
+
+  /* ── Logout ── */
+  document.getElementById('adm-logout-btn').addEventListener('click', function () {
+    cmgAuth.signOut().then(function () { window.location.href = 'Inicio.html'; });
+  });
+
+  /* ── Cargar todos los miembros ── */
+  function loadMembers() {
+    cmgDb.collection('d365solicitudes')
+      .get()
+      .then(function (snap) {
+        allMembers = [];
+        snap.forEach(function (doc) {
+          allMembers.push(Object.assign({ _id: doc.id }, doc.data()));
+        });
+        /* Ordenar: pendientes primero, luego activos; más recientes arriba */
+        allMembers.sort(function (a, b) {
+          if (a.estado === b.estado) {
+            var ta = a.fechaSolicitud && a.fechaSolicitud.toMillis ? a.fechaSolicitud.toMillis() : 0;
+            var tb = b.fechaSolicitud && b.fechaSolicitud.toMillis ? b.fechaSolicitud.toMillis() : 0;
+            return tb - ta;
+          }
+          return a.estado === 'pendiente' ? -1 : 1;
+        });
+        updateStats();
+        renderTable(allMembers);
+      })
+      .catch(function (err) {
+        document.getElementById('adm-loading').style.display = 'none';
+        document.getElementById('adm-empty').style.display = '';
+        document.getElementById('adm-empty').textContent = '❌ Error al cargar: ' + err.message;
+      });
+  }
+
+  /* ── Stats ── */
+  function updateStats() {
+    var total  = allMembers.length;
+    var active = allMembers.filter(function(m){ return m.estado === 'activo'; }).length;
+    var pend   = total - active;
+    document.getElementById('adm-total').textContent  = total;
+    document.getElementById('adm-pend').textContent   = pend;
+    document.getElementById('adm-active').textContent = active;
+  }
+
+  /* ── Render tabla ── */
+  function renderTable(members) {
+    document.getElementById('adm-loading').style.display = 'none';
+
+    if (members.length === 0) {
+      document.getElementById('adm-empty').style.display = '';
+      document.getElementById('adm-table').style.display = 'none';
+      return;
+    }
+    document.getElementById('adm-empty').style.display = 'none';
+    document.getElementById('adm-table').style.display = '';
+
+    var tbody = document.getElementById('adm-tbody');
+    tbody.innerHTML = members.map(function (m) {
+      var nombreCompleto = [m.nombre, m.segundoNombre, m.apellido, m.segundoApellido].filter(Boolean).join(' ');
+      var initl    = (m.nombre || '?').charAt(0).toUpperCase();
+      var isActive = m.estado === 'activo';
+
+      var badgeHtml = isActive
+        ? '<span class="adm-badge adm-badge--active">✅ Activo</span>'
+        : '<span class="adm-badge adm-badge--pend">⏳ Pendiente</span>';
+
+      var datesHtml = isActive
+        ? '<div class="adm-dates">' +
+            '<strong>Desde:</strong> ' + fmtDate(m.fechaActivacion) + '<br>' +
+            '<strong>Hasta:</strong> ' + fmtDate(m.fechaVencimiento) +
+          '</div>'
+        : '<span style="color:#9CA3AF;font-size:12px;">Sin activar</span>';
+
+      return '<tr data-id="' + esc(m._id) + '" data-estado="' + esc(m.estado) + '">' +
+        '<td>' +
+          '<div class="adm-member-cell">' +
+            '<div class="adm-avatar' + (isActive ? ' is-active' : '') + '">' + esc(initl) + '</div>' +
+            '<div>' +
+              '<div class="adm-member-name">' + esc(nombreCompleto) + '</div>' +
+              '<div class="adm-member-num">' + esc(m.numSolicitud || '—') + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</td>' +
+        '<td>' +
+          '<div style="font-size:13px">' + esc(m.email || '—') + '</div>' +
+          '<div style="font-size:12px;color:#9CA3AF">' + esc(m.telefono || '—') + '</div>' +
+        '</td>' +
+        '<td style="font-size:13px;white-space:nowrap">' + fmtDate(m.fechaSolicitud) + '</td>' +
+        '<td style="font-size:13px">' +
+          fmtNac(m.fechaNacimiento) + '<br>' +
+          '<span style="color:#9CA3AF;font-size:12px;">' + (m.edad ? m.edad + ' años' : '—') + '</span>' +
+        '</td>' +
+        '<td>' + badgeHtml + '</td>' +
+        '<td>' + datesHtml + '</td>' +
+        '<td style="text-align:center">' +
+          '<label class="adm-switch" title="' + (isActive ? 'Clic para desactivar' : 'Clic para activar') + '">' +
+            '<input type="checkbox" class="adm-toggle" data-id="' + esc(m._id) + '" data-nombre="' + esc(nombreCompleto) + '" ' + (isActive ? 'checked' : '') + '>' +
+            '<span class="adm-slider"></span>' +
+          '</label>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
+
+    /* Eventos de los toggles */
+    tbody.querySelectorAll('.adm-toggle').forEach(function (chk) {
+      chk.addEventListener('change', function () {
+        handleToggle(chk);
+      });
+    });
+  }
+
+  /* ── Activar / Desactivar ── */
+  function handleToggle(chk) {
+    var docId   = chk.dataset.id;
+    var nombre  = chk.dataset.nombre;
+    var turning = chk.checked; /* true = activar, false = desactivar */
+
+    var msg = turning
+      ? '¿Activar membresía para ' + nombre + '?'
+      : '¿Desactivar membresía de ' + nombre + '?';
+
+    if (!confirm(msg)) {
+      chk.checked = !turning; /* revertir visualmente */
+      return;
+    }
+
+    chk.disabled = true;
+
+    var update;
+    if (turning) {
+      var ahora     = new Date();
+      var vence     = new Date(ahora);
+      vence.setFullYear(vence.getFullYear() + 1);
+      update = {
+        estado          : 'activo',
+        fechaActivacion : firebase.firestore.FieldValue.serverTimestamp(),
+        fechaVencimiento: firebase.firestore.Timestamp.fromDate(vence)
+      };
+    } else {
+      update = {
+        estado          : 'pendiente',
+        fechaActivacion : null,
+        fechaVencimiento: null
+      };
+    }
+
+    cmgDb.collection('d365solicitudes').doc(docId).update(update)
+      .then(function () {
+        var verb = turning ? 'activada ✅' : 'desactivada';
+        toast('Membresía de ' + nombre + ' ' + verb, 3500);
+        /* Recargar datos y re-renderizar */
+        return loadMembersAndRender();
+      })
+      .catch(function (err) {
+        chk.disabled  = false;
+        chk.checked   = !turning;
+        toast('❌ Error: ' + err.message, 4000);
+      });
+  }
+
+  function loadMembersAndRender() {
+    return cmgDb.collection('d365solicitudes').get()
+      .then(function (snap) {
+        allMembers = [];
+        snap.forEach(function (doc) {
+          allMembers.push(Object.assign({ _id: doc.id }, doc.data()));
+        });
+        allMembers.sort(function (a, b) {
+          if (a.estado === b.estado) {
+            var ta = a.fechaSolicitud && a.fechaSolicitud.toMillis ? a.fechaSolicitud.toMillis() : 0;
+            var tb = b.fechaSolicitud && b.fechaSolicitud.toMillis ? b.fechaSolicitud.toMillis() : 0;
+            return tb - ta;
+          }
+          return a.estado === 'pendiente' ? -1 : 1;
+        });
+        updateStats();
+        applyFilters();
+      });
+  }
+
+  /* ── Búsqueda y filtro ── */
+  function applyFilters() {
+    var q      = document.getElementById('adm-search').value.trim().toLowerCase();
+    var estado = document.getElementById('adm-filter').value;
+    var result = allMembers.filter(function (m) {
+      var nombreCompleto = [m.nombre, m.segundoNombre, m.apellido, m.segundoApellido].filter(Boolean).join(' ').toLowerCase();
+      var matchText  = !q || nombreCompleto.includes(q) || (m.email||'').toLowerCase().includes(q) || (m.telefono||'').includes(q);
+      var matchState = estado === 'all' || m.estado === estado;
+      return matchText && matchState;
+    });
+    renderTable(result);
+  }
+
+  document.getElementById('adm-search').addEventListener('input', applyFilters);
+  document.getElementById('adm-filter').addEventListener('change', applyFilters);
+
+})();
+</script>
+
+</body>
+</html>

@@ -224,6 +224,72 @@
 }
 .adm-toast.is-visible { transform: translateY(0); opacity: 1; }
 
+/* ── Botón eliminar solicitud ── */
+.adm-del-btn {
+  width: 30px; height: 30px; border: none; border-radius: 8px;
+  background: #FEE2E2; color: #DC2626; cursor: pointer; font-size: 14px;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background .18s; flex-shrink: 0;
+}
+.adm-del-btn:hover { background: #FECACA; }
+
+/* ── Botón expandir dependientes ── */
+.adm-dep-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 30px; padding: 0 10px;
+  border: 1.5px solid #E5E7EB; border-radius: 8px;
+  background: #fff; color: #374151;
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all .18s; white-space: nowrap;
+}
+.adm-dep-btn:hover, .adm-dep-btn.is-open {
+  border-color: #213C7D; color: #213C7D; background: #EEF2FF;
+}
+
+/* ── Fila expandible de dependientes ── */
+.adm-dep-row > td { background: #F8FAFF !important; padding: 0 !important; border-bottom: none !important; }
+.adm-dep-panel { padding: 20px 28px; border-top: 3px solid #213C7D; }
+.adm-dep-panel-title {
+  font-size: 14px; font-weight: 800; color: #213C7D;
+  margin: 0 0 14px; display: flex; align-items: center; gap: 8px;
+}
+.adm-dep-list { display: flex; flex-direction: column; gap: 10px; }
+.adm-dep-card {
+  background: #fff; border-radius: 10px; border: 1px solid #E5E7EB;
+  padding: 12px 16px; display: flex; align-items: center;
+  gap: 12px; flex-wrap: wrap;
+}
+.adm-dep-tipo-badge {
+  display: inline-flex; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.adm-dep-tipo-badge.conyugue { background: #EDE9FE; color: #5B21B6; }
+.adm-dep-tipo-badge.hijo     { background: #DBEAFE; color: #1D4ED8; }
+.adm-dep-info { flex: 1; min-width: 120px; }
+.adm-dep-info strong { font-size: 14px; color: #1F2937; display: block; }
+.adm-dep-info span   { font-size: 12px; color: #9CA3AF; }
+.adm-dep-est {
+  display: inline-flex; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+}
+.adm-dep-est.pend     { background: #FEF3C7; color: #92400E; }
+.adm-dep-est.aprobado { background: #DCFCE7; color: #166534; }
+.adm-dep-approve {
+  height: 28px; padding: 0 12px; border: none; border-radius: 8px;
+  background: #22C55E; color: #fff;
+  font-family: inherit; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: opacity .18s; white-space: nowrap;
+}
+.adm-dep-approve:hover { opacity: .85; }
+.adm-dep-remove {
+  width: 28px; height: 28px; border: none; border-radius: 8px;
+  background: #FEE2E2; color: #DC2626; cursor: pointer; font-size: 12px;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.adm-dep-remove:hover { background: #FECACA; }
+.adm-dep-none { font-size: 13px; color: #9CA3AF; text-align: center; padding: 14px 0; }
+
 /* Responsive */
 @media (max-width: 1100px) {
   .adm-stats { grid-template-columns: 1fr 1fr; }
@@ -322,7 +388,8 @@
             <th>Nacimiento / Edad</th>
             <th>Estado</th>
             <th>Vigencia</th>
-            <th style="text-align:center">Activar</th>
+            <th style="text-align:center">Acciones</th>
+            <th style="text-align:center">Dependientes</th>
           </tr>
         </thead>
         <tbody id="adm-tbody"></tbody>
@@ -499,19 +566,38 @@
         '<td>' + badgeHtml + '</td>' +
         '<td>' + datesHtml + '</td>' +
         '<td style="text-align:center">' +
-          '<label class="adm-switch" title="' + (isActive ? 'Clic para suspender' : isSusp ? 'Clic para reactivar' : 'Clic para activar') + '">' +
-            '<input type="checkbox" class="adm-toggle" data-id="' + esc(m._id) + '" data-nombre="' + esc(nombreCompleto) + '" data-estado="' + esc(m.estado) + '" ' + (isActive ? 'checked' : '') + '>' +
-            '<span class="adm-slider"></span>' +
-          '</label>' +
+          '<div style="display:flex;align-items:center;justify-content:center;gap:8px;">' +
+            '<label class="adm-switch" title="' + (isActive ? 'Suspender membresía' : isSusp ? 'Reactivar membresía' : 'Activar membresía') + '">' +
+              '<input type="checkbox" class="adm-toggle" data-id="' + esc(m._id) + '" data-nombre="' + esc(nombreCompleto) + '" data-estado="' + esc(m.estado) + '" ' + (isActive ? 'checked' : '') + '>' +
+              '<span class="adm-slider"></span>' +
+            '</label>' +
+            '<button class="adm-del-btn" data-id="' + esc(m._id) + '" data-nombre="' + esc(nombreCompleto) + '" title="Eliminar solicitud">🗑️</button>' +
+          '</div>' +
+        '</td>' +
+        '<td style="text-align:center">' +
+          '<button class="adm-dep-btn" data-id="' + esc(m._id) + '">👨‍👩‍👧‍👦 Ver</button>' +
+        '</td>' +
+      '</tr>' +
+      '<tr class="adm-dep-row" id="adm-dep-row-' + esc(m._id) + '" style="display:none">' +
+        '<td colspan="8" style="padding:0">' +
+          '<div class="adm-dep-panel" id="adm-dep-panel-' + esc(m._id) + '">' +
+            '<p class="adm-dep-none">Cargando dependientes...</p>' +
+          '</div>' +
         '</td>' +
       '</tr>';
     }).join('');
 
     /* Eventos de los toggles */
     tbody.querySelectorAll('.adm-toggle').forEach(function (chk) {
-      chk.addEventListener('change', function () {
-        handleToggle(chk);
-      });
+      chk.addEventListener('change', function () { handleToggle(chk); });
+    });
+    /* Botones eliminar solicitud */
+    tbody.querySelectorAll('.adm-del-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () { handleDelete(btn.dataset.id, btn.dataset.nombre); });
+    });
+    /* Botones expandir dependientes */
+    tbody.querySelectorAll('.adm-dep-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () { toggleDepRow(btn.dataset.id, btn); });
     });
   }
 
@@ -607,6 +693,126 @@
         updateStats();
         applyFilters();
       });
+  }
+
+  /* ══════════════════════════════════════════
+     ELIMINAR SOLICITUD
+     ══════════════════════════════════════════ */
+  function handleDelete(docId, nombre) {
+    if (!confirm('⚠️ ¿Eliminar la solicitud de ' + nombre + '?\n\nTambién se borrarán sus dependientes. Esta acción no se puede deshacer.')) return;
+    /* Borrar subcol dependientes primero */
+    cmgDb.collection('d365solicitudes').doc(docId)
+      .collection('dependientes').get()
+      .then(function (snap) {
+        var batch = cmgDb.batch();
+        snap.forEach(function (d) { batch.delete(d.ref); });
+        return batch.commit();
+      })
+      .then(function () {
+        return cmgDb.collection('d365solicitudes').doc(docId).delete();
+      })
+      .then(function () {
+        toast('Solicitud de ' + nombre + ' eliminada.', 3500);
+        return loadMembersAndRender();
+      })
+      .catch(function (err) { toast('❌ Error: ' + err.message, 4000); });
+  }
+
+  /* ══════════════════════════════════════════
+     DEPENDIENTES — ADMIN
+     ══════════════════════════════════════════ */
+  function toggleDepRow(docId, btn) {
+    var row   = document.getElementById('adm-dep-row-' + docId);
+    var panel = document.getElementById('adm-dep-panel-' + docId);
+    if (!row) return;
+    var isOpen = row.style.display !== 'none';
+    row.style.display = isOpen ? 'none' : '';
+    btn.classList.toggle('is-open', !isOpen);
+    btn.textContent = isOpen ? '👨‍👩‍👧‍👦 Ver' : '👨‍👩‍👧‍👦 Cerrar';
+    if (!isOpen && panel) loadDepsForRow(docId, panel);
+  }
+
+  function loadDepsForRow(docId, panel) {
+    panel.innerHTML = '<p class="adm-dep-none">Cargando...</p>';
+    cmgDb.collection('d365solicitudes').doc(docId)
+      .collection('dependientes').get()
+      .then(function (snap) {
+        var deps = [];
+        snap.forEach(function (d) { deps.push(Object.assign({ _id: d.id }, d.data())); });
+        renderDepsPanel(docId, deps, panel);
+      })
+      .catch(function (err) {
+        panel.innerHTML = '<p class="adm-dep-none" style="color:#DC2626;">Error: ' + esc(err.message) + '</p>';
+      });
+  }
+
+  function renderDepsPanel(docId, deps, panel) {
+    var tipoLabel = { conyugue: 'Cónyuge', hijo: 'Hijo', hija: 'Hija' };
+    var html = '<div class="adm-dep-panel-title">👨‍👩‍👧‍👦 Dependientes (' + deps.length + ' / 3)</div>';
+    if (deps.length === 0) {
+      html += '<p class="adm-dep-none">Sin dependientes registrados.</p>';
+    } else {
+      html += '<div class="adm-dep-list">';
+      deps.forEach(function (dep) {
+        var tipoCls = dep.tipo === 'conyugue' ? 'conyugue' : 'hijo';
+        var isPend  = dep.estado !== 'aprobado';
+        html +=
+          '<div class="adm-dep-card">' +
+            '<span class="adm-dep-tipo-badge ' + tipoCls + '">' + esc(tipoLabel[dep.tipo] || dep.tipo) + '</span>' +
+            '<div class="adm-dep-info">' +
+              '<strong>' + esc(dep.nombreCompleto) + '</strong>' +
+              '<span>' + esc(dep.fechaNacimiento || '—') +
+                (dep.edad ? ' · ' + dep.edad + ' años' : '') +
+                (dep.esMenor ? ' · Menor de edad' : '') +
+              '</span>' +
+            '</div>' +
+            '<span class="adm-dep-est ' + (isPend ? 'pend' : 'aprobado') + '">' +
+              (isPend ? '⏳ Pendiente' : '✅ Aprobado') +
+            '</span>' +
+            (isPend
+              ? '<button class="adm-dep-approve" data-docid="' + esc(docId) + '" data-depid="' + esc(dep._id) + '" data-nombre="' + esc(dep.nombreCompleto) + '">✔ Aprobar</button>'
+              : '') +
+            '<button class="adm-dep-remove" data-docid="' + esc(docId) + '" data-depid="' + esc(dep._id) + '" data-nombre="' + esc(dep.nombreCompleto) + '" title="Eliminar dependiente">🗑️</button>' +
+          '</div>';
+      });
+      html += '</div>';
+    }
+    panel.innerHTML = html;
+
+    panel.querySelectorAll('.adm-dep-approve').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        approveDep(btn.dataset.docid, btn.dataset.depid, btn.dataset.nombre, docId, panel);
+      });
+    });
+    panel.querySelectorAll('.adm-dep-remove').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        removeDep(btn.dataset.docid, btn.dataset.depid, btn.dataset.nombre, docId, panel);
+      });
+    });
+  }
+
+  function approveDep(docId, depId, nombre, parentId, panel) {
+    if (!confirm('¿Aprobar a ' + nombre + ' como dependiente?')) return;
+    cmgDb.collection('d365solicitudes').doc(docId)
+      .collection('dependientes').doc(depId)
+      .update({ estado: 'aprobado' })
+      .then(function () {
+        toast('✅ ' + nombre + ' aprobado/a.', 2500);
+        loadDepsForRow(parentId, panel);
+      })
+      .catch(function (err) { toast('❌ ' + err.message, 4000); });
+  }
+
+  function removeDep(docId, depId, nombre, parentId, panel) {
+    if (!confirm('¿Eliminar a ' + nombre + ' de los dependientes?\nEsta acción no se puede deshacer.')) return;
+    cmgDb.collection('d365solicitudes').doc(docId)
+      .collection('dependientes').doc(depId)
+      .delete()
+      .then(function () {
+        toast('Dependiente eliminado.', 2500);
+        loadDepsForRow(parentId, panel);
+      })
+      .catch(function (err) { toast('❌ ' + err.message, 4000); });
   }
 
   /* ── Búsqueda y filtro ── */

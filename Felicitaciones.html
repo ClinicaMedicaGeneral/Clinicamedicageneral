@@ -263,6 +263,91 @@
   font-size: 16px; font-weight: 800; color: #1F2937;
 }
 
+/* ── Dependientes section ── */
+.fel-deps-section {
+  background: #fff; border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(33,60,125,.10);
+  overflow: hidden; margin-bottom: 28px;
+}
+.fel-deps-head {
+  background: #213C7D; padding: 18px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.fel-deps-head h2 { font-size: 17px; font-weight: 800; color: #fff; margin: 0; }
+.fel-deps-count   { font-size: 13px; color: rgba(255,255,255,.6); }
+.fel-deps-body    { padding: 24px; }
+.fel-deps-note {
+  font-size: 12px; color: #6B7280; background: #F9FAFB;
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 18px;
+}
+.fel-dep-card {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 14px 18px; border: 1px solid #E5E7EB;
+  border-radius: 12px; margin-bottom: 10px; background: #FAFBFD;
+}
+.fel-dep-tipo {
+  display: inline-flex; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.fel-dep-tipo--conyugue { background: #EDE9FE; color: #5B21B6; }
+.fel-dep-tipo--hijo     { background: #DBEAFE; color: #1D4ED8; }
+.fel-dep-info    { flex: 1; }
+.fel-dep-nombre  { font-size: 15px; font-weight: 700; color: #1F2937; }
+.fel-dep-meta    { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
+.fel-dep-estado  {
+  display: inline-flex; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+}
+.fel-dep-estado--pend     { background: #FEF3C7; color: #92400E; }
+.fel-dep-estado--aprobado { background: #DCFCE7; color: #166534; }
+.fel-dep-add-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 14px; border: 2px dashed #CBD5E1;
+  border-radius: 12px; background: transparent;
+  font-family: inherit; font-size: 14px; font-weight: 700; color: #213C7D;
+  cursor: pointer; transition: all .18s; margin-top: 4px;
+}
+.fel-dep-add-btn:hover { border-color: #213C7D; background: #EEF2FF; }
+.fel-dep-form {
+  background: #F8FAFF; border-radius: 14px;
+  border: 1.5px solid #CBD5E1; padding: 22px; margin-top: 10px;
+}
+.fel-dep-form h4 { font-size: 16px; font-weight: 800; color: #213C7D; margin: 0 0 18px; }
+.fel-dep-form-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 14px; margin-bottom: 16px;
+}
+@media (max-width: 600px) { .fel-dep-form-grid { grid-template-columns: 1fr; } }
+.fel-dep-form-full { grid-column: 1 / -1; }
+.fel-dep-form label {
+  display: block; font-size: 11px; font-weight: 700; color: #374151;
+  margin-bottom: 5px; text-transform: uppercase; letter-spacing: .5px;
+}
+.fel-dep-input {
+  width: 100%; height: 42px; border: 1.5px solid #E5E7EB;
+  border-radius: 8px; padding: 0 14px; font-family: inherit;
+  font-size: 14px; color: #1F2937; background: #fff; outline: none;
+  transition: border-color .18s;
+}
+.fel-dep-input:focus  { border-color: #213C7D; }
+.fel-dep-input[readonly] { background: #F3F4F6; color: #6B7280; }
+.fel-dep-form-actions { display: flex; gap: 10px; }
+.fel-dep-submit {
+  flex: 1; height: 44px; border: none; border-radius: 10px;
+  background: #213C7D; color: #fff;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: opacity .18s;
+}
+.fel-dep-submit:hover { opacity: .88; }
+.fel-dep-submit:disabled { opacity: .5; cursor: wait; }
+.fel-dep-cancel {
+  height: 44px; padding: 0 20px; border: 1.5px solid #E5E7EB;
+  border-radius: 10px; background: #fff; color: #6B7280;
+  font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: all .18s;
+}
+.fel-dep-cancel:hover { border-color: #9CA3AF; }
+
 /* ── En Revisión Card ── */
 .fel-susp-card {
   display: none;
@@ -478,6 +563,57 @@
       </a>
     </div>
 
+    <!-- ════ DEPENDIENTES ════ -->
+    <div class="fel-deps-section no-print" id="fel-deps-section" style="display:none">
+      <div class="fel-deps-head">
+        <h2>👨‍👩‍👧‍👦 Mis Dependientes</h2>
+        <span class="fel-deps-count" id="fel-deps-count">0 / 3</span>
+      </div>
+      <div class="fel-deps-body">
+        <div class="fel-deps-note">
+          ℹ️ Puedes agregar hasta <strong>3 dependientes</strong> (cónyuge e hijos). Una vez enviados, los cambios solo pueden realizarse <strong>presencialmente en Caja CMG</strong>.
+        </div>
+        <div id="fel-deps-list"></div>
+        <button class="fel-dep-add-btn" id="fel-dep-add-btn" style="display:none" onclick="showDepForm()">
+          ＋ Agregar dependiente
+        </button>
+        <div class="fel-dep-form" id="fel-dep-form" style="display:none">
+          <h4>Nuevo Dependiente</h4>
+          <div class="fel-dep-form-grid">
+            <div>
+              <label for="dep-tipo">Tipo de dependiente</label>
+              <select class="fel-dep-input" id="dep-tipo">
+                <option value="">Seleccionar...</option>
+                <option value="conyugue">Cónyuge (Esposa/o)</option>
+                <option value="hijo">Hijo</option>
+                <option value="hija">Hija</option>
+              </select>
+            </div>
+            <div>
+              <label for="dep-nombre">Nombre completo</label>
+              <input class="fel-dep-input" type="text" id="dep-nombre" placeholder="Nombre y apellidos">
+            </div>
+            <div>
+              <label for="dep-dob">Fecha de nacimiento</label>
+              <input class="fel-dep-input" type="date" id="dep-dob" oninput="calcDepAge()">
+            </div>
+            <div>
+              <label for="dep-edad">Edad</label>
+              <input class="fel-dep-input" type="text" id="dep-edad" readonly placeholder="Auto-calculada">
+            </div>
+            <div class="fel-dep-form-full">
+              <label>Menor de edad</label>
+              <input class="fel-dep-input" type="text" id="dep-menor" readonly placeholder="Auto">
+            </div>
+          </div>
+          <div class="fel-dep-form-actions">
+            <button class="fel-dep-submit" id="dep-submit-btn" onclick="submitDependent()">Enviar solicitud</button>
+            <button class="fel-dep-cancel" onclick="hideDepForm()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ════ CONTRATO ════ -->
     <div class="contract-section">
       <div class="contract-section-head no-print">
@@ -648,8 +784,15 @@
     return d.toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' });
   }
 
+  /* ── Helpers dependientes ── */
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, function(c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
   /* ── Rellenar el contrato ── */
-  function fillContract(data) {
+  function fillContract(data, docId, uid) {
     var nombreCompleto = [
       data.nombre, data.segundoNombre,
       data.apellido, data.segundoApellido
@@ -692,14 +835,158 @@
       if (activeCard) activeCard.style.display = 'block';
       setText('fel-activa-desde', fmtFecha(data.fechaActivacion));
       setText('fel-activa-hasta', fmtFecha(data.fechaVencimiento));
+      if (docId) initDependientes(docId, uid, true);  /* puede agregar */
     } else if (data.estado === 'suspendida') {
       if (suspCard) suspCard.style.display = 'block';
       setText('fel-susp-desde', fmtFecha(data.fechaActivacion));
       setText('fel-susp-hasta', fmtFecha(data.fechaVencimiento));
+      if (docId) initDependientes(docId, uid, false); /* solo ver */
     } else {
       /* pendiente — mostrar pasos */
       if (stepsCard) stepsCard.style.display = '';
     }
+  }
+
+  /* ════════════════════════════════════════════
+     DEPENDIENTES — MIEMBRO
+     ════════════════════════════════════════════ */
+  var _depDocId  = null;
+  var _depUid    = null;
+  var _depCanAdd = false;
+  var _deps      = [];
+
+  function initDependientes(docId, uid, canAdd) {
+    _depDocId  = docId;
+    _depUid    = uid;
+    _depCanAdd = canAdd;
+    var sec = $id('fel-deps-section');
+    if (sec) sec.style.display = '';
+    loadDeps();
+  }
+
+  function loadDeps() {
+    cmgDb.collection('d365solicitudes').doc(_depDocId)
+      .collection('dependientes').get()
+      .then(function (snap) {
+        _deps = [];
+        snap.forEach(function (d) { _deps.push(Object.assign({ _id: d.id }, d.data())); });
+        renderDeps(_deps);
+      })
+      .catch(function (err) { console.error('[CMG] Dependientes:', err); });
+  }
+
+  function renderDeps(deps) {
+    var list    = $id('fel-deps-list');
+    var countEl = $id('fel-deps-count');
+    var addBtn  = $id('fel-dep-add-btn');
+    if (countEl) countEl.textContent = deps.length + ' / 3';
+
+    var tipoLabel = { conyugue: 'Cónyuge', hijo: 'Hijo', hija: 'Hija' };
+    if (list) {
+      if (deps.length === 0) {
+        list.innerHTML = '<p style="font-size:13px;color:#9CA3AF;text-align:center;padding:8px 0 16px;">No tienes dependientes registrados aún.</p>';
+      } else {
+        list.innerHTML = deps.map(function (dep) {
+          var tipoCls = dep.tipo === 'conyugue' ? 'conyugue' : 'hijo';
+          var isPend  = dep.estado !== 'aprobado';
+          return '<div class="fel-dep-card">' +
+            '<span class="fel-dep-tipo fel-dep-tipo--' + tipoCls + '">' + esc(tipoLabel[dep.tipo] || dep.tipo) + '</span>' +
+            '<div class="fel-dep-info">' +
+              '<div class="fel-dep-nombre">' + esc(dep.nombreCompleto) + '</div>' +
+              '<div class="fel-dep-meta">' +
+                esc(dep.fechaNacimiento || '—') +
+                (dep.edad ? ' · ' + dep.edad + ' años' : '') +
+                (dep.esMenor ? ' · Menor de edad' : '') +
+              '</div>' +
+            '</div>' +
+            '<span class="fel-dep-estado fel-dep-estado--' + (isPend ? 'pend' : 'aprobado') + '">' +
+              (isPend ? '⏳ Pendiente aprobación' : '✅ Aprobado') +
+            '</span>' +
+          '</div>';
+        }).join('');
+      }
+    }
+    if (addBtn) addBtn.style.display = (_depCanAdd && deps.length < 3) ? '' : 'none';
+  }
+
+  function showDepForm() {
+    var form = $id('fel-dep-form');
+    var btn  = $id('fel-dep-add-btn');
+    if (form) form.style.display = '';
+    if (btn)  btn.style.display  = 'none';
+    ['dep-tipo','dep-nombre','dep-dob','dep-edad','dep-menor'].forEach(function(id){
+      var el = $id(id); if (el) el.value = '';
+    });
+  }
+
+  function hideDepForm() {
+    var form = $id('fel-dep-form');
+    var btn  = $id('fel-dep-add-btn');
+    if (form) form.style.display = 'none';
+    if (btn && _depCanAdd && _deps.length < 3) btn.style.display = '';
+  }
+
+  function calcDepAge() {
+    var dobVal = ($id('dep-dob') || {}).value;
+    if (!dobVal) return;
+    var dob   = new Date(dobVal + 'T00:00:00');
+    var hoy   = new Date();
+    var age   = hoy.getFullYear() - dob.getFullYear();
+    var m     = hoy.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < dob.getDate())) age--;
+    var edadEl  = $id('dep-edad');
+    var menorEl = $id('dep-menor');
+    if (edadEl)  edadEl.value  = age >= 0 ? age + ' años' : '—';
+    if (menorEl) menorEl.value = age < 18 ? 'Sí' : 'No';
+  }
+
+  function submitDependent() {
+    var tipo   = ($id('dep-tipo')   || {}).value || '';
+    var nombre = (($id('dep-nombre') || {}).value || '').trim();
+    var dob    = ($id('dep-dob')    || {}).value || '';
+    var edadTx = ($id('dep-edad')   || {}).value || '';
+    var menorTx= ($id('dep-menor')  || {}).value || '';
+
+    if (!tipo || !nombre || !dob) {
+      alert('Por favor completa todos los campos.');
+      return;
+    }
+    if (tipo === 'conyugue' && _deps.some(function(d){ return d.tipo === 'conyugue'; })) {
+      alert('Ya tienes un cónyuge registrado. Solo se permite uno.');
+      return;
+    }
+    if (_deps.length >= 3) {
+      alert('Ya alcanzaste el límite de 3 dependientes.');
+      return;
+    }
+
+    var edad    = parseInt(edadTx, 10);
+    var esMenor = menorTx === 'Sí';
+    var payload = {
+      tipo           : tipo,
+      nombreCompleto : nombre,
+      fechaNacimiento: dob,
+      edad           : isNaN(edad) ? null : edad,
+      esMenor        : esMenor,
+      estado         : 'pendiente',
+      userId         : _depUid,
+      fechaAgregado  : firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    var btn = $id('dep-submit-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+    cmgDb.collection('d365solicitudes').doc(_depDocId)
+      .collection('dependientes').add(payload)
+      .then(function () {
+        hideDepForm();
+        loadDeps();
+        if (btn) { btn.disabled = false; btn.textContent = 'Enviar solicitud'; }
+      })
+      .catch(function (err) {
+        alert('Error al guardar: ' + err.message);
+        if (btn) { btn.disabled = false; btn.textContent = 'Enviar solicitud'; }
+      });
   }
 
   /* ── Auth guard + cargar datos ── */
@@ -721,28 +1008,20 @@
       if (adminPill) adminPill.style.display = 'inline-flex';
     }
 
-    /* 1. Intentar desde localStorage (recién inscrito) */
-    try {
-      var raw = localStorage.getItem('cmg-d365-member');
-      if (raw) {
-        fillContract(JSON.parse(raw));
-        localStorage.removeItem('cmg-d365-member');
-        return;
-      }
-    } catch (e) { /* continuar con Firestore */ }
+    /* Limpiar cache localStorage */
+    localStorage.removeItem('cmg-d365-member');
 
-    /* 2. Cargar desde Firestore */
+    /* Cargar siempre desde Firestore (necesitamos el docId para dependientes) */
     cmgDb.collection('d365solicitudes')
       .where('userId', '==', user.uid)
       .limit(1)
       .get()
       .then(function (snap) {
         if (snap.empty) {
-          /* No tiene solicitud → redirigir al formulario */
           window.location.href = 'Doctor-365-Inscripcion.html';
           return;
         }
-        fillContract(snap.docs[0].data());
+        fillContract(snap.docs[0].data(), snap.docs[0].id, user.uid);
       })
       .catch(function (err) {
         console.error('[CMG] Error Firestore:', err);

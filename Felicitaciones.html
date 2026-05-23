@@ -1044,9 +1044,23 @@
 
     cmgDb.collection('d365solicitudes').doc(_depDocId)
       .collection('dependientes').add(payload)
-      .then(function () {
+      .then(function (docRef) {
+        /* Actualizar _deps de inmediato (optimista) para que hideDepForm y
+           cualquier acción del usuario antes de que loadDeps resuelva ya
+           vean los conteos correctos — evita la condición de carrera donde
+           el usuario podía reabrir el form y agregar un tercer hijo. */
+        _deps.push({
+          _id            : docRef.id,
+          tipo           : tipo,
+          nombreCompleto : nombre,
+          identidad      : identidad,
+          fechaNacimiento: dob,
+          edad           : isNaN(edad) ? null : edad,
+          esMenor        : esMenor,
+          estado         : 'pendiente'
+        });
         hideDepForm();
-        loadDeps();
+        loadDeps();   /* re-sincroniza _deps desde Firestore en background */
         if (btn) { btn.disabled = false; btn.textContent = 'Enviar solicitud'; }
       })
       .catch(function (err) {

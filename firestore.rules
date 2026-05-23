@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ─── Helpers ──────────────────────────────────────────────
+    // ═══ Helpers ═══════════════════════════════════════════════
     function isAuth() {
       return request.auth != null;
     }
@@ -13,21 +13,23 @@ service cloud.firestore {
         'ventasymercadeocmg@gmail.com'
       ];
     }
+    function isAdmin() {
+      return isAuth() && request.auth.token.email in [
+        'ventasymercadeocmg@gmail.com',
+        'rubenwainwrightba@gmail.com'
+      ];
+    }
 
-    // ─── /users/{uid} ─────────────────────────────────────────
-    // Cada usuario solo puede leer/escribir su propio perfil.
+    // ═══ /users/{uid} ══════════════════════════════════════════
+    // Perfil del usuario (códigos de expediente vinculados/compartidos).
     match /users/{userId} {
       allow read: if isAuth() && request.auth.uid == userId;
       allow create, update: if isAuth() && request.auth.uid == userId;
       allow delete: if false;
     }
 
-    // ─── /expedientes/{codigo} ────────────────────────────────
-    // - Doctor: acceso total.
-    // - Paciente owner: lee y puede agregarse a "compartidoCon" si otro lo invita.
-    // - Paciente sin owner: puede reclamar (setear ownerUid a su uid).
+    // ═══ /expedientes/{codigo} ═════════════════════════════════
     match /expedientes/{codigo} {
-
       allow read: if isDoctor()
         || (isAuth() && resource.data.ownerUid == request.auth.uid)
         || (isAuth() && resource.data.compartidoCon is list
@@ -36,9 +38,10 @@ service cloud.firestore {
       // Solo el doctor crea expedientes.
       allow create: if isDoctor();
 
-      // Update: doctor siempre. Paciente solo si:
-      //   a) Reclama ownership (ownerUid era null y ahora es su uid)
-      //   b) Se agrega a sí mismo a compartidoCon (sin modificar otros campos sensibles)
+      // Update:
+      //   - Doctor: siempre.
+      //   - Paciente sin owner asignado: puede reclamar (set ownerUid).
+      //   - Paciente con owner: solo agregarse a sí mismo a compartidoCon.
       allow update: if isDoctor()
         || (
           isAuth()
@@ -55,12 +58,8 @@ service cloud.firestore {
       allow delete: if isDoctor();
     }
 
-    // ─── /consultas/{id} ──────────────────────────────────────
-    // - Doctor: acceso total.
-    // - Paciente: lee si es owner del expediente referenciado o
-    //   si el expediente está en su compartidoCon.
+    // ═══ /consultas/{id} ═══════════════════════════════════════
     match /consultas/{consultaId} {
-
       allow read: if isDoctor()
         || (
           isAuth()
@@ -77,18 +76,42 @@ service cloud.firestore {
       allow create, update, delete: if isDoctor();
     }
 
-    // ─── /quotations/{id} ─────────────────────────────────────
-    // Comportamiento existente: el usuario lee/escribe solo sus cotizaciones.
+    // ═══ /quotations/{id} ══════════════════════════════════════
+    // Cotizaciones guardadas: cada usuario lee/escribe solo las suyas.
     match /quotations/{quotationId} {
-      allow read, write: if isAuth()
-        && (
-          (resource != null && request.auth.uid == resource.data.userId)
-          || (request.resource != null && request.auth.uid == request.resource.data.userId)
-        );
+      allow read: if isAuth() && resource.data.userId == request.auth.uid;
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuth() && resource.data.userId == request.auth.uid;
     }
 
-    // ─── /doctor365/{...} y otras colecciones existentes ──────
-    // Permite la lectura para usuarios autenticados; ajusta según necesites.
+    // ═══ /d365solicitudes/{id} ═════════════════════════════════
+    // Solicitudes del programa Doctor 365:
+    //   - Usuario: lee/crea/actualiza solo las suyas.
+    //   - Admin: lee y modifica todas.
+    match /d365solicitudes/{solId} {
+      allow read: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+      allow create: if isAuth()
+        && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin()
+        || (isAuth() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+
+      // Subcolección /dependientes/{depId}
+      match /dependientes/{depId} {
+        allow read: if isAdmin()
+          || (isAuth()
+              && get(/databases/$(database)/documents/d365solicitudes/$(solId)).data.userId == request.auth.uid);
+        allow create: if isAuth()
+          && get(/databases/$(database)/documents/d365solicitudes/$(solId)).data.userId == request.auth.uid;
+        allow update, delete: if isAdmin()
+          || (isAuth()
+              && get(/databases/$(database)/documents/d365solicitudes/$(solId)).data.userId == request.auth.uid);
+      }
+    }
+
+    // ═══ Bloqueo por defecto ═══════════════════════════════════
+    // Cualquier otra colección queda bloqueada.
     match /{document=**} {
       allow read, write: if false;
     }

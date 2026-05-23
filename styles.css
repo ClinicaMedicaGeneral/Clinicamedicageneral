@@ -4,12 +4,11 @@
    ============================================================ */
 
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
+html, body { margin: 0; padding: 0; overflow-x: hidden; }
 body {
   background: #fff;
   color: var(--cmg-navy);
   font-family: var(--font-body);
-  overflow-x: hidden;
 }
 
 /* ── Bilingual machinery ─────────────────────────────────── */

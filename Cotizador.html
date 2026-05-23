@@ -398,13 +398,19 @@
   .coti-disc-warning b { color: var(--cmg-yellow); font-weight: 800; }
 
   @media (max-width: 960px) {
-    .coti-layout { grid-template-columns: 1fr; }
+    .coti-layout { grid-template-columns: 1fr; padding: 0 20px; }
     .coti-cart { position: static; }
     .coti-item { padding: 14px 20px 14px 20px; grid-template-columns: 1fr auto; }
     .coti-item-price { grid-column: 2; }
     .coti-qty { grid-column: 1 / -1; justify-self: end; }
     .coti-search { padding: 16px 20px; top: 64px; }
     .coti-cat-h { padding: 18px 20px; }
+  }
+  @media (max-width: 600px) {
+    .coti-layout { padding: 0 16px; }
+    .coti-cat-title { font-size: 18px; }
+    .coti-categories, .coti-cart { border-radius: 16px; }
+    .coti-cart-grand-amt { font-size: 36px; }
   }
 </style>
 </head>

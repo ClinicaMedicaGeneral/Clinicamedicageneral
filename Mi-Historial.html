@@ -1189,25 +1189,17 @@
     var cont = $id('mh-pruebas-container');
     if (!cont) return;
     cont.innerHTML = '<div class="mh-spinner"></div>';
-    var dg = (exp || {}).datosGenerales || {};
-    var dniNorm = (dg.numeroIdentidad || '').replace(/\D/g, '');
 
-    var promesas = [
-      cmgDb.collection('resultadosPruebas').where('codigoPaciente', '==', codigo).get()
-    ];
-    if (dniNorm) {
-      promesas.push(cmgDb.collection('resultadosPruebas').where('dniNormalizado', '==', dniNorm).get());
-    }
-
-    Promise.all(promesas)
-      .then(function (snaps) {
-        var mapa = {};
-        snaps.forEach(function (snap) {
-          snap.forEach(function (doc) {
-            mapa[doc.id] = Object.assign({ _id: doc.id }, doc.data());
-          });
+    /* Solo consultamos por codigoPaciente — las reglas Firestore permiten
+       leer únicamente pruebas ligadas al expediente del paciente. */
+    cmgDb.collection('resultadosPruebas')
+      .where('codigoPaciente', '==', codigo)
+      .get()
+      .then(function (snap) {
+        var arr = [];
+        snap.forEach(function (doc) {
+          arr.push(Object.assign({ _id: doc.id }, doc.data()));
         });
-        var arr = Object.keys(mapa).map(function (k) { return mapa[k]; });
         arr.sort(function (a, b) {
           var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
           var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;

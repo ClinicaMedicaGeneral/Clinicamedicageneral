@@ -1126,7 +1126,11 @@
       .get()
       .then(function (snap) {
         var consultas = [];
-        snap.forEach(function (doc) { consultas.push(Object.assign({ _id: doc.id }, doc.data())); });
+        snap.forEach(function (doc) {
+          var data = doc.data();
+          if (data.status === 'preclinica') return; /* ocultar pre-clínicas pendientes */
+          consultas.push(Object.assign({ _id: doc.id }, data));
+        });
         consultas.sort(function (a, b) {
           var ta = a.fecha && a.fecha.toMillis ? a.fecha.toMillis() : 0;
           var tb = b.fecha && b.fecha.toMillis ? b.fecha.toMillis() : 0;

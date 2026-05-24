@@ -406,6 +406,128 @@
 }
 .ed-consulta-link:hover { background: #FDD22C; border-color: #FDD22C; }
 
+/* ── Modo selector consulta ── */
+.ed-mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+@media (max-width: 720px) { .ed-mode-grid { grid-template-columns: 1fr; } }
+.ed-mode-card {
+  background: #fff;
+  border: 2px solid #E5E7EB;
+  border-radius: 14px;
+  padding: 22px 20px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: border-color .15s, transform .1s, box-shadow .15s;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.ed-mode-card:hover {
+  border-color: #213C7D;
+  box-shadow: 0 6px 18px rgba(33,60,125,.10);
+  transform: translateY(-2px);
+}
+.ed-mode-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: #213C7D;
+  color: #fff;
+  font-size: 24px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.ed-mode-card.is-yellow .ed-mode-icon { background: #FDD22C; color: #213C7D; }
+.ed-mode-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #213C7D;
+  margin: 0 0 4px;
+}
+.ed-mode-desc {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ── Pre-clínicas pendientes ── */
+.ed-pending-item {
+  background: #FFFBEB;
+  border-left: 4px solid #F59E0B;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ed-pending-info { flex: 1; min-width: 0; }
+.ed-pending-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #213C7D;
+  margin: 0 0 3px;
+}
+.ed-pending-meta {
+  font-size: 12px;
+  color: #6B7280;
+  margin: 0;
+}
+.ed-pending-vitals {
+  font-size: 12px;
+  color: #92400E;
+  margin-top: 4px;
+  font-family: 'Courier New', monospace;
+}
+.ed-back-link {
+  background: none;
+  border: none;
+  color: #6B7280;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 0;
+  margin-bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ed-back-link:hover { color: #213C7D; }
+.ed-vitals-readonly {
+  background: #F4F6FB;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+.ed-vitals-readonly-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 8px;
+}
+.ed-vitals-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ed-vital-chip {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: #213C7D;
+}
+.ed-vital-chip strong { font-weight: 700; }
+
 /* ── Alert ── */
 .ed-alert {
   border-radius: 10px;
@@ -1626,22 +1748,123 @@
   }
 
   /* ════════════════════════════════════════════════════════════
-     NUEVA CONSULTA
+     CONSULTA - Flujo en 2 etapas (Pre-clínica → Consulta médica)
      ════════════════════════════════════════════════════════════ */
+  var consultaPendienteCargada = null; /* id + datos de la preclínica que se está continuando */
+
   function renderConsultaTab() {
     var cont = $id('consulta-contenido');
-    if (!pacienteActual) {
-      cont.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔍</div><p>Primero busca un paciente en la pestaña "Buscar Paciente"</p></div>';
-      return;
+    consultaPendienteCargada = null;
+
+    var html = '';
+
+    /* Si hay paciente seleccionado, mostrar resumen */
+    if (pacienteActual) {
+      var p = pacienteActual;
+      var dg = p.datosGenerales || {};
+      html +=
+        '<div class="ed-patient-summary">' +
+          '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
+          '<p class="ed-patient-meta">' + (calcEdad(dg.fechaNacimiento) || '') +
+          (dg.tipoSangre ? ' · Sangre ' + esc(dg.tipoSangre) : '') +
+          (dg.alergias ? ' · ⚠️ ' + esc(dg.alergias) : '') + '</p></div>' +
+          '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
+        '</div>';
     }
+
+    /* Selector de modo */
+    html +=
+      '<div class="ed-mode-grid">' +
+        '<button class="ed-mode-card" id="btn-modo-preclinica"' + (pacienteActual ? '' : ' disabled style="opacity:.45;cursor:not-allowed"') + '>' +
+          '<div class="ed-mode-icon">🩺</div>' +
+          '<div>' +
+            '<p class="ed-mode-title">Etapa 1 · Pre-clínica</p>' +
+            '<p class="ed-mode-desc">' + (pacienteActual ? 'Registrar signos vitales del paciente seleccionado.' : 'Primero busca un paciente en la pestaña "Buscar".') + '</p>' +
+          '</div>' +
+        '</button>' +
+        '<div class="ed-mode-card is-yellow" style="cursor:default">' +
+          '<div class="ed-mode-icon">📝</div>' +
+          '<div>' +
+            '<p class="ed-mode-title">Etapa 2 · Consulta médica</p>' +
+            '<p class="ed-mode-desc">Selecciona una pre-clínica pendiente abajo para continuar la consulta del médico.</p>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    /* Lista de pendientes */
+    html +=
+      '<div class="ed-section-title">⏳ Pre-clínicas pendientes</div>' +
+      '<div id="preclinicas-pendientes-lista">' +
+        '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
+      '</div>';
+
+    cont.innerHTML = html;
+
+    if (pacienteActual) {
+      $id('btn-modo-preclinica').addEventListener('click', function () { renderPreclinicaForm(); });
+    }
+
+    cargarPreclinicasPendientes();
+  }
+
+  /* ─── Cargar pre-clínicas pendientes (status:'preclinica') ─── */
+  function cargarPreclinicasPendientes() {
+    var lista = $id('preclinicas-pendientes-lista');
+    if (!lista) return;
+    cmgDb.collection('consultas')
+      .where('status', '==', 'preclinica')
+      .get()
+      .then(function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ _id: d.id }, d.data())); });
+        items.sort(function (a, b) {
+          var ta = a.fechaPreclinica && a.fechaPreclinica.toMillis ? a.fechaPreclinica.toMillis() : 0;
+          var tb = b.fechaPreclinica && b.fechaPreclinica.toMillis ? b.fechaPreclinica.toMillis() : 0;
+          return tb - ta;
+        });
+        if (!items.length) {
+          lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">✅</div><p>No hay pre-clínicas pendientes.</p></div>';
+          return;
+        }
+        lista.innerHTML = items.map(function (it) {
+          var sv = it.signosVitales || {};
+          var chips = [];
+          if (sv.ta) chips.push('TA ' + esc(sv.ta));
+          if (sv.fc) chips.push('FC ' + esc(sv.fc));
+          if (sv.temp) chips.push('T° ' + esc(sv.temp));
+          if (sv.spo2) chips.push('SpO2 ' + esc(sv.spo2) + '%');
+          return '<div class="ed-pending-item">' +
+            '<div class="ed-pending-info">' +
+              '<p class="ed-pending-name">' + esc(it.pacienteNombre || it.codigoPaciente) + ' <span style="font-weight:500;color:#6B7280">· ' + esc(it.codigoPaciente) + '</span></p>' +
+              '<p class="ed-pending-meta">📅 ' + fmtDate(it.fechaPreclinica) + ' · Registrado por ' + esc(it.preclinicaPor || '—') + '</p>' +
+              (chips.length ? '<div class="ed-pending-vitals">' + chips.join(' · ') + '</div>' : '') +
+            '</div>' +
+            '<button class="ed-btn ed-btn-yellow" data-continuar="' + esc(it._id) + '">Continuar →</button>' +
+          '</div>';
+        }).join('');
+        lista.querySelectorAll('[data-continuar]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            continuarConsulta(b.getAttribute('data-continuar'));
+          });
+        });
+      })
+      .catch(function (err) {
+        lista.innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error: ' + esc(err.message) + '</div>';
+      });
+  }
+
+  /* ─── Formulario solo signos vitales (Etapa 1) ─── */
+  function renderPreclinicaForm() {
+    if (!pacienteActual) return;
+    var cont = $id('consulta-contenido');
     var p = pacienteActual;
     var dg = p.datosGenerales || {};
+
     cont.innerHTML =
+      '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
       '<div class="ed-patient-summary">' +
         '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
-        '<p class="ed-patient-meta">' + (calcEdad(dg.fechaNacimiento) || '') +
-        (dg.tipoSangre ? ' · Sangre ' + esc(dg.tipoSangre) : '') +
-        (dg.alergias ? ' · ⚠️ ' + esc(dg.alergias) : '') + '</p></div>' +
+        '<p class="ed-patient-meta">Etapa 1 · Pre-clínica</p></div>' +
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
       '<div class="ed-section-title">📊 Signos vitales</div>' +
@@ -1655,6 +1878,113 @@
         '<div class="ed-vital"><div class="ed-vital-label">SpO2 (%)</div><input id="cons-spo2" placeholder="98"></div>' +
         '<div class="ed-vital"><div class="ed-vital-label">Glucosa (mg/dL)</div><input id="cons-glucosa" placeholder="90"></div>' +
       '</div>' +
+      '<div class="ed-section">' +
+        '<div class="ed-fgroup full"><label class="ed-label">Notas de pre-clínica (opcional)</label>' +
+          '<textarea class="ed-textarea" id="cons-notas-pre" rows="2" placeholder="Observaciones relevantes para el médico"></textarea></div>' +
+      '</div>' +
+      '<div class="ed-actions">' +
+        '<button class="ed-btn ed-btn-primary" id="btn-guardar-preclinica">💾 Guardar pre-clínica</button>' +
+      '</div>';
+
+    $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
+    $id('btn-guardar-preclinica').addEventListener('click', guardarPreclinica);
+  }
+
+  /* ─── Guardar pre-clínica (crea consulta con status:'preclinica') ─── */
+  function guardarPreclinica() {
+    if (!pacienteActual) return;
+    var dg = pacienteActual.datosGenerales || {};
+    var vitales = {
+      ta: $val('cons-ta'), fc: $val('cons-fc'), fr: $val('cons-fr'),
+      temp: $val('cons-temp'), peso: $val('cons-peso'), talla: $val('cons-talla'),
+      spo2: $val('cons-spo2'), glucosa: $val('cons-glucosa')
+    };
+    var algunaVital = Object.keys(vitales).some(function (k) { return vitales[k]; });
+    if (!algunaVital) {
+      showAlert('Registra al menos un signo vital.', 'error');
+      return;
+    }
+
+    var docData = {
+      codigoPaciente: pacienteActual.codigoPaciente,
+      pacienteNombre: dg.nombreCompleto || '',
+      status: 'preclinica',
+      fechaPreclinica: firebase.firestore.FieldValue.serverTimestamp(),
+      preclinicaPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
+      preclinicaEmail: cmgAuth.currentUser.email,
+      signosVitales: vitales,
+      notasPreclinica: $val('cons-notas-pre'),
+      pdfUrl: null
+    };
+
+    showOverlay('Guardando pre-clínica...');
+    cmgDb.collection('consultas').add(docData)
+      .then(function () {
+        hideOverlay();
+        showAlert('✓ Pre-clínica guardada. El médico podrá continuar la consulta.', 'success');
+        renderConsultaTab();
+      })
+      .catch(function (err) {
+        hideOverlay();
+        showAlert('Error: ' + err.message, 'error');
+      });
+  }
+
+  /* ─── Continuar consulta a partir de una pre-clínica existente ─── */
+  function continuarConsulta(consultaId) {
+    showOverlay('Cargando pre-clínica...');
+    cmgDb.collection('consultas').doc(consultaId).get()
+      .then(function (snap) {
+        if (!snap.exists) throw new Error('Pre-clínica no encontrada');
+        var data = snap.data();
+        /* Cargar paciente */
+        return cmgDb.collection('expedientes').doc(data.codigoPaciente).get()
+          .then(function (psnap) {
+            if (!psnap.exists) throw new Error('Expediente del paciente no encontrado');
+            pacienteActual = Object.assign({ _id: psnap.id }, psnap.data());
+            consultaPendienteCargada = Object.assign({ _id: snap.id }, data);
+            hideOverlay();
+            renderConsultaForm();
+          });
+      })
+      .catch(function (err) {
+        hideOverlay();
+        showAlert('Error: ' + err.message, 'error');
+      });
+  }
+
+  /* ─── Formulario de consulta médica (Etapa 2) ─── */
+  function renderConsultaForm() {
+    var cont = $id('consulta-contenido');
+    var p = pacienteActual;
+    var dg = p.datosGenerales || {};
+    var pre = consultaPendienteCargada || {};
+    var sv = pre.signosVitales || {};
+
+    var chips = [];
+    if (sv.ta) chips.push('<span class="ed-vital-chip"><strong>TA:</strong> ' + esc(sv.ta) + '</span>');
+    if (sv.fc) chips.push('<span class="ed-vital-chip"><strong>FC:</strong> ' + esc(sv.fc) + '</span>');
+    if (sv.fr) chips.push('<span class="ed-vital-chip"><strong>FR:</strong> ' + esc(sv.fr) + '</span>');
+    if (sv.temp) chips.push('<span class="ed-vital-chip"><strong>T°:</strong> ' + esc(sv.temp) + '</span>');
+    if (sv.peso) chips.push('<span class="ed-vital-chip"><strong>Peso:</strong> ' + esc(sv.peso) + ' kg</span>');
+    if (sv.talla) chips.push('<span class="ed-vital-chip"><strong>Talla:</strong> ' + esc(sv.talla) + ' m</span>');
+    if (sv.spo2) chips.push('<span class="ed-vital-chip"><strong>SpO2:</strong> ' + esc(sv.spo2) + '%</span>');
+    if (sv.glucosa) chips.push('<span class="ed-vital-chip"><strong>Glucosa:</strong> ' + esc(sv.glucosa) + '</span>');
+
+    cont.innerHTML =
+      '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
+      '<div class="ed-patient-summary">' +
+        '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
+        '<p class="ed-patient-meta">Etapa 2 · Consulta médica</p></div>' +
+        '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
+      '</div>' +
+
+      '<div class="ed-vitals-readonly">' +
+        '<div class="ed-vitals-readonly-title">📊 Signos vitales (pre-clínica · ' + fmtDate(pre.fechaPreclinica) + ' · por ' + esc(pre.preclinicaPor || '—') + ')</div>' +
+        (chips.length ? '<div class="ed-vitals-chips">' + chips.join('') + '</div>' : '<div style="font-size:13px;color:#6B7280">Sin signos vitales registrados</div>') +
+        (pre.notasPreclinica ? '<div style="margin-top:8px;font-size:12px;color:#374151"><strong>Notas:</strong> ' + esc(pre.notasPreclinica) + '</div>' : '') +
+      '</div>' +
+
       '<div class="ed-section">' +
         '<div class="ed-grid ed-grid-2">' +
           '<div class="ed-fgroup full"><label class="ed-label">Motivo de consulta *</label>' +
@@ -1676,46 +2006,43 @@
         '</div>' +
       '</div>' +
       '<div class="ed-actions">' +
-        '<button class="ed-btn ed-btn-primary" id="btn-cons-guardar">' +
-          '💾 Guardar consulta + Generar PDF' +
-        '</button>' +
+        '<button class="ed-btn ed-btn-primary" id="btn-cons-guardar">💾 Finalizar consulta + Generar PDF</button>' +
       '</div>';
 
+    $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
     $id('btn-cons-guardar').addEventListener('click', guardarConsulta);
   }
 
+  /* ─── Finalizar consulta (actualiza pre-clínica → completa) ─── */
   function guardarConsulta() {
-    if (!pacienteActual) return;
+    if (!pacienteActual || !consultaPendienteCargada) return;
     var motivo = $val('cons-motivo');
     var diagnostico = $val('cons-diagnostico');
     if (!motivo || !diagnostico) {
       showAlert('Motivo y diagnóstico son obligatorios.', 'error');
       return;
     }
-    var consulta = {
-      codigoPaciente: pacienteActual.codigoPaciente,
+
+    var preId = consultaPendienteCargada._id;
+    var consulta = Object.assign({}, consultaPendienteCargada, {
+      status: 'completa',
       fecha: firebase.firestore.FieldValue.serverTimestamp(),
       fechaLocal: new Date().toISOString(),
       doctorEmail: cmgAuth.currentUser.email,
       doctorNombre: $val('cons-medico'),
-      signosVitales: {
-        ta: $val('cons-ta'), fc: $val('cons-fc'), fr: $val('cons-fr'),
-        temp: $val('cons-temp'), peso: $val('cons-peso'), talla: $val('cons-talla'),
-        spo2: $val('cons-spo2'), glucosa: $val('cons-glucosa')
-      },
       motivoConsulta: motivo,
       sintomas: $val('cons-sintomas'),
       exploracion: $val('cons-exploracion'),
       diagnostico: diagnostico,
       tratamiento: $val('cons-tratamiento'),
       indicaciones: $val('cons-indicaciones'),
-      proximaCita: $val('cons-proxcita'),
-      pdfUrl: null
-    };
+      proximaCita: $val('cons-proxcita')
+    });
+    delete consulta._id;
 
-    showOverlay('Generando PDF y guardando consulta...');
+    showOverlay('Generando PDF y finalizando consulta...');
 
-    /* Paso 1: Generar PDF como blob */
+    /* Paso 1: Generar PDF */
     var pdfBlob;
     try {
       pdfBlob = generarPdfConsulta(pacienteActual, consulta);
@@ -1725,7 +2052,7 @@
       return;
     }
 
-    /* Paso 2: Subir PDF a Firebase Storage */
+    /* Paso 2: Subir a Storage */
     var fechaStr = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
     var storagePath = 'expedientes/' + pacienteActual.codigoPaciente + '/consultas/' + fechaStr + '.pdf';
     var storageRef = firebase.storage().ref(storagePath);
@@ -1734,15 +2061,14 @@
       .then(function (url) {
         consulta.pdfUrl = url;
         consulta.storagePath = storagePath;
-        /* Paso 3: Guardar consulta en Firestore */
-        return cmgDb.collection('consultas').add(consulta);
+        /* Paso 3: Actualizar documento existente */
+        return cmgDb.collection('consultas').doc(preId).update(consulta);
       })
       .then(function () {
         hideOverlay();
-        showAlert('✓ Consulta guardada exitosamente. PDF generado.', 'success');
-        /* Limpiar formulario */
-        document.querySelectorAll('#consulta-contenido .ed-input, #consulta-contenido .ed-textarea, #consulta-contenido .ed-vital input')
-          .forEach(function (el) { if (el.id !== 'cons-medico') el.value = ''; });
+        showAlert('✓ Consulta finalizada exitosamente. PDF generado.', 'success');
+        consultaPendienteCargada = null;
+        renderConsultaTab();
       })
       .catch(function (err) {
         hideOverlay();
@@ -1932,13 +2258,17 @@
 
     $id('btn-gen-word').addEventListener('click', generarWordExpediente);
 
-    /* Cargar consultas */
+    /* Cargar consultas (solo completas, excluye pre-clínicas pendientes) */
     cmgDb.collection('consultas')
       .where('codigoPaciente', '==', p.codigoPaciente)
       .get()
       .then(function (snap) {
         var consultas = [];
-        snap.forEach(function (doc) { consultas.push(Object.assign({ _id: doc.id }, doc.data())); });
+        snap.forEach(function (doc) {
+          var data = doc.data();
+          if (data.status === 'preclinica') return; /* omitir pendientes */
+          consultas.push(Object.assign({ _id: doc.id }, data));
+        });
         consultas.sort(function (a, b) {
           var ta = a.fecha && a.fecha.toMillis ? a.fecha.toMillis() : 0;
           var tb = b.fecha && b.fecha.toMillis ? b.fecha.toMillis() : 0;

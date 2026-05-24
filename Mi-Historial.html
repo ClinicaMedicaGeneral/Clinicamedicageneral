@@ -857,9 +857,13 @@
     $id('mh-expediente-data').style.display = '';
     var dg = exp.datosGenerales || {};
 
-    /* Mostrar código en la barra superior */
-    $id('mh-topbar').style.display = '';
-    $id('mh-topbar-code').textContent = codigo;
+    /* Mostrar código en la barra superior solo si es expediente propio */
+    if (userProfile.codigoExpediente && codigo === userProfile.codigoExpediente) {
+      $id('mh-topbar').style.display = '';
+      $id('mh-topbar-code').textContent = codigo;
+    } else {
+      $id('mh-topbar').style.display = 'none';
+    }
 
     $id('mh-p-nombre').textContent = dg.nombreCompleto || '—';
     var sub = [];

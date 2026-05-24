@@ -788,7 +788,13 @@
 
       <!-- Exámenes de laboratorio -->
       <div class="mh-card">
-        <h3 class="mh-card-title">🔬 Exámenes de laboratorio</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+          <h3 class="mh-card-title" style="margin:0">🔬 Exámenes de laboratorio</h3>
+          <button id="btn-subir-lab" style="display:none;background:#213C7D;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+            📤 Subir mi examen
+          </button>
+        </div>
+        <p style="font-size:12px;color:#6B7280;margin:0 0 12px">Aquí ves los exámenes de laboratorio que subió CMG o tú mismo.</p>
         <div id="mh-laboratorio-container"></div>
       </div>
     </div>
@@ -818,6 +824,70 @@
   </div>
 </div>
 
+<!-- Modal subir examen propio -->
+<div class="mh-modal" id="modal-subir-lab">
+  <div class="mh-modal-box" style="max-width:520px">
+    <h3 class="mh-modal-title">📤 Subir examen de laboratorio</h3>
+    <p class="mh-modal-sub">Sube un PDF con tus resultados. Quedará en tu expediente y tus médicos podrán verlo.</p>
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px">
+      <div>
+        <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px">Tipo de examen *</label>
+        <select id="lab-tipo" class="mh-modal-input" style="text-transform:none;letter-spacing:0;font-family:inherit;font-weight:500">
+          <option value="">— Seleccionar —</option>
+          <option value="hematologia">Hematología completa</option>
+          <option value="quimica">Química sanguínea</option>
+          <option value="glucosa">Glucosa</option>
+          <option value="lipidograma">Perfil lipídico</option>
+          <option value="hepatico">Perfil hepático</option>
+          <option value="renal">Perfil renal</option>
+          <option value="tiroideas">Pruebas tiroideas</option>
+          <option value="hba1c">Hemoglobina glicosilada</option>
+          <option value="electrolitos">Electrolitos</option>
+          <option value="coagulacion">Coagulación</option>
+          <option value="orina">Orina (general)</option>
+          <option value="heces">Heces (general)</option>
+          <option value="cultivo">Cultivo</option>
+          <option value="hierro">Hierro / Ferritina</option>
+          <option value="vitb12">Vitamina B12</option>
+          <option value="vitd">Vitamina D</option>
+          <option value="vih">VIH</option>
+          <option value="vdrl">VDRL</option>
+          <option value="hepatitis">Hepatitis B/C</option>
+          <option value="embarazo-sangre">Embarazo (sangre)</option>
+          <option value="marcadores">Marcadores tumorales</option>
+          <option value="otro">Otro (escribir abajo)</option>
+        </select>
+      </div>
+      <div id="lab-tipo-otro-wrap" style="display:none">
+        <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px">Nombre del examen *</label>
+        <input type="text" id="lab-tipo-otro" class="mh-modal-input" placeholder="Ej. Anti-CCP" style="text-transform:none;letter-spacing:0;font-family:inherit;font-weight:500">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px">Fecha del examen *</label>
+        <input type="date" id="lab-fecha" class="mh-modal-input" style="text-transform:none;letter-spacing:0;font-family:inherit;font-weight:500">
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:4px">Notas (opcional)</label>
+        <textarea id="lab-notas" rows="2" class="mh-modal-input" placeholder="Cualquier información relevante" style="text-transform:none;letter-spacing:0;font-family:inherit;font-weight:500;resize:vertical;min-height:60px;line-height:1.4"></textarea>
+      </div>
+      <div>
+        <label id="lab-file-label" for="lab-file" style="display:block;border:2px dashed #C7D2FE;border-radius:8px;padding:18px;text-align:center;background:#F4F6FB;cursor:pointer;font-size:13px;color:#4B5563">
+          <div style="font-size:28px;margin-bottom:4px">📄</div>
+          <div id="lab-file-text">Click para elegir el PDF</div>
+        </label>
+        <input type="file" id="lab-file" accept="application/pdf" style="display:none">
+      </div>
+    </div>
+
+    <div class="mh-modal-error" id="lab-error"></div>
+    <div class="mh-modal-actions">
+      <button class="mh-modal-btn mh-modal-btn-ghost" id="lab-cancel">Cancelar</button>
+      <button class="mh-modal-btn mh-modal-btn-primary" id="lab-confirmar" disabled>📤 Subir PDF</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="mh-toast" id="mh-toast">—</div>
 
@@ -830,6 +900,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="firebase-init.js"></script>
 
 <script>
@@ -1253,10 +1324,21 @@
   /* ════════════════════════════════════════════════════════════
      EXÁMENES DE LABORATORIO
      ════════════════════════════════════════════════════════════ */
+  var puedeSubirLab = false; /* true si el usuario es owner del expediente actual */
+
   function cargarLaboratorio(codigo) {
     var cont = $id('mh-laboratorio-container');
     if (!cont) return;
     cont.innerHTML = '<div class="mh-spinner"></div>';
+
+    /* Mostrar/ocultar botón de subir según ownership */
+    cmgDb.collection('expedientes').doc(codigo).get().then(function (expSnap) {
+      var exp = expSnap.exists ? expSnap.data() : null;
+      puedeSubirLab = !!(exp && exp.ownerUid === currentUser.uid);
+      var btn = $id('btn-subir-lab');
+      if (btn) btn.style.display = puedeSubirLab ? '' : 'none';
+    });
+
     cmgDb.collection('examenesLaboratorio')
       .where('codigoPaciente', '==', codigo)
       .get()
@@ -1281,20 +1363,151 @@
   function renderLaboratorio(examenes) {
     var cont = $id('mh-laboratorio-container');
     if (!examenes.length) {
-      cont.innerHTML = '<div class="mh-ant-empty">Aún no tienes exámenes de laboratorio registrados.</div>';
+      cont.innerHTML = '<div class="mh-ant-empty">Aún no hay exámenes registrados. ' + (puedeSubirLab ? 'Puedes subir el primero con el botón de arriba.' : '') + '</div>';
       return;
     }
     cont.innerHTML = examenes.map(function (ex) {
       var fecha = ex.fechaExamen || '—';
+      var origen = ex.subidoPorPaciente
+        ? '<span style="background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;margin-left:6px">Subido por ti</span>'
+        : '<span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;margin-left:6px">Por CMG</span>';
       return '<div style="background:#F9FAFB;border-left:4px solid #4BACC6;border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">' +
         '<div style="flex:1;min-width:0">' +
-          '<div style="font-size:13px;font-weight:700;color:#213C7D;margin-bottom:4px">🔬 ' + esc(ex.tipoNombre || ex.tipo) + ' · 📅 ' + esc(fecha) + '</div>' +
+          '<div style="font-size:13px;font-weight:700;color:#213C7D;margin-bottom:4px">🔬 ' + esc(ex.tipoNombre || ex.tipo) + ' · 📅 ' + esc(fecha) + origen + '</div>' +
           (ex.proveedor ? '<div style="font-size:12px;color:#6B7280">Proveedor: ' + esc(ex.proveedor) + '</div>' : '') +
           (ex.notas ? '<div style="font-size:12px;color:#4B5563;margin-top:4px">' + esc(ex.notas) + '</div>' : '') +
         '</div>' +
         '<a href="' + esc(ex.pdfUrl) + '" target="_blank" rel="noopener" style="background:#213C7D;color:#fff;text-decoration:none;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:700;white-space:nowrap">📄 Ver / Descargar</a>' +
       '</div>';
     }).join('');
+  }
+
+  /* ─── Modal subir examen (paciente) ─── */
+  var labFile = null;
+
+  function abrirModalLab() {
+    if (!puedeSubirLab || !codigoActual) {
+      toast('Solo puedes subir exámenes a tu propio expediente');
+      return;
+    }
+    $id('lab-tipo').value = '';
+    $id('lab-tipo-otro').value = '';
+    $id('lab-tipo-otro-wrap').style.display = 'none';
+    $id('lab-fecha').value = new Date().toISOString().slice(0, 10);
+    $id('lab-notas').value = '';
+    $id('lab-file').value = '';
+    $id('lab-file-text').textContent = 'Click para elegir el PDF';
+    $id('lab-file-label').style.borderColor = '#C7D2FE';
+    $id('lab-file-label').style.background = '#F4F6FB';
+    $id('lab-error').classList.remove('is-visible');
+    $id('lab-confirmar').disabled = true;
+    labFile = null;
+    $id('modal-subir-lab').classList.add('is-open');
+  }
+  function cerrarModalLab() { $id('modal-subir-lab').classList.remove('is-open'); }
+
+  function updateLabBtn() {
+    var tipo = $id('lab-tipo').value;
+    var tipoOtro = $id('lab-tipo-otro').value.trim();
+    var fecha = $id('lab-fecha').value;
+    var valid = tipo && (tipo !== 'otro' || tipoOtro) && fecha && labFile;
+    $id('lab-confirmar').disabled = !valid;
+  }
+
+  if ($id('btn-subir-lab')) {
+    $id('btn-subir-lab').addEventListener('click', abrirModalLab);
+    $id('lab-cancel').addEventListener('click', cerrarModalLab);
+    $id('modal-subir-lab').addEventListener('click', function (e) {
+      if (e.target === $id('modal-subir-lab')) cerrarModalLab();
+    });
+    $id('lab-tipo').addEventListener('change', function () {
+      $id('lab-tipo-otro-wrap').style.display = this.value === 'otro' ? '' : 'none';
+      updateLabBtn();
+    });
+    ['lab-tipo-otro', 'lab-fecha'].forEach(function (id) {
+      $id(id).addEventListener('input', updateLabBtn);
+    });
+    $id('lab-file').addEventListener('change', function (e) {
+      var f = e.target.files[0];
+      if (!f) { labFile = null; return; }
+      if (f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) {
+        toast('Solo se aceptan archivos PDF');
+        e.target.value = '';
+        return;
+      }
+      if (f.size > 15 * 1024 * 1024) {
+        toast('El archivo excede 15 MB');
+        e.target.value = '';
+        return;
+      }
+      labFile = f;
+      $id('lab-file-text').innerHTML = '✓ <strong>' + esc(f.name) + '</strong><br><span style="font-size:11px;color:#6B7280">(' + (f.size / 1024 / 1024).toFixed(2) + ' MB)</span>';
+      $id('lab-file-label').style.borderColor = '#059669';
+      $id('lab-file-label').style.background = '#ECFDF5';
+      updateLabBtn();
+    });
+
+    $id('lab-confirmar').addEventListener('click', function () {
+      if ($id('lab-confirmar').disabled) return;
+      var TIPOS_LABELS = {
+        hematologia:'Hematología completa',quimica:'Química sanguínea',glucosa:'Glucosa',
+        lipidograma:'Perfil lipídico',hepatico:'Perfil hepático',renal:'Perfil renal',
+        tiroideas:'Pruebas tiroideas',hba1c:'Hemoglobina glicosilada',electrolitos:'Electrolitos',
+        coagulacion:'Coagulación',orina:'Orina (general)',heces:'Heces (general)',
+        cultivo:'Cultivo',hierro:'Hierro / Ferritina',vitb12:'Vitamina B12',vitd:'Vitamina D',
+        vih:'VIH',vdrl:'VDRL',hepatitis:'Hepatitis B/C','embarazo-sangre':'Embarazo (sangre)',
+        marcadores:'Marcadores tumorales',otro:'Otro'
+      };
+      var tipoVal = $id('lab-tipo').value;
+      var tipoNombre = tipoVal === 'otro' ? $id('lab-tipo-otro').value.trim() : TIPOS_LABELS[tipoVal];
+      var fecha = $id('lab-fecha').value;
+      var notas = $id('lab-notas').value.trim();
+
+      var btn = $id('lab-confirmar');
+      btn.disabled = true;
+      btn.textContent = 'Subiendo...';
+
+      var ts = new Date().toISOString().replace(/[:.]/g, '-');
+      var safeTipo = (tipoNombre || 'examen').replace(/[^a-zA-Z0-9-]/g, '_').slice(0, 30);
+      var storagePath = 'examenes-laboratorio/paciente-' + currentUser.uid + '/' + ts + '-' + safeTipo + '.pdf';
+      var ref = firebase.storage().ref(storagePath);
+
+      ref.put(labFile)
+        .then(function (snap) { return snap.ref.getDownloadURL(); })
+        .then(function (url) {
+          var docData = {
+            tipo: tipoVal,
+            tipoNombre: tipoNombre,
+            fechaExamen: fecha,
+            notas: notas,
+            pdfUrl: url,
+            storagePath: storagePath,
+            codigoPaciente: codigoActual,
+            fileName: labFile.name,
+            fileSize: labFile.size,
+            subidoPorPaciente: true,
+            subidoPor: currentUser.email,
+            subidoPorNombre: currentUser.displayName || currentUser.email.split('@')[0],
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          };
+          return cmgDb.collection('examenesLaboratorio').add(docData);
+        })
+        .then(function () {
+          btn.disabled = false;
+          btn.textContent = '📤 Subir PDF';
+          toast('✓ Examen subido a tu expediente');
+          cerrarModalLab();
+          cargarLaboratorio(codigoActual);
+        })
+        .catch(function (err) {
+          console.error('[CMG] Error subiendo:', err);
+          btn.disabled = false;
+          btn.textContent = '📤 Subir PDF';
+          var e = $id('lab-error');
+          e.textContent = 'Error: ' + err.message;
+          e.classList.add('is-visible');
+        });
+    });
   }
 
   /* ════════════════════════════════════════════════════════════

@@ -141,6 +141,9 @@ service cloud.firestore {
     // Exámenes de laboratorio externos (PDFs):
     //   - Staff (isDoctor): lectura/escritura total.
     //   - Paciente: puede leer los exámenes ligados a su expediente.
+    //   - Paciente: puede CREAR (subir) exámenes solo a SU PROPIO expediente
+    //     (ownerUid === su uid), siempre con flag subidoPorPaciente=true.
+    //   - Paciente: NO puede editar ni borrar (solo staff).
     match /examenesLaboratorio/{examenId} {
       allow read: if isDoctor()
         || (
@@ -155,8 +158,16 @@ service cloud.firestore {
             )
           )
         );
-      allow create, update: if isDoctor();
-      allow delete:         if isDoctor();
+      allow create: if isDoctor()
+        || (
+          isAuth()
+          && request.resource.data.codigoPaciente != null
+          && request.resource.data.subidoPorPaciente == true
+          && exists(/databases/$(database)/documents/expedientes/$(request.resource.data.codigoPaciente))
+          && get(/databases/$(database)/documents/expedientes/$(request.resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
+        );
+      allow update: if isDoctor();
+      allow delete: if isDoctor();
     }
 
     // ═══ Bloqueo por defecto ═══════════════════════════════════

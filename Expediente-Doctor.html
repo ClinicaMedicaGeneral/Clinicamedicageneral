@@ -2529,9 +2529,12 @@
     lista.innerHTML = banner + examenes.map(function (ex) {
       var fecha = ex.fechaExamen || (ex.createdAt && ex.createdAt.toMillis ? new Date(ex.createdAt.toMillis()).toLocaleDateString('es-HN') : '—');
       var size = ex.fileSize ? ' · ' + (ex.fileSize / 1024 / 1024).toFixed(2) + ' MB' : '';
+      var origen = ex.subidoPorPaciente
+        ? '<span style="background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;margin-left:6px">👤 Subido por paciente</span>'
+        : '<span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;margin-left:6px">🏥 Subido por CMG</span>';
       return '<div class="ed-consulta-item">' +
         '<div style="flex:1;min-width:0">' +
-          '<div class="ed-consulta-fecha">🔬 ' + esc(ex.tipoNombre || ex.tipo) + ' · 📅 ' + esc(fecha) + '</div>' +
+          '<div class="ed-consulta-fecha">🔬 ' + esc(ex.tipoNombre || ex.tipo) + ' · 📅 ' + esc(fecha) + origen + '</div>' +
           (ex.proveedor ? '<div class="ed-consulta-motivo">Proveedor: ' + esc(ex.proveedor) + '</div>' : '') +
           (ex.notas ? '<div class="ed-consulta-motivo">' + esc(ex.notas) + '</div>' : '') +
           '<div style="font-size:11px;color:#9CA3AF;margin-top:4px">Subido por ' + esc(ex.subidoPorNombre || ex.subidoPor || '—') + size + '</div>' +

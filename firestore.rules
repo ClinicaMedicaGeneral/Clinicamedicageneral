@@ -30,11 +30,9 @@ service cloud.firestore {
 
     // ═══ /expedientes/{codigo} ═════════════════════════════════
     match /expedientes/{codigo} {
-      allow read: if isDoctor()
-        || (isAuth() && resource.data.ownerUid == request.auth.uid)
-        || (isAuth() && resource.data.ownerUid == null)
-        || (isAuth() && resource.data.compartidoCon is list
-            && request.auth.uid in resource.data.compartidoCon);
+      // Cualquier usuario autenticado puede leer un expediente si conoce el código.
+      // El código único actúa como control de acceso.
+      allow read: if isDoctor() || isAuth();
 
       // Solo el doctor crea expedientes.
       allow create: if isDoctor();

@@ -934,17 +934,39 @@
   /* ════════════════════════════════════════════════════════════
      SAVE & GENERATE RESULT
      ════════════════════════════════════════════════════════════ */
+  /* Normaliza DNI (solo dígitos, para hacer match aunque tenga guiones) */
+  function normalizarDNI(v) { return (v || '').replace(/\D/g, ''); }
+
+  /* Busca expediente cuyo numeroIdentidad coincida (con o sin guiones) */
+  function buscarExpedientePorDNI(dniRaw) {
+    var dniNorm = normalizarDNI(dniRaw);
+    if (!dniNorm) return Promise.resolve(null);
+    return cmgDb.collection('expedientes').get().then(function (snap) {
+      var match = null;
+      snap.forEach(function (doc) {
+        if (match) return;
+        var dg = (doc.data() || {}).datosGenerales || {};
+        if (normalizarDNI(dg.numeroIdentidad) === dniNorm) {
+          match = { codigoPaciente: doc.id, nombrePaciente: dg.nombreCompleto || '' };
+        }
+      });
+      return match;
+    });
+  }
+
   $id('btn-guardar').addEventListener('click', function () {
     if ($id('btn-guardar').disabled) return;
     $id('btn-guardar').disabled = true;
-    $id('btn-guardar').textContent = 'Guardando...';
+    $id('btn-guardar').textContent = 'Buscando expediente...';
 
     var horaImpresion = nowTime();
+    var dniRaw = $id('f-dni').value.trim();
     var data = {
       tipo: selectedType,
       nombre: $id('f-nombre').value.trim(),
       fechaNacimiento: $id('f-fechanac').value,
-      dni: $id('f-dni').value.trim(),
+      dni: dniRaw,
+      dniNormalizado: normalizarDNI(dniRaw),
       edad: calcAge($id('f-fechanac').value),
       fecha: $id('f-fecha').value,
       horaToma: $id('f-horatoma').value,
@@ -952,7 +974,8 @@
       resultados: Object.assign({}, resultValues),
       creadoPor: currentUser.email,
       creadoPorNombre: currentUser.displayName || currentUser.email.split('@')[0],
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      codigoPaciente: null  /* se llena si hay match */
     };
 
     if (selectedType === 'antigeno') {
@@ -961,13 +984,26 @@
       data.correlativo = $id('f-correlativo').value.trim();
     }
 
-    cmgDb.collection('resultadosPruebas').add(data)
-      .then(function (docRef) {
-        data._id = docRef.id;
-        toast('✓ Resultado guardado');
-        renderResultSheet(data);
-        $id('btn-guardar').textContent = '💾 Guardar e Imprimir';
-        $id('btn-guardar').disabled = false;
+    /* Paso 1: Buscar expediente por DNI */
+    buscarExpedientePorDNI(dniRaw)
+      .then(function (match) {
+        if (match) {
+          data.codigoPaciente = match.codigoPaciente;
+          data.pacienteNombreExpediente = match.nombrePaciente;
+        }
+        $id('btn-guardar').textContent = 'Guardando...';
+        /* Paso 2: Guardar resultado */
+        return cmgDb.collection('resultadosPruebas').add(data).then(function (docRef) {
+          data._id = docRef.id;
+          if (match) {
+            toast('✓ Vinculado al expediente ' + match.codigoPaciente);
+          } else {
+            toast('✓ Resultado guardado (sin expediente vinculado)');
+          }
+          renderResultSheet(data);
+          $id('btn-guardar').textContent = '💾 Guardar e Imprimir';
+          $id('btn-guardar').disabled = false;
+        });
       })
       .catch(function (err) {
         console.error('[CMG] Error guardando resultado:', err);

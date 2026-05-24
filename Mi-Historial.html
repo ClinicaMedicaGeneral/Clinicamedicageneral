@@ -779,6 +779,12 @@
         <h3 class="mh-card-title">📅 Historial de consultas</h3>
         <div id="mh-consultas-container"></div>
       </div>
+
+      <!-- Pruebas rápidas vinculadas -->
+      <div class="mh-card">
+        <h3 class="mh-card-title">🧪 Pruebas rápidas</h3>
+        <div id="mh-pruebas-container"></div>
+      </div>
     </div>
 
     <!-- Estado: pendiente de aprobación (compartido no aprobado) -->
@@ -959,6 +965,7 @@
         var exp = snap.data();
         renderExpediente(codigo, exp);
         cargarConsultas(codigo);
+        cargarPruebas(codigo, exp);
       })
       .catch(function (err) {
         $id('mh-loading').style.display = 'none';
@@ -1173,6 +1180,72 @@
         '</div>' +
       '</div>';
     }).join('') + '</div>';
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     PRUEBAS RÁPIDAS
+     ════════════════════════════════════════════════════════════ */
+  function cargarPruebas(codigo, exp) {
+    var cont = $id('mh-pruebas-container');
+    if (!cont) return;
+    cont.innerHTML = '<div class="mh-spinner"></div>';
+    var dg = (exp || {}).datosGenerales || {};
+    var dniNorm = (dg.numeroIdentidad || '').replace(/\D/g, '');
+
+    var promesas = [
+      cmgDb.collection('resultadosPruebas').where('codigoPaciente', '==', codigo).get()
+    ];
+    if (dniNorm) {
+      promesas.push(cmgDb.collection('resultadosPruebas').where('dniNormalizado', '==', dniNorm).get());
+    }
+
+    Promise.all(promesas)
+      .then(function (snaps) {
+        var mapa = {};
+        snaps.forEach(function (snap) {
+          snap.forEach(function (doc) {
+            mapa[doc.id] = Object.assign({ _id: doc.id }, doc.data());
+          });
+        });
+        var arr = Object.keys(mapa).map(function (k) { return mapa[k]; });
+        arr.sort(function (a, b) {
+          var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+          var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+          return tb - ta;
+        });
+        renderPruebas(arr);
+      })
+      .catch(function (err) {
+        cont.innerHTML = '<div class="mh-ant-empty">Error al cargar pruebas</div>';
+        console.error('[CMG] Error pruebas:', err);
+      });
+  }
+
+  function renderPruebas(pruebas) {
+    var cont = $id('mh-pruebas-container');
+    if (!pruebas.length) {
+      cont.innerHTML = '<div class="mh-ant-empty">Aún no tienes pruebas rápidas registradas.</div>';
+      return;
+    }
+    var labels = {
+      embarazo: '🤰 Embarazo',
+      dengue: '🦟 Dengue NS1',
+      duo: '🧬 DUO (COVID-Influenza)',
+      antigeno: '🧪 Antígeno COVID-19'
+    };
+    cont.innerHTML = pruebas.map(function (pr) {
+      var resumen = '';
+      if (pr.resultados) {
+        resumen = Object.keys(pr.resultados).map(function (k) {
+          return '<strong>' + esc(k) + ':</strong> ' + esc(pr.resultados[k]);
+        }).join(' · ');
+      }
+      var fechaTxt = pr.fecha || '—';
+      return '<div style="background:#F9FAFB;border-left:4px solid #FDD22C;border-radius:8px;padding:14px 16px;margin-bottom:10px">' +
+        '<div style="font-size:13px;font-weight:700;color:#213C7D;margin-bottom:4px">' + (labels[pr.tipo] || '🧪 ' + esc(pr.tipo)) + ' · 📅 ' + esc(fechaTxt) + (pr.horaToma ? ' ' + esc(pr.horaToma) : '') + '</div>' +
+        '<div style="font-size:13px;color:#4B5563">' + resumen + '</div>' +
+      '</div>';
+    }).join('');
   }
 
   /* ════════════════════════════════════════════════════════════

@@ -116,10 +116,23 @@ service cloud.firestore {
 
     // ═══ /resultadosPruebas/{id} ═════════════════════════════
     // Resultados de pruebas rápidas:
-    //   - Solo staff (isDoctor) crea y modifica.
-    //   - Lectura: staff solamente.
+    //   - Staff (isDoctor): lectura/escritura total.
+    //   - Paciente: puede leer las pruebas ligadas a su expediente
+    //     (owner o compartido) por codigoPaciente.
     match /resultadosPruebas/{resultadoId} {
-      allow read:            if isDoctor();
+      allow read: if isDoctor()
+        || (
+          isAuth()
+          && resource.data.codigoPaciente != null
+          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
+          && (
+            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
+            || (
+              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
+              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
+            )
+          )
+        );
       allow create, update:  if isDoctor();
       allow delete:          if isDoctor();
     }

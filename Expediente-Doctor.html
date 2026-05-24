@@ -819,6 +819,7 @@
       <button class="ed-tab" data-tab="buscar">🔍 Buscar</button>
       <button class="ed-tab" data-tab="editar">✏️ Editar</button>
       <button class="ed-tab" data-tab="consulta">📝 Consulta</button>
+      <button class="ed-tab" data-tab="pruebas">🧪 Pruebas</button>
       <button class="ed-tab" data-tab="historial">📂 Historial</button>
     </div>
 
@@ -1018,6 +1019,27 @@
         <h2 class="ed-card-title">📝 Registrar nueva hoja de consulta</h2>
         <p class="ed-card-subtitle">Primero selecciona un paciente. Cada consulta genera un PDF que se guarda en su historial.</p>
         <div id="consulta-contenido">
+          <div class="ed-empty">
+            <div class="ed-empty-icon">🔍</div>
+            <p>Primero busca un paciente en la pestaña "Buscar Paciente"</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── TAB: PRUEBAS RÁPIDAS ─── -->
+    <section id="tab-pruebas" class="ed-tab-content" style="display:none">
+      <div class="ed-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px">
+          <div>
+            <h2 class="ed-card-title" style="margin-bottom:4px">🧪 Pruebas rápidas del paciente</h2>
+            <p class="ed-card-subtitle" style="margin:0">Resultados vinculados automáticamente por número de identidad.</p>
+          </div>
+          <a class="ed-btn ed-btn-yellow" href="Pruebas-Rapidas.html" target="_blank" rel="noopener">
+            🧪 Registrar nueva prueba ↗
+          </a>
+        </div>
+        <div id="pruebas-contenido" style="margin-top:18px">
           <div class="ed-empty">
             <div class="ed-empty-icon">🔍</div>
             <p>Primero busca un paciente en la pestaña "Buscar Paciente"</p>
@@ -1262,6 +1284,7 @@
     if (name === 'pacientes') cargarListaPacientes();
     if (name === 'editar') renderEditarTab();
     if (name === 'consulta') renderConsultaTab();
+    if (name === 'pruebas') renderPruebasTab();
     if (name === 'historial') renderHistorialTab();
   }
   document.querySelectorAll('.ed-tab').forEach(function (t) {
@@ -2296,6 +2319,86 @@
         '</div>' +
         '<div class="ed-consulta-actions">' +
           (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Ver PDF</a>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     PRUEBAS RÁPIDAS DEL PACIENTE
+     ════════════════════════════════════════════════════════════ */
+  function renderPruebasTab() {
+    var cont = $id('pruebas-contenido');
+    if (!pacienteActual) {
+      cont.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔍</div><p>Primero busca un paciente en la pestaña "Buscar Paciente"</p></div>';
+      return;
+    }
+    var p = pacienteActual;
+    var dg = p.datosGenerales || {};
+    var dniNormalizado = (dg.numeroIdentidad || '').replace(/\D/g, '');
+
+    cont.innerHTML =
+      '<div class="ed-patient-summary">' +
+        '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
+        '<p class="ed-patient-meta">' + (dg.numeroIdentidad ? 'DNI ' + esc(dg.numeroIdentidad) : 'Sin DNI registrado') + '</p></div>' +
+        '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
+      '</div>' +
+      '<div id="pruebas-lista"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>';
+
+    /* Cargar pruebas vinculadas por codigoPaciente Y por DNI (back-compat) */
+    var promesas = [
+      cmgDb.collection('resultadosPruebas').where('codigoPaciente', '==', p.codigoPaciente).get()
+    ];
+    if (dniNormalizado) {
+      promesas.push(cmgDb.collection('resultadosPruebas').where('dniNormalizado', '==', dniNormalizado).get());
+    }
+
+    Promise.all(promesas)
+      .then(function (snaps) {
+        var mapa = {};
+        snaps.forEach(function (snap) {
+          snap.forEach(function (doc) {
+            mapa[doc.id] = Object.assign({ _id: doc.id }, doc.data());
+          });
+        });
+        var arr = Object.keys(mapa).map(function (k) { return mapa[k]; });
+        arr.sort(function (a, b) {
+          var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+          var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+          return tb - ta;
+        });
+        renderPruebasLista(arr);
+      })
+      .catch(function (err) {
+        $id('pruebas-lista').innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar pruebas: ' + esc(err.message) + '</div>';
+      });
+  }
+
+  function renderPruebasLista(pruebas) {
+    var lista = $id('pruebas-lista');
+    if (!pruebas.length) {
+      lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🧪</div><p>Este paciente aún no tiene pruebas rápidas registradas.</p><p style="font-size:13px;color:#9CA3AF;margin-top:6px">Las pruebas se vinculan automáticamente cuando el DNI coincide.</p></div>';
+      return;
+    }
+    var labels = {
+      embarazo: '🤰 Embarazo',
+      dengue: '🦟 Dengue NS1',
+      duo: '🧬 DUO (COVID-Influenza)',
+      antigeno: '🧪 Antígeno COVID-19'
+    };
+    lista.innerHTML = pruebas.map(function (pr) {
+      var resumen = '';
+      if (pr.resultados) {
+        resumen = Object.keys(pr.resultados).map(function (k) {
+          return '<strong>' + esc(k) + ':</strong> ' + esc(pr.resultados[k]);
+        }).join(' · ');
+      }
+      var fechaTxt = pr.fecha || (pr.createdAt && pr.createdAt.toMillis ? new Date(pr.createdAt.toMillis()).toLocaleDateString('es-HN') : '—');
+      return '<div class="ed-consulta-item">' +
+        '<div style="flex:1;min-width:0">' +
+          '<div class="ed-consulta-fecha">' + (labels[pr.tipo] || '🧪 ' + esc(pr.tipo)) + ' · 📅 ' + esc(fechaTxt) + (pr.horaToma ? ' ' + esc(pr.horaToma) : '') + '</div>' +
+          '<div class="ed-consulta-motivo">' + resumen + '</div>' +
+          '<div style="font-size:11px;color:#9CA3AF;margin-top:4px">Registrado por ' + esc(pr.creadoPorNombre || pr.creadoPor || '—') + '</div>' +
         '</div>' +
       '</div>';
     }).join('');

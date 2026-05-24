@@ -41,6 +41,31 @@
   color: #fff;
   margin: 0;
 }
+.mh-topbar {
+  background: #1a3068;
+  border-bottom: 1px solid rgba(253,210,44,.3);
+  text-align: center;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.mh-topbar-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,.6);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+.mh-topbar-code {
+  font-size: 14px;
+  font-weight: 800;
+  color: #FDD22C;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+}
+
 .mh-user-chip {
   display: flex;
   align-items: center;
@@ -523,6 +548,10 @@
 </div>
 
 <!-- ═══ HEADER ═══ -->
+<div class="mh-topbar" id="mh-topbar" style="display:none">
+  <span class="mh-topbar-label">N.° de expediente:</span>
+  <span class="mh-topbar-code" id="mh-topbar-code">—</span>
+</div>
 <header class="site-header">
   <div class="container header-row">
     <a class="brand-lockup" href="Inicio.html" aria-label="CMG">
@@ -775,6 +804,7 @@
 
         if (todosLosCodigos.length === 0) {
           $id('mh-empty-novinculado').style.display = '';
+          $id('mh-topbar').style.display = 'none';
           return;
         }
 
@@ -826,6 +856,10 @@
   function renderExpediente(codigo, exp) {
     $id('mh-expediente-data').style.display = '';
     var dg = exp.datosGenerales || {};
+
+    /* Mostrar código en la barra superior */
+    $id('mh-topbar').style.display = '';
+    $id('mh-topbar-code').textContent = codigo;
 
     $id('mh-p-nombre').textContent = dg.nombreCompleto || '—';
     var sub = [];

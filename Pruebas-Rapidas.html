@@ -174,6 +174,41 @@
 }
 .rs-toolbar {
   display: flex; gap: 10px; margin-bottom: 16px; justify-content: flex-end;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.rs-edit-hint {
+  margin-right: auto;
+  font-size: 12px;
+  color: #6B7280;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.pr-btn-save { background: #213C7D; color: #fff; }
+.pr-btn-save:hover { opacity: .92; }
+
+/* Editable cells / blocks */
+.result-sheet [contenteditable="true"] {
+  outline: none;
+  border-radius: 3px;
+  transition: background .15s, box-shadow .15s;
+  cursor: text;
+}
+.result-sheet [contenteditable="true"]:hover {
+  background: #FFFBEB;
+}
+.result-sheet [contenteditable="true"]:focus {
+  background: #FEF3C7;
+  box-shadow: 0 0 0 2px #FDD22C;
+}
+/* En modo impresión, no se ven los hovers/focus de edición */
+@media print {
+  .result-sheet [contenteditable="true"] {
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
 }
 
 .result-sheet {
@@ -632,7 +667,9 @@
 <!-- ═══ RESULT SHEET (for print) ═══ -->
 <div class="rs-container" id="rs-container">
   <div class="rs-toolbar">
+    <span class="rs-edit-hint">✏️ Los campos resaltados son editables · revisa antes de imprimir</span>
     <button class="pr-btn pr-btn-ghost" id="btn-new-test">+ Nueva prueba</button>
+    <button class="pr-btn pr-btn-save" id="btn-save-edits">💾 Guardar cambios</button>
     <button class="pr-btn pr-btn-print" id="btn-print">🖨️ Imprimir</button>
   </div>
   <div class="result-sheet" id="result-sheet">
@@ -1016,10 +1053,19 @@
   /* ════════════════════════════════════════════════════════════
      RENDER RESULT SHEET
      ════════════════════════════════════════════════════════════ */
+  /* Estado del documento actualmente mostrado (para guardar ediciones) */
+  var currentResultDoc = null;
+
+  /* Helper: celda editable con data-edit-key */
+  function edCell(key, value) {
+    return '<td contenteditable="true" data-edit-key="' + key + '">' + esc(value || '') + '</td>';
+  }
+
   function renderResultSheet(data) {
     /* Hide form, show result sheet */
     $id('pr-page').style.display = 'none';
     $id('rs-container').style.display = '';
+    currentResultDoc = data;
 
     var isAntigeno = data.tipo === 'antigeno';
     var edad = data.edad !== '' && data.edad !== null ? data.edad + ' AÑOS' : '';
@@ -1030,9 +1076,12 @@
     /* Correlativo */
     if (isAntigeno && data.correlativo) {
       $id('rs-correlativo').style.display = '';
+      $id('rs-correlativo').setAttribute('contenteditable', 'true');
+      $id('rs-correlativo').setAttribute('data-edit-key', 'correlativo');
       $id('rs-correlativo').textContent = data.correlativo;
     } else {
       $id('rs-correlativo').style.display = 'none';
+      $id('rs-correlativo').removeAttribute('contenteditable');
     }
 
     /* Patient table */
@@ -1040,53 +1089,53 @@
     if (isAntigeno) {
       /* Two-column layout for antigeno */
       pacienteHTML =
-        '<tr><td>Paciente</td><td>' + esc(data.nombre) + '</td><td>Fecha de Nac</td><td>' + esc(data.fechaNacimiento) + '</td></tr>' +
-        '<tr><td>Pasaporte</td><td>' + esc(data.pasaporte || '—') + '</td><td>Edad</td><td>' + edad + '</td></tr>' +
-        '<tr><td>Identidad</td><td>' + esc(data.dni || '—') + '</td><td>Sexo</td><td>' + esc(data.sexo || '—') + '</td></tr>';
+        '<tr><td>Paciente</td>' + edCell('nombre', data.nombre) + '<td>Fecha de Nac</td>' + edCell('fechaNacimiento', data.fechaNacimiento) + '</tr>' +
+        '<tr><td>Pasaporte</td>' + edCell('pasaporte', data.pasaporte) + '<td>Edad</td>' + edCell('edadTxt', edad) + '</tr>' +
+        '<tr><td>Identidad</td>' + edCell('dni', data.dni) + '<td>Sexo</td>' + edCell('sexo', data.sexo) + '</tr>';
       $id('rs-paciente-table').classList.add('rs-table-2col');
     } else {
       pacienteHTML =
-        '<tr><td>Nombre</td><td>' + esc(data.nombre) + '</td></tr>' +
-        '<tr><td>Fecha de Nacimiento</td><td>' + esc(data.fechaNacimiento) + '</td></tr>';
+        '<tr><td>Nombre</td>' + edCell('nombre', data.nombre) + '</tr>' +
+        '<tr><td>Fecha de Nacimiento</td>' + edCell('fechaNacimiento', data.fechaNacimiento) + '</tr>';
       if (data.tipo !== 'embarazo') {
-        pacienteHTML += '<tr><td>Edad</td><td>' + edad + '</td></tr>';
+        pacienteHTML += '<tr><td>Edad</td>' + edCell('edadTxt', edad) + '</tr>';
       }
-      pacienteHTML += '<tr><td>DNI</td><td>' + esc(data.dni || '—') + '</td></tr>';
+      pacienteHTML += '<tr><td>DNI</td>' + edCell('dni', data.dni) + '</tr>';
       $id('rs-paciente-table').classList.remove('rs-table-2col');
     }
     $id('rs-paciente-table').innerHTML = pacienteHTML;
 
     /* Sample table */
     $id('rs-muestra-table').innerHTML =
-      '<tr><td>Fecha</td><td>' + esc(formatDateLong(data.fecha)) + '</td></tr>' +
-      '<tr><td>Hora de Toma</td><td>' + formatTime12(data.horaToma) + '</td></tr>' +
-      '<tr><td>Hora de Impresión</td><td>' + formatTime12(data.horaImpresion) + '</td></tr>';
+      '<tr><td>Fecha</td>' + edCell('fechaTxt', formatDateLong(data.fecha)) + '</tr>' +
+      '<tr><td>Hora de Toma</td>' + edCell('horaTomaTxt', formatTime12(data.horaToma)) + '</tr>' +
+      '<tr><td>Hora de Impresión</td>' + edCell('horaImpresionTxt', formatTime12(data.horaImpresion)) + '</tr>';
 
     /* Results table */
     var resultsHTML = '';
-    var res = data.resultados;
+    var res = data.resultados || {};
 
     if (data.tipo === 'embarazo') {
       $id('rs-exam-title').textContent = 'III.- EXÁMENES REALIZADOS';
-      resultsHTML = '<tr><td>PRUEBA DE EMBARAZO:</td><td>' + esc(res['res-embarazo']) + '</td></tr>';
+      resultsHTML = '<tr><td>PRUEBA DE EMBARAZO:</td>' + edCell('r-res-embarazo', res['res-embarazo']) + '</tr>';
     } else if (data.tipo === 'dengue') {
       $id('rs-exam-title').textContent = 'III.- EXÁMENES REALIZADO';
       resultsHTML =
         '<tr><td colspan="2" style="font-weight:800;background:#f0f8ff">PRUEBA DE DENGUE</td></tr>' +
-        '<tr><td>ANTICUERPO IgG:</td><td>' + esc(res['res-igg']) + '</td></tr>' +
-        '<tr><td>ANTICUERPO IgM:</td><td>' + esc(res['res-igm']) + '</td></tr>' +
-        '<tr><td>NS1:</td><td>' + esc(res['res-ns1']) + '</td></tr>';
+        '<tr><td>ANTICUERPO IgG:</td>' + edCell('r-res-igg', res['res-igg']) + '</tr>' +
+        '<tr><td>ANTICUERPO IgM:</td>' + edCell('r-res-igm', res['res-igm']) + '</tr>' +
+        '<tr><td>NS1:</td>' + edCell('r-res-ns1', res['res-ns1']) + '</tr>';
     } else if (data.tipo === 'duo') {
       $id('rs-exam-title').textContent = 'III.- EXÁMENES REALIZADO';
       resultsHTML =
-        '<tr><td>SARS-COV-2:<br>COVID-19</td><td>' + esc(res['res-sarcov2']) + '</td></tr>' +
-        '<tr><td>INFLUENZA H1N1 A:</td><td>' + esc(res['res-tipoa']) + '</td></tr>' +
-        '<tr><td>INFLUENZA H1N1 B:</td><td>' + esc(res['res-tipob']) + '</td></tr>';
+        '<tr><td>SARS-COV-2:<br>COVID-19</td>' + edCell('r-res-sarcov2', res['res-sarcov2']) + '</tr>' +
+        '<tr><td>INFLUENZA H1N1 A:</td>' + edCell('r-res-tipoa', res['res-tipoa']) + '</tr>' +
+        '<tr><td>INFLUENZA H1N1 B:</td>' + edCell('r-res-tipob', res['res-tipob']) + '</tr>';
     } else if (data.tipo === 'antigeno') {
       $id('rs-exam-title').textContent = 'III.-INMUNOLOGÍA';
       resultsHTML =
         '<tr><td colspan="2" style="font-weight:800;background:#f0f8ff;border-bottom:none">DETECCIÓN DE:<br>COVID-19 | ANTÍGENO</td></tr>' +
-        '<tr><td>ANTÍGENO SARS COV-2</td><td>: ' + esc(res['res-antigeno']) + '</td></tr>' +
+        '<tr><td>ANTÍGENO SARS COV-2</td><td contenteditable="true" data-edit-key="r-res-antigeno">: ' + esc(res['res-antigeno'] || '') + '</td></tr>' +
         '<tr><td colspan="2" style="font-size:11px;color:#555;border-top:none">TIPO DE MUESTRA:<br>HISOPADO NASOFARÍNGEO</td></tr>';
     }
     $id('rs-results-table').innerHTML = resultsHTML;
@@ -1139,6 +1188,71 @@
     clearForm();
     loadHistory();
     window.scrollTo(0, 0);
+  });
+
+  /* ─── Guardar ediciones in-place de la hoja de resultados ─── */
+  $id('btn-save-edits').addEventListener('click', function () {
+    if (!currentResultDoc || !currentResultDoc._id) {
+      toast('No hay documento que guardar');
+      return;
+    }
+    var btn = $id('btn-save-edits');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    /* Recolectar todas las ediciones */
+    var edits = {};
+    document.querySelectorAll('.result-sheet [data-edit-key]').forEach(function (el) {
+      edits[el.getAttribute('data-edit-key')] = (el.textContent || '').trim();
+    });
+
+    /* Mapeo de campos editados a campos del documento Firestore */
+    var update = {
+      editedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      editedBy: currentUser.email
+    };
+    var resultados = Object.assign({}, currentResultDoc.resultados || {});
+
+    if (edits.nombre !== undefined) update.nombre = edits.nombre;
+    if (edits.fechaNacimiento !== undefined) update.fechaNacimiento = edits.fechaNacimiento;
+    if (edits.dni !== undefined) {
+      update.dni = edits.dni;
+      update.dniNormalizado = edits.dni.replace(/\D/g, '');
+    }
+    if (edits.pasaporte !== undefined) update.pasaporte = edits.pasaporte;
+    if (edits.sexo !== undefined) update.sexo = edits.sexo;
+    if (edits.correlativo !== undefined) update.correlativo = edits.correlativo;
+    if (edits.edadTxt !== undefined) update.edadTxt = edits.edadTxt;
+    if (edits.fechaTxt !== undefined) update.fechaTxt = edits.fechaTxt;
+    if (edits.horaTomaTxt !== undefined) update.horaTomaTxt = edits.horaTomaTxt;
+    if (edits.horaImpresionTxt !== undefined) update.horaImpresionTxt = edits.horaImpresionTxt;
+
+    /* Resultados (keys con prefijo r-) */
+    Object.keys(edits).forEach(function (k) {
+      if (k.indexOf('r-') === 0) {
+        var realKey = k.substring(2);
+        /* Para antigeno el valor incluye ": " al inicio en algunos casos — limpiar */
+        var v = edits[k].replace(/^[:\s]+/, '');
+        resultados[realKey] = v;
+      }
+    });
+    update.resultados = resultados;
+
+    cmgDb.collection('resultadosPruebas').doc(currentResultDoc._id).update(update)
+      .then(function () {
+        /* Actualizar estado en memoria */
+        Object.assign(currentResultDoc, update);
+        currentResultDoc.resultados = resultados;
+        btn.disabled = false;
+        btn.textContent = '💾 Guardar cambios';
+        toast('✓ Cambios guardados');
+      })
+      .catch(function (err) {
+        console.error('[CMG] Error guardando ediciones:', err);
+        btn.disabled = false;
+        btn.textContent = '💾 Guardar cambios';
+        toast('Error: ' + err.message);
+      });
   });
 
   /* ════════════════════════════════════════════════════════════

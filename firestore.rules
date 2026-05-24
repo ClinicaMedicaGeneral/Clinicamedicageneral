@@ -114,6 +114,16 @@ service cloud.firestore {
       }
     }
 
+    // ═══ /resultadosPruebas/{id} ═════════════════════════════
+    // Resultados de pruebas rápidas:
+    //   - Solo staff (isDoctor) crea y modifica.
+    //   - Lectura: staff solamente.
+    match /resultadosPruebas/{resultadoId} {
+      allow read:            if isDoctor();
+      allow create, update:  if isDoctor();
+      allow delete:          if isDoctor();
+    }
+
     // ═══ Bloqueo por defecto ═══════════════════════════════════
     // Cualquier otra colección queda bloqueada.
     match /{document=**} {

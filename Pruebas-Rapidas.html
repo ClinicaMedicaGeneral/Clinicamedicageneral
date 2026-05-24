@@ -1,0 +1,1163 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pruebas Rápidas · CMG</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<link rel="stylesheet" href="styles.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ═══ FORM PAGE ═══════════════════════════════════════════ */
+.pr-page { background: #F4F6FB; min-height: 100vh; padding-bottom: 80px; }
+
+.pr-hero {
+  background: #213C7D;
+  padding: 40px 0 32px;
+  border-bottom: 4px solid #FDD22C;
+}
+.pr-hero-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.pr-hero-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: #FDD22C; margin-bottom: 8px;
+}
+.pr-hero-h1 { font-size: clamp(22px,4vw,32px); font-weight: 900; color: #fff; margin: 0; }
+.pr-user-chip {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+  border-radius: 50px; padding: 8px 18px 8px 8px; color: #fff; font-size: 13px;
+}
+.pr-avatar {
+  width: 34px; height: 34px; border-radius: 50%; background: #FDD22C;
+  color: #213C7D; display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 14px;
+}
+.pr-logout {
+  border: 1px solid rgba(255,255,255,.25); background: transparent;
+  color: rgba(255,255,255,.75); border-radius: 20px; padding: 6px 14px;
+  font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+}
+
+.pr-content { max-width: 900px; margin: 28px auto 0; padding: 0 28px; }
+
+/* Test type selector */
+.pr-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.pr-type-btn {
+  background: #fff;
+  border: 2.5px solid #E5E7EB;
+  border-radius: 14px;
+  padding: 20px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+}
+.pr-type-btn:hover { border-color: #213C7D; }
+.pr-type-btn.is-active { border-color: #213C7D; background: #213C7D; color: #fff; }
+.pr-type-btn.is-active .pr-type-icon { filter: brightness(0) invert(1); }
+.pr-type-icon { font-size: 28px; margin-bottom: 6px; display: block; }
+.pr-type-label { font-size: 13px; font-weight: 700; }
+
+/* Form card */
+.pr-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(33,60,125,.08);
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.pr-card-title {
+  font-size: 16px; font-weight: 800; color: #213C7D;
+  margin: 0 0 18px; display: flex; align-items: center; gap: 10px;
+  border-bottom: 2px solid #F4F6FB; padding-bottom: 12px;
+}
+.pr-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+.pr-field { display: flex; flex-direction: column; gap: 4px; }
+.pr-field.full-width { grid-column: 1 / -1; }
+.pr-label {
+  font-size: 11px; font-weight: 700; color: #6B7280;
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.pr-input, .pr-select {
+  height: 44px; border: 1.5px solid #E5E7EB; border-radius: 8px;
+  padding: 0 14px; font-family: inherit; font-size: 14px;
+  font-weight: 600; color: #1F2937; background: #F9FAFB; outline: none;
+}
+.pr-input:focus, .pr-select:focus { border-color: #213C7D; }
+.pr-select { cursor: pointer; }
+
+/* Result options (Positivo/Negativo) */
+.pr-result-options {
+  display: flex; gap: 8px;
+}
+.pr-result-opt {
+  flex: 1; height: 44px; border: 2px solid #E5E7EB; border-radius: 8px;
+  background: #F9FAFB; font-family: inherit; font-size: 13px;
+  font-weight: 700; cursor: pointer; transition: all .15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.pr-result-opt:hover { border-color: #9CA3AF; }
+.pr-result-opt.is-positive { border-color: #DC2626; background: #FEE2E2; color: #991B1B; }
+.pr-result-opt.is-negative { border-color: #059669; background: #D1FAE5; color: #065F46; }
+
+/* Actions */
+.pr-actions {
+  display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;
+}
+.pr-btn {
+  height: 48px; padding: 0 28px; border: none; border-radius: 10px;
+  font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.pr-btn-primary { background: #213C7D; color: #fff; }
+.pr-btn-primary:hover { opacity: .9; }
+.pr-btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+.pr-btn-ghost { background: #F4F6FB; color: #6B7280; border: 1.5px solid #E5E7EB; }
+.pr-btn-print { background: #059669; color: #fff; }
+
+/* Toast */
+.pr-toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: #213C7D; color: #fff; padding: 12px 22px; border-radius: 50px;
+  font-size: 14px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 10000;
+}
+.pr-toast.is-visible { opacity: 1; }
+
+/* Spinner */
+.pr-spinner {
+  width: 40px; height: 40px; border: 3px solid #E5E7EB;
+  border-top-color: #213C7D; border-radius: 50%;
+  animation: pr-spin .8s linear infinite; margin: 40px auto;
+}
+@keyframes pr-spin { to { transform: rotate(360deg); } }
+
+/* History list */
+.pr-history-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; background: #F9FAFB; border-radius: 10px;
+  margin-bottom: 8px; gap: 12px; flex-wrap: wrap;
+}
+.pr-history-name { font-size: 14px; font-weight: 700; color: #1F2937; }
+.pr-history-meta { font-size: 12px; color: #6B7280; }
+.pr-history-btn {
+  background: #213C7D; color: #fff; border: none; border-radius: 6px;
+  padding: 6px 12px; font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+}
+
+/* ═══ RESULT SHEET (Printable) ════════════════════════════ */
+.rs-container {
+  display: none;
+  max-width: 800px;
+  margin: 28px auto 0;
+  padding: 0 28px;
+}
+.rs-toolbar {
+  display: flex; gap: 10px; margin-bottom: 16px; justify-content: flex-end;
+}
+
+.result-sheet {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 12px;
+  color: #1a1a1a;
+  line-height: 1.4;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Header */
+.rs-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 32px 16px;
+  border-bottom: 3px solid #4BACC6;
+  background: linear-gradient(135deg, #f0f8ff 0%, #e8f4f8 50%, #fff 100%);
+  position: relative;
+}
+.rs-header::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 80'%3E%3Cpath d='M0 40 L60 40 L80 15 L100 65 L120 25 L140 55 L160 40 L400 40' fill='none' stroke='%234BACC6' stroke-width='1.5' opacity='0.15'/%3E%3C/svg%3E") no-repeat center;
+  background-size: cover;
+  pointer-events: none;
+}
+.rs-logo {
+  width: 70px; height: auto; position: relative; z-index: 1;
+}
+.rs-header-text {
+  position: relative; z-index: 1;
+}
+.rs-header-text h1 {
+  font-size: 18px; font-weight: 800; color: #213C7D; margin: 0;
+}
+.rs-header-text h2 {
+  font-size: 14px; font-weight: 600; color: #4BACC6; margin: 2px 0 0;
+}
+.rs-arsa-badge {
+  position: absolute; right: 24px; top: 12px; z-index: 1;
+  font-size: 9px; color: #666; text-align: center;
+  border: 1px solid #999; border-radius: 4px; padding: 4px 8px;
+  background: rgba(255,255,255,.8);
+}
+
+/* Watermark */
+.rs-watermark {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: .06;
+  pointer-events: none;
+  z-index: 0;
+  width: 300px;
+}
+
+/* Body */
+.rs-body { padding: 20px 32px 16px; position: relative; z-index: 1; }
+
+.rs-title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+  text-decoration: underline;
+}
+.rs-correlativo {
+  text-align: center;
+  font-size: 11px;
+  color: #555;
+  margin: 0 0 16px;
+}
+
+.rs-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 16px 0 6px;
+  text-transform: uppercase;
+}
+
+.rs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+}
+.rs-table td {
+  border: 1px solid #bbb;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.rs-table td:first-child {
+  font-weight: 700;
+  color: #333;
+  width: 160px;
+  background: #f0f8ff;
+}
+.rs-table td:nth-child(2) {
+  color: #1a1a1a;
+}
+
+/* Two-column patient table for COVID antigeno */
+.rs-table-2col td:first-child { width: 100px; }
+.rs-table-2col td:nth-child(3) { width: 100px; font-weight: 700; background: #f0f8ff; }
+
+/* Results table */
+.rs-results-table td:first-child {
+  width: auto;
+  font-weight: 700;
+}
+.rs-results-table td:last-child {
+  font-weight: 800;
+  font-size: 13px;
+  text-align: right;
+  width: 140px;
+}
+
+/* Sensitivity note */
+.rs-sensitivity {
+  text-align: center;
+  font-size: 10px;
+  color: #DC2626;
+  margin: 8px 0;
+}
+
+/* Nota */
+.rs-nota {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid #ddd;
+}
+.rs-nota strong {
+  font-size: 11px;
+  color: #333;
+}
+.rs-nota p {
+  font-size: 9px;
+  color: #666;
+  margin: 2px 0;
+  line-height: 1.3;
+}
+
+/* Stamp area */
+.rs-stamp {
+  margin-top: 16px;
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+}
+.rs-stamp-img {
+  width: 80px; height: 80px;
+  object-fit: contain;
+  opacity: .85;
+}
+.rs-stamp-text {
+  font-size: 10px;
+  font-weight: 800;
+  color: #213C7D;
+  line-height: 1.3;
+}
+.rs-stamp-right {
+  margin-left: auto;
+  text-align: center;
+}
+.rs-qr { width: 90px; height: 90px; }
+.rs-qr-label { font-size: 8px; color: #999; font-style: italic; margin-top: 2px; }
+
+/* Footer */
+.rs-footer {
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 2px solid #4BACC6;
+  font-size: 10px;
+  color: #555;
+  line-height: 1.4;
+}
+.rs-footer a { color: #213C7D; }
+
+/* ═══ PRINT STYLES ════════════════════════════════════════ */
+@media print {
+  body * { visibility: hidden; }
+  .result-sheet, .result-sheet * { visibility: visible; }
+  .result-sheet {
+    position: fixed;
+    left: 0; top: 0;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+    margin: 0; padding: 0;
+  }
+  .rs-toolbar, .pr-page, .site-header, .promo-strip, .float-wa,
+  .pr-toast, .rs-container > .rs-toolbar { display: none !important; }
+
+  @page {
+    size: letter;
+    margin: 12mm 10mm;
+  }
+}
+
+@media (max-width: 640px) {
+  .pr-card { padding: 20px; }
+  .pr-type-grid { grid-template-columns: 1fr 1fr; }
+  .pr-form-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body data-lang="es">
+
+<!-- ═══ PROMO STRIP ═══ -->
+<div class="promo-strip">
+  <div class="container promo-row">
+    <span class="dot"></span>
+    <span class="promo-msgs">
+      <span class="promo-msg is-active" data-msg="hours">
+        <b>ABIERTO</b> <span id="promo-hours-es">6:00 AM – 10:00 PM</span> <span id="promo-day-es"></span> · City Mall S2 E214
+      </span>
+    </span>
+    <a href="https://wa.me/50431555162" class="promo-wa">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+      +504 3155-5162
+    </a>
+  </div>
+</div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="site-header">
+  <div class="container header-row">
+    <a class="brand-lockup" href="Inicio.html" aria-label="CMG">
+      <img class="brand-logo" src="assets/cmg-logo-white.png" alt="CMG">
+    </a>
+    <nav class="site-nav" aria-label="Principal">
+      <a href="Inicio.html">Inicio</a>
+      <a href="Sobre-nosotros.html">Sobre nosotros</a>
+      <a href="Expediente-Doctor.html">Expedientes</a>
+      <a href="Mi-Historial.html">Mi Historial</a>
+    </nav>
+    <div class="header-actions">
+      <button class="nav-toggle" type="button" aria-label="Menú">
+        <svg class="icon-open" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg class="icon-close" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<main class="pr-page" id="pr-page">
+
+  <!-- Hero -->
+  <div class="pr-hero">
+    <div class="pr-hero-inner">
+      <div>
+        <div class="pr-hero-eyebrow">🧪 Laboratorio</div>
+        <h1 class="pr-hero-h1">Pruebas Rápidas</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="pr-user-chip" id="pr-user-chip" style="display:none">
+          <div class="pr-avatar" id="pr-avatar">?</div>
+          <span id="pr-user-name">—</span>
+        </div>
+        <button class="pr-logout" id="pr-logout">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="pr-content" id="pr-form-section">
+
+    <!-- Loading -->
+    <div id="pr-loading"><div class="pr-spinner"></div></div>
+
+    <!-- Tipo de prueba -->
+    <div class="pr-card" id="pr-type-card" style="display:none">
+      <h3 class="pr-card-title">📋 Selecciona el tipo de prueba</h3>
+      <div class="pr-type-grid">
+        <button class="pr-type-btn" data-type="embarazo">
+          <span class="pr-type-icon">🤰</span>
+          <span class="pr-type-label">Prueba de<br>Embarazo</span>
+        </button>
+        <button class="pr-type-btn" data-type="dengue">
+          <span class="pr-type-icon">🦟</span>
+          <span class="pr-type-label">Dengue<br>NS1</span>
+        </button>
+        <button class="pr-type-btn" data-type="duo">
+          <span class="pr-type-icon">🧪</span>
+          <span class="pr-type-label">DUO<br>COVID - Influenza</span>
+        </button>
+        <button class="pr-type-btn" data-type="antigeno">
+          <span class="pr-type-icon">🩹</span>
+          <span class="pr-type-label">Antígeno<br>COVID-19</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <div id="pr-form-card" style="display:none">
+
+      <!-- Datos del paciente -->
+      <div class="pr-card">
+        <h3 class="pr-card-title">👤 Información del paciente</h3>
+        <div class="pr-form-grid">
+          <div class="pr-field">
+            <label class="pr-label">Nombre completo</label>
+            <input type="text" class="pr-input" id="f-nombre" placeholder="Nombre del paciente">
+          </div>
+          <div class="pr-field">
+            <label class="pr-label">Fecha de nacimiento</label>
+            <input type="date" class="pr-input" id="f-fechanac">
+          </div>
+          <div class="pr-field">
+            <label class="pr-label">DNI / Identidad</label>
+            <input type="text" class="pr-input" id="f-dni" placeholder="0000-0000-00000">
+          </div>
+          <div class="pr-field" id="field-edad" style="display:none">
+            <label class="pr-label">Edad</label>
+            <input type="text" class="pr-input" id="f-edad" readonly placeholder="Auto">
+          </div>
+          <div class="pr-field" id="field-pasaporte" style="display:none">
+            <label class="pr-label">Pasaporte</label>
+            <input type="text" class="pr-input" id="f-pasaporte" placeholder="Número de pasaporte">
+          </div>
+          <div class="pr-field" id="field-sexo" style="display:none">
+            <label class="pr-label">Sexo</label>
+            <select class="pr-select" id="f-sexo">
+              <option value="">Seleccionar</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Femenino">Femenino</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de muestra -->
+      <div class="pr-card">
+        <h3 class="pr-card-title">🕐 Información de toma de muestra</h3>
+        <div class="pr-form-grid">
+          <div class="pr-field">
+            <label class="pr-label">Fecha</label>
+            <input type="date" class="pr-input" id="f-fecha">
+          </div>
+          <div class="pr-field">
+            <label class="pr-label">Hora de toma de muestra</label>
+            <input type="time" class="pr-input" id="f-horatoma">
+          </div>
+          <div class="pr-field" id="field-correlativo" style="display:none">
+            <label class="pr-label">Correlativo</label>
+            <input type="text" class="pr-input" id="f-correlativo" placeholder="Ej: ENE266997/001">
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div class="pr-card">
+        <h3 class="pr-card-title">📊 Resultados del examen</h3>
+
+        <!-- Embarazo -->
+        <div id="results-embarazo" class="pr-results-section" style="display:none">
+          <div class="pr-field">
+            <label class="pr-label">Prueba de Embarazo</label>
+            <div class="pr-result-options" data-field="res-embarazo">
+              <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+              <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dengue -->
+        <div id="results-dengue" class="pr-results-section" style="display:none">
+          <div class="pr-form-grid">
+            <div class="pr-field">
+              <label class="pr-label">Anticuerpo IgG</label>
+              <div class="pr-result-options" data-field="res-igg">
+                <button type="button" class="pr-result-opt" data-value="REACTIVO">🔴 Reactivo</button>
+                <button type="button" class="pr-result-opt" data-value="NO REACTIVO">🟢 No Reactivo</button>
+              </div>
+            </div>
+            <div class="pr-field">
+              <label class="pr-label">Anticuerpo IgM</label>
+              <div class="pr-result-options" data-field="res-igm">
+                <button type="button" class="pr-result-opt" data-value="REACTIVO">🔴 Reactivo</button>
+                <button type="button" class="pr-result-opt" data-value="NO REACTIVO">🟢 No Reactivo</button>
+              </div>
+            </div>
+            <div class="pr-field">
+              <label class="pr-label">NS1</label>
+              <div class="pr-result-options" data-field="res-ns1">
+                <button type="button" class="pr-result-opt" data-value="REACTIVO">🔴 Reactivo</button>
+                <button type="button" class="pr-result-opt" data-value="NO REACTIVO">🟢 No Reactivo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DUO -->
+        <div id="results-duo" class="pr-results-section" style="display:none">
+          <div class="pr-form-grid">
+            <div class="pr-field">
+              <label class="pr-label">SARS-COV-2 / COVID-19</label>
+              <div class="pr-result-options" data-field="res-sarcov2">
+                <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+                <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
+              </div>
+            </div>
+            <div class="pr-field">
+              <label class="pr-label">Influenza H1N1 A</label>
+              <div class="pr-result-options" data-field="res-tipoa">
+                <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+                <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
+              </div>
+            </div>
+            <div class="pr-field">
+              <label class="pr-label">Influenza H1N1 B</label>
+              <div class="pr-result-options" data-field="res-tipob">
+                <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+                <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Antígeno COVID -->
+        <div id="results-antigeno" class="pr-results-section" style="display:none">
+          <div class="pr-field">
+            <label class="pr-label">Antígeno SARS COV-2</label>
+            <div class="pr-result-options" data-field="res-antigeno">
+              <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+              <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="pr-actions">
+        <button class="pr-btn pr-btn-ghost" id="btn-cancelar">← Cambiar prueba</button>
+        <button class="pr-btn pr-btn-primary" id="btn-guardar" disabled>💾 Guardar e Imprimir</button>
+      </div>
+    </div>
+
+    <!-- Historial reciente -->
+    <div class="pr-card" id="pr-history-card" style="display:none">
+      <h3 class="pr-card-title">📋 Resultados recientes</h3>
+      <div id="pr-history-list"></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ═══ RESULT SHEET (for print) ═══ -->
+<div class="rs-container" id="rs-container">
+  <div class="rs-toolbar">
+    <button class="pr-btn pr-btn-ghost" id="btn-new-test">+ Nueva prueba</button>
+    <button class="pr-btn pr-btn-print" id="btn-print">🖨️ Imprimir</button>
+  </div>
+  <div class="result-sheet" id="result-sheet">
+    <!-- Watermark -->
+    <img src="assets/isotipo-color.png" class="rs-watermark" alt="">
+
+    <!-- Header -->
+    <div class="rs-header">
+      <img src="assets/isotipo-color.png" class="rs-logo" alt="CMG">
+      <div class="rs-header-text">
+        <h1>CLÍNICA MÉDICA CMG, S. de R.L.</h1>
+        <h2>Clínica Médica General</h2>
+      </div>
+      <div class="rs-arsa-badge" id="rs-arsa" style="display:none">
+        Certificado de<br>Prueba (ARSA)
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="rs-body">
+      <h3 class="rs-title">INFORME DE RESULTADOS</h3>
+      <div class="rs-correlativo" id="rs-correlativo" style="display:none"></div>
+
+      <!-- I. Paciente -->
+      <div class="rs-section-title">I.- INFORMACIÓN DEL PACIENTE</div>
+      <table class="rs-table" id="rs-paciente-table">
+        <!-- filled by JS -->
+      </table>
+
+      <!-- II. Muestra -->
+      <div class="rs-section-title">II.- INFORMACIÓN DE TOMA DE MUESTRA</div>
+      <table class="rs-table" id="rs-muestra-table">
+        <!-- filled by JS -->
+      </table>
+
+      <!-- III. Resultados -->
+      <div class="rs-section-title" id="rs-exam-title">III.- EXÁMENES REALIZADOS</div>
+      <table class="rs-table rs-results-table" id="rs-results-table">
+        <!-- filled by JS -->
+      </table>
+
+      <div id="rs-extra-info" style="display:none"></div>
+
+      <div class="rs-sensitivity" id="rs-sensitivity" style="display:none">
+        Sensibilidad: 97.1% | Especificidad: 99.5%<br>
+        Porcentajes según especificaciones del fabricante
+      </div>
+
+      <!-- Nota -->
+      <div class="rs-nota">
+        <strong>Nota:</strong>
+        <p>Los resultados del Laboratorio clínico, no son datos concluyentes de patologías.</p>
+        <p>Es responsabilidad del paciente el manejo de resultados de exámenes no ordenados por un médico.</p>
+        <p>La apreciación médica es indispensable.</p>
+      </div>
+
+      <!-- Stamp -->
+      <div class="rs-stamp">
+        <div>
+          <img src="assets/isotipo-color.png" class="rs-stamp-img" alt="Sello CMG">
+          <div class="rs-stamp-text">
+            TOMA Y RECEPCIÓN DE MUESTRAS<br>
+            CLÍNICA MÉDICA GENERAL CMG
+          </div>
+        </div>
+        <div class="rs-stamp-right" id="rs-qr-container" style="display:none">
+          <canvas id="rs-qr-canvas" class="rs-qr"></canvas>
+          <div class="rs-qr-label">¡Escanea para verificar tus resultados!</div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="rs-footer">
+        Local E-214, Sótano No. 2, City Mall - Comayagüela, Francisco Morazán, M.D. C.<br>
+        Correo-e: <a href="mailto:clinicamedicacmg@gmail.com">clinicamedicacmg@gmail.com</a><br>
+        Teléfonos: (+504) 2262-6764 / (+504) 3155-5162
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="pr-toast" id="pr-toast">—</div>
+
+<!-- Float WhatsApp -->
+<a class="float-wa" href="https://wa.me/50431555162" aria-label="WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
+</a>
+
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+
+<script>
+(function () {
+  /* ════════════════════════════════════════════════════════════
+     HELPERS
+     ════════════════════════════════════════════════════════════ */
+  function $id(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function toast(msg, ms) {
+    var t = $id('pr-toast');
+    t.textContent = msg;
+    t.classList.add('is-visible');
+    setTimeout(function () { t.classList.remove('is-visible'); }, ms || 2400);
+  }
+  function formatDateLong(dateStr) {
+    if (!dateStr) return '—';
+    var d = new Date(dateStr + 'T12:00:00');
+    var DAYS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    var MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    return DAYS[d.getDay()] + ' ' + d.getDate() + ' de ' + MONTHS[d.getMonth()] + ' del ' + d.getFullYear();
+  }
+  function formatTime12(time24) {
+    if (!time24) return '—';
+    var parts = time24.split(':');
+    var h = parseInt(parts[0]);
+    var m = parts[1];
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return h + ':' + m + ' ' + ampm;
+  }
+  function calcAge(dateStr) {
+    if (!dateStr) return '';
+    var fn = new Date(dateStr + 'T12:00:00');
+    var hoy = new Date();
+    var e = hoy.getFullYear() - fn.getFullYear();
+    var m = hoy.getMonth() - fn.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < fn.getDate())) e--;
+    return e;
+  }
+  function nowTime() {
+    var d = new Date();
+    return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+  function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  /* Promo */
+  var DAYS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  var dnow = new Date().getDay();
+  var hEl = $id('promo-hours-es'); if (hEl) hEl.textContent = dnow === 0 ? '8:00 AM – 7:00 PM' : '6:00 AM – 10:00 PM';
+  var dEl = $id('promo-day-es');   if (dEl) dEl.textContent = '(' + DAYS[dnow] + ')';
+  var header = document.querySelector('.site-header');
+  if (header) {
+    var onScroll = function () { header.classList.toggle('is-scrolled', window.scrollY > 8); };
+    window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  }
+  var navBtn = document.querySelector('.nav-toggle');
+  if (navBtn) navBtn.addEventListener('click', function () { document.body.classList.toggle('nav-open'); });
+
+  /* ════════════════════════════════════════════════════════════
+     STATE
+     ════════════════════════════════════════════════════════════ */
+  var currentUser = null;
+  var selectedType = null;
+  var resultValues = {};
+
+  /* ════════════════════════════════════════════════════════════
+     AUTH GUARD
+     ════════════════════════════════════════════════════════════ */
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) {
+      window.location.href = 'Auth.html?returnTo=Pruebas-Rapidas.html';
+      return;
+    }
+    currentUser = user;
+    var name = user.displayName || user.email.split('@')[0];
+    $id('pr-user-chip').style.display = '';
+    $id('pr-avatar').textContent = name.charAt(0).toUpperCase();
+    $id('pr-user-name').textContent = name;
+    $id('pr-loading').style.display = 'none';
+    $id('pr-type-card').style.display = '';
+    loadHistory();
+  });
+
+  $id('pr-logout').addEventListener('click', function () {
+    cmgAuth.signOut().then(function () { window.location.href = 'Inicio.html'; });
+  });
+
+  /* ════════════════════════════════════════════════════════════
+     TEST TYPE SELECTION
+     ════════════════════════════════════════════════════════════ */
+  var typeButtons = document.querySelectorAll('.pr-type-btn');
+  typeButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      selectedType = btn.getAttribute('data-type');
+      typeButtons.forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      showForm(selectedType);
+    });
+  });
+
+  function showForm(type) {
+    $id('pr-form-card').style.display = '';
+    resultValues = {};
+
+    /* Reset all result buttons */
+    document.querySelectorAll('.pr-result-opt').forEach(function (b) {
+      b.classList.remove('is-positive', 'is-negative');
+    });
+
+    /* Show/hide fields based on type */
+    var showEdad = type !== 'embarazo';
+    var showPasaporte = type === 'antigeno';
+    var showSexo = type === 'antigeno';
+    var showCorrelativo = type === 'antigeno';
+
+    $id('field-edad').style.display = showEdad ? '' : 'none';
+    $id('field-pasaporte').style.display = showPasaporte ? '' : 'none';
+    $id('field-sexo').style.display = showSexo ? '' : 'none';
+    $id('field-correlativo').style.display = showCorrelativo ? '' : 'none';
+
+    /* Show correct results section */
+    document.querySelectorAll('.pr-results-section').forEach(function (s) { s.style.display = 'none'; });
+    $id('results-' + type).style.display = '';
+
+    /* Set defaults */
+    $id('f-fecha').value = todayStr();
+    $id('f-horatoma').value = nowTime();
+
+    updateSaveBtn();
+  }
+
+  /* Auto-calc edad */
+  $id('f-fechanac').addEventListener('change', function () {
+    var age = calcAge(this.value);
+    $id('f-edad').value = age !== '' ? age + ' años' : '';
+  });
+
+  /* Cancel / change type */
+  $id('btn-cancelar').addEventListener('click', function () {
+    $id('pr-form-card').style.display = 'none';
+    selectedType = null;
+    typeButtons.forEach(function (b) { b.classList.remove('is-active'); });
+    clearForm();
+  });
+
+  function clearForm() {
+    $id('f-nombre').value = '';
+    $id('f-fechanac').value = '';
+    $id('f-dni').value = '';
+    $id('f-edad').value = '';
+    $id('f-pasaporte').value = '';
+    $id('f-sexo').value = '';
+    $id('f-fecha').value = todayStr();
+    $id('f-horatoma').value = nowTime();
+    $id('f-correlativo').value = '';
+    resultValues = {};
+    document.querySelectorAll('.pr-result-opt').forEach(function (b) {
+      b.classList.remove('is-positive', 'is-negative');
+    });
+    updateSaveBtn();
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     RESULT BUTTONS
+     ════════════════════════════════════════════════════════════ */
+  document.addEventListener('click', function (e) {
+    var opt = e.target.closest('.pr-result-opt');
+    if (!opt) return;
+    var container = opt.closest('.pr-result-options');
+    var field = container.getAttribute('data-field');
+    var value = opt.getAttribute('data-value');
+
+    /* Toggle siblings */
+    container.querySelectorAll('.pr-result-opt').forEach(function (b) {
+      b.classList.remove('is-positive', 'is-negative');
+    });
+
+    var isPositive = value === 'POSITIVO' || value === 'REACTIVO';
+    opt.classList.add(isPositive ? 'is-positive' : 'is-negative');
+    resultValues[field] = value;
+    updateSaveBtn();
+  });
+
+  function updateSaveBtn() {
+    var nombre = $id('f-nombre').value.trim();
+    var hasResults = false;
+
+    if (selectedType === 'embarazo') hasResults = !!resultValues['res-embarazo'];
+    else if (selectedType === 'dengue') hasResults = !!resultValues['res-igg'] && !!resultValues['res-igm'] && !!resultValues['res-ns1'];
+    else if (selectedType === 'duo') hasResults = !!resultValues['res-sarcov2'] && !!resultValues['res-tipoa'] && !!resultValues['res-tipob'];
+    else if (selectedType === 'antigeno') hasResults = !!resultValues['res-antigeno'];
+
+    $id('btn-guardar').disabled = !(nombre && hasResults);
+  }
+
+  $id('f-nombre').addEventListener('input', updateSaveBtn);
+
+  /* ════════════════════════════════════════════════════════════
+     SAVE & GENERATE RESULT
+     ════════════════════════════════════════════════════════════ */
+  $id('btn-guardar').addEventListener('click', function () {
+    if ($id('btn-guardar').disabled) return;
+    $id('btn-guardar').disabled = true;
+    $id('btn-guardar').textContent = 'Guardando...';
+
+    var horaImpresion = nowTime();
+    var data = {
+      tipo: selectedType,
+      nombre: $id('f-nombre').value.trim(),
+      fechaNacimiento: $id('f-fechanac').value,
+      dni: $id('f-dni').value.trim(),
+      edad: calcAge($id('f-fechanac').value),
+      fecha: $id('f-fecha').value,
+      horaToma: $id('f-horatoma').value,
+      horaImpresion: horaImpresion,
+      resultados: Object.assign({}, resultValues),
+      creadoPor: currentUser.email,
+      creadoPorNombre: currentUser.displayName || currentUser.email.split('@')[0],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (selectedType === 'antigeno') {
+      data.pasaporte = $id('f-pasaporte').value.trim();
+      data.sexo = $id('f-sexo').value;
+      data.correlativo = $id('f-correlativo').value.trim();
+    }
+
+    cmgDb.collection('resultadosPruebas').add(data)
+      .then(function (docRef) {
+        data._id = docRef.id;
+        toast('✓ Resultado guardado');
+        renderResultSheet(data);
+        $id('btn-guardar').textContent = '💾 Guardar e Imprimir';
+        $id('btn-guardar').disabled = false;
+      })
+      .catch(function (err) {
+        console.error('[CMG] Error guardando resultado:', err);
+        toast('Error: ' + err.message);
+        $id('btn-guardar').textContent = '💾 Guardar e Imprimir';
+        $id('btn-guardar').disabled = false;
+      });
+  });
+
+  /* ════════════════════════════════════════════════════════════
+     RENDER RESULT SHEET
+     ════════════════════════════════════════════════════════════ */
+  function renderResultSheet(data) {
+    /* Hide form, show result sheet */
+    $id('pr-page').style.display = 'none';
+    $id('rs-container').style.display = '';
+
+    var isAntigeno = data.tipo === 'antigeno';
+    var edad = data.edad !== '' && data.edad !== null ? data.edad + ' AÑOS' : '';
+
+    /* ARSA badge */
+    $id('rs-arsa').style.display = isAntigeno ? '' : 'none';
+
+    /* Correlativo */
+    if (isAntigeno && data.correlativo) {
+      $id('rs-correlativo').style.display = '';
+      $id('rs-correlativo').textContent = data.correlativo;
+    } else {
+      $id('rs-correlativo').style.display = 'none';
+    }
+
+    /* Patient table */
+    var pacienteHTML = '';
+    if (isAntigeno) {
+      /* Two-column layout for antigeno */
+      pacienteHTML =
+        '<tr><td>Paciente</td><td>' + esc(data.nombre) + '</td><td>Fecha de Nac</td><td>' + esc(data.fechaNacimiento) + '</td></tr>' +
+        '<tr><td>Pasaporte</td><td>' + esc(data.pasaporte || '—') + '</td><td>Edad</td><td>' + edad + '</td></tr>' +
+        '<tr><td>Identidad</td><td>' + esc(data.dni || '—') + '</td><td>Sexo</td><td>' + esc(data.sexo || '—') + '</td></tr>';
+      $id('rs-paciente-table').classList.add('rs-table-2col');
+    } else {
+      pacienteHTML =
+        '<tr><td>Nombre</td><td>' + esc(data.nombre) + '</td></tr>' +
+        '<tr><td>Fecha de Nacimiento</td><td>' + esc(data.fechaNacimiento) + '</td></tr>';
+      if (data.tipo !== 'embarazo') {
+        pacienteHTML += '<tr><td>Edad</td><td>' + edad + '</td></tr>';
+      }
+      pacienteHTML += '<tr><td>DNI</td><td>' + esc(data.dni || '—') + '</td></tr>';
+      $id('rs-paciente-table').classList.remove('rs-table-2col');
+    }
+    $id('rs-paciente-table').innerHTML = pacienteHTML;
+
+    /* Sample table */
+    $id('rs-muestra-table').innerHTML =
+      '<tr><td>Fecha</td><td>' + esc(formatDateLong(data.fecha)) + '</td></tr>' +
+      '<tr><td>Hora de Toma</td><td>' + formatTime12(data.horaToma) + '</td></tr>' +
+      '<tr><td>Hora de Impresión</td><td>' + formatTime12(data.horaImpresion) + '</td></tr>';
+
+    /* Results table */
+    var resultsHTML = '';
+    var res = data.resultados;
+
+    if (data.tipo === 'embarazo') {
+      $id('rs-exam-title').textContent = 'III.- EXÁMENES REALIZADOS';
+      resultsHTML = '<tr><td>PRUEBA DE EMBARAZO:</td><td>' + esc(res['res-embarazo']) + '</td></tr>';
+    } else if (data.tipo === 'dengue') {
+      $id('rs-exam-title').textContent = 'III.- EXÁMENES REALIZADO';
+      resultsHTML =
+        '<tr><td colspan="2" style="font-weight:800;background:#f0f8ff">PRUEBA DE DENGUE</td></tr>' +
+        '<tr><td>ANTICUERPO IgG:</td><td>' + esc(res['res-igg']) + '</td></tr>' +
+        '<tr><td>ANTICUERPO IgM:</td><td>' + esc(res['res-igm']) + '</td></tr>' +
+        '<tr><td>NS1:</td><td>' + esc(res['res-ns1']) + '</td></tr>';
+    } else if (data.tipo === 'duo') {
+      $id('rs-exam-title').textContent = 'III.- EXÁMENES REALIZADO';
+      resultsHTML =
+        '<tr><td>SARS-COV-2:<br>COVID-19</td><td>' + esc(res['res-sarcov2']) + '</td></tr>' +
+        '<tr><td>INFLUENZA H1N1 A:</td><td>' + esc(res['res-tipoa']) + '</td></tr>' +
+        '<tr><td>INFLUENZA H1N1 B:</td><td>' + esc(res['res-tipob']) + '</td></tr>';
+    } else if (data.tipo === 'antigeno') {
+      $id('rs-exam-title').textContent = 'III.-INMUNOLOGÍA';
+      resultsHTML =
+        '<tr><td colspan="2" style="font-weight:800;background:#f0f8ff;border-bottom:none">DETECCIÓN DE:<br>COVID-19 | ANTÍGENO</td></tr>' +
+        '<tr><td>ANTÍGENO SARS COV-2</td><td>: ' + esc(res['res-antigeno']) + '</td></tr>' +
+        '<tr><td colspan="2" style="font-size:11px;color:#555;border-top:none">TIPO DE MUESTRA:<br>HISOPADO NASOFARÍNGEO</td></tr>';
+    }
+    $id('rs-results-table').innerHTML = resultsHTML;
+
+    /* Sensitivity note */
+    $id('rs-sensitivity').style.display = isAntigeno ? '' : 'none';
+
+    /* Extra info */
+    $id('rs-extra-info').style.display = 'none';
+
+    /* QR code for antigeno */
+    if (isAntigeno && data._id) {
+      $id('rs-qr-container').style.display = '';
+      generateQR(data._id);
+    } else {
+      $id('rs-qr-container').style.display = 'none';
+    }
+
+    window.scrollTo(0, 0);
+  }
+
+  /* Simple QR code generator (creates a placeholder) */
+  function generateQR(id) {
+    var canvas = $id('rs-qr-canvas');
+    var ctx = canvas.getContext('2d');
+    canvas.width = 90;
+    canvas.height = 90;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, 90, 90);
+    ctx.fillStyle = '#213C7D';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('QR', 45, 40);
+    ctx.font = '7px sans-serif';
+    ctx.fillText(id.substring(0, 10), 45, 55);
+    ctx.strokeStyle = '#213C7D';
+    ctx.strokeRect(2, 2, 86, 86);
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     TOOLBAR ACTIONS
+     ════════════════════════════════════════════════════════════ */
+  $id('btn-print').addEventListener('click', function () {
+    window.print();
+  });
+
+  $id('btn-new-test').addEventListener('click', function () {
+    $id('rs-container').style.display = 'none';
+    $id('pr-page').style.display = '';
+    clearForm();
+    loadHistory();
+    window.scrollTo(0, 0);
+  });
+
+  /* ════════════════════════════════════════════════════════════
+     LOAD HISTORY
+     ════════════════════════════════════════════════════════════ */
+  function loadHistory() {
+    var container = $id('pr-history-list');
+    container.innerHTML = '<div class="pr-spinner" style="margin:20px auto"></div>';
+    $id('pr-history-card').style.display = '';
+
+    cmgDb.collection('resultadosPruebas')
+      .orderBy('createdAt', 'desc')
+      .limit(15)
+      .get()
+      .then(function (snap) {
+        if (snap.empty) {
+          container.innerHTML = '<div style="text-align:center;color:#9CA3AF;padding:20px;font-size:13px">Aún no hay resultados registrados.</div>';
+          return;
+        }
+        var LABELS = { embarazo: '🤰 Embarazo', dengue: '🦟 Dengue NS1', duo: '🧪 DUO', antigeno: '🩹 Antígeno COVID' };
+        var html = '';
+        snap.forEach(function (doc) {
+          var d = doc.data();
+          d._id = doc.id;
+          var ts = d.createdAt ? d.createdAt.toDate().toLocaleDateString('es-HN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+          html += '<div class="pr-history-item">' +
+            '<div><div class="pr-history-name">' + esc(d.nombre) + '</div>' +
+            '<div class="pr-history-meta">' + (LABELS[d.tipo] || d.tipo) + ' · ' + ts + '</div></div>' +
+            '<button class="pr-history-btn" data-id="' + doc.id + '">🖨️ Ver / Imprimir</button>' +
+          '</div>';
+        });
+        container.innerHTML = html;
+
+        /* Event delegation for history items */
+        container.onclick = function (e) {
+          var btn = e.target.closest('.pr-history-btn');
+          if (!btn) return;
+          var id = btn.getAttribute('data-id');
+          cmgDb.collection('resultadosPruebas').doc(id).get().then(function (snap) {
+            if (!snap.exists) { toast('Resultado no encontrado'); return; }
+            var data = snap.data();
+            data._id = snap.id;
+            renderResultSheet(data);
+          });
+        };
+      })
+      .catch(function (err) {
+        console.error('[CMG] Error cargando historial:', err);
+        container.innerHTML = '<div style="text-align:center;color:#DC2626;padding:20px;font-size:13px">Error al cargar historial</div>';
+      });
+  }
+
+})();
+</script>
+
+<script src="cmg-d365-banner.js"></script>
+</body>
+</html>

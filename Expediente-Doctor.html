@@ -2419,6 +2419,9 @@
           '<div class="ed-consulta-motivo">' + resumen + '</div>' +
           '<div style="font-size:11px;color:#9CA3AF;margin-top:4px">Registrado por ' + esc(pr.creadoPorNombre || pr.creadoPor || '—') + '</div>' +
         '</div>' +
+        '<div class="ed-consulta-actions">' +
+          '<a class="ed-consulta-link" href="Ver-Prueba.html?id=' + esc(pr._id) + '" target="_blank" rel="noopener">📄 Ver / PDF</a>' +
+        '</div>' +
       '</div>';
     }).join('');
   }

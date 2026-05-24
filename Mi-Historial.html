@@ -1233,9 +1233,12 @@
         }).join(' · ');
       }
       var fechaTxt = pr.fecha || '—';
-      return '<div style="background:#F9FAFB;border-left:4px solid #FDD22C;border-radius:8px;padding:14px 16px;margin-bottom:10px">' +
-        '<div style="font-size:13px;font-weight:700;color:#213C7D;margin-bottom:4px">' + (labels[pr.tipo] || '🧪 ' + esc(pr.tipo)) + ' · 📅 ' + esc(fechaTxt) + (pr.horaToma ? ' ' + esc(pr.horaToma) : '') + '</div>' +
-        '<div style="font-size:13px;color:#4B5563">' + resumen + '</div>' +
+      return '<div style="background:#F9FAFB;border-left:4px solid #FDD22C;border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:13px;font-weight:700;color:#213C7D;margin-bottom:4px">' + (labels[pr.tipo] || '🧪 ' + esc(pr.tipo)) + ' · 📅 ' + esc(fechaTxt) + (pr.horaToma ? ' ' + esc(pr.horaToma) : '') + '</div>' +
+          '<div style="font-size:13px;color:#4B5563">' + resumen + '</div>' +
+        '</div>' +
+        '<a href="Ver-Prueba.html?id=' + esc(pr._id) + '" target="_blank" rel="noopener" style="background:#213C7D;color:#fff;text-decoration:none;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:700;white-space:nowrap">📄 Ver / PDF</a>' +
       '</div>';
     }).join('');
   }

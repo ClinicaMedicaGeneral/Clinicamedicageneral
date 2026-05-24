@@ -137,6 +137,28 @@ service cloud.firestore {
       allow delete:          if isDoctor();
     }
 
+    // ═══ /examenesLaboratorio/{id} ════════════════════════════
+    // Exámenes de laboratorio externos (PDFs):
+    //   - Staff (isDoctor): lectura/escritura total.
+    //   - Paciente: puede leer los exámenes ligados a su expediente.
+    match /examenesLaboratorio/{examenId} {
+      allow read: if isDoctor()
+        || (
+          isAuth()
+          && resource.data.codigoPaciente != null
+          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
+          && (
+            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
+            || (
+              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
+              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
+            )
+          )
+        );
+      allow create, update: if isDoctor();
+      allow delete:         if isDoctor();
+    }
+
     // ═══ Bloqueo por defecto ═══════════════════════════════════
     // Cualquier otra colección queda bloqueada.
     match /{document=**} {

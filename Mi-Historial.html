@@ -785,6 +785,12 @@
         <h3 class="mh-card-title">🧪 Pruebas rápidas</h3>
         <div id="mh-pruebas-container"></div>
       </div>
+
+      <!-- Exámenes de laboratorio -->
+      <div class="mh-card">
+        <h3 class="mh-card-title">🔬 Exámenes de laboratorio</h3>
+        <div id="mh-laboratorio-container"></div>
+      </div>
     </div>
 
     <!-- Estado: pendiente de aprobación (compartido no aprobado) -->
@@ -966,6 +972,7 @@
         renderExpediente(codigo, exp);
         cargarConsultas(codigo);
         cargarPruebas(codigo, exp);
+        cargarLaboratorio(codigo);
       })
       .catch(function (err) {
         $id('mh-loading').style.display = 'none';
@@ -1239,6 +1246,53 @@
           '<div style="font-size:13px;color:#4B5563">' + resumen + '</div>' +
         '</div>' +
         '<a href="Ver-Prueba.html?id=' + esc(pr._id) + '" target="_blank" rel="noopener" style="background:#213C7D;color:#fff;text-decoration:none;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:700;white-space:nowrap">📄 Ver / PDF</a>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     EXÁMENES DE LABORATORIO
+     ════════════════════════════════════════════════════════════ */
+  function cargarLaboratorio(codigo) {
+    var cont = $id('mh-laboratorio-container');
+    if (!cont) return;
+    cont.innerHTML = '<div class="mh-spinner"></div>';
+    cmgDb.collection('examenesLaboratorio')
+      .where('codigoPaciente', '==', codigo)
+      .get()
+      .then(function (snap) {
+        var arr = [];
+        snap.forEach(function (doc) {
+          arr.push(Object.assign({ _id: doc.id }, doc.data()));
+        });
+        arr.sort(function (a, b) {
+          var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+          var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+          return tb - ta;
+        });
+        renderLaboratorio(arr);
+      })
+      .catch(function (err) {
+        cont.innerHTML = '<div class="mh-ant-empty">Error al cargar exámenes</div>';
+        console.error('[CMG] Error laboratorio:', err);
+      });
+  }
+
+  function renderLaboratorio(examenes) {
+    var cont = $id('mh-laboratorio-container');
+    if (!examenes.length) {
+      cont.innerHTML = '<div class="mh-ant-empty">Aún no tienes exámenes de laboratorio registrados.</div>';
+      return;
+    }
+    cont.innerHTML = examenes.map(function (ex) {
+      var fecha = ex.fechaExamen || '—';
+      return '<div style="background:#F9FAFB;border-left:4px solid #4BACC6;border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:13px;font-weight:700;color:#213C7D;margin-bottom:4px">🔬 ' + esc(ex.tipoNombre || ex.tipo) + ' · 📅 ' + esc(fecha) + '</div>' +
+          (ex.proveedor ? '<div style="font-size:12px;color:#6B7280">Proveedor: ' + esc(ex.proveedor) + '</div>' : '') +
+          (ex.notas ? '<div style="font-size:12px;color:#4B5563;margin-top:4px">' + esc(ex.notas) + '</div>' : '') +
+        '</div>' +
+        '<a href="' + esc(ex.pdfUrl) + '" target="_blank" rel="noopener" style="background:#213C7D;color:#fff;text-decoration:none;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:700;white-space:nowrap">📄 Ver / Descargar</a>' +
       '</div>';
     }).join('');
   }

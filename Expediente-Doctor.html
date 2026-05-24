@@ -820,6 +820,7 @@
       <button class="ed-tab" data-tab="editar">✏️ Editar</button>
       <button class="ed-tab" data-tab="consulta">📝 Consulta</button>
       <button class="ed-tab" data-tab="pruebas">🧪 Pruebas</button>
+      <button class="ed-tab" data-tab="laboratorio">🔬 Laboratorio</button>
       <button class="ed-tab" data-tab="historial">📂 Historial</button>
     </div>
 
@@ -1040,6 +1041,27 @@
           </a>
         </div>
         <div id="pruebas-contenido" style="margin-top:18px">
+          <div class="ed-empty">
+            <div class="ed-empty-icon">🔍</div>
+            <p>Primero busca un paciente en la pestaña "Buscar Paciente"</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── TAB: LABORATORIO ─── -->
+    <section id="tab-laboratorio" class="ed-tab-content" style="display:none">
+      <div class="ed-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px">
+          <div>
+            <h2 class="ed-card-title" style="margin-bottom:4px">🔬 Exámenes de laboratorio</h2>
+            <p class="ed-card-subtitle" style="margin:0">PDFs subidos del laboratorio proveedor, vinculados por número de identidad.</p>
+          </div>
+          <a class="ed-btn ed-btn-yellow" id="btn-subir-examen" href="Examenes-Laboratorio.html" target="_blank" rel="noopener">
+            📤 Subir nuevo examen ↗
+          </a>
+        </div>
+        <div id="laboratorio-contenido" style="margin-top:18px">
           <div class="ed-empty">
             <div class="ed-empty-icon">🔍</div>
             <p>Primero busca un paciente en la pestaña "Buscar Paciente"</p>
@@ -1285,6 +1307,7 @@
     if (name === 'editar') renderEditarTab();
     if (name === 'consulta') renderConsultaTab();
     if (name === 'pruebas') renderPruebasTab();
+    if (name === 'laboratorio') renderLaboratorioTab();
     if (name === 'historial') renderHistorialTab();
   }
   document.querySelectorAll('.ed-tab').forEach(function (t) {
@@ -2421,6 +2444,100 @@
         '</div>' +
         '<div class="ed-consulta-actions">' +
           '<a class="ed-consulta-link" href="Ver-Prueba.html?id=' + esc(pr._id) + '" target="_blank" rel="noopener">📄 Ver / PDF</a>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     EXÁMENES DE LABORATORIO DEL PACIENTE
+     ════════════════════════════════════════════════════════════ */
+  function renderLaboratorioTab() {
+    var cont = $id('laboratorio-contenido');
+    if (!pacienteActual) {
+      cont.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔍</div><p>Primero busca un paciente en la pestaña "Buscar Paciente"</p></div>';
+      return;
+    }
+    var p = pacienteActual;
+    var dg = p.datosGenerales || {};
+    var dniNormalizado = (dg.numeroIdentidad || '').replace(/\D/g, '');
+
+    /* Actualizar link de subida para pre-llenar DNI y nombre */
+    var url = 'Examenes-Laboratorio.html?dni=' + encodeURIComponent(dg.numeroIdentidad || '') + '&nombre=' + encodeURIComponent(dg.nombreCompleto || '');
+    $id('btn-subir-examen').setAttribute('href', url);
+
+    cont.innerHTML =
+      '<div class="ed-patient-summary">' +
+        '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
+        '<p class="ed-patient-meta">' + (dg.numeroIdentidad ? 'DNI ' + esc(dg.numeroIdentidad) : 'Sin DNI registrado') + '</p></div>' +
+        '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
+      '</div>' +
+      '<div id="laboratorio-lista"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>';
+
+    /* Cargar todos los exámenes y filtrar por codigoPaciente o DNI */
+    cmgDb.collection('examenesLaboratorio').get()
+      .then(function (snap) {
+        var arr = [];
+        var pendientesVincular = [];
+        snap.forEach(function (doc) {
+          var d = Object.assign({ _id: doc.id }, doc.data());
+          var dniDoc = (d.dniNormalizado || (d.dni || '').replace(/\D/g, ''));
+          var match = (d.codigoPaciente === p.codigoPaciente)
+            || (dniNormalizado && dniDoc === dniNormalizado);
+          if (!match) return;
+          if (!d.codigoPaciente) {
+            pendientesVincular.push(doc.id);
+            d.codigoPaciente = p.codigoPaciente;
+          }
+          arr.push(d);
+        });
+
+        if (pendientesVincular.length) {
+          var batch = cmgDb.batch();
+          pendientesVincular.forEach(function (id) {
+            batch.update(cmgDb.collection('examenesLaboratorio').doc(id), {
+              codigoPaciente: p.codigoPaciente,
+              dniNormalizado: dniNormalizado,
+              pacienteNombreExpediente: dg.nombreCompleto || ''
+            });
+          });
+          batch.commit().catch(function (e) { console.warn('[CMG] No se pudo vincular exámenes viejos:', e); });
+        }
+
+        arr.sort(function (a, b) {
+          var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+          var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+          return tb - ta;
+        });
+        renderLaboratorioLista(arr, pendientesVincular.length);
+      })
+      .catch(function (err) {
+        $id('laboratorio-lista').innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar exámenes: ' + esc(err.message) + '</div>';
+      });
+  }
+
+  function renderLaboratorioLista(examenes, vinculadasAhora) {
+    var lista = $id('laboratorio-lista');
+    if (!examenes.length) {
+      lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔬</div><p>Este paciente aún no tiene exámenes de laboratorio.</p><p style="font-size:13px;color:#9CA3AF;margin-top:6px">Súbelos desde el botón superior. Se vinculan por DNI automáticamente.</p></div>';
+      return;
+    }
+    var banner = '';
+    if (vinculadasAhora) {
+      banner = '<div style="background:#D1FAE5;border:1px solid #6EE7B7;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#065F46">✓ ' + vinculadasAhora + ' examen' + (vinculadasAhora > 1 ? 'es vinculados' : ' vinculado') + ' automáticamente al expediente por coincidencia de DNI.</div>';
+    }
+    lista.innerHTML = banner + examenes.map(function (ex) {
+      var fecha = ex.fechaExamen || (ex.createdAt && ex.createdAt.toMillis ? new Date(ex.createdAt.toMillis()).toLocaleDateString('es-HN') : '—');
+      var size = ex.fileSize ? ' · ' + (ex.fileSize / 1024 / 1024).toFixed(2) + ' MB' : '';
+      return '<div class="ed-consulta-item">' +
+        '<div style="flex:1;min-width:0">' +
+          '<div class="ed-consulta-fecha">🔬 ' + esc(ex.tipoNombre || ex.tipo) + ' · 📅 ' + esc(fecha) + '</div>' +
+          (ex.proveedor ? '<div class="ed-consulta-motivo">Proveedor: ' + esc(ex.proveedor) + '</div>' : '') +
+          (ex.notas ? '<div class="ed-consulta-motivo">' + esc(ex.notas) + '</div>' : '') +
+          '<div style="font-size:11px;color:#9CA3AF;margin-top:4px">Subido por ' + esc(ex.subidoPorNombre || ex.subidoPor || '—') + size + '</div>' +
+        '</div>' +
+        '<div class="ed-consulta-actions">' +
+          '<a class="ed-consulta-link" href="' + esc(ex.pdfUrl) + '" target="_blank" rel="noopener">📄 Ver / Descargar</a>' +
         '</div>' +
       '</div>';
     }).join('');

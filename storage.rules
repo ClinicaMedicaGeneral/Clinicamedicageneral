@@ -23,6 +23,16 @@ service firebase.storage {
       allow write: if isDoctor();
     }
 
+    // ─── Exámenes de laboratorio (PDFs externos) ──
+    // Estructura: /examenes-laboratorio/{codigoPaciente|sin-expediente}/...
+    //   - Lectura: cualquier usuario autenticado (URL secreta, control real
+    //     vía reglas Firestore en /examenesLaboratorio).
+    //   - Escritura: solo doctores autorizados.
+    match /examenes-laboratorio/{folder}/{allPaths=**} {
+      allow read: if isAuth();
+      allow write: if isDoctor();
+    }
+
     // ─── Cualquier otra ruta ──
     match /{allPaths=**} {
       allow read, write: if false;

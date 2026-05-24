@@ -1064,7 +1064,7 @@
   function renderResultSheet(data) {
     /* Hide form, show result sheet */
     $id('pr-page').style.display = 'none';
-    $id('rs-container').style.display = '';
+    $id('rs-container').style.display = 'block';
     currentResultDoc = data;
 
     var isAntigeno = data.tipo === 'antigeno';

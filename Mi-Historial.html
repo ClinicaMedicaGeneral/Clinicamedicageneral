@@ -502,6 +502,106 @@
   font-family: inherit;
 }
 
+/* Pending access requests */
+.mh-requests-box {
+  background: #fff;
+  border: 2px solid #FDD22C;
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 20px;
+}
+.mh-requests-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #213C7D;
+  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mh-request-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #F9FAFB;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.mh-request-info {
+  flex: 1;
+  min-width: 200px;
+}
+.mh-request-email {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1F2937;
+}
+.mh-request-date {
+  font-size: 11px;
+  color: #9CA3AF;
+  margin-top: 2px;
+}
+.mh-request-actions {
+  display: flex;
+  gap: 8px;
+}
+.mh-request-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.mh-request-btn-approve {
+  background: #059669;
+  color: #fff;
+}
+.mh-request-btn-approve:hover { opacity: .85; }
+.mh-request-btn-deny {
+  background: #DC2626;
+  color: #fff;
+}
+.mh-request-btn-deny:hover { opacity: .85; }
+
+/* Pending state for requester */
+.mh-pending-state {
+  background: #fff;
+  border-radius: 16px;
+  padding: 60px 30px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(33,60,125,.08);
+}
+.mh-pending-icon { font-size: 48px; margin-bottom: 12px; }
+.mh-pending-state h3 {
+  color: #213C7D;
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+.mh-pending-state p {
+  color: #6B7280;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.6;
+}
+.mh-pending-remove {
+  margin-top: 18px;
+  background: transparent;
+  border: 1.5px solid #E5E7EB;
+  color: #6B7280;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mh-pending-remove:hover { border-color: #DC2626; color: #DC2626; }
+
 /* Toast */
 .mh-toast {
   position: fixed;
@@ -635,6 +735,12 @@
         <button class="mh-share-btn" id="btn-share-code">📋 Copiar</button>
       </div>
 
+      <!-- Solicitudes de acceso pendientes (solo visible al dueño) -->
+      <div class="mh-requests-box" id="mh-requests-box" style="display:none">
+        <h3 class="mh-requests-title">🔔 Solicitudes de acceso</h3>
+        <div id="mh-requests-list"></div>
+      </div>
+
       <!-- Datos generales -->
       <div class="mh-card">
         <h3 class="mh-card-title">👤 Datos generales</h3>
@@ -673,6 +779,14 @@
         <h3 class="mh-card-title">📅 Historial de consultas</h3>
         <div id="mh-consultas-container"></div>
       </div>
+    </div>
+
+    <!-- Estado: pendiente de aprobación (compartido no aprobado) -->
+    <div class="mh-pending-state" id="mh-pending-state" style="display:none">
+      <div class="mh-pending-icon" id="mh-pending-icon">⏳</div>
+      <h3 id="mh-pending-title">Solicitud pendiente de aprobación</h3>
+      <p id="mh-pending-msg">El titular de este expediente debe aprobar tu solicitud<br>para que puedas ver su historial médico.</p>
+      <button class="mh-pending-remove" id="btn-remove-pending">Cancelar solicitud</button>
     </div>
 
   </div>
@@ -854,16 +968,42 @@
   }
 
   function renderExpediente(codigo, exp) {
-    $id('mh-expediente-data').style.display = '';
     var dg = exp.datosGenerales || {};
+    var esPropio = userProfile.codigoExpediente && codigo === userProfile.codigoExpediente;
+    var esOwner = exp.ownerUid === currentUser.uid;
+    var enCompartidoCon = exp.compartidoCon && exp.compartidoCon.indexOf(currentUser.uid) !== -1;
+    var solicitudes = exp.solicitudesAcceso || [];
+    var solicitudPendiente = solicitudes.some(function (s) { return s.uid === currentUser.uid; });
 
-    /* Mostrar código en la barra superior solo si es expediente propio */
-    if (userProfile.codigoExpediente && codigo === userProfile.codigoExpediente) {
+    /* Topbar solo si es propio */
+    if (esPropio || esOwner) {
       $id('mh-topbar').style.display = '';
       $id('mh-topbar-code').textContent = codigo;
     } else {
       $id('mh-topbar').style.display = 'none';
     }
+
+    /* Si es compartido y NO aprobado → mostrar estado pendiente */
+    if (!esPropio && !esOwner && !enCompartidoCon) {
+      $id('mh-expediente-data').style.display = 'none';
+      $id('mh-pending-state').style.display = '';
+      if (solicitudPendiente) {
+        $id('mh-pending-icon').textContent = '⏳';
+        $id('mh-pending-title').textContent = 'Solicitud pendiente de aprobación';
+        $id('mh-pending-msg').innerHTML = 'El titular de este expediente debe aprobar tu solicitud<br>para que puedas ver su historial médico.';
+        $id('btn-remove-pending').textContent = 'Cancelar solicitud';
+      } else {
+        $id('mh-pending-icon').textContent = '🚫';
+        $id('mh-pending-title').textContent = 'Sin acceso a este expediente';
+        $id('mh-pending-msg').innerHTML = 'Tu solicitud fue rechazada o aún no has solicitado acceso.<br>Puedes quitar este expediente de tu lista.';
+        $id('btn-remove-pending').textContent = 'Quitar de mi lista';
+      }
+      return;
+    }
+
+    /* Ocultar estado pendiente, mostrar datos */
+    $id('mh-pending-state').style.display = 'none';
+    $id('mh-expediente-data').style.display = '';
 
     $id('mh-p-nombre').textContent = dg.nombreCompleto || '—';
     var sub = [];
@@ -874,11 +1014,43 @@
     $id('mh-p-codigo').textContent = codigo;
 
     /* Share box solo si es propio */
-    if (userProfile && userProfile.codigoExpediente === codigo) {
+    if (esPropio || esOwner) {
       $id('mh-share-box').style.display = '';
       $id('mh-share-code').textContent = codigo;
     } else {
       $id('mh-share-box').style.display = 'none';
+    }
+
+    /* Solicitudes de acceso pendientes (solo visible al dueño) */
+    if ((esPropio || esOwner) && solicitudes.length > 0) {
+      $id('mh-requests-box').style.display = '';
+      $id('mh-requests-list').innerHTML = solicitudes.map(function (sol) {
+        return '<div class="mh-request-item">' +
+          '<div class="mh-request-info">' +
+            '<div class="mh-request-email">' + esc(sol.displayName || sol.email) + '</div>' +
+            '<div class="mh-request-date">' + esc(sol.email) + (sol.fecha ? ' · ' + fmtDate(sol.fecha) : '') + '</div>' +
+          '</div>' +
+          '<div class="mh-request-actions">' +
+            '<button class="mh-request-btn mh-request-btn-approve" data-uid="' + esc(sol.uid) + '" data-codigo="' + esc(codigo) + '">✓ Aprobar</button>' +
+            '<button class="mh-request-btn mh-request-btn-deny" data-uid="' + esc(sol.uid) + '" data-codigo="' + esc(codigo) + '">✗ Rechazar</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      /* Event delegation para aprobar/rechazar */
+      $id('mh-requests-list').onclick = function (e) {
+        var btn = e.target.closest('.mh-request-btn');
+        if (!btn) return;
+        var uid = btn.getAttribute('data-uid');
+        var cod = btn.getAttribute('data-codigo');
+        if (btn.classList.contains('mh-request-btn-approve')) {
+          aprobarSolicitud(cod, uid);
+        } else if (btn.classList.contains('mh-request-btn-deny')) {
+          rechazarSolicitud(cod, uid);
+        }
+      };
+    } else {
+      $id('mh-requests-box').style.display = 'none';
     }
 
     /* Datos generales grid */
@@ -1072,26 +1244,59 @@
           resetModalBtn();
           return null;
         } else {
-          /* Agregar como compartido */
-          if (userProfile.codigosCompartidos.indexOf(codigo) !== -1) {
-            mostrarErrorModal('Ya tienes acceso a este expediente compartido.');
+          /* Solicitar acceso compartido (requiere aprobación del titular) */
+          /* Verificar si ya tiene acceso aprobado */
+          if (exp.compartidoCon && exp.compartidoCon.indexOf(currentUser.uid) !== -1) {
+            if (userProfile.codigosCompartidos.indexOf(codigo) !== -1) {
+              mostrarErrorModal('Ya tienes acceso a este expediente compartido.');
+              resetModalBtn();
+              return null;
+            }
+            var nuevosAprobados = (userProfile.codigosCompartidos || []).concat([codigo]);
+            return cmgDb.collection('users').doc(currentUser.uid).set({
+              email: currentUser.email,
+              codigoExpediente: userProfile.codigoExpediente || null,
+              codigosCompartidos: nuevosAprobados,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }).then(function () {
+              toast('✓ Expediente compartido agregado');
+              closeModal();
+              cargarPerfilUsuario();
+            });
+          }
+          /* Verificar si ya tiene solicitud pendiente */
+          var solicitudes = exp.solicitudesAcceso || [];
+          var yaSolicitado = solicitudes.some(function (s) { return s.uid === currentUser.uid; });
+          if (yaSolicitado) {
+            mostrarErrorModal('Ya enviaste una solicitud de acceso. Espera a que el titular la apruebe.');
             resetModalBtn();
             return null;
           }
-          var nuevos = (userProfile.codigosCompartidos || []).concat([codigo]);
-          return cmgDb.collection('users').doc(currentUser.uid).set({
+          if (userProfile.codigosCompartidos.indexOf(codigo) !== -1) {
+            mostrarErrorModal('Ya tienes este expediente en tu lista. Espera a que el titular apruebe tu solicitud.');
+            resetModalBtn();
+            return null;
+          }
+          /* Crear solicitud de acceso */
+          var nuevaSolicitud = {
+            uid: currentUser.uid,
             email: currentUser.email,
-            codigoExpediente: userProfile.codigoExpediente || null,
-            codigosCompartidos: nuevos,
+            displayName: currentUser.displayName || currentUser.email.split('@')[0],
+            fecha: new Date().toISOString()
+          };
+          var nuevos = (userProfile.codigosCompartidos || []).concat([codigo]);
+          return cmgDb.collection('expedientes').doc(codigo).update({
+            solicitudesAcceso: firebase.firestore.FieldValue.arrayUnion(nuevaSolicitud),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          }, { merge: true }).then(function () {
-            /* Registrar acceso en el expediente */
-            return cmgDb.collection('expedientes').doc(codigo).update({
-              compartidoCon: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
-              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
           }).then(function () {
-            toast('✓ Expediente compartido agregado');
+            return cmgDb.collection('users').doc(currentUser.uid).set({
+              email: currentUser.email,
+              codigoExpediente: userProfile.codigoExpediente || null,
+              codigosCompartidos: nuevos,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+          }).then(function () {
+            toast('✓ Solicitud enviada. El titular debe aprobar tu acceso.');
             closeModal();
             cargarPerfilUsuario();
           });
@@ -1113,6 +1318,87 @@
     $id('modal-confirmar').disabled = false;
     $id('modal-confirmar').textContent = 'Vincular';
   }
+
+  /* ════════════════════════════════════════════════════════════
+     APROBAR / RECHAZAR SOLICITUDES DE ACCESO
+     ════════════════════════════════════════════════════════════ */
+  function aprobarSolicitud(codigo, uid) {
+    cmgDb.collection('expedientes').doc(codigo).get().then(function (snap) {
+      if (!snap.exists) return;
+      var exp = snap.data();
+      var solicitudes = exp.solicitudesAcceso || [];
+      var solicitante = solicitudes.find(function (s) { return s.uid === uid; });
+      if (!solicitante) { toast('Solicitud no encontrada'); return; }
+
+      /* Remover de solicitudesAcceso y agregar a compartidoCon */
+      var nuevasSolicitudes = solicitudes.filter(function (s) { return s.uid !== uid; });
+      return cmgDb.collection('expedientes').doc(codigo).update({
+        solicitudesAcceso: nuevasSolicitudes,
+        compartidoCon: firebase.firestore.FieldValue.arrayUnion(uid),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }).then(function () {
+      toast('✓ Acceso aprobado');
+      cargarExpediente(codigoActual);
+    }).catch(function (err) {
+      console.error('[CMG] Error aprobar:', err);
+      toast('Error al aprobar solicitud');
+    });
+  }
+
+  function rechazarSolicitud(codigo, uid) {
+    cmgDb.collection('expedientes').doc(codigo).get().then(function (snap) {
+      if (!snap.exists) return;
+      var exp = snap.data();
+      var solicitudes = exp.solicitudesAcceso || [];
+      var nuevasSolicitudes = solicitudes.filter(function (s) { return s.uid !== uid; });
+
+      return cmgDb.collection('expedientes').doc(codigo).update({
+        solicitudesAcceso: nuevasSolicitudes,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }).then(function () {
+      toast('Solicitud rechazada');
+      cargarExpediente(codigoActual);
+    }).catch(function (err) {
+      console.error('[CMG] Error rechazar:', err);
+      toast('Error al rechazar solicitud');
+    });
+  }
+
+  /* Botón "Cancelar solicitud" / "Quitar de mi lista" */
+  $id('btn-remove-pending').addEventListener('click', function () {
+    if (!codigoActual || !currentUser) return;
+    cmgDb.collection('expedientes').doc(codigoActual).get().then(function (snap) {
+      if (!snap.exists) return Promise.resolve();
+      var exp = snap.data();
+      var solicitudes = exp.solicitudesAcceso || [];
+      var miSolicitud = solicitudes.some(function (s) { return s.uid === currentUser.uid; });
+      if (miSolicitud) {
+        var nuevas = solicitudes.filter(function (s) { return s.uid !== currentUser.uid; });
+        return cmgDb.collection('expedientes').doc(codigoActual).update({
+          solicitudesAcceso: nuevas,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+      return Promise.resolve();
+    }).then(function () {
+      /* Remover de codigosCompartidos del usuario */
+      var codigos = (userProfile.codigosCompartidos || []).filter(function (c) { return c !== codigoActual; });
+      return cmgDb.collection('users').doc(currentUser.uid).set({
+        email: currentUser.email,
+        codigoExpediente: userProfile.codigoExpediente || null,
+        codigosCompartidos: codigos,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }).then(function () {
+      toast('Solicitud cancelada');
+      cargarPerfilUsuario();
+    }).catch(function (err) {
+      console.error('[CMG] Error cancelar:', err);
+      toast('Error al cancelar solicitud');
+    });
+  });
 
   /* ════════════════════════════════════════════════════════════
      COPIAR CÓDIGO PROPIO

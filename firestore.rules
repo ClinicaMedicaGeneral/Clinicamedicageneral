@@ -49,9 +49,14 @@ service cloud.firestore {
         )
         || (
           isAuth()
-          && resource.data.ownerUid != null
+          && resource.data.ownerUid == request.auth.uid
           && request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['compartidoCon', 'updatedAt'])
+              .hasOnly(['compartidoCon', 'solicitudesAcceso', 'updatedAt'])
+        )
+        || (
+          isAuth()
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['solicitudesAcceso', 'updatedAt'])
         );
 
       allow delete: if isDoctor();

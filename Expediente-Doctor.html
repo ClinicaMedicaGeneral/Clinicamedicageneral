@@ -2345,40 +2345,59 @@
       '</div>' +
       '<div id="pruebas-lista"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>';
 
-    /* Cargar pruebas vinculadas por codigoPaciente Y por DNI (back-compat) */
-    var promesas = [
-      cmgDb.collection('resultadosPruebas').where('codigoPaciente', '==', p.codigoPaciente).get()
-    ];
-    if (dniNormalizado) {
-      promesas.push(cmgDb.collection('resultadosPruebas').where('dniNormalizado', '==', dniNormalizado).get());
-    }
-
-    Promise.all(promesas)
-      .then(function (snaps) {
-        var mapa = {};
-        snaps.forEach(function (snap) {
-          snap.forEach(function (doc) {
-            mapa[doc.id] = Object.assign({ _id: doc.id }, doc.data());
-          });
+    /* Traemos todas las pruebas y filtramos por DNI client-side.
+       El doctor tiene read total en resultadosPruebas (regla isDoctor). */
+    cmgDb.collection('resultadosPruebas').get()
+      .then(function (snap) {
+        var arr = [];
+        var pendientesVincular = [];
+        snap.forEach(function (doc) {
+          var d = Object.assign({ _id: doc.id }, doc.data());
+          var dniDoc = (d.dniNormalizado || (d.dni || '').replace(/\D/g, ''));
+          var match = (d.codigoPaciente === p.codigoPaciente)
+            || (dniNormalizado && dniDoc === dniNormalizado);
+          if (!match) return;
+          /* Si la prueba aún no tiene codigoPaciente, la vinculamos */
+          if (!d.codigoPaciente) {
+            pendientesVincular.push(doc.id);
+            d.codigoPaciente = p.codigoPaciente;
+          }
+          arr.push(d);
         });
-        var arr = Object.keys(mapa).map(function (k) { return mapa[k]; });
+
+        if (pendientesVincular.length) {
+          var batch = cmgDb.batch();
+          pendientesVincular.forEach(function (id) {
+            batch.update(cmgDb.collection('resultadosPruebas').doc(id), {
+              codigoPaciente: p.codigoPaciente,
+              dniNormalizado: dniNormalizado,
+              pacienteNombreExpediente: dg.nombreCompleto || ''
+            });
+          });
+          batch.commit().catch(function (e) { console.warn('[CMG] No se pudo vincular pruebas viejas:', e); });
+        }
+
         arr.sort(function (a, b) {
           var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
           var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
           return tb - ta;
         });
-        renderPruebasLista(arr);
+        renderPruebasLista(arr, pendientesVincular.length);
       })
       .catch(function (err) {
         $id('pruebas-lista').innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar pruebas: ' + esc(err.message) + '</div>';
       });
   }
 
-  function renderPruebasLista(pruebas) {
+  function renderPruebasLista(pruebas, vinculadasAhora) {
     var lista = $id('pruebas-lista');
     if (!pruebas.length) {
       lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🧪</div><p>Este paciente aún no tiene pruebas rápidas registradas.</p><p style="font-size:13px;color:#9CA3AF;margin-top:6px">Las pruebas se vinculan automáticamente cuando el DNI coincide.</p></div>';
       return;
+    }
+    var bannerVinc = '';
+    if (vinculadasAhora) {
+      bannerVinc = '<div style="background:#D1FAE5;border:1px solid #6EE7B7;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#065F46">✓ ' + vinculadasAhora + ' prueba' + (vinculadasAhora > 1 ? 's vinculadas' : ' vinculada') + ' automáticamente al expediente por coincidencia de DNI.</div>';
     }
     var labels = {
       embarazo: '🤰 Embarazo',
@@ -2386,7 +2405,7 @@
       duo: '🧬 DUO (COVID-Influenza)',
       antigeno: '🧪 Antígeno COVID-19'
     };
-    lista.innerHTML = pruebas.map(function (pr) {
+    lista.innerHTML = bannerVinc + pruebas.map(function (pr) {
       var resumen = '';
       if (pr.resultados) {
         resumen = Object.keys(pr.resultados).map(function (k) {

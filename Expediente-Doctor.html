@@ -406,6 +406,37 @@
 }
 .ed-consulta-link:hover { background: #FDD22C; border-color: #FDD22C; }
 
+button.ed-consulta-link {
+  font-family: inherit;
+  cursor: pointer;
+}
+.ed-link-blue { background: #EFF6FF !important; border-color: #BFDBFE !important; color: #1E40AF !important; }
+.ed-link-blue:hover { background: #DBEAFE !important; border-color: #93C5FD !important; }
+.ed-link-red { background: #FEF2F2 !important; border-color: #FECACA !important; color: #991B1B !important; }
+.ed-link-red:hover { background: #FEE2E2 !important; border-color: #FCA5A5 !important; }
+
+/* Modal mover */
+.ed-modal {
+  position: fixed; inset: 0;
+  background: rgba(33,60,125,.45);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 9000; padding: 20px;
+}
+.ed-modal.is-open { display: flex; }
+.ed-modal-box {
+  background: #fff;
+  border-radius: 14px;
+  padding: 26px;
+  max-width: 460px;
+  width: 100%;
+  box-shadow: 0 12px 50px rgba(0,0,0,.18);
+}
+.mover-info { font-weight: 600; }
+.mover-info-ok { color: #065F46; }
+.mover-info-warn { color: #92400E; }
+.mover-info-err { color: #991B1B; }
+
 /* ── Modo selector consulta ── */
 .ed-mode-grid {
   display: grid;
@@ -1092,6 +1123,20 @@
   <div class="ed-overlay-box">
     <div class="ed-overlay-spinner"></div>
     <div class="ed-overlay-text" id="ed-overlay-text">Procesando...</div>
+  </div>
+</div>
+
+<!-- Modal: Mover archivo a otro expediente -->
+<div class="ed-modal" id="modal-mover">
+  <div class="ed-modal-box">
+    <h3 style="margin:0 0 6px;color:#213C7D;font-size:17px">📂 Mover archivo a otro expediente</h3>
+    <p style="margin:0 0 14px;font-size:13px;color:#6B7280">Ingresa el código del expediente destino. El archivo se re-vinculará y aparecerá allí.</p>
+    <input type="text" id="mover-codigo-input" class="ed-input" placeholder="CMG-XXXXXX" maxlength="11" autocomplete="off" style="text-transform:uppercase;font-family:'Courier New',monospace;letter-spacing:2px;text-align:center;font-size:15px;font-weight:700">
+    <div id="mover-info" class="mover-info" style="margin-top:10px;min-height:18px;font-size:12px"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">
+      <button class="ed-btn ed-btn-ghost" id="mover-cancelar">Cancelar</button>
+      <button class="ed-btn ed-btn-primary" id="mover-confirmar" disabled>Mover archivo</button>
+    </div>
   </div>
 </div>
 
@@ -2443,10 +2488,20 @@
           '<div style="font-size:11px;color:#9CA3AF;margin-top:4px">Registrado por ' + esc(pr.creadoPorNombre || pr.creadoPor || '—') + '</div>' +
         '</div>' +
         '<div class="ed-consulta-actions">' +
-          '<a class="ed-consulta-link" href="Ver-Prueba.html?id=' + esc(pr._id) + '" target="_blank" rel="noopener">📄 Ver / PDF</a>' +
+          '<a class="ed-consulta-link" href="Ver-Prueba.html?id=' + esc(pr._id) + '" target="_blank" rel="noopener">📄 Ver</a>' +
+          '<button class="ed-consulta-link ed-link-blue" data-mover-prueba="' + esc(pr._id) + '" data-tipo-nombre="' + esc(pr.tipo) + '">📂 Mover</button>' +
+          '<button class="ed-consulta-link ed-link-red" data-borrar-prueba="' + esc(pr._id) + '">🗑️ Borrar</button>' +
         '</div>' +
       '</div>';
     }).join('');
+
+    /* Event delegation para botones */
+    lista.querySelectorAll('[data-borrar-prueba]').forEach(function (b) {
+      b.addEventListener('click', function () { borrarPrueba(b.getAttribute('data-borrar-prueba')); });
+    });
+    lista.querySelectorAll('[data-mover-prueba]').forEach(function (b) {
+      b.addEventListener('click', function () { abrirMoverModal('prueba', b.getAttribute('data-mover-prueba')); });
+    });
   }
 
   /* ════════════════════════════════════════════════════════════
@@ -2540,11 +2595,133 @@
           '<div style="font-size:11px;color:#9CA3AF;margin-top:4px">Subido por ' + esc(ex.subidoPorNombre || ex.subidoPor || '—') + size + '</div>' +
         '</div>' +
         '<div class="ed-consulta-actions">' +
-          '<a class="ed-consulta-link" href="' + esc(ex.pdfUrl) + '" target="_blank" rel="noopener">📄 Ver / Descargar</a>' +
+          '<a class="ed-consulta-link" href="' + esc(ex.pdfUrl) + '" target="_blank" rel="noopener">📄 Ver</a>' +
+          '<button class="ed-consulta-link ed-link-blue" data-mover-examen="' + esc(ex._id) + '">📂 Mover</button>' +
+          '<button class="ed-consulta-link ed-link-red" data-borrar-examen="' + esc(ex._id) + '" data-storage-path="' + esc(ex.storagePath || '') + '">🗑️ Borrar</button>' +
         '</div>' +
       '</div>';
     }).join('');
+
+    lista.querySelectorAll('[data-borrar-examen]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        borrarExamen(b.getAttribute('data-borrar-examen'), b.getAttribute('data-storage-path'));
+      });
+    });
+    lista.querySelectorAll('[data-mover-examen]').forEach(function (b) {
+      b.addEventListener('click', function () { abrirMoverModal('examen', b.getAttribute('data-mover-examen')); });
+    });
   }
+
+  /* ════════════════════════════════════════════════════════════
+     ADMINISTRACIÓN DE ARCHIVOS (borrar / mover)
+     ════════════════════════════════════════════════════════════ */
+  function borrarPrueba(id) {
+    if (!confirm('¿Borrar esta prueba rápida? Esta acción no se puede deshacer.')) return;
+    showOverlay('Borrando prueba...');
+    cmgDb.collection('resultadosPruebas').doc(id).delete()
+      .then(function () {
+        hideOverlay();
+        showAlert('✓ Prueba borrada', 'success');
+        renderPruebasTab();
+      })
+      .catch(function (err) { hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
+  }
+
+  function borrarExamen(id, storagePath) {
+    if (!confirm('¿Borrar este examen de laboratorio y su PDF? Esta acción no se puede deshacer.')) return;
+    showOverlay('Borrando examen...');
+    /* Borrar Storage primero (best-effort), luego Firestore */
+    var promesaStorage = storagePath
+      ? firebase.storage().ref(storagePath).delete().catch(function (e) { console.warn('storage:', e.message); })
+      : Promise.resolve();
+    promesaStorage
+      .then(function () { return cmgDb.collection('examenesLaboratorio').doc(id).delete(); })
+      .then(function () {
+        hideOverlay();
+        showAlert('✓ Examen borrado', 'success');
+        renderLaboratorioTab();
+      })
+      .catch(function (err) { hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
+  }
+
+  /* Mover archivo a otro expediente */
+  var moverContexto = null; /* {tipo: 'prueba'|'examen', id} */
+
+  function abrirMoverModal(tipo, id) {
+    moverContexto = { tipo: tipo, id: id };
+    $id('mover-codigo-input').value = '';
+    $id('mover-info').textContent = '';
+    $id('mover-info').className = 'mover-info';
+    $id('mover-confirmar').disabled = true;
+    $id('modal-mover').classList.add('is-open');
+    setTimeout(function () { $id('mover-codigo-input').focus(); }, 100);
+  }
+
+  $id('mover-codigo-input').addEventListener('input', function () {
+    var v = this.value.trim().toUpperCase();
+    this.value = v;
+    var info = $id('mover-info');
+    if (!v) { info.textContent = ''; info.className = 'mover-info'; $id('mover-confirmar').disabled = true; return; }
+    if (!/^CMG-[A-Z0-9]+$/.test(v)) {
+      info.textContent = 'Formato: CMG-XXXXXX';
+      info.className = 'mover-info mover-info-warn';
+      $id('mover-confirmar').disabled = true;
+      return;
+    }
+    cmgDb.collection('expedientes').doc(v).get().then(function (snap) {
+      if (snap.exists) {
+        var dg = (snap.data() || {}).datosGenerales || {};
+        info.textContent = '✓ ' + (dg.nombreCompleto || '(sin nombre)') + ' · ' + (dg.numeroIdentidad || 'sin DNI');
+        info.className = 'mover-info mover-info-ok';
+        $id('mover-confirmar').disabled = false;
+      } else {
+        info.textContent = '✗ No existe expediente ' + v;
+        info.className = 'mover-info mover-info-err';
+        $id('mover-confirmar').disabled = true;
+      }
+    });
+  });
+
+  $id('mover-cancelar').addEventListener('click', function () {
+    $id('modal-mover').classList.remove('is-open');
+    moverContexto = null;
+  });
+  $id('modal-mover').addEventListener('click', function (e) {
+    if (e.target === $id('modal-mover')) $id('mover-cancelar').click();
+  });
+
+  $id('mover-confirmar').addEventListener('click', function () {
+    if (!moverContexto) return;
+    var nuevoCodigo = $id('mover-codigo-input').value.trim().toUpperCase();
+    var colName = moverContexto.tipo === 'examen' ? 'examenesLaboratorio' : 'resultadosPruebas';
+    showOverlay('Moviendo archivo...');
+    cmgDb.collection('expedientes').doc(nuevoCodigo).get()
+      .then(function (snap) {
+        if (!snap.exists) throw new Error('Expediente destino no existe');
+        var dg = (snap.data() || {}).datosGenerales || {};
+        var dniNorm = (dg.numeroIdentidad || '').replace(/\D/g, '');
+        return cmgDb.collection(colName).doc(moverContexto.id).update({
+          codigoPaciente: nuevoCodigo,
+          dniNormalizado: dniNorm,
+          pacienteNombreExpediente: dg.nombreCompleto || '',
+          movidoPor: cmgAuth.currentUser.email,
+          movidoAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      })
+      .then(function () {
+        hideOverlay();
+        $id('modal-mover').classList.remove('is-open');
+        showAlert('✓ Archivo movido a ' + nuevoCodigo, 'success');
+        moverContexto = null;
+        /* Re-render el tab actual */
+        if (colName === 'examenesLaboratorio') renderLaboratorioTab();
+        else renderPruebasTab();
+      })
+      .catch(function (err) {
+        hideOverlay();
+        showAlert('Error: ' + err.message, 'error');
+      });
+  });
 
   /* ════════════════════════════════════════════════════════════
      GENERAR WORD DEL EXPEDIENTE PRINCIPAL

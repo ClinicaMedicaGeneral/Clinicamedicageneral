@@ -2569,14 +2569,16 @@ button.ed-consulta-link {
         var consultas = [];
         snap.forEach(function (doc) {
           var data = doc.data();
-          /* omitir registros todavía pendientes */
-          if (data.status === 'preclinica' || data.status === 'servicio') return;
+          /* omitir solo pre-clínicas pendientes; servicios (pendientes y completos) sí aparecen */
+          if (data.status === 'preclinica') return;
           consultas.push(Object.assign({ _id: doc.id }, data));
         });
         consultas.sort(function (a, b) {
-          var ta = a.fecha && a.fecha.toMillis ? a.fecha.toMillis() : 0;
-          var tb = b.fecha && b.fecha.toMillis ? b.fecha.toMillis() : 0;
-          return tb - ta;
+          var getMs = function (c) {
+            var f = c.fecha || c.fechaServicio;
+            return f && f.toMillis ? f.toMillis() : 0;
+          };
+          return getMs(b) - getMs(a);
         });
         renderConsultasLista(consultas);
       })
@@ -2592,19 +2594,25 @@ button.ed-consulta-link {
       return;
     }
     lista.innerHTML = consultas.map(function (c) {
-      var esServicio = c.status === 'servicio-completo';
-      var badgeServicio = esServicio
-        ? ' <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🛎️ Servicio</span>'
-        : '';
+      var esServicioCompleto  = c.status === 'servicio-completo';
+      var esServicioPendiente = c.status === 'servicio';
+      var esServicio = esServicioCompleto || esServicioPendiente;
+
+      var badge = '';
+      if (esServicioCompleto)  badge = ' <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🛎️ Servicio completado</span>';
+      if (esServicioPendiente) badge = ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🕐 Servicio pendiente</span>';
+
+      var fechaDisplay = c.fecha || c.fechaServicio;
       var titulo = esServicio
         ? esc(c.servicioNombre || 'Servicio')
         : esc(c.motivoConsulta || '').slice(0, 120) + (c.motivoConsulta && c.motivoConsulta.length > 120 ? '...' : '');
+
       return '<div class="ed-consulta-item">' +
         '<div>' +
-          '<div class="ed-consulta-fecha">📅 ' + fmtDate(c.fecha) + badgeServicio + '</div>' +
+          '<div class="ed-consulta-fecha">📅 ' + fmtDate(fechaDisplay) + badge + '</div>' +
           '<div class="ed-consulta-motivo">' + titulo + '</div>' +
           (!esServicio && c.diagnostico ? '<div class="ed-consulta-motivo"><strong>Dx:</strong> ' + esc(c.diagnostico).slice(0, 100) + '</div>' : '') +
-          (esServicio && c.servicioNotasFin ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas:</strong> ' + esc(c.servicioNotasFin).slice(0, 100) + '</div>' : '') +
+          (esServicio && c.servicioNotas ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas:</strong> ' + esc(c.servicioNotas).slice(0, 100) + '</div>' : '') +
         '</div>' +
         '<div class="ed-consulta-actions">' +
           (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Ver PDF</a>' : '') +

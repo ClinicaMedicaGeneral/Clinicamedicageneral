@@ -1213,14 +1213,16 @@
         var consultas = [];
         snap.forEach(function (doc) {
           var data = doc.data();
-          /* ocultar registros todavía pendientes */
-          if (data.status === 'preclinica' || data.status === 'servicio') return;
+          /* ocultar solo pre-clínicas pendientes; servicios sí aparecen (pendientes o completados) */
+          if (data.status === 'preclinica') return;
           consultas.push(Object.assign({ _id: doc.id }, data));
         });
         consultas.sort(function (a, b) {
-          var ta = a.fecha && a.fecha.toMillis ? a.fecha.toMillis() : 0;
-          var tb = b.fecha && b.fecha.toMillis ? b.fecha.toMillis() : 0;
-          return tb - ta;
+          var getMs = function (c) {
+            var f = c.fecha || c.fechaServicio;
+            return f && f.toMillis ? f.toMillis() : 0;
+          };
+          return getMs(b) - getMs(a);
         });
         renderConsultas(consultas);
       })
@@ -1237,14 +1239,19 @@
       return;
     }
     cont.innerHTML = '<div class="mh-timeline">' + consultas.map(function (c) {
-      var esServicio = c.status === 'servicio-completo';
+      var esServicioCompleto  = c.status === 'servicio-completo';
+      var esServicioPendiente = c.status === 'servicio';
 
-      if (esServicio) {
-        /* ── Tarjeta de servicio completado ── */
+      if (esServicioCompleto || esServicioPendiente) {
+        /* ── Tarjeta de servicio ── */
+        var fechaDisplay  = c.fecha || c.fechaServicio;
+        var badgeColor    = esServicioCompleto ? '#d1fae5' : '#FEF3C7';
+        var badgeText     = esServicioCompleto ? '#065f46' : '#92400E';
+        var badgeLabel    = esServicioCompleto ? '🛎️ Servicio completado' : '🕐 Servicio pendiente';
         return '<div class="mh-consulta">' +
           '<div class="mh-consulta-head">' +
-            '<div class="mh-consulta-fecha">📅 ' + fmtDateTime(c.fecha) +
-              ' <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🛎️ Servicio</span>' +
+            '<div class="mh-consulta-fecha">📅 ' + fmtDateTime(fechaDisplay) +
+              ' <span style="background:' + badgeColor + ';color:' + badgeText + ';font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">' + badgeLabel + '</span>' +
             '</div>' +
             '<div class="mh-consulta-doctor">CMG</div>' +
           '</div>' +

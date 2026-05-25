@@ -365,6 +365,25 @@
 
           <hr class="ins-divider">
 
+          <!-- Identificación -->
+          <div class="ins-grid2">
+            <div class="ins-fgroup">
+              <label class="ins-label" for="f-tipoid">Tipo de Identificación <span style="color:#F20F10">*</span></label>
+              <select id="f-tipoid" class="ins-select">
+                <option value="">— Seleccionar —</option>
+                <option value="dni">🪪 DNI (Hondureños)</option>
+                <option value="residencia">🟡 Carnet de Residencia</option>
+                <option value="extranjera">🌎 Identidad Extranjera</option>
+              </select>
+            </div>
+            <div class="ins-fgroup">
+              <label class="ins-label" for="f-numeroid">Número de Identificación <span style="color:#F20F10">*</span></label>
+              <input type="text" id="f-numeroid" class="ins-input" placeholder="0801-1990-12345">
+            </div>
+          </div>
+
+          <hr class="ins-divider">
+
           <!-- Fecha solicitud (info) -->
           <div class="ins-fgroup">
             <label class="ins-label">Fecha de Solicitud</label>
@@ -463,6 +482,16 @@
   }
   if (nacEl) nacEl.addEventListener('change', function () { calcEdad(nacEl.value); });
 
+  /* Actualizar placeholder del número de identificación según tipo */
+  var tipoidEl   = document.getElementById('f-tipoid');
+  var numeroidEl = document.getElementById('f-numeroid');
+  var TIPOID_PH  = { dni: '0801-1990-12345', residencia: 'Número de carnet de residencia', extranjera: 'Número de pasaporte o documento' };
+  if (tipoidEl && numeroidEl) {
+    tipoidEl.addEventListener('change', function () {
+      numeroidEl.placeholder = TIPOID_PH[this.value] || '0801-1990-12345';
+    });
+  }
+
   /* ── Error ── */
   function showError(msg) {
     var el = document.getElementById('ins-error');
@@ -529,12 +558,16 @@
       var email           = document.getElementById('f-email').value.trim();
       var nacimiento      = document.getElementById('f-nacimiento').value;
       var edadTxt         = (edadEl && edadEl.value) ? parseInt(edadEl.value) : 0;
+      var tipoId          = document.getElementById('f-tipoid').value.trim();
+      var numeroId        = document.getElementById('f-numeroid').value.trim();
 
       if (!nombre)    { showError('El primer nombre es obligatorio.'); return; }
       if (!apellido)  { showError('El primer apellido es obligatorio.'); return; }
       if (!telefono)  { showError('El número telefónico es obligatorio.'); return; }
       if (!email)     { showError('El correo electrónico es obligatorio.'); return; }
       if (!nacimiento){ showError('La fecha de nacimiento es obligatoria.'); return; }
+      if (!tipoId)    { showError('Selecciona un tipo de identificación.'); return; }
+      if (!numeroId)  { showError('El número de identificación es obligatorio.'); return; }
 
       /* Generar número de solicitud */
       var now   = new Date();
@@ -558,6 +591,8 @@
         email          : email,
         fechaNacimiento: nacimiento,
         edad           : edadTxt,
+        tipoIdentidad  : tipoId,
+        numeroIdentidad: numeroId,
         fechaSolicitud : firebase.firestore.FieldValue.serverTimestamp(),
         numSolicitud   : numSol,
         estado         : 'pendiente'

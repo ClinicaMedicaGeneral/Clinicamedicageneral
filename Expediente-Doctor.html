@@ -874,7 +874,16 @@ button.ed-consulta-link {
             <input type="text" class="ed-input" id="nuevo-nombre" placeholder="Ej. Juan Pérez González">
           </div>
           <div class="ed-fgroup">
-            <label class="ed-label">Número de identidad</label>
+            <label class="ed-label">Tipo de identificación</label>
+            <select class="ed-select" id="nuevo-tipoid">
+              <option value="">— Seleccionar —</option>
+              <option value="dni">🪪 DNI (Hondureños)</option>
+              <option value="residencia">🟡 Carnet de Residencia</option>
+              <option value="extranjera">🌎 Identidad Extranjera</option>
+            </select>
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Número de identificación</label>
             <input type="text" class="ed-input" id="nuevo-identidad" placeholder="0801-1990-12345">
           </div>
           <div class="ed-fgroup">
@@ -1405,9 +1414,20 @@ button.ed-consulta-link {
   /* ════════════════════════════════════════════════════════════
      CREAR NUEVO EXPEDIENTE
      ════════════════════════════════════════════════════════════ */
+  /* Actualizar placeholder del campo de identidad según tipo seleccionado */
+  var PLACEHOLDERS_ID = {
+    dni:        '0801-1990-12345',
+    residencia: 'Número de carnet de residencia',
+    extranjera: 'Número de pasaporte o documento'
+  };
+  $id('nuevo-tipoid').addEventListener('change', function () {
+    $id('nuevo-identidad').placeholder = PLACEHOLDERS_ID[this.value] || '0801-1990-12345';
+  });
+
   $id('btn-nuevo-limpiar').addEventListener('click', function () {
     document.querySelectorAll('#tab-nuevo .ed-input, #tab-nuevo .ed-select, #tab-nuevo .ed-textarea')
       .forEach(function (el) { el.value = ''; });
+    $id('nuevo-identidad').placeholder = '0801-1990-12345';
     renderAntecedentes('nuevo-pat-container', ANTECEDENTES_PATOLOGICOS, 'nvopat');
     renderAntecedentes('nuevo-nopat-container', ANTECEDENTES_NO_PATOLOGICOS, 'nvonopat');
     $id('nuevo-resultado').style.display = 'none';
@@ -1429,6 +1449,7 @@ button.ed-consulta-link {
       _searchFechaNac: $val('nuevo-fecnac'),
       datosGenerales: {
         nombreCompleto: nombre,
+        tipoIdentidad: $val('nuevo-tipoid'),
         numeroIdentidad: $val('nuevo-identidad'),
         fechaNacimiento: $val('nuevo-fecnac'),
         sexo: $val('nuevo-sexo'),
@@ -1552,7 +1573,7 @@ button.ed-consulta-link {
         '<td><strong>' + esc(dg.nombreCompleto || '—') + '</strong>' +
           (dg.sexo ? '<br><span style="font-size:11px;color:#6B7280">' + (dg.sexo === 'M' ? 'Masculino' : dg.sexo === 'F' ? 'Femenino' : dg.sexo) + '</span>' : '') +
         '</td>' +
-        '<td>' + esc(dg.numeroIdentidad || '—') + '</td>' +
+        '<td>' + (dg.tipoIdentidad && dg.tipoIdentidad !== 'dni' ? '<span style="font-size:10px;font-weight:700;background:#F3F4F6;color:#374151;padding:1px 5px;border-radius:10px;margin-right:4px">' + (dg.tipoIdentidad === 'residencia' ? '🟡 RES' : '🌎 EXT') + '</span>' : '') + esc(dg.numeroIdentidad || '—') + '</td>' +
         '<td><span class="ed-pt-code-chip">' + esc(p.codigoPaciente) + '</span></td>' +
         '<td>' + (edad || '—') + '</td>' +
         '<td>' + esc(dg.telefono || '—') + '</td>' +
@@ -1776,7 +1797,8 @@ button.ed-consulta-link {
     return '<div class="ed-section-title">👤 Datos Generales</div>' +
       '<div class="ed-grid ed-grid-2">' +
         '<div class="ed-fgroup full"><label class="ed-label">Nombre completo</label>' + inp('edit-nombre', dg.nombreCompleto) + '</div>' +
-        '<div class="ed-fgroup"><label class="ed-label">Número de identidad</label>' + inp('edit-identidad', dg.numeroIdentidad) + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Tipo de identificación</label>' + sel('edit-tipoid', dg.tipoIdentidad, [{v:'',l:'— Seleccionar —'},{v:'dni',l:'🪪 DNI (Hondureños)'},{v:'residencia',l:'🟡 Carnet de Residencia'},{v:'extranjera',l:'🌎 Identidad Extranjera'}]) + '</div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Número de identificación</label>' + inp('edit-identidad', dg.numeroIdentidad) + '</div>' +
         '<div class="ed-fgroup"><label class="ed-label">Fecha nacimiento</label>' + inp('edit-fecnac', dg.fechaNacimiento, 'date') + '</div>' +
         '<div class="ed-fgroup"><label class="ed-label">Sexo</label>' + sel('edit-sexo', dg.sexo, [{v:'',l:'—'},{v:'M',l:'Masculino'},{v:'F',l:'Femenino'},{v:'O',l:'Otro'}]) + '</div>' +
         '<div class="ed-fgroup"><label class="ed-label">Tipo sangre</label>' + sel('edit-sangre', dg.tipoSangre, ['','A+','A-','B+','B-','O+','O-','AB+','AB-']) + '</div>' +
@@ -1807,6 +1829,7 @@ button.ed-consulta-link {
       _searchFechaNac: $val('edit-fecnac'),
       datosGenerales: {
         nombreCompleto: $val('edit-nombre'),
+        tipoIdentidad: $val('edit-tipoid'),
         numeroIdentidad: $val('edit-identidad'),
         fechaNacimiento: $val('edit-fecnac'),
         sexo: $val('edit-sexo'),

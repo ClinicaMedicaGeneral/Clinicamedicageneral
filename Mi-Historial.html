@@ -1213,7 +1213,8 @@
         var consultas = [];
         snap.forEach(function (doc) {
           var data = doc.data();
-          if (data.status === 'preclinica') return; /* ocultar pre-clínicas pendientes */
+          /* ocultar registros todavía pendientes */
+          if (data.status === 'preclinica' || data.status === 'servicio') return;
           consultas.push(Object.assign({ _id: doc.id }, data));
         });
         consultas.sort(function (a, b) {
@@ -1236,6 +1237,25 @@
       return;
     }
     cont.innerHTML = '<div class="mh-timeline">' + consultas.map(function (c) {
+      var esServicio = c.status === 'servicio-completo';
+
+      if (esServicio) {
+        /* ── Tarjeta de servicio completado ── */
+        return '<div class="mh-consulta">' +
+          '<div class="mh-consulta-head">' +
+            '<div class="mh-consulta-fecha">📅 ' + fmtDateTime(c.fecha) +
+              ' <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🛎️ Servicio</span>' +
+            '</div>' +
+            '<div class="mh-consulta-doctor">CMG</div>' +
+          '</div>' +
+          '<div class="mh-consulta-motivo"><strong>Servicio:</strong> ' + esc(c.servicioNombre || '—') + '</div>' +
+          (c.servicioNotas ? '<div class="mh-consulta-motivo" style="font-size:12px;color:#6B7280;margin-top:4px"><strong>Notas:</strong> ' + esc(c.servicioNotas) + '</div>' : '') +
+          (c.servicioNotasFin ? '<div class="mh-consulta-dx"><strong>Observaciones:</strong> ' + esc(c.servicioNotasFin) + '</div>' : '') +
+          '<div class="mh-consulta-actions"></div>' +
+        '</div>';
+      }
+
+      /* ── Tarjeta de consulta médica normal ── */
       var sv = c.signosVitales || {};
       var vitales = [];
       if (sv.ta) vitales.push('TA ' + sv.ta);

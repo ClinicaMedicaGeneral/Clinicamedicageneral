@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reset Total · CMG Admin</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #0F172A; color: #E2E8F0; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; padding: 24px; }
+
+.ar-wrap { max-width: 880px; margin: 0 auto; }
+
+.ar-header {
+  background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+.ar-header h1 { margin: 0 0 6px; font-size: 22px; font-weight: 900; }
+.ar-header p { margin: 0; opacity: .85; font-size: 14px; }
+
+.ar-card {
+  background: #1E293B;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 18px;
+}
+.ar-card h2 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #FBBF24;
+}
+.ar-warning {
+  background: #7F1D1D;
+  border-left: 5px solid #FCA5A5;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.ar-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+.ar-stat {
+  background: #0F172A;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.ar-stat-label { font-size: 11px; color: #94A3B8; text-transform: uppercase; letter-spacing: .5px; }
+.ar-stat-value { font-size: 22px; font-weight: 900; color: #E2E8F0; margin-top: 4px; }
+.ar-stat-value.loading { color: #475569; font-size: 16px; }
+
+.ar-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.ar-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.ar-btn:disabled { opacity: .4; cursor: not-allowed; }
+.ar-btn-danger { background: #DC2626; color: #fff; }
+.ar-btn-danger:hover:not(:disabled) { background: #B91C1C; }
+.ar-btn-ghost { background: transparent; color: #CBD5E1; border: 1px solid #475569; }
+.ar-btn-ghost:hover:not(:disabled) { background: #1E293B; }
+
+.ar-log {
+  background: #020617;
+  border-radius: 8px;
+  padding: 14px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #94A3B8;
+  max-height: 320px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.ar-log .ok { color: #34D399; }
+.ar-log .err { color: #F87171; }
+.ar-log .info { color: #60A5FA; }
+.ar-log .warn { color: #FBBF24; }
+
+/* Modal confirmación */
+.ar-modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.75);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.ar-modal.is-open { display: flex; }
+.ar-modal-box {
+  background: #1E293B;
+  border: 2px solid #DC2626;
+  border-radius: 14px;
+  padding: 28px;
+  max-width: 460px;
+  width: 100%;
+}
+.ar-modal-box h3 { margin: 0 0 10px; color: #FCA5A5; font-size: 18px; }
+.ar-modal-box p { color: #CBD5E1; font-size: 14px; margin: 0 0 14px; line-height: 1.5; }
+.ar-confirm-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: #0F172A;
+  border: 2px solid #334155;
+  border-radius: 8px;
+  color: #FCA5A5;
+  font-family: 'Courier New', monospace;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: center;
+  outline: none;
+  margin-bottom: 14px;
+}
+.ar-confirm-input:focus { border-color: #DC2626; }
+.ar-modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+.ar-options {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.ar-option {
+  background: #0F172A;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #CBD5E1;
+}
+.ar-option:hover { background: #1E293B; }
+.ar-option input { accent-color: #DC2626; transform: scale(1.2); }
+
+.ar-blocked {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 15px;
+  color: #94A3B8;
+}
+.ar-blocked .icon { font-size: 56px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<div class="ar-wrap">
+
+  <div id="ar-blocked" class="ar-blocked" style="display:none">
+    <div class="icon">🔒</div>
+    <p>Solo administradores pueden acceder a esta página.</p>
+    <a href="Inicio.html" style="color:#FBBF24">← Volver al inicio</a>
+  </div>
+
+  <div id="ar-main" style="display:none">
+
+    <div class="ar-header">
+      <h1>🧹 Reset Total · Administración</h1>
+      <p>Borra los datos del sistema para entregar la base en blanco lista para producción.</p>
+    </div>
+
+    <div class="ar-warning">
+      <strong>⚠️ ACCIÓN IRREVERSIBLE.</strong>
+      Esta página borra documentos en Firestore y archivos en Storage de forma <strong>permanente</strong>.
+      Los <strong>usuarios de Authentication</strong> (logins con email/contraseña) deben borrarse manualmente desde
+      <a href="https://console.firebase.google.com/project/clinica-medica-general/authentication/users" target="_blank" rel="noopener" style="color:#FBBF24">Firebase Console → Authentication</a>.
+    </div>
+
+    <!-- Stats -->
+    <div class="ar-card">
+      <h2>📊 Estado actual</h2>
+      <div class="ar-stats">
+        <div class="ar-stat"><div class="ar-stat-label">Expedientes</div><div class="ar-stat-value loading" id="c-expedientes">…</div></div>
+        <div class="ar-stat"><div class="ar-stat-label">Consultas</div><div class="ar-stat-value loading" id="c-consultas">…</div></div>
+        <div class="ar-stat"><div class="ar-stat-label">Pruebas rápidas</div><div class="ar-stat-value loading" id="c-pruebas">…</div></div>
+        <div class="ar-stat"><div class="ar-stat-label">Exámenes lab</div><div class="ar-stat-value loading" id="c-laboratorio">…</div></div>
+        <div class="ar-stat"><div class="ar-stat-label">Cotizaciones</div><div class="ar-stat-value loading" id="c-cotizaciones">…</div></div>
+        <div class="ar-stat"><div class="ar-stat-label">Doctor 365</div><div class="ar-stat-value loading" id="c-d365">…</div></div>
+        <div class="ar-stat"><div class="ar-stat-label">Perfiles users</div><div class="ar-stat-value loading" id="c-users">…</div></div>
+      </div>
+      <div class="ar-actions">
+        <button class="ar-btn ar-btn-ghost" id="btn-refresh">🔄 Refrescar contadores</button>
+      </div>
+    </div>
+
+    <!-- Selección y reset -->
+    <div class="ar-card">
+      <h2>🗑️ Qué borrar</h2>
+      <div class="ar-options">
+        <label class="ar-option"><input type="checkbox" data-col="expedientes" checked> Expedientes (colección /expedientes)</label>
+        <label class="ar-option"><input type="checkbox" data-col="consultas" checked> Consultas (colección /consultas)</label>
+        <label class="ar-option"><input type="checkbox" data-col="resultadosPruebas" checked> Pruebas rápidas (resultadosPruebas)</label>
+        <label class="ar-option"><input type="checkbox" data-col="examenesLaboratorio" checked> Exámenes de laboratorio (examenesLaboratorio)</label>
+        <label class="ar-option"><input type="checkbox" data-col="quotations" checked> Cotizaciones (quotations)</label>
+        <label class="ar-option"><input type="checkbox" data-col="d365solicitudes" checked> Doctor 365 (d365solicitudes + subcolección dependientes)</label>
+        <label class="ar-option"><input type="checkbox" data-col="users" checked> Perfiles users (códigos vinculados — se recrean al login)</label>
+        <label class="ar-option"><input type="checkbox" data-col="storage:expedientes" checked> Storage: /expedientes (PDFs de consulta, Word)</label>
+        <label class="ar-option"><input type="checkbox" data-col="storage:examenes-laboratorio" checked> Storage: /examenes-laboratorio (PDFs externos)</label>
+      </div>
+      <div class="ar-actions">
+        <button class="ar-btn ar-btn-danger" id="btn-reset">🗑️ Borrar TODO lo seleccionado</button>
+      </div>
+    </div>
+
+    <!-- Log -->
+    <div class="ar-card">
+      <h2>📋 Registro</h2>
+      <div class="ar-log" id="ar-log">Listo. Selecciona qué borrar y presiona el botón rojo.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal confirmación -->
+<div class="ar-modal" id="ar-modal">
+  <div class="ar-modal-box">
+    <h3>⚠️ Confirmación final</h3>
+    <p>Estás a punto de borrar <strong id="m-cantidad">…</strong> elementos de forma <strong>permanente</strong>. No hay vuelta atrás.</p>
+    <p>Para continuar, escribe <strong style="color:#FCA5A5">BORRAR TODO</strong> en el campo:</p>
+    <input type="text" class="ar-confirm-input" id="m-input" placeholder="BORRAR TODO" autocomplete="off">
+    <div class="ar-modal-actions">
+      <button class="ar-btn ar-btn-ghost" id="m-cancel">Cancelar</button>
+      <button class="ar-btn ar-btn-danger" id="m-confirm" disabled>Borrar definitivamente</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="firebase-init.js"></script>
+
+<script>
+(function () {
+  var ADMIN_EMAILS = ['ventasymercadeocmg@gmail.com', 'rubenwainwrightba@gmail.com'];
+  var COLECCIONES = ['expedientes','consultas','resultadosPruebas','examenesLaboratorio','quotations','d365solicitudes','users'];
+  var STORAGE_PATHS = ['expedientes','examenes-laboratorio'];
+
+  function $id(id) { return document.getElementById(id); }
+  function logLine(msg, type) {
+    var el = $id('ar-log');
+    var span = document.createElement('span');
+    if (type) span.className = type;
+    span.textContent = '[' + new Date().toLocaleTimeString('es-HN') + '] ' + msg + '\n';
+    el.appendChild(span);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  /* ── Auth guard ── */
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) {
+      window.location.href = 'Auth.html?returnTo=Admin-Reset.html';
+      return;
+    }
+    if (ADMIN_EMAILS.indexOf(user.email) === -1) {
+      $id('ar-blocked').style.display = '';
+      $id('ar-main').style.display = 'none';
+      return;
+    }
+    $id('ar-main').style.display = '';
+    refrescarContadores();
+  });
+
+  /* ── Contadores ── */
+  function refrescarContadores() {
+    var map = {
+      expedientes: 'c-expedientes', consultas: 'c-consultas',
+      resultadosPruebas: 'c-pruebas', examenesLaboratorio: 'c-laboratorio',
+      quotations: 'c-cotizaciones', d365solicitudes: 'c-d365', users: 'c-users'
+    };
+    Object.keys(map).forEach(function (col) {
+      $id(map[col]).className = 'ar-stat-value loading';
+      $id(map[col]).textContent = '…';
+      cmgDb.collection(col).get()
+        .then(function (snap) {
+          $id(map[col]).className = 'ar-stat-value';
+          $id(map[col]).textContent = snap.size;
+        })
+        .catch(function (err) {
+          $id(map[col]).textContent = '?';
+          console.warn('count ' + col, err);
+        });
+    });
+  }
+  $id('btn-refresh').addEventListener('click', refrescarContadores);
+
+  /* ── Botón reset → abrir modal ── */
+  $id('btn-reset').addEventListener('click', function () {
+    var checks = document.querySelectorAll('.ar-option input:checked');
+    if (!checks.length) {
+      alert('Selecciona al menos una opción.');
+      return;
+    }
+    var total = 0;
+    /* contar lo que se va a borrar (estimado de Firestore visible) */
+    var promesas = [];
+    checks.forEach(function (chk) {
+      var col = chk.getAttribute('data-col');
+      if (col.indexOf('storage:') === 0) {
+        total = 'varios PDFs'; /* no contamos storage para no demorar */
+      } else {
+        promesas.push(cmgDb.collection(col).get().then(function (s) { total += s.size; }));
+      }
+    });
+    Promise.all(promesas).then(function () {
+      $id('m-cantidad').textContent = (total === 0 ? 'cero documentos Firestore' : total + ' documentos Firestore') + (Array.from(checks).some(function(c){return c.getAttribute('data-col').indexOf('storage:')===0;}) ? ' + archivos Storage' : '');
+      $id('m-input').value = '';
+      $id('m-confirm').disabled = true;
+      $id('ar-modal').classList.add('is-open');
+      setTimeout(function(){ $id('m-input').focus(); }, 100);
+    });
+  });
+
+  $id('m-input').addEventListener('input', function () {
+    $id('m-confirm').disabled = this.value.trim() !== 'BORRAR TODO';
+  });
+  $id('m-cancel').addEventListener('click', function () {
+    $id('ar-modal').classList.remove('is-open');
+  });
+  $id('m-confirm').addEventListener('click', function () {
+    $id('ar-modal').classList.remove('is-open');
+    ejecutarReset();
+  });
+
+  /* ── Ejecutar reset ── */
+  function ejecutarReset() {
+    var checks = Array.from(document.querySelectorAll('.ar-option input:checked'));
+    $id('btn-reset').disabled = true;
+    $id('btn-refresh').disabled = true;
+    logLine('=== INICIO DE RESET ===', 'warn');
+
+    var queue = Promise.resolve();
+    checks.forEach(function (chk) {
+      var col = chk.getAttribute('data-col');
+      queue = queue.then(function () {
+        if (col.indexOf('storage:') === 0) {
+          var path = col.substring(8);
+          logLine('→ Borrando archivos en Storage: /' + path + '/', 'info');
+          return borrarStoragePath(path);
+        } else if (col === 'd365solicitudes') {
+          logLine('→ Borrando /d365solicitudes (con subcolección dependientes)', 'info');
+          return borrarD365();
+        } else {
+          logLine('→ Borrando /' + col, 'info');
+          return borrarColeccion(col);
+        }
+      });
+    });
+
+    queue
+      .then(function () {
+        logLine('=== RESET COMPLETADO ===', 'ok');
+        logLine('Recuerda borrar usuarios de Firebase Console → Authentication.', 'warn');
+        $id('btn-reset').disabled = false;
+        $id('btn-refresh').disabled = false;
+        refrescarContadores();
+      })
+      .catch(function (err) {
+        logLine('ERROR FATAL: ' + err.message, 'err');
+        $id('btn-reset').disabled = false;
+        $id('btn-refresh').disabled = false;
+      });
+  }
+
+  /* ── Borrar colección normal ── */
+  function borrarColeccion(nombre) {
+    return cmgDb.collection(nombre).get().then(function (snap) {
+      if (snap.empty) {
+        logLine('  ' + nombre + ' ya está vacía', 'ok');
+        return;
+      }
+      logLine('  ' + nombre + ': ' + snap.size + ' documentos por borrar', 'info');
+      var batches = [];
+      var batch = cmgDb.batch();
+      var count = 0;
+      snap.forEach(function (doc) {
+        batch.delete(doc.ref);
+        count++;
+        if (count % 400 === 0) {
+          batches.push(batch);
+          batch = cmgDb.batch();
+        }
+      });
+      batches.push(batch);
+      return Promise.all(batches.map(function (b) { return b.commit(); }))
+        .then(function () { logLine('  ✓ ' + nombre + ' borrado (' + snap.size + ' docs)', 'ok'); });
+    });
+  }
+
+  /* ── Borrar d365solicitudes con subcolección /dependientes ── */
+  function borrarD365() {
+    return cmgDb.collection('d365solicitudes').get().then(function (snap) {
+      if (snap.empty) { logLine('  d365solicitudes ya está vacía', 'ok'); return; }
+      logLine('  d365solicitudes: ' + snap.size + ' solicitudes (cada una con dependientes)', 'info');
+      var ops = [];
+      snap.forEach(function (doc) {
+        ops.push(
+          doc.ref.collection('dependientes').get().then(function (subSnap) {
+            var subBatch = cmgDb.batch();
+            subSnap.forEach(function (subDoc) { subBatch.delete(subDoc.ref); });
+            if (!subSnap.empty) return subBatch.commit();
+          }).then(function () {
+            return doc.ref.delete();
+          })
+        );
+      });
+      return Promise.all(ops).then(function () {
+        logLine('  ✓ d365solicitudes borrado completo', 'ok');
+      });
+    });
+  }
+
+  /* ── Borrar archivos en Storage recursivamente ── */
+  function borrarStoragePath(path) {
+    var ref = firebase.storage().ref(path);
+    return ref.listAll()
+      .then(function (result) {
+        var ops = [];
+        result.items.forEach(function (item) {
+          ops.push(item.delete().then(function () {
+            logLine('  ✓ borrado: ' + item.fullPath, 'ok');
+          }).catch(function (e) {
+            logLine('  ✗ ' + item.fullPath + ': ' + e.message, 'err');
+          }));
+        });
+        result.prefixes.forEach(function (folder) {
+          ops.push(borrarStoragePath(folder.fullPath));
+        });
+        return Promise.all(ops);
+      })
+      .catch(function (e) {
+        if (e.code === 'storage/object-not-found') {
+          logLine('  /' + path + ' no existe o está vacío', 'warn');
+          return;
+        }
+        logLine('  ✗ Storage /' + path + ': ' + e.message, 'err');
+      });
+  }
+})();
+</script>
+
+</body>
+</html>

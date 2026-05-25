@@ -317,19 +317,38 @@ body { margin: 0; background: #0F172A; color: #E2E8F0; font-family: 'Segoe UI', 
       alert('Selecciona al menos una opción.');
       return;
     }
-    var total = 0;
     /* contar lo que se va a borrar (estimado de Firestore visible) */
-    var promesas = [];
-    checks.forEach(function (chk) {
+    var hasStorage = false;
+    var promesas = checks.map(function (chk) {
       var col = chk.getAttribute('data-col');
       if (col.indexOf('storage:') === 0) {
-        total = 'varios PDFs'; /* no contamos storage para no demorar */
-      } else {
-        promesas.push(cmgDb.collection(col).get().then(function (s) { total += s.size; }));
+        hasStorage = true;
+        return Promise.resolve(null);
       }
+      return cmgDb.collection(col).get()
+        .then(function (s) { return s.size; })
+        .catch(function (err) {
+          console.warn('count failed for ' + col + ':', err.message);
+          return null; /* indeterminado, no bloquear */
+        });
     });
-    Promise.all(promesas).then(function () {
-      $id('m-cantidad').textContent = (total === 0 ? 'cero documentos Firestore' : total + ' documentos Firestore') + (Array.from(checks).some(function(c){return c.getAttribute('data-col').indexOf('storage:')===0;}) ? ' + archivos Storage' : '');
+
+    Promise.all(promesas).then(function (sizes) {
+      var validSizes = sizes.filter(function (n) { return typeof n === 'number'; });
+      var total = validSizes.reduce(function (a, b) { return a + b; }, 0);
+      var msg = validSizes.length === sizes.filter(function(n){return n!==null||true;}).length - (hasStorage?1:0)
+        ? total + ' documentos Firestore'
+        : 'aproximadamente ' + total + '+ documentos Firestore';
+      if (hasStorage) msg += ' + archivos Storage';
+      $id('m-cantidad').textContent = msg;
+      $id('m-input').value = '';
+      $id('m-confirm').disabled = true;
+      $id('ar-modal').classList.add('is-open');
+      setTimeout(function(){ $id('m-input').focus(); }, 100);
+    }).catch(function (err) {
+      /* Si todo lo demás falla, igual abre el modal */
+      console.error('Error contando:', err);
+      $id('m-cantidad').textContent = 'los datos seleccionados';
       $id('m-input').value = '';
       $id('m-confirm').disabled = true;
       $id('ar-modal').classList.add('is-open');
@@ -410,12 +429,17 @@ body { margin: 0; background: #0F172A; color: #E2E8F0; font-family: 'Segoe UI', 
       batches.push(batch);
       return Promise.all(batches.map(function (b) { return b.commit(); }))
         .then(function () { logLine('  ✓ ' + nombre + ' borrado (' + snap.size + ' docs)', 'ok'); });
+    }).catch(function (err) {
+      logLine('  ✗ ' + nombre + ': ' + err.message + ' (revisa reglas Firestore para admin)', 'err');
     });
   }
 
   /* ── Borrar d365solicitudes con subcolección /dependientes ── */
   function borrarD365() {
-    return cmgDb.collection('d365solicitudes').get().then(function (snap) {
+    return cmgDb.collection('d365solicitudes').get().catch(function (err) {
+      logLine('  ✗ d365solicitudes: ' + err.message, 'err');
+      return { empty: true, forEach: function(){} };
+    }).then(function (snap) {
       if (snap.empty) { logLine('  d365solicitudes ya está vacía', 'ok'); return; }
       logLine('  d365solicitudes: ' + snap.size + ' solicitudes (cada una con dependientes)', 'info');
       var ops = [];

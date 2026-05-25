@@ -23,9 +23,9 @@ service cloud.firestore {
     // ═══ /users/{uid} ══════════════════════════════════════════
     // Perfil del usuario (códigos de expediente vinculados/compartidos).
     match /users/{userId} {
-      allow read: if isAuth() && request.auth.uid == userId;
+      allow read: if (isAuth() && request.auth.uid == userId) || isAdmin();
       allow create, update: if isAuth() && request.auth.uid == userId;
-      allow delete: if false;
+      allow delete: if isAdmin();
     }
 
     // ═══ /expedientes/{codigo} ═════════════════════════════════
@@ -82,10 +82,12 @@ service cloud.firestore {
 
     // ═══ /quotations/{id} ══════════════════════════════════════
     // Cotizaciones guardadas: cada usuario lee/escribe solo las suyas.
+    // Admin puede leer y borrar todo (para limpieza).
     match /quotations/{quotationId} {
-      allow read: if isAuth() && resource.data.userId == request.auth.uid;
+      allow read: if (isAuth() && resource.data.userId == request.auth.uid) || isAdmin();
       allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuth() && resource.data.userId == request.auth.uid;
+      allow update: if isAuth() && resource.data.userId == request.auth.uid;
+      allow delete: if isAdmin() || (isAuth() && resource.data.userId == request.auth.uid);
     }
 
     // ═══ /d365solicitudes/{id} ═════════════════════════════════

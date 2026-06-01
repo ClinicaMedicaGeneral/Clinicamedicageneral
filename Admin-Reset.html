@@ -312,7 +312,7 @@ body { margin: 0; background: #0F172A; color: #E2E8F0; font-family: 'Segoe UI', 
 
   /* ── Botón reset → abrir modal ── */
   $id('btn-reset').addEventListener('click', function () {
-    var checks = document.querySelectorAll('.ar-option input:checked');
+    var checks = Array.from(document.querySelectorAll('.ar-option input:checked'));
     if (!checks.length) {
       alert('Selecciona al menos una opción.');
       return;

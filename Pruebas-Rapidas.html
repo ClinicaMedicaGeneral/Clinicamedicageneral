@@ -588,22 +588,22 @@
             <div class="pr-field">
               <label class="pr-label">Anticuerpo IgG</label>
               <div class="pr-result-options" data-field="res-igg">
-                <button type="button" class="pr-result-opt" data-value="REACTIVO">🔴 Reactivo</button>
-                <button type="button" class="pr-result-opt" data-value="NO REACTIVO">🟢 No Reactivo</button>
+                <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+                <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
               </div>
             </div>
             <div class="pr-field">
               <label class="pr-label">Anticuerpo IgM</label>
               <div class="pr-result-options" data-field="res-igm">
-                <button type="button" class="pr-result-opt" data-value="REACTIVO">🔴 Reactivo</button>
-                <button type="button" class="pr-result-opt" data-value="NO REACTIVO">🟢 No Reactivo</button>
+                <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+                <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
               </div>
             </div>
             <div class="pr-field">
               <label class="pr-label">NS1</label>
               <div class="pr-result-options" data-field="res-ns1">
-                <button type="button" class="pr-result-opt" data-value="REACTIVO">🔴 Reactivo</button>
-                <button type="button" class="pr-result-opt" data-value="NO REACTIVO">🟢 No Reactivo</button>
+                <button type="button" class="pr-result-opt" data-value="POSITIVO">🔴 Positivo</button>
+                <button type="button" class="pr-result-opt" data-value="NEGATIVO">🟢 Negativo</button>
               </div>
             </div>
           </div>
@@ -651,8 +651,17 @@
       <!-- Actions -->
       <div class="pr-actions">
         <button class="pr-btn pr-btn-ghost" id="btn-cancelar">← Cambiar prueba</button>
-        <button class="pr-btn pr-btn-primary" id="btn-guardar" disabled>💾 Guardar e Imprimir</button>
+        <!-- DRM Fun-6: dejar pendiente -->
+        <button class="pr-btn pr-btn-ghost" id="btn-pendiente" title="Guardar sin imprimir, podrás reabrirla luego" disabled>📋 Dejar pendiente</button>
+        <button class="pr-btn pr-btn-primary" id="btn-guardar" disabled>💾 Confirmar e Imprimir</button>
       </div>
+    </div>
+
+    <!-- DRM Fun-6: Pruebas pendientes (sin resultado confirmado) -->
+    <div class="pr-card" id="pr-pending-card">
+      <h3 class="pr-card-title">⏳ Pruebas pendientes de resultado</h3>
+      <p style="font-size:13px;color:#6B7280;margin-top:-6px">Reanuda una prueba para confirmar el resultado e imprimirla.</p>
+      <div id="pr-pending-list"><div style="font-size:13px;color:#9CA3AF">Cargando…</div></div>
     </div>
 
     <!-- Historial reciente -->
@@ -724,6 +733,7 @@
         <p>Los resultados del Laboratorio clínico, no son datos concluyentes de patologías.</p>
         <p>Es responsabilidad del paciente el manejo de resultados de exámenes no ordenados por un médico.</p>
         <p>La apreciación médica es indispensable.</p>
+        <p style="margin-top:6px;font-weight:700;color:#b91c1c;">Empresa receptora: solicitar verificación primero.</p>
       </div>
 
       <!-- Stamp -->
@@ -964,6 +974,9 @@
     else if (selectedType === 'antigeno') hasResults = !!resultValues['res-antigeno'];
 
     $id('btn-guardar').disabled = !(nombre && hasResults);
+    /* DRM Fun-6: dejar pendiente solo requiere nombre */
+    var btnPend = $id('btn-pendiente');
+    if (btnPend) btnPend.disabled = !nombre;
   }
 
   $id('f-nombre').addEventListener('input', updateSaveBtn);
@@ -991,12 +1004,15 @@
     });
   }
 
-  $id('btn-guardar').addEventListener('click', function () {
-    if ($id('btn-guardar').disabled) return;
-    $id('btn-guardar').disabled = true;
-    $id('btn-guardar').textContent = 'Buscando expediente...';
+  /* DRM Fun-6: handler unificado — soporta confirmar e imprimir o dejar pendiente */
+  function guardarPrueba(modo /* 'confirmado' | 'pendiente' */) {
+    var btn = (modo === 'pendiente') ? $id('btn-pendiente') : $id('btn-guardar');
+    if (btn.disabled) return;
+    btn.disabled = true;
+    var textoBase = btn.textContent;
+    btn.textContent = 'Buscando expediente...';
 
-    var horaImpresion = nowTime();
+    var horaImpresion = (modo === 'pendiente') ? null : nowTime();
     var dniRaw = $id('f-dni').value.trim();
     var data = {
       tipo: selectedType,
@@ -1012,7 +1028,9 @@
       creadoPor: currentUser.email,
       creadoPorNombre: currentUser.displayName || currentUser.email.split('@')[0],
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      codigoPaciente: null  /* se llena si hay match */
+      codigoPaciente: null,
+      /* DRM Fun-6: estado de la prueba */
+      status: modo === 'pendiente' ? 'pendiente_resultado' : 'confirmado'
     };
 
     if (selectedType === 'antigeno') {
@@ -1028,27 +1046,91 @@
           data.codigoPaciente = match.codigoPaciente;
           data.pacienteNombreExpediente = match.nombrePaciente;
         }
-        $id('btn-guardar').textContent = 'Guardando...';
+        btn.textContent = 'Guardando...';
         /* Paso 2: Guardar resultado */
         return cmgDb.collection('resultadosPruebas').add(data).then(function (docRef) {
           data._id = docRef.id;
-          if (match) {
-            toast('✓ Vinculado al expediente ' + match.codigoPaciente);
+          if (modo === 'pendiente') {
+            toast('📋 Prueba dejada pendiente. Podrás reabrirla cuando tengas el resultado.');
+            cargarPendientes();
+            /* Limpiar form y NO renderizar hoja */
+            $id('btn-cancelar').click();
           } else {
-            toast('✓ Resultado guardado (sin expediente vinculado)');
+            if (match) toast('✓ Vinculado al expediente ' + match.codigoPaciente);
+            else       toast('✓ Resultado guardado (sin expediente vinculado)');
+            renderResultSheet(data);
           }
-          renderResultSheet(data);
-          $id('btn-guardar').textContent = '💾 Guardar e Imprimir';
-          $id('btn-guardar').disabled = false;
+          btn.textContent = textoBase;
+          btn.disabled = false;
         });
       })
       .catch(function (err) {
         console.error('[CMG] Error guardando resultado:', err);
         toast('Error: ' + err.message);
-        $id('btn-guardar').textContent = '💾 Guardar e Imprimir';
-        $id('btn-guardar').disabled = false;
+        btn.textContent = textoBase;
+        btn.disabled = false;
       });
-  });
+  }
+  $id('btn-guardar').addEventListener('click', function(){ guardarPrueba('confirmado'); });
+  if ($id('btn-pendiente')) {
+    $id('btn-pendiente').addEventListener('click', function(){ guardarPrueba('pendiente'); });
+  }
+
+  /* DRM Fun-6: cargar y mostrar pruebas pendientes */
+  function cargarPendientes() {
+    var box = $id('pr-pending-list');
+    if (!box) return;
+    cmgDb.collection('resultadosPruebas')
+      .where('status', '==', 'pendiente_resultado')
+      .limit(20).get()
+      .then(function(snap){
+        if (snap.empty) {
+          box.innerHTML = '<div style="font-size:13px;color:#9CA3AF;padding:8px 0">No hay pruebas pendientes.</div>';
+          return;
+        }
+        var html = '<div style="display:flex;flex-direction:column;gap:8px">';
+        snap.forEach(function(doc){
+          var d = doc.data();
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:10px 12px">' +
+            '<div><b>' + esc(d.nombre || '—') + '</b><br><small style="color:#6B7280">' + esc(d.tipo) + ' · ' + esc(d.fecha) + (d.horaToma ? ' · Toma: ' + esc(d.horaToma) : '') + '</small></div>' +
+            '<button class="pr-btn pr-btn-primary" data-pending-id="' + doc.id + '">▶ Reanudar</button>' +
+          '</div>';
+        });
+        html += '</div>';
+        box.innerHTML = html;
+        box.querySelectorAll('[data-pending-id]').forEach(function(btn){
+          btn.addEventListener('click', function(){
+            reanudarPendiente(this.getAttribute('data-pending-id'));
+          });
+        });
+      })
+      .catch(function(err){
+        box.innerHTML = '<div style="font-size:12px;color:#b91c1c">Error: ' + esc(err.message) + '</div>';
+      });
+  }
+  function reanudarPendiente(id) {
+    cmgDb.collection('resultadosPruebas').doc(id).get().then(function(snap){
+      if (!snap.exists) { toast('No se encontró la prueba'); return; }
+      var d = snap.data();
+      d._id = snap.id;
+      /* Cambiar a estado confirmado al imprimir */
+      d.status = 'confirmado';
+      d.horaImpresion = nowTime();
+      cmgDb.collection('resultadosPruebas').doc(id).update({
+        status: 'confirmado',
+        horaImpresion: d.horaImpresion
+      }).then(function(){
+        renderResultSheet(d);
+        toast('Prueba reanudada. Confirma y haz clic en Imprimir.');
+      });
+    });
+  }
+  /* Cargar pendientes al inicio */
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(cargarPendientes, 500);
+  } else {
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(cargarPendientes, 500); });
+  }
 
   /* ════════════════════════════════════════════════════════════
      RENDER RESULT SHEET

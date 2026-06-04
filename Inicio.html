@@ -85,8 +85,8 @@
       </p>
 
       <p class="hero-strap">
-        <span class="lang lang-es">Consulta médica, laboratorio y sueroterapias bajo un mismo techo — atención profesional, sin citas y a precios accesibles. Únete a <b>Doctor 365</b> por <b>L900/año</b> y recibe una <b>Sueroterapia Complejo B</b> de regalo.</span>
-        <span class="lang lang-en">Doctor consults, lab tests and IV therapy under one roof — professional, walk-in care at accessible prices. Join <b>Doctor 365</b> for <b>L900/year</b> and receive a free <b>Complex B IV therapy</b>.</span>
+        <span class="lang lang-es">Consulta médica, laboratorio, sueroterapias y servicios médicos bajo un mismo techo — atención profesional, sin citas y a precios accesibles. Únete a <b>Doctor 365</b> por <b>L900/año</b> y recibe una <b>Sueroterapia Complejo B</b> de regalo.</span>
+        <span class="lang lang-en">Doctor consults, lab tests, IV therapy and medical services under one roof — professional, walk-in care at accessible prices. Join <b>Doctor 365</b> for <b>L900/year</b> and receive a free <b>Complex B IV therapy</b>.</span>
       </p>
 
       <div class="hero-ctas">
@@ -101,27 +101,64 @@
       </div>
     </div>
 
-    <aside class="hero-card">
+    <aside class="hero-card" id="heroServiceCard">
       <div class="hero-card-eyebrow">
         <span class="lang lang-es">Hoy en CMG</span>
         <span class="lang lang-en">Today at CMG</span>
       </div>
       <div class="hero-card-title">
-        <span class="lang lang-es">Lavado de oído</span>
-        <span class="lang lang-en">Ear cleaning</span>
+        <span class="lang lang-es" data-svc-es>Lavado de oído</span>
+        <span class="lang lang-en" data-svc-en>Ear cleaning</span>
       </div>
       <div class="hero-card-promise">
-        <span class="lang lang-es">Rápido · Indoloro · Sin citas</span>
-        <span class="lang lang-en">Quick · Painless · No appointment</span>
+        <span class="lang lang-es" data-svc-promise-es>Rápido · Indoloro · Sin citas</span>
+        <span class="lang lang-en" data-svc-promise-en>Quick · Painless · No appointment</span>
       </div>
       <div class="hero-card-price">
-        <span class="price-currency">L</span>400
+        <span class="price-currency">L</span><span data-svc-price>400</span>
       </div>
       <a href="Cotizador.html" class="hero-card-link">
         <span class="lang lang-es">Ver todos los servicios →</span>
         <span class="lang lang-en">See all services →</span>
       </a>
     </aside>
+    <script>
+      /* ── Servicio aleatorio por sesión (Estético #4) ── */
+      (function(){
+        var SERVICES = [
+          { es:'Lavado de oído',              en:'Ear cleaning',          promiseEs:'Rápido · Indoloro · Sin citas',     promiseEn:'Quick · Painless · No appointment', price:'400' },
+          { es:'Extracción de uña',           en:'Nail extraction',       promiseEs:'Procedimiento menor · Sin citas',    promiseEn:'Minor procedure · No appointment', price:'600' },
+          { es:'Cauterización lunar/verruga', en:'Mole/wart cauterization', promiseEs:'Rápido · Profesional · Sin citas', promiseEn:'Quick · Professional · No appointment', price:'200' },
+          { es:'Cauterización en párpado',    en:'Eyelid cauterization',  promiseEs:'Procedimiento delicado · Sin citas', promiseEn:'Delicate procedure · No appointment', price:'300' },
+          { es:'Retiro de puntos',            en:'Stitches removal',      promiseEs:'Rápido · Indoloro · Sin citas',     promiseEn:'Quick · Painless · No appointment', price:'50'  },
+          { es:'Consulta médica general',     en:'General medical consult', promiseEs:'Sin citas · Todos los días',       promiseEn:'No appointment · Every day',       price:'300' },
+          { es:'Prueba de embarazo',          en:'Pregnancy test',        promiseEs:'Resultados al instante',             promiseEn:'Instant results',                  price:'250' },
+          { es:'Prueba de dengue',            en:'Dengue test',           promiseEs:'Resultados rápidos',                 promiseEn:'Quick results',                    price:'500' },
+          { es:'Suero Complejo B',            en:'Complex B IV',          promiseEs:'Energía y vitalidad',                promiseEn:'Energy and vitality',              price:'750' },
+          { es:'Suero Vitamina C',            en:'Vitamin C IV',          promiseEs:'Defensas en alza',                   promiseEn:'Boost your immunity',              price:'900' }
+        ];
+        try {
+          var KEY = 'cmg-hero-svc';
+          var pick = sessionStorage.getItem(KEY);
+          var svc;
+          if (pick !== null && SERVICES[+pick]) {
+            svc = SERVICES[+pick];
+          } else {
+            var idx = Math.floor(Math.random() * SERVICES.length);
+            sessionStorage.setItem(KEY, idx);
+            svc = SERVICES[idx];
+          }
+          var card = document.getElementById('heroServiceCard');
+          if (card && svc) {
+            card.querySelector('[data-svc-es]').textContent = svc.es;
+            card.querySelector('[data-svc-en]').textContent = svc.en;
+            card.querySelector('[data-svc-promise-es]').textContent = svc.promiseEs;
+            card.querySelector('[data-svc-promise-en]').textContent = svc.promiseEn;
+            card.querySelector('[data-svc-price]').textContent = svc.price;
+          }
+        } catch(e){ /* fallback al servicio por defecto */ }
+      })();
+    </script>
   </div>
 </section>
 
@@ -195,8 +232,8 @@
         <span class="lang lang-en">Care without pause</span>
       </p>
       <p class="doc365-lead">
-        <span class="lang lang-es">Doctor 365 es el modelo de atención continua de CMG. Consulta médica, seguimiento, prevención y descuentos en laboratorio y sueroterapias — un solo plan, todos los días del año.</span>
-        <span class="lang lang-en">Doctor 365 is CMG's continuous-care plan. Doctor consults, follow-ups, prevention, and discounts on labs and IV therapy — one membership, every day of the year.</span>
+        <span class="lang lang-es">Doctor 365 es el modelo de atención continua de CMG. Consulta médica, seguimiento, prevención y descuentos en laboratorio, sueroterapias y servicios médicos — un solo plan, todos los días del año.</span>
+        <span class="lang lang-en">Doctor 365 is CMG's continuous-care plan. Doctor consults, follow-ups, prevention, and discounts on labs, IV therapy and medical services — one membership, every day of the year.</span>
       </p>
 
       <ul class="doc365-list">
@@ -256,8 +293,8 @@
     <div class="doc365-visual">
       <div class="doc365-card">
         <div class="doc365-card-h">
-          <span class="lang lang-es">Plan Familiar Doctor 365</span>
-          <span class="lang lang-en">Doctor 365 Family Plan</span>
+          <span class="lang lang-es">Doctor 365</span>
+          <span class="lang lang-en">Doctor 365</span>
         </div>
         <div class="doc365-card-price">
           <span class="price-currency">L</span><span class="price-amt">900</span>
@@ -329,12 +366,12 @@
         <span class="lang lang-en">What we do</span>
       </div>
       <h2 class="section-h2">
-        <span class="lang lang-es">Tres pilares, un mismo lugar</span>
-        <span class="lang lang-en">Three pillars, one place</span>
+        <span class="lang lang-es">Cuatro pilares, un mismo lugar</span>
+        <span class="lang lang-en">Four pillars, one place</span>
       </h2>
       <p class="section-lead">
-        <span class="lang lang-es">Consulta, laboratorio y sueroterapia — todo bajo el mismo techo, todos los días.</span>
-        <span class="lang lang-en">Consults, labs and IV therapy — under one roof, every day.</span>
+        <span class="lang lang-es">Consulta, laboratorio, sueroterapia y servicios médicos — todo bajo el mismo techo, todos los días.</span>
+        <span class="lang lang-en">Consults, labs, IV therapy and medical services — under one roof, every day.</span>
       </p>
     </header>
 
@@ -421,6 +458,35 @@
           </ul>
           <a class="service-link" href="Cotizador.html">
             <span class="lang lang-es">Ver todas →</span>
+            <span class="lang lang-en">See all →</span>
+          </a>
+        </div>
+      </article>
+
+      <article class="service-card">
+        <div class="service-photo" style="background-image:url('assets/photo-clinic-3.jpg')">
+          <div class="service-photo-overlay"></div>
+          <div class="service-badge">
+            <span class="lang lang-es">Servicios</span>
+            <span class="lang lang-en">Services</span>
+          </div>
+        </div>
+        <div class="service-body">
+          <h3>
+            <span class="lang lang-es">Servicios médicos</span>
+            <span class="lang lang-en">Medical services</span>
+          </h3>
+          <p>
+            <span class="lang lang-es">Procedimientos menores, curaciones y atención especializada — cuidado de la piel, de la mujer y de las vías urinarias con respaldo médico.</span>
+            <span class="lang lang-en">Minor procedures, wound care and specialized attention — skin care, women's care and urinary tract care with medical backing.</span>
+          </p>
+          <ul class="service-bullets">
+            <li><span class="lang lang-es">Cuidado de la piel</span><span class="lang lang-en">Skin care</span> <span class="from">L200+</span></li>
+            <li><span class="lang lang-es">Cuidado de la mujer</span><span class="lang lang-en">Women's care</span> <span class="from">L400+</span></li>
+            <li><span class="lang lang-es">Cuidado de las vías urinarias</span><span class="lang lang-en">Urinary tract care</span> <span class="from">L400+</span></li>
+          </ul>
+          <a class="service-link" href="Cotizador.html">
+            <span class="lang lang-es">Ver todos →</span>
             <span class="lang lang-en">See all →</span>
           </a>
         </div>

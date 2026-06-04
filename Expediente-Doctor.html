@@ -561,6 +561,29 @@ button.ed-consulta-link {
 }
 .ed-vital-chip strong { font-weight: 700; }
 
+/* ── DRM Fun-8/10/11: listas de medicamentos y opciones ── */
+.ed-meds-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.ed-meds-opt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #213C7D;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+.ed-meds-opt:hover { background: #fff; }
+.ed-meds-opt input { accent-color: #213C7D; }
+
 /* ── Alert ── */
 .ed-alert {
   border-radius: 10px;
@@ -855,6 +878,10 @@ button.ed-consulta-link {
       <button class="ed-tab" data-tab="pruebas">🧪 Pruebas</button>
       <button class="ed-tab" data-tab="laboratorio">🔬 Laboratorio</button>
       <button class="ed-tab" data-tab="historial">📂 Historial</button>
+      <!-- DRM Fun-9: Caja -->
+      <button class="ed-tab" data-tab="caja">💰 Caja</button>
+      <!-- DRM Fun-5: Unificar -->
+      <button class="ed-tab" data-tab="unificar">🔗 Unificar</button>
     </div>
 
     <!-- Alerts -->
@@ -980,6 +1007,33 @@ button.ed-consulta-link {
           <div class="ed-fgroup">
             <label class="ed-label">Detalle (padre, madre, hermanos, abuelos)</label>
             <textarea class="ed-textarea" id="nuevo-familiares" rows="4" placeholder="Ej. Padre: diabetes tipo 2. Madre: hipertensión. Abuelo paterno: cáncer de próstata..."></textarea>
+          </div>
+        </div>
+
+        <!-- DRM Fun-10: Cliente especial (discapacidades) -->
+        <div class="ed-section">
+          <div class="ed-section-title">♿ Cliente especial</div>
+          <div class="ed-grid ed-grid-2">
+            <div class="ed-fgroup">
+              <label class="ed-label">¿Presenta alguna discapacidad?</label>
+              <select class="ed-input" id="nuevo-discapacidad-flag">
+                <option value="no">No</option>
+                <option value="si">Sí</option>
+              </select>
+            </div>
+            <div class="ed-fgroup">
+              <label class="ed-label">Tipo de discapacidad</label>
+              <input type="text" class="ed-input" id="nuevo-discapacidad-tipo" placeholder="Visual, auditiva, motora, intelectual…">
+            </div>
+            <div class="ed-fgroup full">
+              <label class="ed-label">Notas / Consideraciones especiales</label>
+              <textarea class="ed-textarea" id="nuevo-discapacidad-notas" rows="2" placeholder="Apoyos requeridos, acompañante, accesibilidad…"></textarea>
+            </div>
+            <div class="ed-fgroup full">
+              <label class="ed-label">Documento de respaldo (PDF / imagen)</label>
+              <input type="file" class="ed-input" id="nuevo-discapacidad-doc" accept=".pdf,image/*">
+              <small style="color:#6B7280">Carné de discapacidad u otro documento oficial.</small>
+            </div>
           </div>
         </div>
 
@@ -1123,6 +1177,42 @@ button.ed-consulta-link {
             <p>Primero busca un paciente en la pestaña "Buscar Paciente"</p>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- DRM Fun-9: TAB CAJA -->
+    <section id="tab-caja" class="ed-tab-content" style="display:none">
+      <div class="ed-card">
+        <h2 class="ed-card-title">💰 Pendiente de caja</h2>
+        <p class="ed-card-subtitle">Consultas y servicios completados por el médico, esperando confirmación de pago en caja. El usuario administrativo confirma el pago y registra qué medicamentos / servicios se dispensaron.</p>
+        <div id="caja-lista"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>
+      </div>
+    </section>
+
+    <!-- DRM Fun-5: TAB UNIFICAR -->
+    <section id="tab-unificar" class="ed-tab-content" style="display:none">
+      <div class="ed-card">
+        <h2 class="ed-card-title">🔗 Unificar expedientes duplicados</h2>
+        <p class="ed-card-subtitle">Si por accidente se creó un expediente con datos erróneos, puedes unificarlo con el correcto. Las consultas y exámenes del expediente eliminado se re-vincularán al expediente conservado.</p>
+        <div class="ed-grid ed-grid-2" style="gap:16px;margin-top:14px">
+          <div class="ed-fgroup">
+            <label class="ed-label">Expediente A (conservar)</label>
+            <input type="text" class="ed-input" id="unif-a" placeholder="CMG-XXXXXX" style="text-transform:uppercase">
+            <button class="ed-btn ed-btn-ghost" id="btn-cargar-a" style="margin-top:6px">Cargar A</button>
+            <div id="unif-info-a" style="margin-top:8px;font-size:12px;color:#374151"></div>
+          </div>
+          <div class="ed-fgroup">
+            <label class="ed-label">Expediente B (eliminar)</label>
+            <input type="text" class="ed-input" id="unif-b" placeholder="CMG-XXXXXX" style="text-transform:uppercase">
+            <button class="ed-btn ed-btn-ghost" id="btn-cargar-b" style="margin-top:6px">Cargar B</button>
+            <div id="unif-info-b" style="margin-top:8px;font-size:12px;color:#374151"></div>
+          </div>
+        </div>
+        <div id="unif-comparador" style="margin-top:18px"></div>
+        <div class="ed-actions" style="margin-top:14px">
+          <button class="ed-btn ed-btn-primary" id="btn-unificar-ejecutar" disabled>🔗 Confirmar y unificar</button>
+        </div>
+        <p style="font-size:11px;color:#92400E;margin-top:8px;background:#FFFBEB;border:1px solid #FCD34D;padding:8px 10px;border-radius:6px">⚠️ La acción es irreversible: B se eliminará y sus consultas / exámenes pasarán a A.</p>
       </div>
     </section>
 
@@ -1365,6 +1455,170 @@ button.ed-consulta-link {
     if (name === 'pruebas') renderPruebasTab();
     if (name === 'laboratorio') renderLaboratorioTab();
     if (name === 'historial') renderHistorialTab();
+    if (name === 'caja') renderCajaTab();
+    if (name === 'unificar') renderUnificarTab();
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     DRM Fun-9: CAJA (Pago Liquidado)
+     ════════════════════════════════════════════════════════════ */
+  function renderCajaTab() {
+    var box = $id('caja-lista');
+    if (!box) return;
+    box.innerHTML = '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>';
+    cmgDb.collection('consultas')
+      .where('status', '==', 'pendiente_caja')
+      .limit(50).get()
+      .then(function(snap){
+        if (snap.empty) {
+          box.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">✅</div><p>No hay pacientes pendientes de caja.</p></div>';
+          return;
+        }
+        var html = '<div style="display:flex;flex-direction:column;gap:12px">';
+        snap.forEach(function(doc){
+          var d = doc.data();
+          var meds1 = (d.medicamentosVisita||[]).join(', ') || '—';
+          var meds2 = (d.medicamentosDespacho||[]).join(', ') || '—';
+          var servicios = (d.serviciosBrindados||[]).join(', ') || (d.diagnostico ? 'Consulta médica' : '—');
+          html +=
+            '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:14px">' +
+              '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">' +
+                '<div><b style="color:#213C7D">' + esc(d.codigoPaciente || '—') + '</b><br>' +
+                  '<small style="color:#6B7280">Médico: ' + esc(d.doctorNombre || '—') + ' · ' + esc(d.fechaLocal ? d.fechaLocal.slice(0,16).replace('T',' ') : '') + '</small></div>' +
+                '<button class="ed-btn ed-btn-primary" data-caja-id="' + doc.id + '">✅ Pago Liquidado en Caja</button>' +
+              '</div>' +
+              '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;font-size:13px">' +
+                '<div><b>💊 Aplicado en consulta:</b><br>' + esc(meds1) + '</div>' +
+                '<div><b>📦 Despacho:</b><br>' + esc(meds2) + '</div>' +
+                '<div><b>🩺 Servicios:</b><br>' + esc(servicios) + '</div>' +
+              '</div>' +
+            '</div>';
+        });
+        html += '</div>';
+        box.innerHTML = html;
+        box.querySelectorAll('[data-caja-id]').forEach(function(b){
+          b.addEventListener('click', function(){
+            var id = this.getAttribute('data-caja-id');
+            if (!confirm('¿Confirmar pago liquidado en caja?')) return;
+            cmgDb.collection('consultas').doc(id).update({
+              status: 'completa',
+              pagoLiquidadoEnCaja: true,
+              pagoLiquidadoPor: cmgAuth.currentUser.email,
+              pagoLiquidadoEn: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(function(){ showAlert('Pago liquidado ✓', 'success'); renderCajaTab(); })
+              .catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
+          });
+        });
+      })
+      .catch(function(err){
+        box.innerHTML = '<div style="color:#b91c1c">Error: ' + esc(err.message) + '</div>';
+      });
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     DRM Fun-5: UNIFICAR expedientes duplicados
+     ════════════════════════════════════════════════════════════ */
+  var unifA = null, unifB = null;
+  function renderUnificarTab() {
+    unifA = null; unifB = null;
+    var ca = $id('btn-cargar-a'); var cb = $id('btn-cargar-b');
+    if (ca && !ca.dataset.wired) {
+      ca.dataset.wired = '1';
+      ca.addEventListener('click', function(){ cargarExpedienteUnif('a'); });
+    }
+    if (cb && !cb.dataset.wired) {
+      cb.dataset.wired = '1';
+      cb.addEventListener('click', function(){ cargarExpedienteUnif('b'); });
+    }
+    var btn = $id('btn-unificar-ejecutar');
+    if (btn && !btn.dataset.wired) {
+      btn.dataset.wired = '1';
+      btn.addEventListener('click', ejecutarUnificacion);
+    }
+  }
+  function cargarExpedienteUnif(slot) {
+    var codigo = ($id('unif-' + slot).value || '').trim().toUpperCase();
+    if (!codigo) return;
+    var info = $id('unif-info-' + slot);
+    info.textContent = 'Cargando…';
+    cmgDb.collection('expedientes').doc(codigo).get().then(function(snap){
+      if (!snap.exists) { info.innerHTML = '<span style="color:#b91c1c">No encontrado</span>'; return; }
+      var d = snap.data();
+      d.codigoPaciente = codigo;
+      if (slot === 'a') unifA = d; else unifB = d;
+      info.innerHTML = '<b>' + esc((d.datosGenerales||{}).nombreCompleto || '—') + '</b><br>' +
+        'Tel: ' + esc((d.datosGenerales||{}).telefono || '—') + ' · DNI: ' + esc((d.datosGenerales||{}).numeroIdentidad || '—');
+      pintarComparadorUnif();
+    });
+  }
+  function pintarComparadorUnif() {
+    var box = $id('unif-comparador');
+    if (!unifA || !unifB) { box.innerHTML = ''; return; }
+    var keys = ['nombreCompleto','numeroIdentidad','fechaNacimiento','sexo','telefono','email','direccion'];
+    var html = '<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#F3F4F6"><th style="text-align:left;padding:6px">Campo</th><th style="text-align:left;padding:6px">A (conservar)</th><th style="text-align:left;padding:6px">B</th><th style="text-align:left;padding:6px">Elegir</th></tr></thead><tbody>';
+    keys.forEach(function(k){
+      var va = ((unifA.datosGenerales||{})[k]) || '—';
+      var vb = ((unifB.datosGenerales||{})[k]) || '—';
+      html += '<tr style="border-top:1px solid #E5E7EB"><td style="padding:6px"><b>' + k + '</b></td><td style="padding:6px">' + esc(va) + '</td><td style="padding:6px">' + esc(vb) + '</td>' +
+        '<td style="padding:6px"><label><input type="radio" name="unif-' + k + '" value="a" checked> A</label> <label><input type="radio" name="unif-' + k + '" value="b"> B</label></td></tr>';
+    });
+    html += '</tbody></table>';
+    box.innerHTML = html;
+    var btn = $id('btn-unificar-ejecutar');
+    if (btn) btn.disabled = false;
+  }
+  function ejecutarUnificacion() {
+    if (!unifA || !unifB) return;
+    if (!confirm('¿Confirmar unificación? B (' + unifB.codigoPaciente + ') se eliminará y todo se re-vinculará a A (' + unifA.codigoPaciente + ').')) return;
+    showOverlay('Unificando expedientes…');
+
+    /* 1) Mezcla de datosGenerales según selección */
+    var datos = Object.assign({}, unifA.datosGenerales || {});
+    var keys = ['nombreCompleto','numeroIdentidad','fechaNacimiento','sexo','telefono','email','direccion'];
+    keys.forEach(function(k){
+      var sel = document.querySelector('input[name="unif-' + k + '"]:checked');
+      if (sel && sel.value === 'b') datos[k] = (unifB.datosGenerales||{})[k];
+    });
+
+    var batch = cmgDb.batch();
+    batch.update(cmgDb.collection('expedientes').doc(unifA.codigoPaciente), {
+      datosGenerales: datos,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      mergedFrom: firebase.firestore.FieldValue.arrayUnion(unifB.codigoPaciente)
+    });
+    batch.delete(cmgDb.collection('expedientes').doc(unifB.codigoPaciente));
+
+    /* 2) Re-vincular consultas de B → A */
+    cmgDb.collection('consultas').where('codigoPaciente', '==', unifB.codigoPaciente).get().then(function(snap){
+      snap.forEach(function(doc){
+        batch.update(doc.ref, { codigoPaciente: unifA.codigoPaciente, mergedFrom: unifB.codigoPaciente });
+      });
+      /* 3) Re-vincular resultadosPruebas */
+      return cmgDb.collection('resultadosPruebas').where('codigoPaciente', '==', unifB.codigoPaciente).get();
+    }).then(function(snap){
+      snap.forEach(function(doc){
+        batch.update(doc.ref, { codigoPaciente: unifA.codigoPaciente, mergedFrom: unifB.codigoPaciente });
+      });
+      /* 4) Re-vincular examenesLaboratorio */
+      return cmgDb.collection('examenesLaboratorio').where('codigoPaciente', '==', unifB.codigoPaciente).get();
+    }).then(function(snap){
+      snap.forEach(function(doc){
+        batch.update(doc.ref, { codigoPaciente: unifA.codigoPaciente, mergedFrom: unifB.codigoPaciente });
+      });
+      return batch.commit();
+    }).then(function(){
+      hideOverlay();
+      showAlert('Expedientes unificados ✓', 'success');
+      $id('unif-comparador').innerHTML = '';
+      $id('unif-info-a').innerHTML = '';
+      $id('unif-info-b').innerHTML = '';
+      $id('unif-a').value = '';
+      $id('unif-b').value = '';
+      unifA = null; unifB = null;
+    }).catch(function(err){
+      hideOverlay();
+      showAlert('Error al unificar: ' + err.message, 'error');
+    });
   }
   document.querySelectorAll('.ed-tab').forEach(function (t) {
     t.addEventListener('click', function () { switchTab(t.dataset.tab); });
@@ -1468,15 +1722,25 @@ button.ed-consulta-link {
       },
       antecedentesPatologicos: collectAntecedentes('nuevo-pat-container'),
       antecedentesNoPatologicos: collectAntecedentes('nuevo-nopat-container'),
-      antecedentesFamiliares: $val('nuevo-familiares')
+      antecedentesFamiliares: $val('nuevo-familiares'),
+      /* DRM Fun-10: Cliente especial */
+      clienteEspecial: {
+        tieneDiscapacidad: $val('nuevo-discapacidad-flag') === 'si',
+        tipoDiscapacidad : $val('nuevo-discapacidad-tipo'),
+        notas            : $val('nuevo-discapacidad-notas'),
+        documentoUrl     : null
+      }
     };
 
     /* Generar código único (reintenta si colisiona) */
     showOverlay('Generando código único...');
-    crearExpedienteConCodigoUnico(expediente, 0);
+    /* DRM Fun-10: si hay documento de discapacidad, subir a Storage tras crear expediente */
+    var docInput = $id('nuevo-discapacidad-doc');
+    var docFile  = docInput && docInput.files && docInput.files[0] ? docInput.files[0] : null;
+    crearExpedienteConCodigoUnico(expediente, 0, docFile);
   });
 
-  function crearExpedienteConCodigoUnico(expediente, intento) {
+  function crearExpedienteConCodigoUnico(expediente, intento, docFile) {
     if (intento > 5) {
       hideOverlay();
       showAlert('No se pudo generar un código único. Intenta de nuevo.', 'error');
@@ -1487,11 +1751,24 @@ button.ed-consulta-link {
       .then(function (snap) {
         if (snap.exists) {
           /* Colisión, reintentar */
-          crearExpedienteConCodigoUnico(expediente, intento + 1);
+          crearExpedienteConCodigoUnico(expediente, intento + 1, docFile);
           return;
         }
         expediente.codigoPaciente = codigo;
         return cmgDb.collection('expedientes').doc(codigo).set(expediente)
+          .then(function () {
+            /* DRM Fun-10: subir documento de discapacidad si existe */
+            if (docFile) {
+              var path = 'expedientes/' + codigo + '/cliente-especial/' + docFile.name;
+              return firebase.storage().ref(path).put(docFile)
+                .then(function(snap){ return snap.ref.getDownloadURL(); })
+                .then(function(url){
+                  return cmgDb.collection('expedientes').doc(codigo).update({
+                    'clienteEspecial.documentoUrl': url
+                  });
+                });
+            }
+          })
           .then(function () {
             hideOverlay();
             pacienteActual = Object.assign({}, expediente, { codigoPaciente: codigo });
@@ -2311,24 +2588,65 @@ button.ed-consulta-link {
         (pre.notasPreclinica ? '<div style="margin-top:8px;font-size:12px;color:#374151"><strong>Notas:</strong> ' + esc(pre.notasPreclinica) + '</div>' : '') +
       '</div>' +
 
+      /* DRM Fun-2/3/8/11: campos requeridos + médico tratante + meds visita/despacho + incapacidad */
       '<div class="ed-section">' +
         '<div class="ed-grid ed-grid-2">' +
           '<div class="ed-fgroup full"><label class="ed-label">Motivo de consulta *</label>' +
-            '<textarea class="ed-textarea" id="cons-motivo" rows="2" placeholder="Razón principal de la visita"></textarea></div>' +
-          '<div class="ed-fgroup full"><label class="ed-label">Padecimiento actual / Síntomas</label>' +
-            '<textarea class="ed-textarea" id="cons-sintomas" rows="3" placeholder="Descripción detallada de los síntomas"></textarea></div>' +
-          '<div class="ed-fgroup full"><label class="ed-label">Exploración física</label>' +
-            '<textarea class="ed-textarea" id="cons-exploracion" rows="3" placeholder="Hallazgos al examen físico"></textarea></div>' +
+            '<textarea class="ed-textarea" id="cons-motivo" rows="2" placeholder="Razón principal de la visita" required></textarea></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Padecimiento actual / Síntomas *</label>' +
+            '<textarea class="ed-textarea" id="cons-sintomas" rows="3" placeholder="Descripción detallada de los síntomas" required></textarea></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Exploración física *</label>' +
+            '<textarea class="ed-textarea" id="cons-exploracion" rows="3" placeholder="Hallazgos al examen físico" required></textarea></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">Diagnóstico *</label>' +
-            '<textarea class="ed-textarea" id="cons-diagnostico" rows="2" placeholder="Diagnóstico principal y diferenciales"></textarea></div>' +
-          '<div class="ed-fgroup full"><label class="ed-label">Plan / Tratamiento</label>' +
-            '<textarea class="ed-textarea" id="cons-tratamiento" rows="3" placeholder="Medicamentos, dosis, duración. Estudios solicitados."></textarea></div>' +
-          '<div class="ed-fgroup full"><label class="ed-label">Indicaciones al paciente</label>' +
-            '<textarea class="ed-textarea" id="cons-indicaciones" rows="2" placeholder="Recomendaciones generales, dieta, reposo, signos de alarma"></textarea></div>' +
-          '<div class="ed-fgroup"><label class="ed-label">Próxima cita</label>' +
-            '<input type="date" class="ed-input" id="cons-proxcita"></div>' +
-          '<div class="ed-fgroup"><label class="ed-label">Médico tratante</label>' +
-            '<input type="text" class="ed-input" id="cons-medico" value="' + esc(cmgAuth.currentUser.displayName || cmgAuth.currentUser.email) + '"></div>' +
+            '<textarea class="ed-textarea" id="cons-diagnostico" rows="2" placeholder="Diagnóstico principal y diferenciales" required></textarea></div>' +
+          /* DRM Fun-8: Plan / Tratamiento dividido en dos secciones con catálogo */
+          '<div class="ed-fgroup full"><label class="ed-label">💊 Medicamentos aplicados en la visita *</label>' +
+            '<div id="cons-meds-visita-list" class="ed-meds-list">' +
+              '<label class="ed-meds-opt"><input type="checkbox" value="Bixicort"> Bixicort</label>' +
+              '<label class="ed-meds-opt"><input type="checkbox" value="Alergil"> Alergil</label>' +
+              '<label class="ed-meds-opt"><input type="checkbox" value="Cetirizina"> Cetirizina</label>' +
+              '<label class="ed-meds-opt"><input type="checkbox" value="Alergil Tabletas"> Alergil Tabletas</label>' +
+            '</div></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">📦 Medicamentos de despacho *</label>' +
+            '<div id="cons-meds-despacho-list" class="ed-meds-list">' +
+              '<label class="ed-meds-opt"><input type="checkbox" value="Bixicort"> Bixicort</label>' +
+              '<label class="ed-meds-opt"><input type="checkbox" value="Alergil"> Alergil</label>' +
+              '<label class="ed-meds-opt"><input type="checkbox" value="Cetirizina"> Cetirizina</label>' +
+              '<label class="ed-meds-opt"><input type="checkbox" value="Alergil Tabletas"> Alergil Tabletas</label>' +
+            '</div></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Indicaciones al paciente *</label>' +
+            '<textarea class="ed-textarea" id="cons-indicaciones" rows="2" placeholder="Recomendaciones generales, dieta, reposo, signos de alarma" required></textarea></div>' +
+          '<div class="ed-fgroup"><label class="ed-label">Próxima cita *</label>' +
+            '<input type="date" class="ed-input" id="cons-proxcita" required></div>' +
+          /* DRM Fun-2: dropdown de médico tratante */
+          '<div class="ed-fgroup"><label class="ed-label">Médico tratante *</label>' +
+            '<select class="ed-input" id="cons-medico" required>' +
+              '<option value="">— Seleccionar —</option>' +
+              '<option value="Doctor Rojas">Doctor Rojas</option>' +
+              '<option value="Doctor Hermes">Doctor Hermes</option>' +
+              '<option value="Doctor Álvarez">Doctor Álvarez</option>' +
+            '</select></div>' +
+        '</div>' +
+      '</div>' +
+      /* DRM Fun-11: pregunta de incapacidad */
+      '<div class="ed-section" id="cons-incap-section">' +
+        '<div class="ed-section-title">📄 ¿Necesita incapacidad?</div>' +
+        '<div style="display:flex;gap:12px;margin-bottom:8px">' +
+          '<label class="ed-meds-opt"><input type="radio" name="cons-incap" value="no" checked> No</label>' +
+          '<label class="ed-meds-opt"><input type="radio" name="cons-incap" value="si"> Sí</label>' +
+        '</div>' +
+        '<div id="cons-incap-form" style="display:none;background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:12px;margin-top:8px">' +
+          '<div class="ed-grid ed-grid-2">' +
+            '<div class="ed-fgroup"><label class="ed-label">Días de incapacidad *</label>' +
+              '<input type="number" min="1" class="ed-input" id="incap-dias" placeholder="Ej. 3"></div>' +
+            '<div class="ed-fgroup"><label class="ed-label">Desde *</label>' +
+              '<input type="date" class="ed-input" id="incap-desde"></div>' +
+            '<div class="ed-fgroup full"><label class="ed-label">Motivo / Diagnóstico para la constancia *</label>' +
+              '<textarea class="ed-textarea" id="incap-motivo" rows="2" placeholder="Texto que aparecerá en la constancia (ej. Reposo por cuadro gripal agudo)"></textarea></div>' +
+            '<div class="ed-fgroup full"><label class="ed-label">Observaciones adicionales</label>' +
+              '<textarea class="ed-textarea" id="incap-obs" rows="2" placeholder="Restricciones, recomendaciones laborales, etc."></textarea></div>' +
+          '</div>' +
+          '<div style="font-size:11px;color:#92400E;margin-top:6px">El formato sigue la plantilla "FORMATO DE CONSTANCIA (NO CAMBIAR)".</div>' +
         '</div>' +
       '</div>' +
       '<div class="ed-actions">' +
@@ -2337,32 +2655,96 @@ button.ed-consulta-link {
 
     $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
     $id('btn-cons-guardar').addEventListener('click', guardarConsulta);
+
+    /* DRM Fun-11: toggle del formulario de incapacidad */
+    document.querySelectorAll('input[name="cons-incap"]').forEach(function(r){
+      r.addEventListener('change', function(){
+        var form = $id('cons-incap-form');
+        if (form) form.style.display = (this.value === 'si') ? 'block' : 'none';
+      });
+    });
   }
 
-  /* ─── Finalizar consulta (actualiza pre-clínica → completa) ─── */
+  /* ─── Finalizar consulta (actualiza pre-clínica → pendiente_caja) ─── */
   function guardarConsulta() {
     if (!pacienteActual || !consultaPendienteCargada) return;
-    var motivo = $val('cons-motivo');
-    var diagnostico = $val('cons-diagnostico');
-    if (!motivo || !diagnostico) {
-      showAlert('Motivo y diagnóstico son obligatorios.', 'error');
+
+    /* DRM Fun-3: todos los campos obligatorios */
+    var motivo        = $val('cons-motivo');
+    var sintomas      = $val('cons-sintomas');
+    var exploracion   = $val('cons-exploracion');
+    var diagnostico   = $val('cons-diagnostico');
+    var indicaciones  = $val('cons-indicaciones');
+    var proxCita      = $val('cons-proxcita');
+    var medico        = $val('cons-medico');
+    var faltantes     = [];
+    if (!motivo)       faltantes.push('Motivo');
+    if (!sintomas)     faltantes.push('Síntomas');
+    if (!exploracion)  faltantes.push('Exploración');
+    if (!diagnostico)  faltantes.push('Diagnóstico');
+    if (!indicaciones) faltantes.push('Indicaciones');
+    if (!proxCita)     faltantes.push('Próxima cita');
+    if (!medico)       faltantes.push('Médico tratante');
+
+    /* DRM Fun-8: recolectar medicamentos */
+    function collectChecked(listId) {
+      var out = [];
+      document.querySelectorAll('#' + listId + ' input[type=checkbox]:checked').forEach(function(c){ out.push(c.value); });
+      return out;
+    }
+    var medsVisita   = collectChecked('cons-meds-visita-list');
+    var medsDespacho = collectChecked('cons-meds-despacho-list');
+    if (!medsVisita.length && !medsDespacho.length) faltantes.push('Al menos un medicamento (visita o despacho)');
+
+    /* DRM Fun-11: incapacidad */
+    var incapRadio = document.querySelector('input[name="cons-incap"]:checked');
+    var necesitaIncap = incapRadio && incapRadio.value === 'si';
+    var incapacidad = null;
+    if (necesitaIncap) {
+      var dias   = $val('incap-dias');
+      var desde  = $val('incap-desde');
+      var motivoIncap = $val('incap-motivo');
+      if (!dias)        faltantes.push('Días de incapacidad');
+      if (!desde)       faltantes.push('Fecha de inicio de incapacidad');
+      if (!motivoIncap) faltantes.push('Motivo de la constancia');
+      incapacidad = {
+        dias        : dias,
+        desde       : desde,
+        motivo      : motivoIncap,
+        observaciones: $val('incap-obs'),
+        emitidaPor  : medico,
+        creadaEn    : new Date().toISOString()
+      };
+    }
+
+    if (faltantes.length) {
+      showAlert('Faltan campos obligatorios: ' + faltantes.join(', '), 'error');
       return;
     }
 
+    /* Compatibilidad: campo tratamiento legado = resumen de medicamentos */
+    var tratamientoResumen =
+      (medsVisita.length   ? 'Se le aplicó: ' + medsVisita.join(', ') + '. ' : '') +
+      (medsDespacho.length ? 'Medicamentos de despacho: ' + medsDespacho.join(', ') + '.' : '');
+
     var preId = consultaPendienteCargada._id;
     var consulta = Object.assign({}, consultaPendienteCargada, {
-      status: 'completa',
+      /* DRM Fun-9: pasa a pendiente_caja en vez de completa */
+      status: 'pendiente_caja',
       fecha: firebase.firestore.FieldValue.serverTimestamp(),
       fechaLocal: new Date().toISOString(),
       doctorEmail: cmgAuth.currentUser.email,
-      doctorNombre: $val('cons-medico'),
+      doctorNombre: medico,
       motivoConsulta: motivo,
-      sintomas: $val('cons-sintomas'),
-      exploracion: $val('cons-exploracion'),
+      sintomas: sintomas,
+      exploracion: exploracion,
       diagnostico: diagnostico,
-      tratamiento: $val('cons-tratamiento'),
-      indicaciones: $val('cons-indicaciones'),
-      proximaCita: $val('cons-proxcita')
+      tratamiento: tratamientoResumen,
+      medicamentosVisita  : medsVisita,
+      medicamentosDespacho: medsDespacho,
+      indicaciones: indicaciones,
+      proximaCita: proxCita,
+      incapacidad: incapacidad
     });
     delete consulta._id;
 
@@ -2525,8 +2907,25 @@ button.ed-consulta-link {
     bloque('PADECIMIENTO ACTUAL', consulta.sintomas);
     bloque('EXPLORACIÓN FÍSICA', consulta.exploracion);
     bloque('DIAGNÓSTICO', consulta.diagnostico);
-    bloque('PLAN / TRATAMIENTO', consulta.tratamiento);
+    /* DRM Fun-8: bloques separados */
+    if (consulta.medicamentosVisita && consulta.medicamentosVisita.length) {
+      bloque('MEDICAMENTOS APLICADOS EN LA VISITA', consulta.medicamentosVisita.join(', '));
+    }
+    if (consulta.medicamentosDespacho && consulta.medicamentosDespacho.length) {
+      bloque('MEDICAMENTOS DE DESPACHO', consulta.medicamentosDespacho.join(', '));
+    }
+    if (!consulta.medicamentosVisita && !consulta.medicamentosDespacho && consulta.tratamiento) {
+      bloque('PLAN / TRATAMIENTO', consulta.tratamiento);
+    }
     bloque('INDICACIONES', consulta.indicaciones);
+
+    /* DRM Fun-11: bloque de incapacidad si aplica */
+    if (consulta.incapacidad) {
+      var i = consulta.incapacidad;
+      var resumen = 'Días: ' + (i.dias || '—') + ' · Desde: ' + (i.desde || '—') + '\nMotivo: ' + (i.motivo || '—');
+      if (i.observaciones) resumen += '\nObservaciones: ' + i.observaciones;
+      bloque('INCAPACIDAD EMITIDA', resumen);
+    }
 
     if (consulta.proximaCita) {
       bloque('PRÓXIMA CITA', new Date(consulta.proximaCita).toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' }));

@@ -765,15 +765,11 @@
           <h3>📋 Datos de la Cotización</h3>
         </div>
         <div class="cs-card-body">
-          <div class="cs-grid2">
-            <div class="cs-fgroup">
-              <label class="cs-label">Nº Cotización</label>
-              <input type="text" id="f-quot-num" class="cs-input" placeholder="Auto-generado">
-            </div>
-            <div class="cs-fgroup">
-              <label class="cs-label">Válida hasta</label>
-              <input type="date" id="f-expiry" class="cs-input">
-            </div>
+          <div class="cs-fgroup">
+            <label class="cs-label">Nº Cotización</label>
+            <input type="text" id="f-quot-num" class="cs-input" placeholder="Auto-generado">
+            <!-- Campo 'Válida hasta' removido (DRM Fun-1): todas las cotizaciones vencen a las 24h -->
+            <input type="hidden" id="f-expiry">
           </div>
           <div class="cs-fgroup" style="margin-top:2px">
             <label class="cs-label">WhatsApp del cliente</label>
@@ -890,11 +886,11 @@
       <!-- Card: Notas -->
       <div class="cs-card">
         <div class="cs-card-head">
-          <h3>📝 Notas adicionales</h3>
+          <h3>📝 Indicaciones especiales para la clínica</h3>
         </div>
         <div class="cs-card-body">
           <textarea id="f-notes" class="cs-textarea" style="width:100%"
-            placeholder="Condiciones de pago, vigencia de la cotización, instrucciones especiales..."></textarea>
+            placeholder="Indicaciones especiales, consideraciones del paciente, observaciones internas..."></textarea>
         </div>
       </div>
 
@@ -960,8 +956,8 @@
                 <span id="p-created" class="pdf-meta-val">—</span>
               </div>
               <div class="pdf-meta-row">
-                <span class="pdf-meta-key">Fecha de vencimiento:</span>
-                <span id="p-expiry" class="pdf-meta-val">—</span>
+                <span class="pdf-meta-key">Vigencia:</span>
+                <span id="p-expiry" class="pdf-meta-val">Válida por 24 horas desde la creación</span>
               </div>
               <div class="pdf-meta-row">
                 <span class="pdf-meta-key">Establecimiento:</span>
@@ -1047,6 +1043,9 @@
 
           <!-- Pie de página -->
           <div class="pdf-foot">
+            <p style="font-weight:600;color:#213C7D;">
+              Cotización válida por 24 horas &middot; Cotización sujeta a cambios &middot; Precios pueden variar en los procedimientos.
+            </p>
             <p>Clínica Médica General CMG &middot; Boulevard Económica Europea, City Mall, LC-214, Tegucigalpa &middot; +504 3155-5162</p>
             <p>clinicamedicacmg@gmail.com &middot; Documento generado electrónicamente &mdash; válido sin firma.</p>
           </div>
@@ -1341,7 +1340,8 @@ var CS = (function () {
     /* meta */
     setText('p-quot-num', state.quotNum);
     setText('p-created',  fmtDate(state.created));
-    setText('p-expiry',   fmtDate(state.expiry));
+    /* Fun-1 DRM: vigencia fija de 24h, no se muestra fecha específica */
+    setText('p-expiry',   'Válida por 24 horas desde la creación');
 
     /* cliente */
     setText('p-client-name',  state.client.name  || '—');
@@ -1473,7 +1473,7 @@ var CS = (function () {
       var lines = [];
       lines.push('🏥 *Clínica Médica General CMG*');
       lines.push('📋 *Cotización N° ' + state.quotNum + '*');
-      lines.push('📅 Válida hasta: ' + fmtDate(state.expiry));
+      lines.push('⏳ _Cotización válida por 24 horas · sujeta a cambios · precios pueden variar en los procedimientos._');
       lines.push('');
       lines.push('Hola *' + clientName + '*, aquí tienes el detalle de tu cotización:');
       lines.push('');

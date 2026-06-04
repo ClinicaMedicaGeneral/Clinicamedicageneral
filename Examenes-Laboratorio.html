@@ -249,9 +249,8 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
         <input type="text" class="el-input" id="f-nombre" placeholder="Juan Pérez González">
       </div>
       <div class="el-fgroup">
-        <label class="el-label">Tipo de examen *</label>
-        <select class="el-select" id="f-tipo">
-          <option value="">— Seleccionar —</option>
+        <label class="el-label">Tipo de examen * <small style="color:#6B7280;font-weight:400">(mantén Ctrl/Cmd para seleccionar varios)</small></label>
+        <select class="el-select" id="f-tipo" multiple size="6">
           <option value="hematologia">Hematología completa</option>
           <option value="quimica">Química sanguínea</option>
           <option value="glucosa">Glucosa</option>
@@ -279,6 +278,10 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       <div class="el-fgroup" id="f-tipo-otro-wrapper" style="display:none">
         <label class="el-label">Nombre personalizado del examen *</label>
         <input type="text" class="el-input" id="f-tipo-otro" placeholder="Ej. Anti-CCP">
+      </div>
+      <div class="el-fgroup full" id="f-tipo-resumen-wrapper" style="display:none">
+        <label class="el-label">Nombre del examen (auto)</label>
+        <input type="text" class="el-input" id="f-tipo-resumen" readonly style="background:#F3F4F6">
       </div>
       <div class="el-fgroup">
         <label class="el-label">Fecha del examen *</label>
@@ -441,7 +444,19 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 
   /* ── Tipo otro toggle ── */
   $id('f-tipo').addEventListener('change', function () {
-    $id('f-tipo-otro-wrapper').style.display = this.value === 'otro' ? '' : 'none';
+    /* DRM Fun-7: multi-select. Mostrar campo 'otro' si está marcado, y resumen si hay >1 */
+    var selected = Array.from(this.selectedOptions).map(function(o){ return o.value; });
+    var labels   = Array.from(this.selectedOptions).map(function(o){ return o.textContent.trim(); });
+    $id('f-tipo-otro-wrapper').style.display = selected.indexOf('otro') >= 0 ? '' : 'none';
+    var resumenWrap = $id('f-tipo-resumen-wrapper');
+    var resumen     = $id('f-tipo-resumen');
+    if (selected.length > 1) {
+      resumenWrap.style.display = '';
+      resumen.value = 'Conjunto: ' + labels.join(', ');
+    } else {
+      resumenWrap.style.display = 'none';
+      resumen.value = '';
+    }
     updateSubmitBtn();
   });
   $id('f-tipo-otro').addEventListener('input', updateSubmitBtn);
@@ -520,10 +535,12 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   function updateSubmitBtn() {
     var dni = $id('f-dni').value.trim();
     var nombre = $id('f-nombre').value.trim();
-    var tipo = $id('f-tipo').value;
+    /* DRM Fun-7: validar multi-select */
+    var sel = $id('f-tipo');
+    var values = Array.from(sel.selectedOptions).map(function(o){ return o.value; });
     var fecha = $id('f-fecha').value;
     var tipoOtro = $id('f-tipo-otro').value.trim();
-    var validTipo = tipo && (tipo !== 'otro' || tipoOtro);
+    var validTipo = values.length > 0 && (values.indexOf('otro') < 0 || tipoOtro);
     $id('btn-subir').disabled = !(dni && nombre && validTipo && fecha && selectedPdf);
   }
 
@@ -598,8 +615,14 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 
   /* ── Proceder con subida del PDF + Firestore ── */
   function procederSubida(expediente) {
-    var tipoVal = $id('f-tipo').value;
-    var tipoNombre = tipoVal === 'otro' ? $id('f-tipo-otro').value.trim() : TIPOS_LABELS[tipoVal];
+    /* DRM Fun-7: soporta multi-select. Si >1 seleccionado → 'Conjunto: A, B, C' */
+    var sel = $id('f-tipo');
+    var values = Array.from(sel.selectedOptions).map(function(o){ return o.value; });
+    var labels = values.map(function(v){
+      return v === 'otro' ? ($id('f-tipo-otro').value.trim() || 'Otro') : TIPOS_LABELS[v];
+    });
+    var tipoVal    = values.length === 1 ? values[0] : 'conjunto';
+    var tipoNombre = labels.length > 1 ? ('Conjunto: ' + labels.join(', ')) : (labels[0] || '');
     var fechaExamen = $id('f-fecha').value;
     var dni = $id('f-dni').value.trim();
     var nombre = $id('f-nombre').value.trim();

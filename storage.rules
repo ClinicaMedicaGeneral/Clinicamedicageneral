@@ -9,7 +9,11 @@ service firebase.storage {
       return isAuth() && request.auth.token.email in [
         'expedientes.clinicamedicacmg@gmail.com',
         'rubenwainwrightba@gmail.com',
-        'ventasymercadeocmg@gmail.com'
+        'ventasymercadeocmg@gmail.com',
+        // DRM Fun-2: médicos tratantes individuales
+        'doctor_rojascmg@gmail.com',
+        'doctor_hermescmg@gmail.com',
+        'doctor_alvarezcmg@gmail.com'
       ];
     }
 

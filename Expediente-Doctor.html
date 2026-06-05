@@ -1189,11 +1189,11 @@ button.ed-consulta-link {
       </div>
     </section>
 
-    <!-- DRM Fun-5: TAB UNIFICAR -->
+    <!-- DRM Fun-5 v2: TAB UNIFICAR (con flujo de aprobación) -->
     <section id="tab-unificar" class="ed-tab-content" style="display:none">
       <div class="ed-card">
         <h2 class="ed-card-title">🔗 Unificar expedientes duplicados</h2>
-        <p class="ed-card-subtitle">Si por accidente se creó un expediente con datos erróneos, puedes unificarlo con el correcto. Las consultas y exámenes del expediente eliminado se re-vincularán al expediente conservado.</p>
+        <p class="ed-card-subtitle" id="unif-subtitle">Si por accidente se creó un expediente con datos erróneos, puedes solicitar su unificación. Por seguridad, la unificación final requiere aprobación administrativa.</p>
         <div class="ed-grid ed-grid-2" style="gap:16px;margin-top:14px">
           <div class="ed-fgroup">
             <label class="ed-label">Expediente A (conservar)</label>
@@ -1208,11 +1208,22 @@ button.ed-consulta-link {
             <div id="unif-info-b" style="margin-top:8px;font-size:12px;color:#374151"></div>
           </div>
         </div>
+        <div class="ed-fgroup full" style="margin-top:14px">
+          <label class="ed-label">Motivo de la unificación *</label>
+          <textarea class="ed-textarea" id="unif-motivo" rows="2" placeholder="Ej. Expediente B se creó por error con DNI invertido, el paciente es el mismo de A."></textarea>
+        </div>
         <div id="unif-comparador" style="margin-top:18px"></div>
         <div class="ed-actions" style="margin-top:14px">
-          <button class="ed-btn ed-btn-primary" id="btn-unificar-ejecutar" disabled>🔗 Confirmar y unificar</button>
+          <button class="ed-btn ed-btn-primary" id="btn-unificar-ejecutar" disabled>🔗 Enviar solicitud</button>
         </div>
-        <p style="font-size:11px;color:#92400E;margin-top:8px;background:#FFFBEB;border:1px solid #FCD34D;padding:8px 10px;border-radius:6px">⚠️ La acción es irreversible: B se eliminará y sus consultas / exámenes pasarán a A.</p>
+        <p id="unif-warn" style="font-size:11px;color:#92400E;margin-top:8px;background:#FFFBEB;border:1px solid #FCD34D;padding:8px 10px;border-radius:6px"></p>
+      </div>
+
+      <!-- Solo admin: solicitudes pendientes -->
+      <div class="ed-card" id="unif-pendientes-card" style="display:none;margin-top:18px">
+        <h2 class="ed-card-title">📥 Solicitudes pendientes de aprobación</h2>
+        <p class="ed-card-subtitle">Solicitudes de unificación enviadas por los médicos. Revisa, aprueba o rechaza.</p>
+        <div id="unif-pendientes-lista" style="margin-top:14px"></div>
       </div>
     </section>
 
@@ -1520,8 +1531,12 @@ button.ed-consulta-link {
   }
 
   /* ════════════════════════════════════════════════════════════
-     DRM Fun-5: UNIFICAR expedientes duplicados
+     DRM Fun-5 v2: UNIFICAR con flujo de aprobación
      ════════════════════════════════════════════════════════════ */
+  var ADMIN_UNIF_EMAIL = 'ventasymercadeocmg@gmail.com';
+  function esAdminUnif() {
+    return cmgAuth.currentUser && cmgAuth.currentUser.email === ADMIN_UNIF_EMAIL;
+  }
   var unifA = null, unifB = null;
   function renderUnificarTab() {
     unifA = null; unifB = null;
@@ -1539,6 +1554,103 @@ button.ed-consulta-link {
       btn.dataset.wired = '1';
       btn.addEventListener('click', ejecutarUnificacion);
     }
+    /* Diferenciar UI según rol */
+    var subtitle = $id('unif-subtitle');
+    var warn     = $id('unif-warn');
+    var pendCard = $id('unif-pendientes-card');
+    if (esAdminUnif()) {
+      btn.textContent = '🔗 Confirmar y unificar ahora';
+      subtitle.textContent = 'Como administrador, puedes ejecutar la unificación directamente o aprobar solicitudes enviadas por médicos.';
+      warn.innerHTML = '⚠️ La acción es irreversible: B se eliminará y sus consultas / exámenes pasarán a A.';
+      pendCard.style.display = '';
+      cargarSolicitudesUnificacion();
+    } else {
+      btn.textContent = '📤 Enviar solicitud al administrador';
+      subtitle.textContent = 'Si por accidente se creó un expediente con datos erróneos, envía una solicitud de unificación. El administrador la revisará y aprobará.';
+      warn.innerHTML = 'ℹ️ Tu solicitud quedará pendiente hasta que el administrador la apruebe. Recibirás el resultado en este mismo panel.';
+      pendCard.style.display = 'none';
+    }
+  }
+  function cargarSolicitudesUnificacion() {
+    var box = $id('unif-pendientes-lista');
+    if (!box) return;
+    box.innerHTML = '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>';
+    cmgDb.collection('solicitudesUnificacion')
+      .where('estado', '==', 'pendiente')
+      .limit(50).get()
+      .then(function(snap){
+        if (snap.empty) {
+          box.innerHTML = '<div style="font-size:13px;color:#9CA3AF;padding:8px 0">No hay solicitudes pendientes.</div>';
+          return;
+        }
+        var html = '<div style="display:flex;flex-direction:column;gap:10px">';
+        snap.forEach(function(doc){
+          var d = doc.data();
+          html +=
+            '<div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:10px;padding:12px">' +
+              '<div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:8px">' +
+                '<div>' +
+                  '<div style="font-size:14px;color:#213C7D"><b>Conservar:</b> ' + esc(d.codigoA) + ' <span style="color:#6B7280">(' + esc((d.datosA||{}).nombreCompleto || '—') + ')</span></div>' +
+                  '<div style="font-size:14px;color:#b91c1c"><b>Eliminar:</b> ' + esc(d.codigoB) + ' <span style="color:#6B7280">(' + esc((d.datosB||{}).nombreCompleto || '—') + ')</span></div>' +
+                  '<div style="font-size:12px;color:#6B7280;margin-top:4px">Solicitado por: ' + esc(d.solicitadoPor) + ' · ' + esc((d.creadaEn && d.creadaEn.toDate) ? d.creadaEn.toDate().toLocaleString('es-HN') : '—') + '</div>' +
+                  '<div style="font-size:13px;color:#374151;margin-top:6px"><b>Motivo:</b> ' + esc(d.motivo || '—') + '</div>' +
+                '</div>' +
+                '<div style="display:flex;gap:6px">' +
+                  '<button class="ed-btn ed-btn-primary" data-aprobar="' + doc.id + '">✅ Aprobar y unificar</button>' +
+                  '<button class="ed-btn ed-btn-ghost" data-rechazar="' + doc.id + '">❌ Rechazar</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+        });
+        html += '</div>';
+        box.innerHTML = html;
+        box.querySelectorAll('[data-aprobar]').forEach(function(b){
+          b.addEventListener('click', function(){ aprobarSolicitudUnif(this.getAttribute('data-aprobar')); });
+        });
+        box.querySelectorAll('[data-rechazar]').forEach(function(b){
+          b.addEventListener('click', function(){ rechazarSolicitudUnif(this.getAttribute('data-rechazar')); });
+        });
+      })
+      .catch(function(err){
+        box.innerHTML = '<div style="color:#b91c1c">Error: ' + esc(err.message) + '</div>';
+      });
+  }
+  function aprobarSolicitudUnif(id) {
+    if (!confirm('¿Aprobar y ejecutar la unificación? La acción es irreversible.')) return;
+    showOverlay('Aprobando y unificando...');
+    cmgDb.collection('solicitudesUnificacion').doc(id).get().then(function(snap){
+      if (!snap.exists) throw new Error('Solicitud no encontrada');
+      var d = snap.data();
+      /* Cargar A y B y ejecutar unificación */
+      unifA = { codigoPaciente: d.codigoA, datosGenerales: d.datosA || {} };
+      unifB = { codigoPaciente: d.codigoB, datosGenerales: d.datosB || {} };
+      return ejecutarUnificacionReal(d.seleccionCampos || {}).then(function(){
+        return cmgDb.collection('solicitudesUnificacion').doc(id).update({
+          estado: 'aprobada',
+          aprobadaPor: cmgAuth.currentUser.email,
+          aprobadaEn: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      });
+    }).then(function(){
+      hideOverlay();
+      showAlert('Solicitud aprobada y expedientes unificados ✓', 'success');
+      cargarSolicitudesUnificacion();
+    }).catch(function(err){
+      hideOverlay();
+      showAlert('Error: ' + err.message, 'error');
+    });
+  }
+  function rechazarSolicitudUnif(id) {
+    var motivo = prompt('Motivo del rechazo (opcional):') || '';
+    cmgDb.collection('solicitudesUnificacion').doc(id).update({
+      estado: 'rechazada',
+      rechazadaPor: cmgAuth.currentUser.email,
+      rechazadaEn: firebase.firestore.FieldValue.serverTimestamp(),
+      motivoRechazo: motivo
+    }).then(function(){
+      showAlert('Solicitud rechazada', 'success');
+      cargarSolicitudesUnificacion();
+    }).catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
   }
   function cargarExpedienteUnif(slot) {
     var codigo = ($id('unif-' + slot).value || '').trim().toUpperCase();
@@ -1571,17 +1683,72 @@ button.ed-consulta-link {
     var btn = $id('btn-unificar-ejecutar');
     if (btn) btn.disabled = false;
   }
+  /* DRM Fun-5 v2: si es admin ejecuta; si es doctor crea solicitud */
   function ejecutarUnificacion() {
-    if (!unifA || !unifB) return;
-    if (!confirm('¿Confirmar unificación? B (' + unifB.codigoPaciente + ') se eliminará y todo se re-vinculará a A (' + unifA.codigoPaciente + ').')) return;
-    showOverlay('Unificando expedientes…');
+    if (!unifA || !unifB) { showAlert('Carga A y B primero.', 'error'); return; }
+    var motivo = ($id('unif-motivo').value || '').trim();
+    if (!motivo) { showAlert('Indica el motivo de la unificación.', 'error'); return; }
 
-    /* 1) Mezcla de datosGenerales según selección */
-    var datos = Object.assign({}, unifA.datosGenerales || {});
-    var keys = ['nombreCompleto','numeroIdentidad','fechaNacimiento','sexo','telefono','email','direccion'];
-    keys.forEach(function(k){
+    /* Capturar selección de campos */
+    var seleccion = {};
+    ['nombreCompleto','numeroIdentidad','fechaNacimiento','sexo','telefono','email','direccion'].forEach(function(k){
       var sel = document.querySelector('input[name="unif-' + k + '"]:checked');
-      if (sel && sel.value === 'b') datos[k] = (unifB.datosGenerales||{})[k];
+      if (sel) seleccion[k] = sel.value;
+    });
+
+    if (esAdminUnif()) {
+      /* Admin → ejecuta directamente */
+      if (!confirm('¿Confirmar unificación? B (' + unifB.codigoPaciente + ') se eliminará y todo se re-vinculará a A (' + unifA.codigoPaciente + ').')) return;
+      showOverlay('Unificando expedientes…');
+      ejecutarUnificacionReal(seleccion)
+        .then(function(){
+          hideOverlay();
+          showAlert('Expedientes unificados ✓', 'success');
+          limpiarFormUnif();
+        })
+        .catch(function(err){
+          hideOverlay();
+          showAlert('Error al unificar: ' + err.message, 'error');
+        });
+    } else {
+      /* Doctor → crea solicitud */
+      showOverlay('Enviando solicitud…');
+      cmgDb.collection('solicitudesUnificacion').add({
+        estado: 'pendiente',
+        codigoA: unifA.codigoPaciente,
+        codigoB: unifB.codigoPaciente,
+        datosA: unifA.datosGenerales || {},
+        datosB: unifB.datosGenerales || {},
+        seleccionCampos: seleccion,
+        motivo: motivo,
+        solicitadoPor: cmgAuth.currentUser.email,
+        creadaEn: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(function(){
+        hideOverlay();
+        showAlert('✓ Solicitud enviada. El administrador la revisará.', 'success');
+        limpiarFormUnif();
+      }).catch(function(err){
+        hideOverlay();
+        showAlert('Error al enviar solicitud: ' + err.message, 'error');
+      });
+    }
+  }
+  function limpiarFormUnif() {
+    $id('unif-comparador').innerHTML = '';
+    $id('unif-info-a').innerHTML = '';
+    $id('unif-info-b').innerHTML = '';
+    $id('unif-a').value = '';
+    $id('unif-b').value = '';
+    $id('unif-motivo').value = '';
+    unifA = null; unifB = null;
+    var btn = $id('btn-unificar-ejecutar');
+    if (btn) btn.disabled = true;
+  }
+  /* Ejecuta la unificación real (usado por admin directo o aprobación). seleccion es objeto {campo: 'a'|'b'} */
+  function ejecutarUnificacionReal(seleccion) {
+    var datos = Object.assign({}, unifA.datosGenerales || {});
+    Object.keys(seleccion || {}).forEach(function(k){
+      if (seleccion[k] === 'b') datos[k] = (unifB.datosGenerales||{})[k];
     });
 
     var batch = cmgDb.batch();
@@ -1592,37 +1759,31 @@ button.ed-consulta-link {
     });
     batch.delete(cmgDb.collection('expedientes').doc(unifB.codigoPaciente));
 
-    /* 2) Re-vincular consultas de B → A */
-    cmgDb.collection('consultas').where('codigoPaciente', '==', unifB.codigoPaciente).get().then(function(snap){
-      snap.forEach(function(doc){
-        batch.update(doc.ref, { codigoPaciente: unifA.codigoPaciente, mergedFrom: unifB.codigoPaciente });
+    return cmgDb.collection('consultas').where('codigoPaciente', '==', unifB.codigoPaciente).get()
+      .then(function(snap){
+        snap.forEach(function(doc){
+          batch.update(doc.ref, { codigoPaciente: unifA.codigoPaciente, mergedFrom: unifB.codigoPaciente });
+        });
+        return cmgDb.collection('resultadosPruebas').where('codigoPaciente', '==', unifB.codigoPaciente).get();
+      })
+      .then(function(snap){
+        snap.forEach(function(doc){
+          batch.update(doc.ref, { codigoPaciente: unifA.codigoPaciente, mergedFrom: unifB.codigoPaciente });
+        });
+        return cmgDb.collection('examenesLaboratorio').where('codigoPaciente', '==', unifB.codigoPaciente).get();
+      })
+      .then(function(snap){
+        snap.forEach(function(doc){
+          batch.update(doc.ref, { codigoPaciente: unifA.codigoPaciente, mergedFrom: unifB.codigoPaciente });
+        });
+        return cmgDb.collection('constancias').where('codigoPaciente', '==', unifB.codigoPaciente).get();
+      })
+      .then(function(snap){
+        snap.forEach(function(doc){
+          batch.update(doc.ref, { codigoPaciente: unifA.codigoPaciente, mergedFrom: unifB.codigoPaciente });
+        });
+        return batch.commit();
       });
-      /* 3) Re-vincular resultadosPruebas */
-      return cmgDb.collection('resultadosPruebas').where('codigoPaciente', '==', unifB.codigoPaciente).get();
-    }).then(function(snap){
-      snap.forEach(function(doc){
-        batch.update(doc.ref, { codigoPaciente: unifA.codigoPaciente, mergedFrom: unifB.codigoPaciente });
-      });
-      /* 4) Re-vincular examenesLaboratorio */
-      return cmgDb.collection('examenesLaboratorio').where('codigoPaciente', '==', unifB.codigoPaciente).get();
-    }).then(function(snap){
-      snap.forEach(function(doc){
-        batch.update(doc.ref, { codigoPaciente: unifA.codigoPaciente, mergedFrom: unifB.codigoPaciente });
-      });
-      return batch.commit();
-    }).then(function(){
-      hideOverlay();
-      showAlert('Expedientes unificados ✓', 'success');
-      $id('unif-comparador').innerHTML = '';
-      $id('unif-info-a').innerHTML = '';
-      $id('unif-info-b').innerHTML = '';
-      $id('unif-a').value = '';
-      $id('unif-b').value = '';
-      unifA = null; unifB = null;
-    }).catch(function(err){
-      hideOverlay();
-      showAlert('Error al unificar: ' + err.message, 'error');
-    });
   }
   document.querySelectorAll('.ed-tab').forEach(function (t) {
     t.addEventListener('click', function () { switchTab(t.dataset.tab); });
@@ -2700,10 +2861,10 @@ button.ed-consulta-link {
     var medsDespacho = collectChecked('cons-meds-despacho-list');
     if (!medsVisita.length && !medsDespacho.length) faltantes.push('Al menos un medicamento (visita o despacho)');
 
-    /* DRM Fun-11: incapacidad */
+    /* DRM Fun-11 v2: incapacidad → constancia como documento HTML aparte */
     var incapRadio = document.querySelector('input[name="cons-incap"]:checked');
     var necesitaIncap = incapRadio && incapRadio.value === 'si';
-    var incapacidad = null;
+    var datosIncap = null;
     if (necesitaIncap) {
       var dias   = $val('incap-dias');
       var desde  = $val('incap-desde');
@@ -2711,13 +2872,11 @@ button.ed-consulta-link {
       if (!dias)        faltantes.push('Días de incapacidad');
       if (!desde)       faltantes.push('Fecha de inicio de incapacidad');
       if (!motivoIncap) faltantes.push('Motivo de la constancia');
-      incapacidad = {
+      datosIncap = {
         dias        : dias,
         desde       : desde,
         motivo      : motivoIncap,
-        observaciones: $val('incap-obs'),
-        emitidaPor  : medico,
-        creadaEn    : new Date().toISOString()
+        observaciones: $val('incap-obs')
       };
     }
 
@@ -2748,7 +2907,9 @@ button.ed-consulta-link {
       medicamentosDespacho: medsDespacho,
       indicaciones: indicaciones,
       proximaCita: proxCita,
-      incapacidad: incapacidad
+      /* DRM Fun-11 v2: ya no embebemos la constancia en la consulta — flag y referencia */
+      tieneConstancia: necesitaIncap,
+      constanciaId: null
     });
     delete consulta._id;
 
@@ -2777,8 +2938,46 @@ button.ed-consulta-link {
         return cmgDb.collection('consultas').doc(preId).update(consulta);
       })
       .then(function () {
+        /* DRM Fun-11 v2: si pidió constancia, crear documento aparte */
+        if (!necesitaIncap || !datosIncap) return null;
+        var dg2 = (pacienteActual && pacienteActual.datosGenerales) || {};
+        var nowIso = new Date().toISOString();
+        var numero = 'CONS-' + nowIso.slice(0,10).replace(/-/g,'') + '-' + Math.floor(Math.random()*9000+1000);
+        return cmgDb.collection('constancias').add({
+          numero            : numero,
+          consultaId        : preId,
+          codigoPaciente    : pacienteActual.codigoPaciente,
+          pacienteNombre    : dg2.nombreCompleto || '',
+          pacienteTipoId    : dg2.tipoIdentidad || '',
+          pacienteDNI       : dg2.numeroIdentidad || '',
+          pacienteFechaNacimiento: dg2.fechaNacimiento || '',
+          pacienteEdad      : (function(f){
+            if (!f) return '';
+            try { var d=new Date(f), h=new Date(), e=h.getFullYear()-d.getFullYear(), m=h.getMonth()-d.getMonth(); if (m<0||(m===0&&h.getDate()<d.getDate())) e--; return e+' años'; } catch(_){ return ''; }
+          })(dg2.fechaNacimiento),
+          fechaConsulta     : nowIso.slice(0,10),
+          dias              : datosIncap.dias,
+          desde             : datosIncap.desde,
+          motivo            : datosIncap.motivo,
+          observaciones     : datosIncap.observaciones,
+          emitidaPor        : medico,
+          emitidaPorEmail   : cmgAuth.currentUser.email,
+          emitidaEn         : nowIso,
+          createdAt         : firebase.firestore.FieldValue.serverTimestamp()
+        }).then(function(ref){
+          /* Vincular el id de la constancia a la consulta */
+          return cmgDb.collection('consultas').doc(preId).update({ constanciaId: ref.id })
+            .then(function(){ return ref.id; });
+        });
+      })
+      .then(function (constanciaId) {
         hideOverlay();
-        showAlert('✓ Consulta finalizada exitosamente. PDF generado.', 'success');
+        if (constanciaId) {
+          showAlert('✓ Consulta finalizada. Abriendo constancia médica en otra pestaña…', 'success');
+          window.open('Constancia-Medica.html?id=' + encodeURIComponent(constanciaId), '_blank', 'noopener');
+        } else {
+          showAlert('✓ Consulta finalizada exitosamente. PDF generado.', 'success');
+        }
         consultaPendienteCargada = null;
         renderConsultaTab();
       })
@@ -2923,12 +3122,9 @@ button.ed-consulta-link {
     }
     bloque('INDICACIONES', consulta.indicaciones);
 
-    /* DRM Fun-11: bloque de incapacidad si aplica */
-    if (consulta.incapacidad) {
-      var i = consulta.incapacidad;
-      var resumen = 'Días: ' + (i.dias || '—') + ' · Desde: ' + (i.desde || '—') + '\nMotivo: ' + (i.motivo || '—');
-      if (i.observaciones) resumen += '\nObservaciones: ' + i.observaciones;
-      bloque('INCAPACIDAD EMITIDA', resumen);
+    /* DRM Fun-11 v2: la constancia es un documento aparte. Solo mencionamos su existencia. */
+    if (consulta.tieneConstancia || consulta.constanciaId) {
+      bloque('CONSTANCIA MÉDICA', 'Se emitió constancia médica como documento aparte. Consultar en colección /constancias.');
     }
 
     if (consulta.proximaCita) {

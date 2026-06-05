@@ -176,6 +176,40 @@ service cloud.firestore {
       allow delete: if isDoctor();
     }
 
+    // ═══ /solicitudesUnificacion/{id} ══════════════════════════
+    // DRM Fun-5 v2: solicitudes de unificación de expedientes.
+    //   - Doctor: puede crear y leer las suyas (estado pendiente).
+    //   - Admin: lee/aprueba/rechaza todas y ejecuta la unificación real.
+    match /solicitudesUnificacion/{solId} {
+      allow read: if isDoctor();
+      allow create: if isDoctor()
+        && request.resource.data.solicitadoPor == request.auth.token.email
+        && request.resource.data.estado == 'pendiente';
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ═══ /constancias/{id} ═════════════════════════════════════
+    // DRM Fun-11 v2: constancias médicas (incapacidades).
+    //   - Staff: lectura/escritura total.
+    //   - Paciente: puede leer las constancias ligadas a su expediente.
+    match /constancias/{constanciaId} {
+      allow read: if isDoctor()
+        || (
+          isAuth()
+          && resource.data.codigoPaciente != null
+          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
+          && (
+            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
+            || (
+              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
+              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
+            )
+          )
+        );
+      allow create, update, delete: if isDoctor();
+    }
+
     // ═══ Bloqueo por defecto ═══════════════════════════════════
     // Cualquier otra colección queda bloqueada.
     match /{document=**} {

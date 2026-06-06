@@ -1281,7 +1281,9 @@ button.ed-consulta-link {
     // DRM Fun-2: médicos tratantes individuales
     'doctor_rojascmg@gmail.com',
     'doctor_hermescmg@gmail.com',
-    'doctor_alvarezcmg@gmail.com'
+    'doctor_alvarezcmg@gmail.com',
+    // Admin operativo
+    'skarleth.admoncmg@gmail.com'
   ];
 
   var ANTECEDENTES_PATOLOGICOS = [
@@ -1533,9 +1535,13 @@ button.ed-consulta-link {
   /* ════════════════════════════════════════════════════════════
      DRM Fun-5 v2: UNIFICAR con flujo de aprobación
      ════════════════════════════════════════════════════════════ */
-  var ADMIN_UNIF_EMAIL = 'ventasymercadeocmg@gmail.com';
+  var ADMIN_UNIF_EMAILS = [
+    'ventasymercadeocmg@gmail.com',
+    'rubenwainwrightba@gmail.com',
+    'skarleth.admoncmg@gmail.com'
+  ];
   function esAdminUnif() {
-    return cmgAuth.currentUser && cmgAuth.currentUser.email === ADMIN_UNIF_EMAIL;
+    return cmgAuth.currentUser && ADMIN_UNIF_EMAILS.indexOf(cmgAuth.currentUser.email) !== -1;
   }
   var unifA = null, unifB = null;
   function renderUnificarTab() {

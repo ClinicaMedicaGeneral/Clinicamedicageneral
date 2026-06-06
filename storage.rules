@@ -13,7 +13,9 @@ service firebase.storage {
         // DRM Fun-2: médicos tratantes individuales
         'doctor_rojascmg@gmail.com',
         'doctor_hermescmg@gmail.com',
-        'doctor_alvarezcmg@gmail.com'
+        'doctor_alvarezcmg@gmail.com',
+        // Admin operativo
+        'skarleth.admoncmg@gmail.com'
       ];
     }
 

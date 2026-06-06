@@ -14,13 +14,16 @@ service cloud.firestore {
         // DRM Fun-2: médicos tratantes individuales
         'doctor_rojascmg@gmail.com',
         'doctor_hermescmg@gmail.com',
-        'doctor_alvarezcmg@gmail.com'
+        'doctor_alvarezcmg@gmail.com',
+        // Admin operativo
+        'skarleth.admoncmg@gmail.com'
       ];
     }
     function isAdmin() {
       return isAuth() && request.auth.token.email in [
         'ventasymercadeocmg@gmail.com',
-        'rubenwainwrightba@gmail.com'
+        'rubenwainwrightba@gmail.com',
+        'skarleth.admoncmg@gmail.com'
       ];
     }
 

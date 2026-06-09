@@ -3982,8 +3982,8 @@ button.ed-consulta-link {
                 (ex.status === 'pendiente'
                   ? '<button class="ed-btn ed-btn-ghost" data-procesar="' + esc(ex._id) + '">▶ Marcar procesando</button>'
                   : '') +
-                '<button class="ed-btn ed-btn-yellow" data-subir-orden="' + esc(ex._id) + '">📤 Subir resultado</button>' +
-                '<button class="ed-btn ed-btn-primary" data-confirmar-orden="' + esc(ex._id) + '">✓ Confirmar</button>' +
+                /* DRM v3.5: la confirmación solo ocurre al subir el PDF (auditable y operativamente seguro) */
+                '<button class="ed-btn ed-btn-primary" data-subir-orden="' + esc(ex._id) + '">📤 Subir resultado y confirmar</button>' +
               '</div>' +
             '</div>' +
           '</div>';
@@ -3993,16 +3993,6 @@ button.ed-consulta-link {
           b.addEventListener('click', function(){
             cmgDb.collection('examenesLaboratorio').doc(this.getAttribute('data-procesar')).update({ status: 'procesando' })
               .then(function(){ showAlert('Orden en procesamiento', 'success'); cargarLaboratorioPendientesGlobal(); });
-          });
-        });
-        box.querySelectorAll('[data-confirmar-orden]').forEach(function(b){
-          b.addEventListener('click', function(){
-            if (!confirm('¿Confirmar esta orden sin PDF? Quedará marcada como completada.')) return;
-            cmgDb.collection('examenesLaboratorio').doc(this.getAttribute('data-confirmar-orden')).update({
-              status: 'confirmado',
-              confirmadoPor: cmgAuth.currentUser.email,
-              confirmadoEn: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(function(){ showAlert('Orden confirmada ✓', 'success'); cargarLaboratorioPendientesGlobal(); if (pacienteActual) renderLaboratorioTab(); });
           });
         });
         box.querySelectorAll('[data-subir-orden]').forEach(function(b){

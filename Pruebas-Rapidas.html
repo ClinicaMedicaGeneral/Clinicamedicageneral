@@ -918,6 +918,15 @@
     $id('f-edad').value = age !== '' ? age + ' años' : '';
   });
 
+  /* DRM v3 #3: pre-llenar desde query params si vienen desde Expediente-Doctor */
+  (function(){
+    function getQP(n){ var m = new RegExp('[?&]' + n + '=([^&]+)').exec(location.search); return m ? decodeURIComponent(m[1]) : ''; }
+    var qDni = getQP('dni'), qNombre = getQP('nombre'), qFecha = getQP('fechanac');
+    if (qDni)    $id('f-dni').value = qDni;
+    if (qNombre) $id('f-nombre').value = qNombre;
+    if (qFecha)  { $id('f-fechanac').value = qFecha; $id('f-edad').value = (calcAge(qFecha) + ' años'); }
+  })();
+
   /* Cancel / change type */
   $id('btn-cancelar').addEventListener('click', function () {
     $id('pr-form-card').style.display = 'none';

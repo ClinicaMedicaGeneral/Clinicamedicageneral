@@ -1496,12 +1496,20 @@ button.ed-consulta-link {
           var d = doc.data();
           var meds1 = (d.medicamentosVisita||[]).join(', ') || '—';
           var meds2 = (d.medicamentosDespacho||[]).join(', ') || '—';
-          var servicios = (d.serviciosBrindados||[]).join(', ') || (d.diagnostico ? 'Consulta médica' : '—');
+          var esServicioStandalone = d.tipoRegistro === 'servicio-standalone' || (!d.diagnostico && d.servicioNombre);
+          var servicios = (d.serviciosBrindados||[]).join(', ') || (esServicioStandalone ? d.servicioNombre : (d.diagnostico ? 'Consulta médica' : '—'));
+          /* DRM v3 #4: badge de constancia emitida */
+          var badgeConstancia = (d.tieneConstancia || d.constanciaId)
+            ? '<span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">📄 Constancia emitida</span>'
+            : '';
+          var tipoLabel = esServicioStandalone
+            ? '<span style="background:#D1FAE5;color:#065F46;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🛎️ Servicio</span>'
+            : '<span style="background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🩺 Consulta</span>';
           html +=
             '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:14px">' +
               '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">' +
-                '<div><b style="color:#213C7D">' + esc(d.codigoPaciente || '—') + '</b><br>' +
-                  '<small style="color:#6B7280">Médico: ' + esc(d.doctorNombre || '—') + ' · ' + esc(d.fechaLocal ? d.fechaLocal.slice(0,16).replace('T',' ') : '') + '</small></div>' +
+                '<div><b style="color:#213C7D">' + esc(d.codigoPaciente || '—') + '</b>' + tipoLabel + badgeConstancia + '<br>' +
+                  '<small style="color:#6B7280">Médico: ' + esc(d.doctorNombre || d.servicioRealizadoPor || '—') + ' · ' + esc(d.fechaLocal ? d.fechaLocal.slice(0,16).replace('T',' ') : '') + '</small></div>' +
                 '<button class="ed-btn ed-btn-primary" data-caja-id="' + doc.id + '">✅ Pago Liquidado en Caja</button>' +
               '</div>' +
               '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;font-size:13px">' +
@@ -1509,6 +1517,8 @@ button.ed-consulta-link {
                 '<div><b>📦 Despacho:</b><br>' + esc(meds2) + '</div>' +
                 '<div><b>🩺 Servicios:</b><br>' + esc(servicios) + '</div>' +
               '</div>' +
+              /* DRM v3 #6: servicios hijos vinculados a esta consulta */
+              '<div data-servicios-hijos="' + doc.id + '" style="margin-top:10px"></div>' +
             '</div>';
         });
         html += '</div>';
@@ -1517,13 +1527,41 @@ button.ed-consulta-link {
           b.addEventListener('click', function(){
             var id = this.getAttribute('data-caja-id');
             if (!confirm('¿Confirmar pago liquidado en caja?')) return;
-            cmgDb.collection('consultas').doc(id).update({
+            /* DRM v3 #6: liquidar también servicios hijos vinculados */
+            var batch = cmgDb.batch();
+            batch.update(cmgDb.collection('consultas').doc(id), {
               status: 'completa',
               pagoLiquidadoEnCaja: true,
               pagoLiquidadoPor: cmgAuth.currentUser.email,
               pagoLiquidadoEn: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            cmgDb.collection('consultas').where('consultaPadreId', '==', id).get().then(function(hijos){
+              hijos.forEach(function(hijo){
+                batch.update(hijo.ref, {
+                  status: 'completa',
+                  pagoLiquidadoEnCaja: true,
+                  pagoLiquidadoPor: cmgAuth.currentUser.email,
+                  pagoLiquidadoEn: firebase.firestore.FieldValue.serverTimestamp()
+                });
+              });
+              return batch.commit();
             }).then(function(){ showAlert('Pago liquidado ✓', 'success'); renderCajaTab(); })
               .catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
+          });
+        });
+        /* DRM v3 #6: cargar servicios hijos para cada consulta de caja */
+        snap.forEach(function(doc){
+          var slot = box.querySelector('[data-servicios-hijos="' + doc.id + '"]');
+          if (!slot) return;
+          cmgDb.collection('consultas').where('consultaPadreId', '==', doc.id).get().then(function(hijos){
+            if (hijos.empty) return;
+            var lines = ['<div style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:6px;padding:8px 10px;font-size:12px"><b style="color:#213C7D">🔗 Servicios vinculados (mismo pago):</b><ul style="margin:4px 0 0 18px;padding:0">'];
+            hijos.forEach(function(h){
+              var hd = h.data();
+              lines.push('<li>' + esc(hd.servicioNombre || '—') + (hd.servicioRealizadoPor ? ' <span style="color:#6B7280">· ' + esc(hd.servicioRealizadoPor) + '</span>' : '') + '</li>');
+            });
+            lines.push('</ul></div>');
+            slot.innerHTML = lines.join('');
           });
         });
       })
@@ -2679,18 +2717,27 @@ button.ed-consulta-link {
   /* ─── Marcar servicio como completado (status:'servicio-completo') ─── */
   function completarServicio() {
     if (!pacienteActual || !consultaPendienteCargada) return;
+    /* DRM v3 #6: si el servicio está vinculado a una consulta padre, va al mismo grupo;
+       si es standalone, genera su propio pendiente_caja. */
+    var esVinculado = !!consultaPendienteCargada.consultaPadreId;
     var updateData = {
-      status: 'servicio-completo',
+      status: esVinculado ? 'servicio-completo' : 'pendiente_caja',
+      tipoRegistro: esVinculado ? 'servicio-vinculado' : 'servicio-standalone',
       fecha: firebase.firestore.FieldValue.serverTimestamp(),
       fechaLocal: new Date().toISOString(),
       servicioNotasFin: $val('serv-notas-fin'),
-      servicioRealizadoPor: $val('serv-realizado-por')
+      servicioRealizadoPor: $val('serv-realizado-por'),
+      doctorEmail: cmgAuth.currentUser.email
     };
     showOverlay('Completando servicio...');
     cmgDb.collection('consultas').doc(consultaPendienteCargada._id).update(updateData)
       .then(function () {
         hideOverlay();
-        showAlert('✓ Servicio marcado como completado.', 'success');
+        if (esVinculado) {
+          showAlert('✓ Servicio completado y vinculado al pago de la consulta padre.', 'success');
+        } else {
+          showAlert('✓ Servicio completado. Generó pendiente de pago en Caja.', 'success');
+        }
         consultaPendienteCargada = null;
         renderConsultaTab();
       })
@@ -2820,12 +2867,41 @@ button.ed-consulta-link {
           '<div style="font-size:11px;color:#92400E;margin-top:6px">El formato sigue la plantilla "FORMATO DE CONSTANCIA (NO CAMBIAR)".</div>' +
         '</div>' +
       '</div>' +
+      /* DRM v3 #3: acciones rápidas desde la consulta */
+      '<div class="ed-section">' +
+        '<div class="ed-section-title">⚡ Acciones rápidas durante la consulta</div>' +
+        '<p style="font-size:12px;color:#6B7280;margin:0 0 10px">Estas acciones generan registros adicionales asociados al paciente actual. No reemplazan la consulta — la complementan.</p>' +
+        '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+          '<button class="ed-btn ed-btn-ghost" id="btn-acc-prueba">🧪 Crear Prueba Rápida</button>' +
+          '<button class="ed-btn ed-btn-ghost" id="btn-acc-lab">🔬 Solicitar Exámenes</button>' +
+          '<button class="ed-btn ed-btn-ghost" id="btn-acc-servicio">🛎️ Realizar servicio</button>' +
+        '</div>' +
+      '</div>' +
       '<div class="ed-actions">' +
         '<button class="ed-btn ed-btn-primary" id="btn-cons-guardar">💾 Finalizar consulta + Generar PDF</button>' +
       '</div>';
 
     $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
     $id('btn-cons-guardar').addEventListener('click', guardarConsulta);
+
+    /* DRM v3 #3: handlers de acciones rápidas */
+    var consultaActualId = consultaPendienteCargada && consultaPendienteCargada._id;
+    var dgQuick = (pacienteActual && pacienteActual.datosGenerales) || {};
+    $id('btn-acc-prueba').addEventListener('click', function(){
+      /* Abre Pruebas-Rapidas con paciente pre-llenado */
+      var url = 'Pruebas-Rapidas.html?dni=' + encodeURIComponent(dgQuick.numeroIdentidad || '') +
+                '&nombre=' + encodeURIComponent(dgQuick.nombreCompleto || '') +
+                '&fechanac=' + encodeURIComponent(dgQuick.fechaNacimiento || '');
+      window.open(url, '_blank', 'noopener');
+    });
+    $id('btn-acc-lab').addEventListener('click', function(){
+      /* Abre formulario de solicitud de exámenes */
+      abrirSolicitudExamenesModal(consultaActualId);
+    });
+    $id('btn-acc-servicio').addEventListener('click', function(){
+      /* Crea un servicio vinculado a esta consulta */
+      abrirRealizarServicioModal(consultaActualId);
+    });
 
     /* DRM Fun-11: toggle del formulario de incapacidad */
     document.querySelectorAll('input[name="cons-incap"]').forEach(function(r){
@@ -2834,6 +2910,157 @@ button.ed-consulta-link {
         if (form) form.style.display = (this.value === 'si') ? 'block' : 'none';
       });
     });
+  }
+
+  /* DRM v3 #3: modal para solicitar exámenes (orden sin PDF) — usado desde consulta */
+  function abrirSolicitudExamenesModal(consultaPadreId){
+    if (!pacienteActual) return;
+    var dg = pacienteActual.datosGenerales || {};
+    var html =
+      '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
+        '<div style="background:#fff;border-radius:12px;max-width:560px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
+          '<h3 style="margin:0 0 6px;color:#213C7D">🔬 Solicitar exámenes de laboratorio</h3>' +
+          '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Crea una orden pendiente. El PDF del resultado se sube después.</p>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Exámenes solicitados *</label>' +
+            '<input type="text" class="ed-input" id="qm-lab-examenes" placeholder="Ej. Hematología completa, Glucosa, Perfil lipídico"></div>' +
+          '<div class="ed-grid ed-grid-2" style="gap:10px;margin-top:8px">' +
+            '<div class="ed-fgroup"><label class="ed-label">Proveedor (laboratorio)</label>' +
+              '<input type="text" class="ed-input" id="qm-lab-proveedor" placeholder="Lab. CMG / externo"></div>' +
+            '<div class="ed-fgroup"><label class="ed-label">Prioridad</label>' +
+              '<select class="ed-input" id="qm-lab-prioridad"><option value="rutina">Rutina</option><option value="urgente">Urgente</option></select></div>' +
+          '</div>' +
+          '<div class="ed-fgroup full" style="margin-top:8px"><label class="ed-label">Notas / Indicaciones</label>' +
+            '<textarea class="ed-textarea" id="qm-lab-notas" rows="2" placeholder="Ej. Ayuno de 8 horas. Resultados al WhatsApp."></textarea></div>' +
+          '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
+            '<button class="ed-btn ed-btn-ghost" id="qm-cancelar">Cancelar</button>' +
+            '<button class="ed-btn ed-btn-primary" id="qm-guardar">📤 Crear orden</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+    $id('qm-cancelar').onclick = function(){ document.getElementById('ed-quick-modal').remove(); };
+    $id('qm-guardar').onclick = function(){
+      var examenes = $val('qm-lab-examenes');
+      if (!examenes) { showAlert('Indica al menos un examen', 'error'); return; }
+      var dniRaw = dg.numeroIdentidad || '';
+      cmgDb.collection('examenesLaboratorio').add({
+        codigoPaciente : pacienteActual.codigoPaciente,
+        pacienteNombre : dg.nombreCompleto || '',
+        pacienteNombreExpediente: dg.nombreCompleto || '',
+        dni            : dniRaw,
+        dniNormalizado : dniRaw.replace(/\D/g,''),
+        tipo           : 'orden',
+        tipoNombre     : examenes,
+        examenesSolicitados: examenes,
+        proveedor      : $val('qm-lab-proveedor'),
+        prioridad      : $val('qm-lab-prioridad'),
+        notas          : $val('qm-lab-notas'),
+        status         : 'pendiente',
+        consultaPadreId: consultaPadreId || null,
+        solicitadoPor  : cmgAuth.currentUser.email,
+        solicitadoPorNombre: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
+        createdAt      : firebase.firestore.FieldValue.serverTimestamp(),
+        pdfUrl         : null
+      }).then(function(){
+        document.getElementById('ed-quick-modal').remove();
+        showAlert('✓ Orden de laboratorio creada. Aparecerá como pendiente en la pestaña Laboratorio.', 'success');
+      }).catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
+    };
+  }
+
+  /* DRM v3 #2: modal para subir PDF de resultado a una orden existente */
+  function abrirSubirResultadoModal(ordenId){
+    var html =
+      '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
+        '<div style="background:#fff;border-radius:12px;max-width:480px;width:100%;padding:24px">' +
+          '<h3 style="margin:0 0 6px;color:#213C7D">📤 Subir resultado a la orden</h3>' +
+          '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">El PDF se vincula a la orden y la marca como confirmada.</p>' +
+          '<input type="file" id="qm-up-pdf" accept="application/pdf" class="ed-input">' +
+          '<div class="ed-fgroup full" style="margin-top:10px"><label class="ed-label">Notas finales (opcional)</label>' +
+            '<textarea class="ed-textarea" id="qm-up-notas" rows="2" placeholder="Hallazgos importantes…"></textarea></div>' +
+          '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
+            '<button class="ed-btn ed-btn-ghost" id="qm-cancelar">Cancelar</button>' +
+            '<button class="ed-btn ed-btn-primary" id="qm-guardar">📤 Subir y confirmar</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+    $id('qm-cancelar').onclick = function(){ document.getElementById('ed-quick-modal').remove(); };
+    $id('qm-guardar').onclick = function(){
+      var fi = $id('qm-up-pdf');
+      var file = fi.files && fi.files[0];
+      if (!file) { showAlert('Seleccioná un PDF', 'error'); return; }
+      if (file.size > 15 * 1024 * 1024) { showAlert('El archivo excede 15 MB', 'error'); return; }
+      showOverlay('Subiendo PDF y confirmando orden...');
+      var ts = new Date().toISOString().replace(/[:.]/g, '-');
+      var folder = pacienteActual ? pacienteActual.codigoPaciente : 'sin-expediente';
+      var safe = (file.name || 'examen').replace(/[^a-zA-Z0-9.-]/g, '_').slice(0, 60);
+      var path = 'examenes-laboratorio/' + folder + '/' + ts + '-' + safe;
+      var ref = firebase.storage().ref(path);
+      ref.put(file)
+        .then(function(snap){ return snap.ref.getDownloadURL(); })
+        .then(function(url){
+          var notas = $val('qm-up-notas');
+          return cmgDb.collection('examenesLaboratorio').doc(ordenId).update({
+            pdfUrl       : url,
+            storagePath  : path,
+            fileSize     : file.size,
+            status       : 'confirmado',
+            confirmadoPor: cmgAuth.currentUser.email,
+            confirmadoEn : firebase.firestore.FieldValue.serverTimestamp(),
+            notasFinales : notas || firebase.firestore.FieldValue.delete()
+          });
+        }).then(function(){
+          hideOverlay();
+          document.getElementById('ed-quick-modal').remove();
+          showAlert('✓ Resultado subido y orden confirmada', 'success');
+          renderLaboratorioTab();
+        }).catch(function(err){
+          hideOverlay();
+          showAlert('Error: ' + err.message, 'error');
+        });
+    };
+  }
+
+  /* DRM v3 #3+#6: modal para crear un servicio vinculado a la consulta actual */
+  function abrirRealizarServicioModal(consultaPadreId){
+    if (!pacienteActual) return;
+    var dg = pacienteActual.datosGenerales || {};
+    var html =
+      '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
+        '<div style="background:#fff;border-radius:12px;max-width:520px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
+          '<h3 style="margin:0 0 6px;color:#213C7D">🛎️ Realizar servicio</h3>' +
+          '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Servicio adicional durante la consulta. Se vincula automáticamente al pago de esta consulta.</p>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Servicio *</label>' +
+            '<input type="text" class="ed-input" id="qm-srv-nombre" placeholder="Ej. Lavado de oído, Inyección IM, Curación"></div>' +
+          '<div class="ed-fgroup full" style="margin-top:8px"><label class="ed-label">Notas</label>' +
+            '<textarea class="ed-textarea" id="qm-srv-notas" rows="2" placeholder="Detalles del procedimiento"></textarea></div>' +
+          '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
+            '<button class="ed-btn ed-btn-ghost" id="qm-cancelar">Cancelar</button>' +
+            '<button class="ed-btn ed-btn-primary" id="qm-guardar">📤 Crear servicio vinculado</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+    $id('qm-cancelar').onclick = function(){ document.getElementById('ed-quick-modal').remove(); };
+    $id('qm-guardar').onclick = function(){
+      var nombre = $val('qm-srv-nombre');
+      if (!nombre) { showAlert('Indica el servicio', 'error'); return; }
+      cmgDb.collection('consultas').add({
+        codigoPaciente : pacienteActual.codigoPaciente,
+        pacienteNombre : dg.nombreCompleto || '',
+        status         : 'servicio',
+        servicioNombre : nombre,
+        servicioNotas  : $val('qm-srv-notas'),
+        fechaServicio  : firebase.firestore.FieldValue.serverTimestamp(),
+        servicioPor    : cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
+        servicioEmail  : cmgAuth.currentUser.email,
+        consultaPadreId: consultaPadreId || null
+      }).then(function(){
+        document.getElementById('ed-quick-modal').remove();
+        showAlert('✓ Servicio creado y vinculado. Aparecerá en pendientes para completar.', 'success');
+      }).catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
+    };
   }
 
   /* ─── Finalizar consulta (actualiza pre-clínica → pendiente_caja) ─── */
@@ -3235,18 +3462,93 @@ button.ed-consulta-link {
         ? esc(c.servicioNombre || 'Servicio')
         : esc(c.motivoConsulta || '').slice(0, 120) + (c.motivoConsulta && c.motivoConsulta.length > 120 ? '...' : '');
 
+      /* DRM v3 #5: badge constancia + permitir editar si < 24h */
+      var constanciaBadge = '';
+      var puedeEditarConstancia = false;
+      if (c.constanciaId) {
+        constanciaBadge = ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">📄 Con constancia</span>';
+        /* Ventana de 24h desde la fecha de la consulta */
+        var fechaConsulta = (c.fecha && c.fecha.toMillis) ? c.fecha.toMillis()
+                          : (c.fechaLocal ? new Date(c.fechaLocal).getTime() : 0);
+        if (fechaConsulta && (Date.now() - fechaConsulta) < (24 * 60 * 60 * 1000)) {
+          puedeEditarConstancia = true;
+        }
+      }
+
       return '<div class="ed-consulta-item">' +
         '<div>' +
-          '<div class="ed-consulta-fecha">📅 ' + fmtDate(fechaDisplay) + badge + '</div>' +
+          '<div class="ed-consulta-fecha">📅 ' + fmtDate(fechaDisplay) + badge + constanciaBadge + '</div>' +
           '<div class="ed-consulta-motivo">' + titulo + '</div>' +
           (!esServicio && c.diagnostico ? '<div class="ed-consulta-motivo"><strong>Dx:</strong> ' + esc(c.diagnostico).slice(0, 100) + '</div>' : '') +
           (esServicio && c.servicioNotas ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas:</strong> ' + esc(c.servicioNotas).slice(0, 100) + '</div>' : '') +
         '</div>' +
         '<div class="ed-consulta-actions">' +
           (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Ver PDF</a>' : '') +
+          (c.constanciaId ? '<a class="ed-consulta-link" href="Constancia-Medica.html?id=' + esc(c.constanciaId) + '" target="_blank">📄 Ver constancia</a>' : '') +
+          (puedeEditarConstancia ? '<button class="ed-consulta-link ed-link-blue" data-editar-constancia="' + esc(c.constanciaId) + '">✏️ Editar constancia</button>' : '') +
         '</div>' +
       '</div>';
     }).join('');
+
+    /* DRM v3 #5: handler editar constancia (solo 24h) */
+    lista.querySelectorAll('[data-editar-constancia]').forEach(function(b){
+      b.addEventListener('click', function(){
+        abrirEditarConstanciaModal(this.getAttribute('data-editar-constancia'));
+      });
+    });
+  }
+
+  /* DRM v3 #5: modal para editar una constancia dentro de la ventana de 24h */
+  function abrirEditarConstanciaModal(constanciaId){
+    showOverlay('Cargando constancia…');
+    cmgDb.collection('constancias').doc(constanciaId).get().then(function(snap){
+      hideOverlay();
+      if (!snap.exists) { showAlert('Constancia no encontrada', 'error'); return; }
+      var d = snap.data();
+      var html =
+        '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
+          '<div style="background:#fff;border-radius:12px;max-width:560px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
+            '<h3 style="margin:0 0 6px;color:#213C7D">✏️ Editar constancia ' + esc(d.numero || '') + '</h3>' +
+            '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Solo editable durante las primeras 24h. Los cambios quedan auditados.</p>' +
+            '<div class="ed-grid ed-grid-2" style="gap:10px">' +
+              '<div class="ed-fgroup"><label class="ed-label">Días *</label>' +
+                '<input type="number" min="1" class="ed-input" id="qm-cm-dias" value="' + esc(d.dias || '') + '"></div>' +
+              '<div class="ed-fgroup"><label class="ed-label">Desde *</label>' +
+                '<input type="date" class="ed-input" id="qm-cm-desde" value="' + esc(d.desde || '') + '"></div>' +
+              '<div class="ed-fgroup full"><label class="ed-label">Motivo *</label>' +
+                '<textarea class="ed-textarea" id="qm-cm-motivo" rows="2">' + esc(d.motivo || '') + '</textarea></div>' +
+              '<div class="ed-fgroup full"><label class="ed-label">Observaciones</label>' +
+                '<textarea class="ed-textarea" id="qm-cm-obs" rows="2">' + esc(d.observaciones || '') + '</textarea></div>' +
+            '</div>' +
+            '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
+              '<button class="ed-btn ed-btn-ghost" id="qm-cancelar">Cancelar</button>' +
+              '<button class="ed-btn ed-btn-primary" id="qm-guardar">💾 Guardar cambios</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      document.body.insertAdjacentHTML('beforeend', html);
+      $id('qm-cancelar').onclick = function(){ document.getElementById('ed-quick-modal').remove(); };
+      $id('qm-guardar').onclick = function(){
+        var dias = $val('qm-cm-dias'), desde = $val('qm-cm-desde'), motivo = $val('qm-cm-motivo');
+        if (!dias || !desde || !motivo) { showAlert('Días, desde y motivo son obligatorios', 'error'); return; }
+        var historial = d.historialEdiciones || [];
+        historial.push({
+          editadoPor : cmgAuth.currentUser.email,
+          editadoEn  : new Date().toISOString(),
+          previo     : { dias: d.dias, desde: d.desde, motivo: d.motivo, observaciones: d.observaciones }
+        });
+        cmgDb.collection('constancias').doc(constanciaId).update({
+          dias: dias, desde: desde, motivo: motivo, observaciones: $val('qm-cm-obs'),
+          historialEdiciones: historial,
+          ultimaEdicionPor: cmgAuth.currentUser.email,
+          ultimaEdicionEn : firebase.firestore.FieldValue.serverTimestamp()
+        }).then(function(){
+          document.getElementById('ed-quick-modal').remove();
+          showAlert('Constancia actualizada ✓', 'success');
+          renderHistorialTab();
+        }).catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
+      };
+    }).catch(function(err){ hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
   }
 
   /* ════════════════════════════════════════════════════════════
@@ -3384,7 +3686,19 @@ button.ed-consulta-link {
         '<p class="ed-patient-meta">' + (dg.numeroIdentidad ? 'DNI ' + esc(dg.numeroIdentidad) : 'Sin DNI registrado') + '</p></div>' +
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
+      /* DRM v3 #1: botón para crear orden de laboratorio */
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">' +
+        '<button class="ed-btn ed-btn-yellow" id="btn-crear-orden-lab">📝 Crear orden de laboratorio</button>' +
+      '</div>' +
+      /* DRM v3 #2: sección de pendientes/procesando */
+      '<div class="ed-section-title">⏳ Órdenes pendientes / procesando</div>' +
+      '<div id="laboratorio-pendientes"><div style="font-size:13px;color:#9CA3AF;padding:8px 0">Cargando…</div></div>' +
+      '<div class="ed-section-title" style="margin-top:18px">📄 Exámenes confirmados</div>' +
       '<div id="laboratorio-lista"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>';
+
+    $id('btn-crear-orden-lab').addEventListener('click', function(){
+      abrirSolicitudExamenesModal(null);
+    });
 
     /* Cargar todos los exámenes y filtrar por codigoPaciente o DNI */
     cmgDb.collection('examenesLaboratorio').get()
@@ -3430,15 +3744,71 @@ button.ed-consulta-link {
 
   function renderLaboratorioLista(examenes, vinculadasAhora) {
     var lista = $id('laboratorio-lista');
-    if (!examenes.length) {
-      lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔬</div><p>Este paciente aún no tiene exámenes de laboratorio.</p><p style="font-size:13px;color:#9CA3AF;margin-top:6px">Súbelos desde el botón superior. Se vinculan por DNI automáticamente.</p></div>';
+    var pendBox = $id('laboratorio-pendientes');
+
+    /* DRM v3 #2: separar pendientes/procesando de confirmados */
+    var pendientes = examenes.filter(function(ex){ return ex.status === 'pendiente' || ex.status === 'procesando'; });
+    var confirmados = examenes.filter(function(ex){ return !ex.status || ex.status === 'confirmado'; });
+
+    /* Pendientes */
+    if (pendBox) {
+      if (!pendientes.length) {
+        pendBox.innerHTML = '<div style="font-size:13px;color:#9CA3AF;padding:8px 0">Sin órdenes pendientes.</div>';
+      } else {
+        pendBox.innerHTML = pendientes.map(function(ex){
+          var st = ex.status === 'procesando' ? 'Procesando' : 'Pendiente';
+          var col = ex.status === 'procesando' ? '#3B82F6' : '#F59E0B';
+          var bg  = ex.status === 'procesando' ? '#DBEAFE' : '#FEF3C7';
+          var fecha = (ex.createdAt && ex.createdAt.toMillis) ? new Date(ex.createdAt.toMillis()).toLocaleString('es-HN') : '—';
+          return '<div style="background:' + bg + ';border:1px solid ' + col + ';border-radius:10px;padding:12px;margin-bottom:8px">' +
+            '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">' +
+              '<div style="flex:1;min-width:0">' +
+                '<div style="font-weight:700;color:#213C7D">🔬 ' + esc(ex.examenesSolicitados || ex.tipoNombre || '—') + ' <span style="background:' + col + ';color:#fff;font-size:10px;padding:2px 8px;border-radius:100px;margin-left:6px">' + st + '</span></div>' +
+                '<div style="font-size:12px;color:#6B7280;margin-top:2px">Solicitado por: ' + esc(ex.solicitadoPorNombre || ex.solicitadoPor || '—') + ' · ' + esc(fecha) + (ex.prioridad === 'urgente' ? ' · 🚨 URGENTE' : '') + '</div>' +
+                (ex.notas ? '<div style="font-size:12px;color:#374151;margin-top:4px"><b>Notas:</b> ' + esc(ex.notas) + '</div>' : '') +
+              '</div>' +
+              '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:start">' +
+                (ex.status === 'pendiente'
+                  ? '<button class="ed-btn ed-btn-ghost" data-procesar="' + esc(ex._id) + '">▶ Marcar procesando</button>'
+                  : '') +
+                '<button class="ed-btn ed-btn-yellow" data-subir-orden="' + esc(ex._id) + '">📤 Subir resultado</button>' +
+                '<button class="ed-btn ed-btn-primary" data-confirmar-orden="' + esc(ex._id) + '">✓ Confirmar</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+
+        pendBox.querySelectorAll('[data-procesar]').forEach(function(b){
+          b.addEventListener('click', function(){
+            cmgDb.collection('examenesLaboratorio').doc(this.getAttribute('data-procesar')).update({ status: 'procesando' })
+              .then(function(){ showAlert('Orden en procesamiento', 'success'); renderLaboratorioTab(); });
+          });
+        });
+        pendBox.querySelectorAll('[data-confirmar-orden]').forEach(function(b){
+          b.addEventListener('click', function(){
+            if (!confirm('¿Confirmar esta orden sin PDF? Quedará marcada como completada.')) return;
+            cmgDb.collection('examenesLaboratorio').doc(this.getAttribute('data-confirmar-orden')).update({
+              status: 'confirmado',
+              confirmadoPor: cmgAuth.currentUser.email,
+              confirmadoEn: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(function(){ showAlert('Orden confirmada ✓', 'success'); renderLaboratorioTab(); });
+          });
+        });
+        pendBox.querySelectorAll('[data-subir-orden]').forEach(function(b){
+          b.addEventListener('click', function(){ abrirSubirResultadoModal(this.getAttribute('data-subir-orden')); });
+        });
+      }
+    }
+
+    if (!confirmados.length) {
+      lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔬</div><p>Este paciente aún no tiene exámenes confirmados.</p><p style="font-size:13px;color:#9CA3AF;margin-top:6px">Crea una orden o sube un PDF de resultado para empezar.</p></div>';
       return;
     }
     var banner = '';
     if (vinculadasAhora) {
       banner = '<div style="background:#D1FAE5;border:1px solid #6EE7B7;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#065F46">✓ ' + vinculadasAhora + ' examen' + (vinculadasAhora > 1 ? 'es vinculados' : ' vinculado') + ' automáticamente al expediente por coincidencia de DNI.</div>';
     }
-    lista.innerHTML = banner + examenes.map(function (ex) {
+    lista.innerHTML = banner + confirmados.map(function (ex) {
       var fecha = ex.fechaExamen || (ex.createdAt && ex.createdAt.toMillis ? new Date(ex.createdAt.toMillis()).toLocaleDateString('es-HN') : '—');
       var size = ex.fileSize ? ' · ' + (ex.fileSize / 1024 / 1024).toFixed(2) + ' MB' : '';
       var origen = ex.subidoPorPaciente
@@ -3452,12 +3822,19 @@ button.ed-consulta-link {
           '<div style="font-size:11px;color:#9CA3AF;margin-top:4px">Subido por ' + esc(ex.subidoPorNombre || ex.subidoPor || '—') + size + '</div>' +
         '</div>' +
         '<div class="ed-consulta-actions">' +
-          '<a class="ed-consulta-link" href="' + esc(ex.pdfUrl) + '" target="_blank" rel="noopener">📄 Ver</a>' +
+          (ex.pdfUrl
+            ? '<a class="ed-consulta-link" href="' + esc(ex.pdfUrl) + '" target="_blank" rel="noopener">📄 Ver PDF</a>'
+            : '<button class="ed-consulta-link ed-link-blue" data-subir-orden="' + esc(ex._id) + '">📤 Subir PDF</button>') +
           '<button class="ed-consulta-link ed-link-blue" data-mover-examen="' + esc(ex._id) + '">📂 Mover</button>' +
           '<button class="ed-consulta-link ed-link-red" data-borrar-examen="' + esc(ex._id) + '" data-storage-path="' + esc(ex.storagePath || '') + '">🗑️ Borrar</button>' +
         '</div>' +
       '</div>';
     }).join('');
+
+    /* Wire subir resultado en confirmados también */
+    lista.querySelectorAll('[data-subir-orden]').forEach(function(b){
+      b.addEventListener('click', function(){ abrirSubirResultadoModal(this.getAttribute('data-subir-orden')); });
+    });
 
     lista.querySelectorAll('[data-borrar-examen]').forEach(function (b) {
       b.addEventListener('click', function () {

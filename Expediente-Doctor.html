@@ -1323,29 +1323,66 @@ button.ed-consulta-link {
     ]}
   ];
 
-  /* Catálogo ESTRICTO de exámenes de laboratorio — sin "Otro" (debe coincidir con Examenes-Laboratorio.html) */
+  /* Catálogo ESTRICTO de exámenes de laboratorio — 141 ítems agrupados, sincronizado con Cotizador.html */
   var CATALOGO_LABORATORIO = [
-    'Hematología completa',
-    'Química sanguínea',
-    'Glucosa',
-    'Perfil lipídico (Lipidograma)',
-    'Perfil hepático',
-    'Perfil renal',
-    'Pruebas tiroideas (TSH, T3, T4)',
-    'Hemoglobina glicosilada (HbA1c)',
-    'Electrolitos',
-    'Coagulación (PT, PTT)',
-    'Orina (general)',
-    'Heces (general)',
-    'Cultivo',
-    'Hierro / Ferritina',
-    'Vitamina B12',
-    'Vitamina D',
-    'VIH',
-    'VDRL',
-    'Hepatitis B / C',
-    'Embarazo (sangre)',
-    'Marcadores tumorales'
+    { label: 'Pruebas comunes', items: [
+      'Prueba de embarazo (rápida)', 'Prueba de dengue (rápida)', 'Prueba DUO (VIH 4ª gen.)',
+      'Prueba de sensibilidad', 'Anticuerpos VIH 1/2', 'Colesterol Total', 'Examen De Orina',
+      'General De Heces', 'Glucosa Ayuno en sangre', 'Grupo Sanguineo', 'Hemoglobina Glicosilada',
+      'Hemograma Completo', 'Proteina C Reactiva', 'Prueba Coombs Directo', 'Prueba Indirecta De Coombs',
+      'RPR / VDRL', 'Sangre oculta en heces', 'Tiempo De Protrombina (TP)',
+      'TSH (Hormona Estimulante de Tiroides)'
+    ]},
+    { label: 'Hematología y coagulación', items: [
+      'Dimero D', 'Eritrosedimentacion (VES)', 'Fibrinógeno', 'Frotis de Sangre Periferica (FSP)',
+      'Hematozoario', 'Tiempo De Trombina (TT)', 'Tiempo de Tromboplastina Parcial (TPT)'
+    ]},
+    { label: 'Química sanguínea', items: [
+      'Ácido Fólico', 'Ácido Úrico serico', 'Albúmina', 'Amilasa en suero', 'Amonio en sangre',
+      'Bilirrubinas', 'Calcio en sangre', 'Cloruro (Cl-) en sangre', 'Colesterol Hdl', 'Colesterol Ldl',
+      'Colesterol VLDL', 'Colinesterasa', 'Creatina Quinasa Mb (Mb-Cpk)', 'Creatina Quinasa Total (CPK)',
+      'Creatinina en sangre', 'Deshidrogenasa Acido Lactica (Ldh)', 'Fosfatasa Acida Total',
+      'Fosfatasa Alcalina', 'Fosforo (P+) en suero', 'Gamma Glutamil Traspeptidasa',
+      'Glucosa 2HPP - 2 horas postprandial', 'Glucosa Tolerancia Oral (2h)', 'Glucosa Tolerancia Oral (3h)',
+      'Hierro', 'Lipasa', 'Lipidos Totales', 'Magnesio en sangre', 'Nitrógeno Ureico en la sangre (Bun)',
+      'Potasio en sangre', 'Pro BNP', 'Procalcitonina', 'Proteínas Totales & Relación A/G',
+      'Sodio (NA+) en Suero', 'Transaminasa Oxalacetica (TsGO)', 'Transaminasa Piruvica (TsGP)',
+      'Transferrina', 'Trigliceridos', 'Troponina I'
+    ]},
+    { label: 'Inmunología y anticuerpos', items: [
+      'ACTH', 'Anticuerpo Chikungunya IgM', 'Anticuerpos Anti Cardiolipina(Igg)',
+      'Anticuerpos Anticardiolipinas IgM', 'Anticuerpos Antiglobulina: Ig (Ra Test) - Factor Reumatoideo',
+      'Anticuerpos Antinucleares (ANA)', 'Anticuerpos Citomegalovirus IgG', 'Anticuerpos Citomegalovirus IgM',
+      'Anticuerpos Estreptolisina O (ASO)', 'Anticuerpos H-Pylori (sangre)', 'Anticuerpos Hepatitis A',
+      'Anticuerpos Hepatitis B (Anti-Hbc)', 'Anticuerpos Hepatitis B (Anti-HBs)', 'Anticuerpos Hepatitis C',
+      'Anticuerpos Herpes simple Tipo 1 IgG', 'Anticuerpos Herpes simple Tipo 1 IgM',
+      'Anticuerpos Herpes simple Tipo 2 IgG', 'Anticuerpos Herpes simple Tipo 2 IgM',
+      'Anticuerpos Mononucleosis (Monotest)', 'Anticuerpos Rubeola IgG', 'Anticuerpos Rubeola IgM',
+      'Anticuerpos Toxoplasma IgG', 'Anticuerpos Toxoplasma IgM', 'Anticuerpos Trypanosoma cruzi (Chagas)',
+      'Antigeno H. Pylori-Heces', 'Antigeno Hepatitis B (Hbsag)',
+      'Antigenos Febriles (Anticuerpos Salmonella)', 'Complemento Sérico C3', 'Complemento Sérico C4',
+      'Inmunoglobulina A', 'Inmunoglobulina E (IgE)', 'Inmunoglobulina G', 'Inmunoglobulina M',
+      'Panel Alimentos', 'Panel Inhalantes'
+    ]},
+    { label: 'Hormonas', items: [
+      'Anticuerpos Anti-peroxidasa (TPO)', 'Cortisol A.M.', 'Cortisol P.M.',
+      'Curva Tolerancia a la Insulina', 'Estradiol', 'Ferritina', 'Fsh (Hormona Foliculo Estimulante)',
+      'Gonadotropina Coriónica Humana', 'Hormona Gonadotropina Coriónica (Beta-HCG)', 'Insulina',
+      'Insulina Post', 'Lh', 'Paratohormona (Pth)', 'Progesterona', 'Prolactina', 'T3 (Triyodotironina)',
+      'T3 Libre', 'T4 (Tiroxina)', 'T4 Libre', 'Testosterona Libre', 'Testosterona Total',
+      'Tiroglobulina', 'Vitamina B-12', 'Vitamina D'
+    ]},
+    { label: 'Marcadores tumorales', items: [
+      'Alfa Fetoproteína (AFP)', 'Antígeno Prostático Especifico Total (PSA Total)',
+      'Antígeno Prostático Libre (PSA Libre)', 'Marcador Tumoral Ca 19-9', 'Marcador Tumoral Ca-125',
+      'Marcador Tumoral Ca-15-3', 'Marcador Tumoral Carcinoembrionario (Cea)'
+    ]},
+    { label: 'Orina, heces y microbiología', items: [
+      'Cocaina en orina COC', 'Coloración De Ziehl-Neelsen', 'Coloración Wright', 'Coprocultivo',
+      'Cultivo Por Bacterias', 'Hemocultivo', 'Marihuana: tetrahidrocannabinol (THC)',
+      'Microalbumina', 'Perfil Fehling & Ph En Heces', 'Proteínas Totales en Orina 24 horas',
+      'Urocultivo'
+    ]}
   ];
 
   var ANTECEDENTES_PATOLOGICOS = [
@@ -2945,21 +2982,37 @@ button.ed-consulta-link {
     });
   }
 
-  /* DRM v3 #3 + v3.1: modal para solicitar exámenes — solo lista del catálogo, sin "Otro" */
+  /* DRM v3 #3 + v3.1 + v3.3: modal para solicitar exámenes — 141 ítems agrupados + buscador */
   function abrirSolicitudExamenesModal(consultaPadreId){
     if (!pacienteActual) return;
     var dg = pacienteActual.datosGenerales || {};
-    var checkboxes = CATALOGO_LABORATORIO.map(function(ex){
-      return '<label class="ed-meds-opt"><input type="checkbox" value="' + esc(ex) + '" class="qm-lab-chk"> ' + esc(ex) + '</label>';
+    var totalItems = 0;
+    var groupedHtml = CATALOGO_LABORATORIO.map(function(grp){
+      totalItems += grp.items.length;
+      return '<div class="qm-lab-grupo" style="margin-top:10px">' +
+        '<div style="font-size:11px;font-weight:800;color:#6B7280;letter-spacing:.4px;text-transform:uppercase;margin-bottom:4px">' + esc(grp.label) + ' <span style="color:#9CA3AF;font-weight:400">(' + grp.items.length + ')</span></div>' +
+        '<div class="ed-meds-list">' +
+          grp.items.map(function(ex){
+            return '<label class="ed-meds-opt qm-lab-item" data-name="' + esc(ex.toLowerCase()) + '"><input type="checkbox" value="' + esc(ex) + '" class="qm-lab-chk"> ' + esc(ex) + '</label>';
+          }).join('') +
+        '</div>' +
+      '</div>';
     }).join('');
+
     var html =
       '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
-        '<div style="background:#fff;border-radius:12px;max-width:640px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
+        '<div style="background:#fff;border-radius:12px;max-width:760px;width:100%;padding:24px;max-height:92vh;overflow:auto;display:flex;flex-direction:column">' +
           '<h3 style="margin:0 0 6px;color:#213C7D">🔬 Solicitar exámenes de laboratorio</h3>' +
-          '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Marca los exámenes del catálogo CMG. El PDF del resultado se sube después.</p>' +
-          '<div class="ed-fgroup full"><label class="ed-label">Exámenes a solicitar *</label>' +
-            '<div class="ed-meds-list" style="max-height:280px;overflow:auto">' + checkboxes + '</div>' +
-            '<small style="color:#6B7280">El catálogo es estricto. Si necesitás agregar un examen nuevo, pedile al admin que lo incluya en la lista del sistema.</small>' +
+          '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Catálogo CMG: <b>' + totalItems + ' exámenes</b> disponibles. Marca los que necesitás (uno o varios). El PDF del resultado se sube después.</p>' +
+          '<input type="text" id="qm-lab-buscar" class="ed-input" placeholder="🔍 Buscar examen (escribe parte del nombre)..." style="margin-bottom:8px">' +
+          '<div style="display:flex;gap:8px;font-size:12px;margin-bottom:8px">' +
+            '<button class="ed-btn ed-btn-ghost" id="qm-lab-marcados" style="padding:4px 10px;font-size:11px">Ver solo marcados (<span id="qm-lab-count">0</span>)</button>' +
+            '<button class="ed-btn ed-btn-ghost" id="qm-lab-todos" style="padding:4px 10px;font-size:11px">Ver todos</button>' +
+            '<button class="ed-btn ed-btn-ghost" id="qm-lab-limpiar" style="padding:4px 10px;font-size:11px">Limpiar selección</button>' +
+          '</div>' +
+          '<div class="ed-fgroup full" style="flex:1;min-height:0">' +
+            '<div class="ed-meds-list" id="qm-lab-lista" style="max-height:380px;overflow:auto;background:#FAFBFF;display:block">' + groupedHtml + '</div>' +
+            '<small style="color:#6B7280;display:block;margin-top:6px">El catálogo es estricto y coincide con el cotizador. Si necesitás agregar un examen nuevo, pedile al admin que lo incluya en la lista del sistema.</small>' +
           '</div>' +
           '<div class="ed-grid ed-grid-2" style="gap:10px;margin-top:10px">' +
             '<div class="ed-fgroup"><label class="ed-label">Proveedor (laboratorio)</label>' +
@@ -2976,6 +3029,38 @@ button.ed-consulta-link {
         '</div>' +
       '</div>';
     document.body.insertAdjacentHTML('beforeend', html);
+
+    /* DRM v3.3: contador, buscador y filtros */
+    function actualizarCount(){
+      var n = document.querySelectorAll('.qm-lab-chk:checked').length;
+      var el = $id('qm-lab-count'); if (el) el.textContent = n;
+    }
+    function aplicarFiltro(modo){
+      var q = ($id('qm-lab-buscar').value || '').trim().toLowerCase();
+      document.querySelectorAll('.qm-lab-item').forEach(function(lbl){
+        var visible = true;
+        if (q) visible = lbl.dataset.name.indexOf(q) !== -1;
+        if (visible && modo === 'marcados') {
+          var chk = lbl.querySelector('input');
+          visible = chk && chk.checked;
+        }
+        lbl.style.display = visible ? '' : 'none';
+      });
+      /* Ocultar grupos vacíos */
+      document.querySelectorAll('.qm-lab-grupo').forEach(function(g){
+        var visibles = g.querySelectorAll('.qm-lab-item:not([style*="display: none"])').length;
+        g.style.display = visibles ? '' : 'none';
+      });
+    }
+    $id('qm-lab-buscar').addEventListener('input', function(){ aplicarFiltro('todos'); });
+    $id('qm-lab-marcados').onclick = function(){ aplicarFiltro('marcados'); };
+    $id('qm-lab-todos').onclick    = function(){ $id('qm-lab-buscar').value = ''; aplicarFiltro('todos'); };
+    $id('qm-lab-limpiar').onclick  = function(){
+      document.querySelectorAll('.qm-lab-chk:checked').forEach(function(c){ c.checked = false; });
+      actualizarCount();
+    };
+    document.querySelectorAll('.qm-lab-chk').forEach(function(c){ c.addEventListener('change', actualizarCount); });
+
     $id('qm-cancelar').onclick = function(){ document.getElementById('ed-quick-modal').remove(); };
     $id('qm-guardar').onclick = function(){
       var seleccionados = [];

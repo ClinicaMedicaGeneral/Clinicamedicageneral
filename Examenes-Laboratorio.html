@@ -250,29 +250,162 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       </div>
       <div class="el-fgroup">
         <label class="el-label">Tipo de examen * <small style="color:#6B7280;font-weight:400">(mantén Ctrl/Cmd para seleccionar varios)</small></label>
-        <select class="el-select" id="f-tipo" multiple size="6">
-          <option value="hematologia">Hematología completa</option>
-          <option value="quimica">Química sanguínea</option>
-          <option value="glucosa">Glucosa</option>
-          <option value="lipidograma">Perfil lipídico (Lipidograma)</option>
-          <option value="hepatico">Perfil hepático</option>
-          <option value="renal">Perfil renal</option>
-          <option value="tiroideas">Pruebas tiroideas (TSH, T3, T4)</option>
-          <option value="hba1c">Hemoglobina glicosilada (HbA1c)</option>
-          <option value="electrolitos">Electrolitos</option>
-          <option value="coagulacion">Coagulación (PT, PTT)</option>
-          <option value="orina">Orina (general)</option>
-          <option value="heces">Heces (general)</option>
-          <option value="cultivo">Cultivo</option>
-          <option value="hierro">Hierro / Ferritina</option>
-          <option value="vitb12">Vitamina B12</option>
-          <option value="vitd">Vitamina D</option>
-          <option value="vih">VIH</option>
-          <option value="vdrl">VDRL</option>
-          <option value="hepatitis">Hepatitis B / C</option>
-          <option value="embarazo-sangre">Embarazo (sangre)</option>
-          <option value="marcadores">Marcadores tumorales</option>
-          <option value="otro">Otro (escribir abajo)</option>
+        <select class="el-select" id="f-tipo" multiple size="10">
+          <optgroup label="Pruebas comunes (19)">
+            <option value="Prueba de embarazo (rápida)">Prueba de embarazo (rápida)</option>
+            <option value="Prueba de dengue (rápida)">Prueba de dengue (rápida)</option>
+            <option value="Prueba DUO (VIH 4ª gen.)">Prueba DUO (VIH 4ª gen.)</option>
+            <option value="Prueba de sensibilidad">Prueba de sensibilidad</option>
+            <option value="Anticuerpos VIH 1/2">Anticuerpos VIH 1/2</option>
+            <option value="Colesterol Total">Colesterol Total</option>
+            <option value="Examen De Orina">Examen De Orina</option>
+            <option value="General De Heces">General De Heces</option>
+            <option value="Glucosa Ayuno en sangre">Glucosa Ayuno en sangre</option>
+            <option value="Grupo Sanguineo">Grupo Sanguineo</option>
+            <option value="Hemoglobina Glicosilada">Hemoglobina Glicosilada</option>
+            <option value="Hemograma Completo">Hemograma Completo</option>
+            <option value="Proteina C Reactiva">Proteina C Reactiva</option>
+            <option value="Prueba Coombs Directo">Prueba Coombs Directo</option>
+            <option value="Prueba Indirecta De Coombs">Prueba Indirecta De Coombs</option>
+            <option value="RPR / VDRL">RPR / VDRL</option>
+            <option value="Sangre oculta en heces">Sangre oculta en heces</option>
+            <option value="Tiempo De Protrombina (TP)">Tiempo De Protrombina (TP)</option>
+            <option value="TSH (Hormona Estimulante de Tiroides)">TSH (Hormona Estimulante de Tiroides)</option>
+          </optgroup>
+          <optgroup label="Hematología y coagulación (7)">
+            <option value="Dimero D">Dimero D</option>
+            <option value="Eritrosedimentacion (VES)">Eritrosedimentacion (VES)</option>
+            <option value="Fibrinógeno">Fibrinógeno</option>
+            <option value="Frotis de Sangre Periferica (FSP)">Frotis de Sangre Periferica (FSP)</option>
+            <option value="Hematozoario">Hematozoario</option>
+            <option value="Tiempo De Trombina (TT)">Tiempo De Trombina (TT)</option>
+            <option value="Tiempo de Tromboplastina Parcial (TPT)">Tiempo de Tromboplastina Parcial (TPT)</option>
+          </optgroup>
+          <optgroup label="Química sanguínea (38)">
+            <option value="Ácido Fólico">Ácido Fólico</option>
+            <option value="Ácido Úrico serico">Ácido Úrico serico</option>
+            <option value="Albúmina">Albúmina</option>
+            <option value="Amilasa en suero">Amilasa en suero</option>
+            <option value="Amonio en sangre">Amonio en sangre</option>
+            <option value="Bilirrubinas">Bilirrubinas</option>
+            <option value="Calcio en sangre">Calcio en sangre</option>
+            <option value="Cloruro (Cl-) en sangre">Cloruro (Cl-) en sangre</option>
+            <option value="Colesterol Hdl">Colesterol Hdl</option>
+            <option value="Colesterol Ldl">Colesterol Ldl</option>
+            <option value="Colesterol VLDL">Colesterol VLDL</option>
+            <option value="Colinesterasa">Colinesterasa</option>
+            <option value="Creatina Quinasa Mb (Mb-Cpk)">Creatina Quinasa Mb (Mb-Cpk)</option>
+            <option value="Creatina Quinasa Total (CPK)">Creatina Quinasa Total (CPK)</option>
+            <option value="Creatinina en sangre">Creatinina en sangre</option>
+            <option value="Deshidrogenasa Acido Lactica (Ldh)">Deshidrogenasa Acido Lactica (Ldh)</option>
+            <option value="Fosfatasa Acida Total">Fosfatasa Acida Total</option>
+            <option value="Fosfatasa Alcalina">Fosfatasa Alcalina</option>
+            <option value="Fosforo (P+) en suero">Fosforo (P+) en suero</option>
+            <option value="Gamma Glutamil Traspeptidasa">Gamma Glutamil Traspeptidasa</option>
+            <option value="Glucosa 2HPP - 2 horas postprandial">Glucosa 2HPP - 2 horas postprandial</option>
+            <option value="Glucosa Tolerancia Oral (2h)">Glucosa Tolerancia Oral (2h)</option>
+            <option value="Glucosa Tolerancia Oral (3h)">Glucosa Tolerancia Oral (3h)</option>
+            <option value="Hierro">Hierro</option>
+            <option value="Lipasa">Lipasa</option>
+            <option value="Lipidos Totales">Lipidos Totales</option>
+            <option value="Magnesio en sangre">Magnesio en sangre</option>
+            <option value="Nitrógeno Ureico en la sangre (Bun)">Nitrógeno Ureico en la sangre (Bun)</option>
+            <option value="Potasio en sangre">Potasio en sangre</option>
+            <option value="Pro BNP">Pro BNP</option>
+            <option value="Procalcitonina">Procalcitonina</option>
+            <option value="Proteínas Totales & Relación A/G">Proteínas Totales & Relación A/G</option>
+            <option value="Sodio (NA+) en Suero">Sodio (NA+) en Suero</option>
+            <option value="Transaminasa Oxalacetica (TsGO)">Transaminasa Oxalacetica (TsGO)</option>
+            <option value="Transaminasa Piruvica (TsGP)">Transaminasa Piruvica (TsGP)</option>
+            <option value="Transferrina">Transferrina</option>
+            <option value="Trigliceridos">Trigliceridos</option>
+            <option value="Troponina I">Troponina I</option>
+          </optgroup>
+          <optgroup label="Inmunología y anticuerpos (35)">
+            <option value="ACTH">ACTH</option>
+            <option value="Anticuerpo Chikungunya IgM">Anticuerpo Chikungunya IgM</option>
+            <option value="Anticuerpos Anti Cardiolipina(Igg)">Anticuerpos Anti Cardiolipina(Igg)</option>
+            <option value="Anticuerpos Anticardiolipinas IgM">Anticuerpos Anticardiolipinas IgM</option>
+            <option value="Anticuerpos Antiglobulina: Ig (Ra Test) - Factor Reumatoideo">Anticuerpos Antiglobulina: Ig (Ra Test) - Factor Reumatoideo</option>
+            <option value="Anticuerpos Antinucleares (ANA)">Anticuerpos Antinucleares (ANA)</option>
+            <option value="Anticuerpos Citomegalovirus IgG">Anticuerpos Citomegalovirus IgG</option>
+            <option value="Anticuerpos Citomegalovirus IgM">Anticuerpos Citomegalovirus IgM</option>
+            <option value="Anticuerpos Estreptolisina O (ASO)">Anticuerpos Estreptolisina O (ASO)</option>
+            <option value="Anticuerpos H-Pylori (sangre)">Anticuerpos H-Pylori (sangre)</option>
+            <option value="Anticuerpos Hepatitis A">Anticuerpos Hepatitis A</option>
+            <option value="Anticuerpos Hepatitis B (Anti-Hbc)">Anticuerpos Hepatitis B (Anti-Hbc)</option>
+            <option value="Anticuerpos Hepatitis B (Anti-HBs)">Anticuerpos Hepatitis B (Anti-HBs)</option>
+            <option value="Anticuerpos Hepatitis C">Anticuerpos Hepatitis C</option>
+            <option value="Anticuerpos Herpes simple Tipo 1 IgG">Anticuerpos Herpes simple Tipo 1 IgG</option>
+            <option value="Anticuerpos Herpes simple Tipo 1 IgM">Anticuerpos Herpes simple Tipo 1 IgM</option>
+            <option value="Anticuerpos Herpes simple Tipo 2 IgG">Anticuerpos Herpes simple Tipo 2 IgG</option>
+            <option value="Anticuerpos Herpes simple Tipo 2 IgM">Anticuerpos Herpes simple Tipo 2 IgM</option>
+            <option value="Anticuerpos Mononucleosis (Monotest)">Anticuerpos Mononucleosis (Monotest)</option>
+            <option value="Anticuerpos Rubeola IgG">Anticuerpos Rubeola IgG</option>
+            <option value="Anticuerpos Rubeola IgM">Anticuerpos Rubeola IgM</option>
+            <option value="Anticuerpos Toxoplasma IgG">Anticuerpos Toxoplasma IgG</option>
+            <option value="Anticuerpos Toxoplasma IgM">Anticuerpos Toxoplasma IgM</option>
+            <option value="Anticuerpos Trypanosoma cruzi (Chagas)">Anticuerpos Trypanosoma cruzi (Chagas)</option>
+            <option value="Antigeno H. Pylori-Heces">Antigeno H. Pylori-Heces</option>
+            <option value="Antigeno Hepatitis B (Hbsag)">Antigeno Hepatitis B (Hbsag)</option>
+            <option value="Antigenos Febriles (Anticuerpos Salmonella)">Antigenos Febriles (Anticuerpos Salmonella)</option>
+            <option value="Complemento Sérico C3">Complemento Sérico C3</option>
+            <option value="Complemento Sérico C4">Complemento Sérico C4</option>
+            <option value="Inmunoglobulina A">Inmunoglobulina A</option>
+            <option value="Inmunoglobulina E (IgE)">Inmunoglobulina E (IgE)</option>
+            <option value="Inmunoglobulina G">Inmunoglobulina G</option>
+            <option value="Inmunoglobulina M">Inmunoglobulina M</option>
+            <option value="Panel Alimentos">Panel Alimentos</option>
+            <option value="Panel Inhalantes">Panel Inhalantes</option>
+          </optgroup>
+          <optgroup label="Hormonas (24)">
+            <option value="Anticuerpos Anti-peroxidasa (TPO)">Anticuerpos Anti-peroxidasa (TPO)</option>
+            <option value="Cortisol A.M.">Cortisol A.M.</option>
+            <option value="Cortisol P.M.">Cortisol P.M.</option>
+            <option value="Curva Tolerancia a la Insulina">Curva Tolerancia a la Insulina</option>
+            <option value="Estradiol">Estradiol</option>
+            <option value="Ferritina">Ferritina</option>
+            <option value="Fsh (Hormona Foliculo Estimulante)">Fsh (Hormona Foliculo Estimulante)</option>
+            <option value="Gonadotropina Coriónica Humana">Gonadotropina Coriónica Humana</option>
+            <option value="Hormona Gonadotropina Coriónica (Beta-HCG)">Hormona Gonadotropina Coriónica (Beta-HCG)</option>
+            <option value="Insulina">Insulina</option>
+            <option value="Insulina Post">Insulina Post</option>
+            <option value="Lh">Lh</option>
+            <option value="Paratohormona (Pth)">Paratohormona (Pth)</option>
+            <option value="Progesterona">Progesterona</option>
+            <option value="Prolactina">Prolactina</option>
+            <option value="T3 (Triyodotironina)">T3 (Triyodotironina)</option>
+            <option value="T3 Libre">T3 Libre</option>
+            <option value="T4 (Tiroxina)">T4 (Tiroxina)</option>
+            <option value="T4 Libre">T4 Libre</option>
+            <option value="Testosterona Libre">Testosterona Libre</option>
+            <option value="Testosterona Total">Testosterona Total</option>
+            <option value="Tiroglobulina">Tiroglobulina</option>
+            <option value="Vitamina B-12">Vitamina B-12</option>
+            <option value="Vitamina D">Vitamina D</option>
+          </optgroup>
+          <optgroup label="Marcadores tumorales (7)">
+            <option value="Alfa Fetoproteína (AFP)">Alfa Fetoproteína (AFP)</option>
+            <option value="Antígeno Prostático Especifico Total (PSA Total)">Antígeno Prostático Especifico Total (PSA Total)</option>
+            <option value="Antígeno Prostático Libre (PSA Libre)">Antígeno Prostático Libre (PSA Libre)</option>
+            <option value="Marcador Tumoral Ca 19-9">Marcador Tumoral Ca 19-9</option>
+            <option value="Marcador Tumoral Ca-125">Marcador Tumoral Ca-125</option>
+            <option value="Marcador Tumoral Ca-15-3">Marcador Tumoral Ca-15-3</option>
+            <option value="Marcador Tumoral Carcinoembrionario (Cea)">Marcador Tumoral Carcinoembrionario (Cea)</option>
+          </optgroup>
+          <optgroup label="Orina, heces y microbiología (11)">
+            <option value="Cocaina en orina COC">Cocaina en orina COC</option>
+            <option value="Coloración De Ziehl-Neelsen">Coloración De Ziehl-Neelsen</option>
+            <option value="Coloración Wright">Coloración Wright</option>
+            <option value="Coprocultivo">Coprocultivo</option>
+            <option value="Cultivo Por Bacterias">Cultivo Por Bacterias</option>
+            <option value="Hemocultivo">Hemocultivo</option>
+            <option value="Marihuana: tetrahidrocannabinol (THC)">Marihuana: tetrahidrocannabinol (THC)</option>
+            <option value="Microalbumina">Microalbumina</option>
+            <option value="Perfil Fehling & Ph En Heces">Perfil Fehling & Ph En Heces</option>
+            <option value="Proteínas Totales en Orina 24 horas">Proteínas Totales en Orina 24 horas</option>
+            <option value="Urocultivo">Urocultivo</option>
+          </optgroup>
         </select>
       </div>
       <div class="el-fgroup" id="f-tipo-otro-wrapper" style="display:none">
@@ -616,11 +749,10 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   /* ── Proceder con subida del PDF + Firestore ── */
   function procederSubida(expediente) {
     /* DRM Fun-7: soporta multi-select. Si >1 seleccionado → 'Conjunto: A, B, C' */
+    /* DRM v3.3: values son ahora los nombres completos (catálogo de 141), sin "otro" */
     var sel = $id('f-tipo');
     var values = Array.from(sel.selectedOptions).map(function(o){ return o.value; });
-    var labels = values.map(function(v){
-      return v === 'otro' ? ($id('f-tipo-otro').value.trim() || 'Otro') : TIPOS_LABELS[v];
-    });
+    var labels = values.slice();  /* value === label */
     var tipoVal    = values.length === 1 ? values[0] : 'conjunto';
     var tipoNombre = labels.length > 1 ? ('Conjunto: ' + labels.join(', ')) : (labels[0] || '');
     var fechaExamen = $id('f-fecha').value;

@@ -1567,11 +1567,15 @@ button.ed-consulta-link {
           var tipoLabel = esServicioStandalone
             ? '<span style="background:#D1FAE5;color:#065F46;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🛎️ Servicio</span>'
             : '<span style="background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🩺 Consulta</span>';
+          /* DRM v3.2: mostrar NOMBRE del paciente prominente, código como subtítulo */
+          var nombrePaciente = d.pacienteNombre || '— sin nombre —';
           html +=
             '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:14px">' +
               '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">' +
-                '<div><b style="color:#213C7D">' + esc(d.codigoPaciente || '—') + '</b>' + tipoLabel + badgeConstancia + '<br>' +
-                  '<small style="color:#6B7280">Médico: ' + esc(d.doctorNombre || d.servicioRealizadoPor || '—') + ' · ' + esc(d.fechaLocal ? d.fechaLocal.slice(0,16).replace('T',' ') : '') + '</small></div>' +
+                '<div>' +
+                  '<b style="color:#213C7D;font-size:16px">' + esc(nombrePaciente) + '</b>' + tipoLabel + badgeConstancia + '<br>' +
+                  '<small style="color:#6B7280">Expediente: <code style="background:#F3F4F6;padding:1px 6px;border-radius:4px">' + esc(d.codigoPaciente || '—') + '</code> · Médico: ' + esc(d.doctorNombre || d.servicioRealizadoPor || '—') + ' · ' + esc(d.fechaLocal ? d.fechaLocal.slice(0,16).replace('T',' ') : '') + '</small>' +
+                '</div>' +
                 '<button class="ed-btn ed-btn-primary" data-caja-id="' + doc.id + '">✅ Pago Liquidado en Caja</button>' +
               '</div>' +
               '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;font-size:13px">' +
@@ -3061,73 +3065,93 @@ button.ed-consulta-link {
     };
   }
 
-  /* DRM v3 #3+#6 + v3.1: modal para crear servicio — usa catálogo + opción "Otro" */
+  /* DRM v3 #3+#6 + v3.2: modal para crear servicio — MULTI-SELECT con catálogo + "Otro" */
   function abrirRealizarServicioModal(consultaPadreId){
     if (!pacienteActual) return;
     var dg = pacienteActual.datosGenerales || {};
-    /* Construir select agrupado a partir del catálogo */
-    var optsHtml = '<option value="">— Seleccionar servicio del catálogo —</option>';
+    /* Construir checkboxes agrupados por categoría */
+    var checkboxesHtml = '';
     CATALOGO_SERVICIOS.forEach(function(grp){
-      optsHtml += '<optgroup label="' + esc(grp.label) + '">';
-      grp.items.forEach(function(s){
-        optsHtml += '<option value="' + esc(s) + '">' + esc(s) + '</option>';
-      });
-      optsHtml += '</optgroup>';
+      checkboxesHtml +=
+        '<div style="margin-top:10px">' +
+          '<div style="font-size:11px;font-weight:800;color:#6B7280;letter-spacing:.4px;text-transform:uppercase;margin-bottom:4px">' + esc(grp.label) + '</div>' +
+          '<div class="ed-meds-list">' +
+            grp.items.map(function(s){
+              return '<label class="ed-meds-opt"><input type="checkbox" value="' + esc(s) + '" class="qm-srv-chk"> ' + esc(s) + '</label>';
+            }).join('') +
+          '</div>' +
+        '</div>';
     });
-    optsHtml += '<option value="__otro__">✏️ Otro (procedimiento poco común — especificar abajo)</option>';
 
     var html =
       '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
-        '<div style="background:#fff;border-radius:12px;max-width:560px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
-          '<h3 style="margin:0 0 6px;color:#213C7D">🛎️ Realizar servicio</h3>' +
-          '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Servicio adicional durante la consulta. Se vincula automáticamente al pago de esta consulta.</p>' +
-          '<div class="ed-fgroup full"><label class="ed-label">Servicio del catálogo *</label>' +
-            '<select class="ed-input" id="qm-srv-selector" style="appearance:auto;-webkit-appearance:menulist">' + optsHtml + '</select>' +
+        '<div style="background:#fff;border-radius:12px;max-width:680px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
+          '<h3 style="margin:0 0 6px;color:#213C7D">🛎️ Realizar servicio(s)</h3>' +
+          '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Marca uno o varios servicios del catálogo. Se vinculan automáticamente al pago de esta consulta.</p>' +
+          '<div style="max-height:340px;overflow:auto;border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;background:#FAFBFF">' +
+            checkboxesHtml +
           '</div>' +
-          '<div class="ed-fgroup full" id="qm-srv-otro-grupo" style="display:none;margin-top:8px">' +
-            '<label class="ed-label">Especifica el procedimiento *</label>' +
-            '<input type="text" class="ed-input" id="qm-srv-otro" placeholder="Describe el procedimiento nuevo o poco común">' +
-            '<small style="color:#92400E">⚠️ Si usás "Otro" más de una vez, pedile al admin que añada el servicio al catálogo para evitar variaciones de nombre.</small>' +
+          /* "Otro" como bloque aparte */
+          '<div class="ed-fgroup full" style="margin-top:12px;background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:10px 12px">' +
+            '<label class="ed-meds-opt" style="font-weight:600">' +
+              '<input type="checkbox" id="qm-srv-otro-chk"> ✏️ Otro (procedimiento poco común)' +
+            '</label>' +
+            '<div id="qm-srv-otro-grupo" style="display:none;margin-top:8px">' +
+              '<label class="ed-label">Especifica el procedimiento *</label>' +
+              '<input type="text" class="ed-input" id="qm-srv-otro" placeholder="Describe el procedimiento nuevo o poco común">' +
+              '<small style="color:#92400E;display:block;margin-top:4px">⚠️ Si usás "Otro" más de una vez con el mismo nombre, pedile al admin que lo añada al catálogo.</small>' +
+            '</div>' +
           '</div>' +
-          '<div class="ed-fgroup full" style="margin-top:8px"><label class="ed-label">Notas</label>' +
-            '<textarea class="ed-textarea" id="qm-srv-notas" rows="2" placeholder="Detalles del procedimiento, cantidad, observaciones para el personal"></textarea></div>' +
+          '<div class="ed-fgroup full" style="margin-top:10px"><label class="ed-label">Notas (aplica a todos los servicios marcados)</label>' +
+            '<textarea class="ed-textarea" id="qm-srv-notas" rows="2" placeholder="Detalles, cantidad, observaciones para el personal"></textarea></div>' +
           '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
             '<button class="ed-btn ed-btn-ghost" id="qm-cancelar">Cancelar</button>' +
-            '<button class="ed-btn ed-btn-primary" id="qm-guardar">📤 Crear servicio vinculado</button>' +
+            '<button class="ed-btn ed-btn-primary" id="qm-guardar">📤 Crear servicios vinculados</button>' +
           '</div>' +
         '</div>' +
       '</div>';
     document.body.insertAdjacentHTML('beforeend', html);
-    $id('qm-srv-selector').addEventListener('change', function(){
-      $id('qm-srv-otro-grupo').style.display = this.value === '__otro__' ? '' : 'none';
+    $id('qm-srv-otro-chk').addEventListener('change', function(){
+      $id('qm-srv-otro-grupo').style.display = this.checked ? '' : 'none';
     });
     $id('qm-cancelar').onclick = function(){ document.getElementById('ed-quick-modal').remove(); };
     $id('qm-guardar').onclick = function(){
-      var sel = $val('qm-srv-selector');
-      if (!sel) { showAlert('Selecciona un servicio del catálogo', 'error'); return; }
-      var nombre;
-      if (sel === '__otro__') {
-        nombre = $val('qm-srv-otro');
-        if (!nombre) { showAlert('Especifica el procedimiento (campo "Otro")', 'error'); return; }
-        nombre = '[OTRO] ' + nombre;
-      } else {
-        nombre = sel;
+      var seleccionados = [];
+      document.querySelectorAll('.qm-srv-chk:checked').forEach(function(c){
+        seleccionados.push({ nombre: c.value, delCatalogo: true });
+      });
+      if ($id('qm-srv-otro-chk').checked) {
+        var nombreOtro = $val('qm-srv-otro');
+        if (!nombreOtro) { showAlert('Especifica el procedimiento del campo "Otro"', 'error'); return; }
+        seleccionados.push({ nombre: '[OTRO] ' + nombreOtro, delCatalogo: false });
       }
-      cmgDb.collection('consultas').add({
-        codigoPaciente : pacienteActual.codigoPaciente,
-        pacienteNombre : dg.nombreCompleto || '',
-        status         : 'servicio',
-        servicioNombre : nombre,
-        servicioDelCatalogo: sel !== '__otro__',
-        servicioNotas  : $val('qm-srv-notas'),
-        fechaServicio  : firebase.firestore.FieldValue.serverTimestamp(),
-        servicioPor    : cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
-        servicioEmail  : cmgAuth.currentUser.email,
-        consultaPadreId: consultaPadreId || null
-      }).then(function(){
+      if (!seleccionados.length) { showAlert('Marca al menos un servicio', 'error'); return; }
+
+      showOverlay('Creando ' + seleccionados.length + ' servicio' + (seleccionados.length>1?'s':'') + '…');
+      var notas = $val('qm-srv-notas');
+      /* Un doc de Firestore por cada servicio — todos vinculados a la misma consulta padre */
+      var promesas = seleccionados.map(function(srv){
+        return cmgDb.collection('consultas').add({
+          codigoPaciente : pacienteActual.codigoPaciente,
+          pacienteNombre : dg.nombreCompleto || '',
+          status         : 'servicio',
+          servicioNombre : srv.nombre,
+          servicioDelCatalogo: srv.delCatalogo,
+          servicioNotas  : notas,
+          fechaServicio  : firebase.firestore.FieldValue.serverTimestamp(),
+          servicioPor    : cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
+          servicioEmail  : cmgAuth.currentUser.email,
+          consultaPadreId: consultaPadreId || null
+        });
+      });
+      Promise.all(promesas).then(function(){
+        hideOverlay();
         document.getElementById('ed-quick-modal').remove();
-        showAlert('✓ Servicio creado y vinculado. Aparecerá en pendientes para completar.', 'success');
-      }).catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
+        showAlert('✓ ' + seleccionados.length + ' servicio(s) creados y vinculados.', 'success');
+      }).catch(function(err){
+        hideOverlay();
+        showAlert('Error: ' + err.message, 'error');
+      });
     };
   }
 

@@ -1286,6 +1286,68 @@ button.ed-consulta-link {
     'skarleth.admoncmg@gmail.com'
   ];
 
+  /* ─── DRM v3.1: catálogos compartidos para evitar errores de tipeo ─── */
+  var CATALOGO_SERVICIOS = [
+    { label: 'Servicios generales', items: [
+      'Consulta médica general',
+      'Evaluación de salud (certificado laboral)',
+      'Toma de presión', 'Glucometría', 'Control de peso',
+      'Electrocardiograma', 'Nebulización (ciclo)',
+      'Inyección intramuscular (IM)', 'Inyección intravenosa (IV)'
+    ]},
+    { label: 'Sueroterapias', items: [
+      'Sueroterapia Complejo B', 'Sueroterapia Oxigenador Cerebral',
+      'Sueroterapia Vitamina C', 'Sueroterapia Vitamina D',
+      'Sueroterapia Hígado Detox', 'Sueroterapia Boost (Complejo B + Oxigenador)',
+      'Sueroterapia Colágeno', 'Sueroterapia Glutatión'
+    ]},
+    { label: 'Pruebas rápidas', items: [
+      'Prueba de embarazo (rápida)', 'Prueba de dengue (rápida)',
+      'Prueba DUO (VIH 4ª gen.)', 'Prueba de sensibilidad', 'Anticuerpos VIH 1/2'
+    ]},
+    { label: 'Procedimientos', items: [
+      'Lavado de oído', 'Lavado ocular',
+      'Cauterización lunar/verruga', 'Cauterización de lesión grande',
+      'Cauterización en párpado',
+      'Cirugía menor · pequeña', 'Cirugía menor · media', 'Cirugía menor · grande',
+      'Curación pequeña', 'Curación mediana', 'Curación grande',
+      'Retiro de puntos', 'Extracción de uña'
+    ]},
+    { label: 'Cuidado de la mujer', items: [
+      'Colocación de DIU', 'Retiro de DIU',
+      'Colocación de implanon', 'Extracción de implanon'
+    ]},
+    { label: 'Cuidado de las vías urinarias', items: [
+      'Colocación de sonda vesical', 'Colocación de sonda + insumos',
+      'Retiro de sonda vesical'
+    ]}
+  ];
+
+  /* Catálogo ESTRICTO de exámenes de laboratorio — sin "Otro" (debe coincidir con Examenes-Laboratorio.html) */
+  var CATALOGO_LABORATORIO = [
+    'Hematología completa',
+    'Química sanguínea',
+    'Glucosa',
+    'Perfil lipídico (Lipidograma)',
+    'Perfil hepático',
+    'Perfil renal',
+    'Pruebas tiroideas (TSH, T3, T4)',
+    'Hemoglobina glicosilada (HbA1c)',
+    'Electrolitos',
+    'Coagulación (PT, PTT)',
+    'Orina (general)',
+    'Heces (general)',
+    'Cultivo',
+    'Hierro / Ferritina',
+    'Vitamina B12',
+    'Vitamina D',
+    'VIH',
+    'VDRL',
+    'Hepatitis B / C',
+    'Embarazo (sangre)',
+    'Marcadores tumorales'
+  ];
+
   var ANTECEDENTES_PATOLOGICOS = [
     'Diabetes mellitus',
     'Hipertensión arterial',
@@ -2562,40 +2624,7 @@ button.ed-consulta-link {
     var p = pacienteActual;
     var dg = p.datosGenerales || {};
 
-    var grupos = [
-      { label: 'Servicios generales', items: [
-        'Consulta médica general',
-        'Evaluación de salud (certificado laboral)',
-        'Toma de presión', 'Glucometría', 'Control de peso',
-        'Electrocardiograma', 'Nebulización (ciclo)',
-        'Inyección intramuscular (IM)', 'Inyección intravenosa (IV)'
-      ]},
-      { label: 'Sueroterapias', items: [
-        'Sueroterapia Complejo B', 'Sueroterapia Oxigenador Cerebral',
-        'Sueroterapia Vitamina C', 'Sueroterapia Vitamina D',
-        'Sueroterapia Hígado Detox', 'Sueroterapia Boost (Complejo B + Oxigenador)',
-        'Sueroterapia Colágeno', 'Sueroterapia Glutatión'
-      ]},
-      { label: 'Pruebas rápidas', items: [
-        'Prueba de embarazo (rápida)', 'Prueba de dengue (rápida)',
-        'Prueba DUO (VIH 4ª gen.)', 'Prueba de sensibilidad', 'Anticuerpos VIH 1/2'
-      ]},
-      { label: 'Procedimientos', items: [
-        'Lavado de oído', 'Lavado ocular',
-        'Cauterización lunar/verruga', 'Cauterización de lesión grande',
-        'Cirugía menor · pequeña', 'Cirugía menor · media', 'Cirugía menor · grande',
-        'Curación pequeña', 'Curación mediana', 'Curación grande',
-        'Retiro de puntos', 'Extracción de uña'
-      ]},
-      { label: 'Ginecología', items: [
-        'Colocación de DIU', 'Retiro de DIU',
-        'Colocación de implanon', 'Extracción de implanon'
-      ]},
-      { label: 'Urología', items: [
-        'Colocación de sonda vesical', 'Colocación de sonda + insumos',
-        'Retiro de sonda vesical'
-      ]}
-    ];
+    var grupos = CATALOGO_SERVICIOS;
 
     var optsHtml = '<option value="">— Seleccionar servicio —</option>';
     grupos.forEach(function (grp) {
@@ -2912,18 +2941,23 @@ button.ed-consulta-link {
     });
   }
 
-  /* DRM v3 #3: modal para solicitar exámenes (orden sin PDF) — usado desde consulta */
+  /* DRM v3 #3 + v3.1: modal para solicitar exámenes — solo lista del catálogo, sin "Otro" */
   function abrirSolicitudExamenesModal(consultaPadreId){
     if (!pacienteActual) return;
     var dg = pacienteActual.datosGenerales || {};
+    var checkboxes = CATALOGO_LABORATORIO.map(function(ex){
+      return '<label class="ed-meds-opt"><input type="checkbox" value="' + esc(ex) + '" class="qm-lab-chk"> ' + esc(ex) + '</label>';
+    }).join('');
     var html =
       '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
-        '<div style="background:#fff;border-radius:12px;max-width:560px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
+        '<div style="background:#fff;border-radius:12px;max-width:640px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
           '<h3 style="margin:0 0 6px;color:#213C7D">🔬 Solicitar exámenes de laboratorio</h3>' +
-          '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Crea una orden pendiente. El PDF del resultado se sube después.</p>' +
-          '<div class="ed-fgroup full"><label class="ed-label">Exámenes solicitados *</label>' +
-            '<input type="text" class="ed-input" id="qm-lab-examenes" placeholder="Ej. Hematología completa, Glucosa, Perfil lipídico"></div>' +
-          '<div class="ed-grid ed-grid-2" style="gap:10px;margin-top:8px">' +
+          '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Marca los exámenes del catálogo CMG. El PDF del resultado se sube después.</p>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Exámenes a solicitar *</label>' +
+            '<div class="ed-meds-list" style="max-height:280px;overflow:auto">' + checkboxes + '</div>' +
+            '<small style="color:#6B7280">El catálogo es estricto. Si necesitás agregar un examen nuevo, pedile al admin que lo incluya en la lista del sistema.</small>' +
+          '</div>' +
+          '<div class="ed-grid ed-grid-2" style="gap:10px;margin-top:10px">' +
             '<div class="ed-fgroup"><label class="ed-label">Proveedor (laboratorio)</label>' +
               '<input type="text" class="ed-input" id="qm-lab-proveedor" placeholder="Lab. CMG / externo"></div>' +
             '<div class="ed-fgroup"><label class="ed-label">Prioridad</label>' +
@@ -2940,8 +2974,12 @@ button.ed-consulta-link {
     document.body.insertAdjacentHTML('beforeend', html);
     $id('qm-cancelar').onclick = function(){ document.getElementById('ed-quick-modal').remove(); };
     $id('qm-guardar').onclick = function(){
-      var examenes = $val('qm-lab-examenes');
-      if (!examenes) { showAlert('Indica al menos un examen', 'error'); return; }
+      var seleccionados = [];
+      document.querySelectorAll('.qm-lab-chk:checked').forEach(function(c){ seleccionados.push(c.value); });
+      if (!seleccionados.length) { showAlert('Marca al menos un examen del catálogo', 'error'); return; }
+      var nombreOrden = seleccionados.length === 1
+        ? seleccionados[0]
+        : 'Conjunto: ' + seleccionados.join(', ');
       var dniRaw = dg.numeroIdentidad || '';
       cmgDb.collection('examenesLaboratorio').add({
         codigoPaciente : pacienteActual.codigoPaciente,
@@ -2950,8 +2988,9 @@ button.ed-consulta-link {
         dni            : dniRaw,
         dniNormalizado : dniRaw.replace(/\D/g,''),
         tipo           : 'orden',
-        tipoNombre     : examenes,
-        examenesSolicitados: examenes,
+        tipoNombre     : nombreOrden,
+        examenesSolicitados: nombreOrden,
+        examenesArray  : seleccionados,
         proveedor      : $val('qm-lab-proveedor'),
         prioridad      : $val('qm-lab-prioridad'),
         notas          : $val('qm-lab-notas'),
@@ -2963,7 +3002,7 @@ button.ed-consulta-link {
         pdfUrl         : null
       }).then(function(){
         document.getElementById('ed-quick-modal').remove();
-        showAlert('✓ Orden de laboratorio creada. Aparecerá como pendiente en la pestaña Laboratorio.', 'success');
+        showAlert('✓ Orden de laboratorio creada (' + seleccionados.length + ' examen' + (seleccionados.length>1?'es':'') + '). Aparece en pestaña Laboratorio como pendiente.', 'success');
       }).catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
     };
   }
@@ -3022,19 +3061,36 @@ button.ed-consulta-link {
     };
   }
 
-  /* DRM v3 #3+#6: modal para crear un servicio vinculado a la consulta actual */
+  /* DRM v3 #3+#6 + v3.1: modal para crear servicio — usa catálogo + opción "Otro" */
   function abrirRealizarServicioModal(consultaPadreId){
     if (!pacienteActual) return;
     var dg = pacienteActual.datosGenerales || {};
+    /* Construir select agrupado a partir del catálogo */
+    var optsHtml = '<option value="">— Seleccionar servicio del catálogo —</option>';
+    CATALOGO_SERVICIOS.forEach(function(grp){
+      optsHtml += '<optgroup label="' + esc(grp.label) + '">';
+      grp.items.forEach(function(s){
+        optsHtml += '<option value="' + esc(s) + '">' + esc(s) + '</option>';
+      });
+      optsHtml += '</optgroup>';
+    });
+    optsHtml += '<option value="__otro__">✏️ Otro (procedimiento poco común — especificar abajo)</option>';
+
     var html =
       '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
-        '<div style="background:#fff;border-radius:12px;max-width:520px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
+        '<div style="background:#fff;border-radius:12px;max-width:560px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
           '<h3 style="margin:0 0 6px;color:#213C7D">🛎️ Realizar servicio</h3>' +
           '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Servicio adicional durante la consulta. Se vincula automáticamente al pago de esta consulta.</p>' +
-          '<div class="ed-fgroup full"><label class="ed-label">Servicio *</label>' +
-            '<input type="text" class="ed-input" id="qm-srv-nombre" placeholder="Ej. Lavado de oído, Inyección IM, Curación"></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Servicio del catálogo *</label>' +
+            '<select class="ed-input" id="qm-srv-selector" style="appearance:auto;-webkit-appearance:menulist">' + optsHtml + '</select>' +
+          '</div>' +
+          '<div class="ed-fgroup full" id="qm-srv-otro-grupo" style="display:none;margin-top:8px">' +
+            '<label class="ed-label">Especifica el procedimiento *</label>' +
+            '<input type="text" class="ed-input" id="qm-srv-otro" placeholder="Describe el procedimiento nuevo o poco común">' +
+            '<small style="color:#92400E">⚠️ Si usás "Otro" más de una vez, pedile al admin que añada el servicio al catálogo para evitar variaciones de nombre.</small>' +
+          '</div>' +
           '<div class="ed-fgroup full" style="margin-top:8px"><label class="ed-label">Notas</label>' +
-            '<textarea class="ed-textarea" id="qm-srv-notas" rows="2" placeholder="Detalles del procedimiento"></textarea></div>' +
+            '<textarea class="ed-textarea" id="qm-srv-notas" rows="2" placeholder="Detalles del procedimiento, cantidad, observaciones para el personal"></textarea></div>' +
           '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
             '<button class="ed-btn ed-btn-ghost" id="qm-cancelar">Cancelar</button>' +
             '<button class="ed-btn ed-btn-primary" id="qm-guardar">📤 Crear servicio vinculado</button>' +
@@ -3042,15 +3098,27 @@ button.ed-consulta-link {
         '</div>' +
       '</div>';
     document.body.insertAdjacentHTML('beforeend', html);
+    $id('qm-srv-selector').addEventListener('change', function(){
+      $id('qm-srv-otro-grupo').style.display = this.value === '__otro__' ? '' : 'none';
+    });
     $id('qm-cancelar').onclick = function(){ document.getElementById('ed-quick-modal').remove(); };
     $id('qm-guardar').onclick = function(){
-      var nombre = $val('qm-srv-nombre');
-      if (!nombre) { showAlert('Indica el servicio', 'error'); return; }
+      var sel = $val('qm-srv-selector');
+      if (!sel) { showAlert('Selecciona un servicio del catálogo', 'error'); return; }
+      var nombre;
+      if (sel === '__otro__') {
+        nombre = $val('qm-srv-otro');
+        if (!nombre) { showAlert('Especifica el procedimiento (campo "Otro")', 'error'); return; }
+        nombre = '[OTRO] ' + nombre;
+      } else {
+        nombre = sel;
+      }
       cmgDb.collection('consultas').add({
         codigoPaciente : pacienteActual.codigoPaciente,
         pacienteNombre : dg.nombreCompleto || '',
         status         : 'servicio',
         servicioNombre : nombre,
+        servicioDelCatalogo: sel !== '__otro__',
         servicioNotas  : $val('qm-srv-notas'),
         fechaServicio  : firebase.firestore.FieldValue.serverTimestamp(),
         servicioPor    : cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,

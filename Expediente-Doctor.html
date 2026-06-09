@@ -3845,102 +3845,136 @@ button.ed-consulta-link {
      ════════════════════════════════════════════════════════════ */
   function renderLaboratorioTab() {
     var cont = $id('laboratorio-contenido');
-    if (!pacienteActual) {
-      cont.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔍</div><p>Primero busca un paciente en la pestaña "Buscar Paciente"</p></div>';
-      return;
-    }
+    /* DRM v3.4: pendientes son GLOBALES (no requieren paciente seleccionado).
+       Confirmados sí son por paciente. */
     var p = pacienteActual;
-    var dg = p.datosGenerales || {};
+    var dg = (p && p.datosGenerales) || {};
     var dniNormalizado = (dg.numeroIdentidad || '').replace(/\D/g, '');
 
-    /* Actualizar link de subida para pre-llenar DNI y nombre */
-    var url = 'Examenes-Laboratorio.html?dni=' + encodeURIComponent(dg.numeroIdentidad || '') + '&nombre=' + encodeURIComponent(dg.nombreCompleto || '');
+    /* Actualizar link de subida para pre-llenar DNI y nombre si hay paciente */
+    var url = 'Examenes-Laboratorio.html' +
+      (p ? '?dni=' + encodeURIComponent(dg.numeroIdentidad || '') + '&nombre=' + encodeURIComponent(dg.nombreCompleto || '') : '');
     $id('btn-subir-examen').setAttribute('href', url);
 
+    var patientHeader = p
+      ? '<div class="ed-patient-summary">' +
+          '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
+          '<p class="ed-patient-meta">' + (dg.numeroIdentidad ? 'DNI ' + esc(dg.numeroIdentidad) : 'Sin DNI registrado') + '</p></div>' +
+          '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
+        '</div>'
+      : '<div style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:#6B7280">' +
+          '<b style="color:#213C7D">📋 Vista global de laboratorio.</b> Las órdenes pendientes/procesando aparecen sin importar qué paciente esté seleccionado. Para crear órdenes nuevas o ver exámenes confirmados de un paciente, primero buscalo en la pestaña Buscar.' +
+        '</div>';
+
     cont.innerHTML =
-      '<div class="ed-patient-summary">' +
-        '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
-        '<p class="ed-patient-meta">' + (dg.numeroIdentidad ? 'DNI ' + esc(dg.numeroIdentidad) : 'Sin DNI registrado') + '</p></div>' +
-        '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
-      '</div>' +
-      /* DRM v3 #1: botón para crear orden de laboratorio */
-      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">' +
-        '<button class="ed-btn ed-btn-yellow" id="btn-crear-orden-lab">📝 Crear orden de laboratorio</button>' +
-      '</div>' +
-      /* DRM v3 #2: sección de pendientes/procesando */
-      '<div class="ed-section-title">⏳ Órdenes pendientes / procesando</div>' +
+      patientHeader +
+      /* DRM v3 #1: botón para crear orden de laboratorio (requiere paciente) */
+      (p
+        ? '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">' +
+            '<button class="ed-btn ed-btn-yellow" id="btn-crear-orden-lab">📝 Crear orden de laboratorio</button>' +
+          '</div>'
+        : '') +
+      /* DRM v3 #2 + v3.4: sección GLOBAL de pendientes/procesando */
+      '<div class="ed-section-title">⏳ Órdenes pendientes / procesando (todos los pacientes)</div>' +
       '<div id="laboratorio-pendientes"><div style="font-size:13px;color:#9CA3AF;padding:8px 0">Cargando…</div></div>' +
-      '<div class="ed-section-title" style="margin-top:18px">📄 Exámenes confirmados</div>' +
-      '<div id="laboratorio-lista"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>';
+      (p
+        ? '<div class="ed-section-title" style="margin-top:18px">📄 Exámenes confirmados de ' + esc(dg.nombreCompleto || '—') + '</div>' +
+          '<div id="laboratorio-lista"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>'
+        : '');
 
-    $id('btn-crear-orden-lab').addEventListener('click', function(){
-      abrirSolicitudExamenesModal(null);
-    });
+    if ($id('btn-crear-orden-lab')) {
+      $id('btn-crear-orden-lab').addEventListener('click', function(){
+        abrirSolicitudExamenesModal(null);
+      });
+    }
 
-    /* Cargar todos los exámenes y filtrar por codigoPaciente o DNI */
-    cmgDb.collection('examenesLaboratorio').get()
-      .then(function (snap) {
-        var arr = [];
-        var pendientesVincular = [];
-        snap.forEach(function (doc) {
-          var d = Object.assign({ _id: doc.id }, doc.data());
-          var dniDoc = (d.dniNormalizado || (d.dni || '').replace(/\D/g, ''));
-          var match = (d.codigoPaciente === p.codigoPaciente)
-            || (dniNormalizado && dniDoc === dniNormalizado);
-          if (!match) return;
-          if (!d.codigoPaciente) {
-            pendientesVincular.push(doc.id);
-            d.codigoPaciente = p.codigoPaciente;
-          }
-          arr.push(d);
-        });
+    /* DRM v3.4: cargar pendientes/procesando GLOBALES */
+    cargarLaboratorioPendientesGlobal();
 
-        if (pendientesVincular.length) {
-          var batch = cmgDb.batch();
-          pendientesVincular.forEach(function (id) {
-            batch.update(cmgDb.collection('examenesLaboratorio').doc(id), {
-              codigoPaciente: p.codigoPaciente,
-              dniNormalizado: dniNormalizado,
-              pacienteNombreExpediente: dg.nombreCompleto || ''
-            });
+    /* Si hay paciente, cargar también sus confirmados */
+    if (p) {
+      cmgDb.collection('examenesLaboratorio').get()
+        .then(function (snap) {
+          var arr = [];
+          var pendientesVincular = [];
+          snap.forEach(function (doc) {
+            var d = Object.assign({ _id: doc.id }, doc.data());
+            var dniDoc = (d.dniNormalizado || (d.dni || '').replace(/\D/g, ''));
+            var match = (d.codigoPaciente === p.codigoPaciente)
+              || (dniNormalizado && dniDoc === dniNormalizado);
+            if (!match) return;
+            if (!d.codigoPaciente) {
+              pendientesVincular.push(doc.id);
+              d.codigoPaciente = p.codigoPaciente;
+            }
+            arr.push(d);
           });
-          batch.commit().catch(function (e) { console.warn('[CMG] No se pudo vincular exámenes viejos:', e); });
-        }
 
-        arr.sort(function (a, b) {
+          if (pendientesVincular.length) {
+            var batch = cmgDb.batch();
+            pendientesVincular.forEach(function (id) {
+              batch.update(cmgDb.collection('examenesLaboratorio').doc(id), {
+                codigoPaciente: p.codigoPaciente,
+                dniNormalizado: dniNormalizado,
+                pacienteNombreExpediente: dg.nombreCompleto || ''
+              });
+            });
+            batch.commit().catch(function (e) { console.warn('[CMG] No se pudo vincular exámenes viejos:', e); });
+          }
+
+          arr.sort(function (a, b) {
+            var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+            var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+            return tb - ta;
+          });
+          /* Solo render de CONFIRMADOS del paciente (los pendientes se cargan globalmente) */
+          renderLaboratorioConfirmadosDelPaciente(arr.filter(function(ex){
+            return !ex.status || ex.status === 'confirmado';
+          }), pendientesVincular.length);
+        })
+        .catch(function (err) {
+          $id('laboratorio-lista').innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar exámenes: ' + esc(err.message) + '</div>';
+        });
+    }
+  }
+
+  /* DRM v3.4: pendientes/procesando GLOBALES — todos los pacientes */
+  function cargarLaboratorioPendientesGlobal(){
+    var box = $id('laboratorio-pendientes');
+    if (!box) return;
+    cmgDb.collection('examenesLaboratorio')
+      .where('status', 'in', ['pendiente', 'procesando'])
+      .get()
+      .then(function(snap){
+        if (snap.empty) {
+          box.innerHTML = '<div class="ed-empty" style="padding:24px"><div class="ed-empty-icon">✅</div><p>No hay órdenes pendientes ni en procesamiento.</p></div>';
+          return;
+        }
+        var arr = [];
+        snap.forEach(function(d){ arr.push(Object.assign({ _id: d.id }, d.data())); });
+        arr.sort(function(a, b){
+          /* Urgentes primero, luego por fecha desc */
+          var ua = a.prioridad === 'urgente' ? 1 : 0;
+          var ub = b.prioridad === 'urgente' ? 1 : 0;
+          if (ua !== ub) return ub - ua;
           var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
           var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
           return tb - ta;
         });
-        renderLaboratorioLista(arr, pendientesVincular.length);
-      })
-      .catch(function (err) {
-        $id('laboratorio-lista').innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar exámenes: ' + esc(err.message) + '</div>';
-      });
-  }
-
-  function renderLaboratorioLista(examenes, vinculadasAhora) {
-    var lista = $id('laboratorio-lista');
-    var pendBox = $id('laboratorio-pendientes');
-
-    /* DRM v3 #2: separar pendientes/procesando de confirmados */
-    var pendientes = examenes.filter(function(ex){ return ex.status === 'pendiente' || ex.status === 'procesando'; });
-    var confirmados = examenes.filter(function(ex){ return !ex.status || ex.status === 'confirmado'; });
-
-    /* Pendientes */
-    if (pendBox) {
-      if (!pendientes.length) {
-        pendBox.innerHTML = '<div style="font-size:13px;color:#9CA3AF;padding:8px 0">Sin órdenes pendientes.</div>';
-      } else {
-        pendBox.innerHTML = pendientes.map(function(ex){
+        box.innerHTML = arr.map(function(ex){
           var st = ex.status === 'procesando' ? 'Procesando' : 'Pendiente';
           var col = ex.status === 'procesando' ? '#3B82F6' : '#F59E0B';
           var bg  = ex.status === 'procesando' ? '#DBEAFE' : '#FEF3C7';
           var fecha = (ex.createdAt && ex.createdAt.toMillis) ? new Date(ex.createdAt.toMillis()).toLocaleString('es-HN') : '—';
+          var nombrePaciente = ex.pacienteNombre || ex.pacienteNombreExpediente || '— sin paciente —';
           return '<div style="background:' + bg + ';border:1px solid ' + col + ';border-radius:10px;padding:12px;margin-bottom:8px">' +
             '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">' +
               '<div style="flex:1;min-width:0">' +
-                '<div style="font-weight:700;color:#213C7D">🔬 ' + esc(ex.examenesSolicitados || ex.tipoNombre || '—') + ' <span style="background:' + col + ';color:#fff;font-size:10px;padding:2px 8px;border-radius:100px;margin-left:6px">' + st + '</span></div>' +
+                /* Paciente prominente */
+                '<div style="font-weight:700;color:#213C7D;font-size:15px">👤 ' + esc(nombrePaciente) +
+                  (ex.codigoPaciente ? ' <code style="background:#fff;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:400">' + esc(ex.codigoPaciente) + '</code>' : '') +
+                '</div>' +
+                '<div style="font-weight:600;color:#374151;margin-top:4px">🔬 ' + esc(ex.examenesSolicitados || ex.tipoNombre || '—') + ' <span style="background:' + col + ';color:#fff;font-size:10px;padding:2px 8px;border-radius:100px;margin-left:6px">' + st + '</span></div>' +
                 '<div style="font-size:12px;color:#6B7280;margin-top:2px">Solicitado por: ' + esc(ex.solicitadoPorNombre || ex.solicitadoPor || '—') + ' · ' + esc(fecha) + (ex.prioridad === 'urgente' ? ' · 🚨 URGENTE' : '') + '</div>' +
                 (ex.notas ? '<div style="font-size:12px;color:#374151;margin-top:4px"><b>Notas:</b> ' + esc(ex.notas) + '</div>' : '') +
               '</div>' +
@@ -3955,28 +3989,35 @@ button.ed-consulta-link {
           '</div>';
         }).join('');
 
-        pendBox.querySelectorAll('[data-procesar]').forEach(function(b){
+        box.querySelectorAll('[data-procesar]').forEach(function(b){
           b.addEventListener('click', function(){
             cmgDb.collection('examenesLaboratorio').doc(this.getAttribute('data-procesar')).update({ status: 'procesando' })
-              .then(function(){ showAlert('Orden en procesamiento', 'success'); renderLaboratorioTab(); });
+              .then(function(){ showAlert('Orden en procesamiento', 'success'); cargarLaboratorioPendientesGlobal(); });
           });
         });
-        pendBox.querySelectorAll('[data-confirmar-orden]').forEach(function(b){
+        box.querySelectorAll('[data-confirmar-orden]').forEach(function(b){
           b.addEventListener('click', function(){
             if (!confirm('¿Confirmar esta orden sin PDF? Quedará marcada como completada.')) return;
             cmgDb.collection('examenesLaboratorio').doc(this.getAttribute('data-confirmar-orden')).update({
               status: 'confirmado',
               confirmadoPor: cmgAuth.currentUser.email,
               confirmadoEn: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(function(){ showAlert('Orden confirmada ✓', 'success'); renderLaboratorioTab(); });
+            }).then(function(){ showAlert('Orden confirmada ✓', 'success'); cargarLaboratorioPendientesGlobal(); if (pacienteActual) renderLaboratorioTab(); });
           });
         });
-        pendBox.querySelectorAll('[data-subir-orden]').forEach(function(b){
+        box.querySelectorAll('[data-subir-orden]').forEach(function(b){
           b.addEventListener('click', function(){ abrirSubirResultadoModal(this.getAttribute('data-subir-orden')); });
         });
-      }
-    }
+      })
+      .catch(function(err){
+        box.innerHTML = '<div style="color:#b91c1c">Error: ' + esc(err.message) + '</div>';
+      });
+  }
 
+  /* DRM v3.4: ahora solo renderiza confirmados del paciente — pendientes son globales */
+  function renderLaboratorioConfirmadosDelPaciente(confirmados, vinculadasAhora) {
+    var lista = $id('laboratorio-lista');
+    if (!lista) return;
     if (!confirmados.length) {
       lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔬</div><p>Este paciente aún no tiene exámenes confirmados.</p><p style="font-size:13px;color:#9CA3AF;margin-top:6px">Crea una orden o sube un PDF de resultado para empezar.</p></div>';
       return;

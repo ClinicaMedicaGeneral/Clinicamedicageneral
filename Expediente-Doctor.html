@@ -2887,20 +2887,22 @@ button.ed-consulta-link {
             '<textarea class="ed-textarea" id="cons-exploracion" rows="3" placeholder="Hallazgos al examen físico" required></textarea></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">Diagnóstico *</label>' +
             '<textarea class="ed-textarea" id="cons-diagnostico" rows="2" placeholder="Diagnóstico principal y diferenciales" required></textarea></div>' +
-          /* DRM Fun-8: Plan / Tratamiento dividido en dos secciones con catálogo */
+          /* DRM Fun-8 + v3.6: Plan/Tratamiento dividido + opción explícita "Ninguno" */
           '<div class="ed-fgroup full"><label class="ed-label">💊 Medicamentos aplicados en la visita *</label>' +
-            '<div id="cons-meds-visita-list" class="ed-meds-list">' +
+            '<div id="cons-meds-visita-list" class="ed-meds-list" data-meds-group="visita">' +
               '<label class="ed-meds-opt"><input type="checkbox" value="Bixicort"> Bixicort</label>' +
               '<label class="ed-meds-opt"><input type="checkbox" value="Alergil"> Alergil</label>' +
               '<label class="ed-meds-opt"><input type="checkbox" value="Cetirizina"> Cetirizina</label>' +
               '<label class="ed-meds-opt"><input type="checkbox" value="Alergil Tabletas"> Alergil Tabletas</label>' +
+              '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se aplicó ningún medicamento en la visita)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">📦 Medicamentos de despacho *</label>' +
-            '<div id="cons-meds-despacho-list" class="ed-meds-list">' +
+            '<div id="cons-meds-despacho-list" class="ed-meds-list" data-meds-group="despacho">' +
               '<label class="ed-meds-opt"><input type="checkbox" value="Bixicort"> Bixicort</label>' +
               '<label class="ed-meds-opt"><input type="checkbox" value="Alergil"> Alergil</label>' +
               '<label class="ed-meds-opt"><input type="checkbox" value="Cetirizina"> Cetirizina</label>' +
               '<label class="ed-meds-opt"><input type="checkbox" value="Alergil Tabletas"> Alergil Tabletas</label>' +
+              '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se despachan medicamentos)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">Indicaciones al paciente *</label>' +
             '<textarea class="ed-textarea" id="cons-indicaciones" rows="2" placeholder="Recomendaciones generales, dieta, reposo, signos de alarma" required></textarea></div>' +
@@ -2978,6 +2980,26 @@ button.ed-consulta-link {
       r.addEventListener('change', function(){
         var form = $id('cons-incap-form');
         if (form) form.style.display = (this.value === 'si') ? 'block' : 'none';
+      });
+    });
+
+    /* DRM v3.6: exclusión mutua "Ninguno" vs medicamentos reales en cada grupo */
+    ['cons-meds-visita-list', 'cons-meds-despacho-list'].forEach(function(listId){
+      var list = $id(listId);
+      if (!list) return;
+      list.addEventListener('change', function(e){
+        var t = e.target;
+        if (!t || t.tagName !== 'INPUT') return;
+        if (t.dataset.medsNinguno === '1' && t.checked) {
+          /* Marcaron "Ninguno" → desmarcar todos los medicamentos reales */
+          list.querySelectorAll('input[type=checkbox]').forEach(function(c){
+            if (c !== t) c.checked = false;
+          });
+        } else if (t.checked && t.dataset.medsNinguno !== '1') {
+          /* Marcaron un medicamento real → desmarcar "Ninguno" */
+          var ninguno = list.querySelector('input[data-meds-ninguno="1"]');
+          if (ninguno) ninguno.checked = false;
+        }
       });
     });
   }
@@ -3261,15 +3283,27 @@ button.ed-consulta-link {
     if (!proxCita)     faltantes.push('Próxima cita');
     if (!medico)       faltantes.push('Médico tratante');
 
-    /* DRM Fun-8: recolectar medicamentos */
+    /* DRM Fun-8 + v3.6: recolectar medicamentos, validar que cada grupo tenga elección (real o "Ninguno") */
     function collectChecked(listId) {
       var out = [];
-      document.querySelectorAll('#' + listId + ' input[type=checkbox]:checked').forEach(function(c){ out.push(c.value); });
+      document.querySelectorAll('#' + listId + ' input[type=checkbox]:checked').forEach(function(c){
+        if (c.dataset.medsNinguno !== '1') out.push(c.value);
+      });
       return out;
+    }
+    function grupoTieneEleccion(listId){
+      return document.querySelectorAll('#' + listId + ' input[type=checkbox]:checked').length > 0;
+    }
+    function grupoEsNinguno(listId){
+      var n = document.querySelector('#' + listId + ' input[data-meds-ninguno="1"]:checked');
+      return !!n;
     }
     var medsVisita   = collectChecked('cons-meds-visita-list');
     var medsDespacho = collectChecked('cons-meds-despacho-list');
-    if (!medsVisita.length && !medsDespacho.length) faltantes.push('Al menos un medicamento (visita o despacho)');
+    var visitaNinguno   = grupoEsNinguno('cons-meds-visita-list');
+    var despachoNinguno = grupoEsNinguno('cons-meds-despacho-list');
+    if (!grupoTieneEleccion('cons-meds-visita-list'))   faltantes.push('Medicamentos aplicados en la visita (marca alguno o "Ninguno")');
+    if (!grupoTieneEleccion('cons-meds-despacho-list')) faltantes.push('Medicamentos de despacho (marca alguno o "Ninguno")');
 
     /* DRM Fun-11 v2: incapacidad → constancia como documento HTML aparte */
     var incapRadio = document.querySelector('input[name="cons-incap"]:checked');

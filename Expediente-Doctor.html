@@ -3720,8 +3720,29 @@ button.ed-consulta-link {
         '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
           '<div style="background:#fff;border-radius:12px;max-width:560px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
             '<h3 style="margin:0 0 6px;color:#213C7D">✏️ Editar constancia ' + esc(d.numero || '') + '</h3>' +
-            '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Solo editable durante las primeras 24h. Los cambios quedan auditados.</p>' +
+            '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Solo editable durante las primeras 24h. Los cambios quedan auditados con autor y timestamp.</p>' +
             '<div class="ed-grid ed-grid-2" style="gap:10px">' +
+              /* DRM v3.7: datos del paciente editables (corrige errores de tipeo sin recrear consulta) */
+              '<div class="ed-fgroup full" style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:10px 12px">' +
+                '<div style="font-weight:700;font-size:12px;color:#1E40AF;margin-bottom:6px">👤 Datos del paciente (corregir si hay error)</div>' +
+                '<div class="ed-grid ed-grid-2" style="gap:8px">' +
+                  '<div class="ed-fgroup"><label class="ed-label">Nombre del paciente *</label>' +
+                    '<input type="text" class="ed-input" id="qm-cm-nombre" value="' + esc(d.pacienteNombre || '') + '"></div>' +
+                  '<div class="ed-fgroup"><label class="ed-label">Tipo de identidad</label>' +
+                    '<select class="ed-input" id="qm-cm-tipoid">' +
+                      ['','dni','residencia','extranjera'].map(function(v){
+                        var lbl = v === 'dni' ? 'DNI (Hondureños)' :
+                                  v === 'residencia' ? 'Carnet de Residencia' :
+                                  v === 'extranjera' ? 'Identidad Extranjera' : '— Seleccionar —';
+                        return '<option value="' + v + '"' + ((d.pacienteTipoId||'')===v ? ' selected' : '') + '>' + lbl + '</option>';
+                      }).join('') +
+                    '</select></div>' +
+                  '<div class="ed-fgroup"><label class="ed-label">Número de identidad *</label>' +
+                    '<input type="text" class="ed-input" id="qm-cm-dni" value="' + esc(d.pacienteDNI || '') + '" placeholder="0801-1990-12345"></div>' +
+                  '<div class="ed-fgroup"><label class="ed-label">Fecha de nacimiento</label>' +
+                    '<input type="date" class="ed-input" id="qm-cm-fechanac" value="' + esc(d.pacienteFechaNacimiento || '') + '"></div>' +
+                '</div>' +
+              '</div>' +
               '<div class="ed-fgroup"><label class="ed-label">Días *</label>' +
                 '<input type="number" min="1" class="ed-input" id="qm-cm-dias" value="' + esc(d.dias || '') + '"></div>' +
               '<div class="ed-fgroup"><label class="ed-label">Desde *</label>' +
@@ -3741,15 +3762,38 @@ button.ed-consulta-link {
       $id('qm-cancelar').onclick = function(){ document.getElementById('ed-quick-modal').remove(); };
       $id('qm-guardar').onclick = function(){
         var dias = $val('qm-cm-dias'), desde = $val('qm-cm-desde'), motivo = $val('qm-cm-motivo');
+        /* DRM v3.7: datos del paciente también editables */
+        var nuevoNombre  = $val('qm-cm-nombre');
+        var nuevoTipoId  = $val('qm-cm-tipoid');
+        var nuevoDNI     = $val('qm-cm-dni');
+        var nuevoFecNac  = $val('qm-cm-fechanac');
         if (!dias || !desde || !motivo) { showAlert('Días, desde y motivo son obligatorios', 'error'); return; }
+        if (!nuevoNombre || !nuevoDNI)  { showAlert('Nombre y número de identidad del paciente son obligatorios', 'error'); return; }
+
+        /* Recalcular edad si cambia la fecha de nacimiento */
+        var nuevaEdad = (function(f){
+          if (!f) return d.pacienteEdad || '';
+          try { var dt=new Date(f), h=new Date(), e=h.getFullYear()-dt.getFullYear(), m=h.getMonth()-dt.getMonth(); if (m<0||(m===0&&h.getDate()<dt.getDate())) e--; return e+' años'; } catch(_){ return d.pacienteEdad || ''; }
+        })(nuevoFecNac);
+
         var historial = d.historialEdiciones || [];
         historial.push({
           editadoPor : cmgAuth.currentUser.email,
           editadoEn  : new Date().toISOString(),
-          previo     : { dias: d.dias, desde: d.desde, motivo: d.motivo, observaciones: d.observaciones }
+          previo     : {
+            dias: d.dias, desde: d.desde, motivo: d.motivo, observaciones: d.observaciones,
+            pacienteNombre: d.pacienteNombre, pacienteTipoId: d.pacienteTipoId,
+            pacienteDNI: d.pacienteDNI, pacienteFechaNacimiento: d.pacienteFechaNacimiento,
+            pacienteEdad: d.pacienteEdad
+          }
         });
         cmgDb.collection('constancias').doc(constanciaId).update({
           dias: dias, desde: desde, motivo: motivo, observaciones: $val('qm-cm-obs'),
+          pacienteNombre          : nuevoNombre,
+          pacienteTipoId          : nuevoTipoId,
+          pacienteDNI             : nuevoDNI,
+          pacienteFechaNacimiento : nuevoFecNac,
+          pacienteEdad            : nuevaEdad,
           historialEdiciones: historial,
           ultimaEdicionPor: cmgAuth.currentUser.email,
           ultimaEdicionEn : firebase.firestore.FieldValue.serverTimestamp()

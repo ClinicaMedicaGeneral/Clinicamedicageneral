@@ -3771,6 +3771,7 @@ button.ed-consulta-link {
           '<div class="ed-consulta-fecha">📅 ' + fmtDate(fechaDisplay) + badge + constanciaBadge + '</div>' +
           '<div class="ed-consulta-motivo">' + titulo + '</div>' +
           (!esServicio && c.diagnostico ? '<div class="ed-consulta-motivo"><strong>Dx:</strong> ' + esc(c.diagnostico).slice(0, 100) + '</div>' : '') +
+          (c.recetaExterna && c.recetaExterna.trim() ? '<div class="ed-consulta-motivo" style="color:#9A3412"><strong>🏥 Receta externa:</strong> ' + esc(c.recetaExterna).slice(0, 120) + (c.recetaExterna.length > 120 ? '...' : '') + '</div>' : '') +
           (esServicio && c.servicioNotas ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas:</strong> ' + esc(c.servicioNotas).slice(0, 100) + '</div>' : '') +
         '</div>' +
         '<div class="ed-consulta-actions">' +

@@ -1650,6 +1650,7 @@ button.ed-consulta-link {
                 '<b style="color:#991B1B">🧪 Inyección IM/IV — Prueba de sensibilidad:</b> ' + esc(ps.resultado) + ' · confirmada por ' + esc(ps.confirmadaPor || '—') +
                 '<label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-weight:700;color:#991B1B;cursor:pointer"><input type="checkbox" class="caja-sens-chk" data-sens-for="' + doc.id + '"' + (ps.cajaConfirmada ? ' checked disabled' : '') + '> Verifiqué la prueba de sensibilidad antes de liquidar</label>' +
               '</div>' : '') +
+              (ps && ps.noRequiere ? '<div style="margin-top:10px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 10px;font-size:12px;color:#166534">🧪 Inyección IM/IV — el médico indicó que <b>este medicamento no necesita prueba de sensibilidad</b>.</div>' : '') +
               /* DRM v3 #6: servicios hijos vinculados a esta consulta */
               '<div data-servicios-hijos="' + doc.id + '" style="margin-top:10px"></div>' +
             '</div>';
@@ -2792,13 +2793,16 @@ button.ed-consulta-link {
       '<div class="ed-section" id="serv-sens-section" style="display:none;background:#FFF7ED;border:1px solid #FED7AA">' +
         '<div class="ed-section-title">🧪 Prueba de sensibilidad requerida</div>' +
         '<p style="font-size:12px;color:#92400E;margin:0 0 8px">Las inyecciones IM/IV requieren confirmar la prueba de sensibilidad para descartar alergias antes de aplicar.</p>' +
-        '<div class="ed-fgroup full"><label class="ed-label">Resultado de la prueba *</label>' +
-          '<select class="ed-input" id="serv-sens-resultado">' +
-            '<option value="">— Seleccionar —</option>' +
-            '<option value="Negativa (sin reacción)">Negativa (sin reacción) — apto para aplicar</option>' +
-            '<option value="Positiva (reacción alérgica)">Positiva (reacción alérgica) — NO aplicar</option>' +
-          '</select></div>' +
-        '<label class="ed-meds-opt" style="margin-top:8px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="serv-sens-confirm"> Confirmo que se realizó la prueba de sensibilidad al paciente</label>' +
+        '<label class="ed-meds-opt" style="margin-bottom:10px;display:flex;gap:8px;align-items:center;background:#fff;border:1px dashed #F59E0B"><input type="checkbox" id="serv-sens-norequiere"> Este medicamento no necesita prueba de sensibilidad</label>' +
+        '<div id="serv-sens-detalle">' +
+          '<div class="ed-fgroup full"><label class="ed-label">Resultado de la prueba *</label>' +
+            '<select class="ed-input" id="serv-sens-resultado">' +
+              '<option value="">— Seleccionar —</option>' +
+              '<option value="Negativa (sin reacción)">Negativa (sin reacción) — apto para aplicar</option>' +
+              '<option value="Positiva (reacción alérgica)">Positiva (reacción alérgica) — NO aplicar</option>' +
+            '</select></div>' +
+          '<label class="ed-meds-opt" style="margin-top:8px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="serv-sens-confirm"> Confirmo que se realizó la prueba de sensibilidad al paciente</label>' +
+        '</div>' +
       '</div>' +
       '<div class="ed-actions">' +
         '<button class="ed-btn ed-btn-primary" id="btn-guardar-servicio">💾 Registrar servicio (queda pendiente)</button>' +
@@ -2808,6 +2812,9 @@ button.ed-consulta-link {
     $id('serv-selector').addEventListener('change', function () {
       $id('serv-otro-grupo').style.display = this.value === '__otro__' ? 'block' : 'none';
       $id('serv-sens-section').style.display = /\((IM|IV)\)/.test(this.value) ? 'block' : 'none';
+    });
+    $id('serv-sens-norequiere').addEventListener('change', function () {
+      $id('serv-sens-detalle').style.display = this.checked ? 'none' : 'block';
     });
     $id('btn-guardar-servicio').addEventListener('click', guardarServicio);
   }
@@ -2830,19 +2837,28 @@ button.ed-consulta-link {
     var esInyeccion = /\((IM|IV)\)/.test(servicioNombre);
     var pruebaSensibilidadServicio = null;
     if (esInyeccion) {
-      var sensConfirm = $id('serv-sens-confirm') && $id('serv-sens-confirm').checked;
-      var sensRes     = $val('serv-sens-resultado');
-      if (!sensRes || !sensConfirm) {
-        showAlert('Para inyecciones IM/IV debes seleccionar el resultado y confirmar la prueba de sensibilidad.', 'error');
-        return;
+      var sensNoRequiere = $id('serv-sens-norequiere') && $id('serv-sens-norequiere').checked;
+      if (sensNoRequiere) {
+        pruebaSensibilidadServicio = {
+          requerida    : false,
+          noRequiere   : true,
+          confirmadaPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email
+        };
+      } else {
+        var sensConfirm = $id('serv-sens-confirm') && $id('serv-sens-confirm').checked;
+        var sensRes     = $val('serv-sens-resultado');
+        if (!sensRes || !sensConfirm) {
+          showAlert('Para inyecciones IM/IV debes seleccionar el resultado y confirmar la prueba de sensibilidad, o marcar que el medicamento no la necesita.', 'error');
+          return;
+        }
+        pruebaSensibilidadServicio = {
+          requerida    : true,
+          confirmada   : true,
+          resultado    : sensRes,
+          confirmadaPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
+          cajaConfirmada: false
+        };
       }
-      pruebaSensibilidadServicio = {
-        requerida    : true,
-        confirmada   : true,
-        resultado    : sensRes,
-        confirmadaPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
-        cajaConfirmada: false
-      };
     }
 
     var dg = pacienteActual.datosGenerales || {};
@@ -2890,6 +2906,7 @@ button.ed-consulta-link {
           ' · ' + fmtDate(srv.fechaServicio) + ' · Registrado por ' + esc(srv.servicioPor || '—') + '</div>' +
         (srv.servicioNotas ? '<div style="margin-top:8px;font-size:12px;color:#374151"><strong>Notas de registro:</strong> ' + esc(srv.servicioNotas) + '</div>' : '') +
         (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.requerida ? '<div style="margin-top:8px;font-size:12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:8px"><strong>🧪 Prueba de sensibilidad:</strong> ' + esc(srv.pruebaSensibilidadServicio.resultado) + ' · confirmada por ' + esc(srv.pruebaSensibilidadServicio.confirmadaPor || '—') + '</div>' : '') +
+        (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.noRequiere ? '<div style="margin-top:8px;font-size:12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px;color:#166534"><strong>🧪 Prueba de sensibilidad:</strong> no necesaria para este medicamento.</div>' : '') +
       '</div>' +
       '<div class="ed-section">' +
         '<div class="ed-grid ed-grid-2">' +

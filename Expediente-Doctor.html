@@ -3101,8 +3101,8 @@ button.ed-consulta-link {
             '<small style="color:#6B7280;display:block;margin-top:4px">Texto libre. Aparecerá en el PDF de la consulta como indicación de compra externa.</small></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">Indicaciones al paciente *</label>' +
             '<textarea class="ed-textarea" id="cons-indicaciones" rows="2" placeholder="Recomendaciones generales, dieta, reposo, signos de alarma" required></textarea></div>' +
-          '<div class="ed-fgroup"><label class="ed-label">Próxima cita *</label>' +
-            '<input type="date" class="ed-input" id="cons-proxcita" required></div>' +
+          '<div class="ed-fgroup"><label class="ed-label">Próxima cita</label>' +
+            '<input type="date" class="ed-input" id="cons-proxcita"></div>' +
           /* DRM Fun-2: dropdown de médico tratante */
           '<div class="ed-fgroup"><label class="ed-label">Médico tratante *</label>' +
             '<select class="ed-input" id="cons-medico" required>' +
@@ -3475,7 +3475,6 @@ button.ed-consulta-link {
     if (!exploracion)  faltantes.push('Exploración');
     if (!diagnostico)  faltantes.push('Diagnóstico');
     if (!indicaciones) faltantes.push('Indicaciones');
-    if (!proxCita)     faltantes.push('Próxima cita');
     if (!medico)       faltantes.push('Médico tratante');
 
     /* DRM Fun-8 + v3.6: recolectar medicamentos, validar que cada grupo tenga elección (real o "Ninguno") */

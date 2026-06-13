@@ -1618,6 +1618,8 @@ button.ed-consulta-link {
           var meds1 = (d.medicamentosVisita||[]).join(', ') || '—';
           var meds2 = (d.medicamentosDespacho||[]).join(', ') || '—';
           var recetaExt = (d.recetaExterna && d.recetaExterna.trim()) ? d.recetaExterna : '';
+          var ps = d.pruebaSensibilidadServicio;
+          var requiereSens = !!(ps && ps.requerida);
           var esServicioStandalone = d.tipoRegistro === 'servicio-standalone' || (!d.diagnostico && d.servicioNombre);
           var servicios = (d.serviciosBrindados||[]).join(', ') || (esServicioStandalone ? d.servicioNombre : (d.diagnostico ? 'Consulta médica' : '—'));
           /* DRM v3 #4: badge de constancia emitida */
@@ -1644,6 +1646,10 @@ button.ed-consulta-link {
                 '<div><b>🩺 Servicios:</b><br>' + esc(servicios) + '</div>' +
               '</div>' +
               (recetaExt ? '<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px;font-size:13px"><b>🏥 Receta externa (comprar en farmacia):</b><br>' + esc(recetaExt) + '</div>' : '') +
+              (requiereSens ? '<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:10px;font-size:13px">' +
+                '<b style="color:#991B1B">🧪 Inyección IM/IV — Prueba de sensibilidad:</b> ' + esc(ps.resultado) + ' · confirmada por ' + esc(ps.confirmadaPor || '—') +
+                '<label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-weight:700;color:#991B1B;cursor:pointer"><input type="checkbox" class="caja-sens-chk" data-sens-for="' + doc.id + '"' + (ps.cajaConfirmada ? ' checked disabled' : '') + '> Verifiqué la prueba de sensibilidad antes de liquidar</label>' +
+              '</div>' : '') +
               /* DRM v3 #6: servicios hijos vinculados a esta consulta */
               '<div data-servicios-hijos="' + doc.id + '" style="margin-top:10px"></div>' +
             '</div>';
@@ -1653,15 +1659,26 @@ button.ed-consulta-link {
         box.querySelectorAll('[data-caja-id]').forEach(function(b){
           b.addEventListener('click', function(){
             var id = this.getAttribute('data-caja-id');
+            /* Inyección IM/IV: el cajero debe verificar la prueba de sensibilidad antes de liquidar */
+            var sensChk = box.querySelector('.caja-sens-chk[data-sens-for="' + id + '"]');
+            if (sensChk && !sensChk.checked) {
+              showAlert('Este servicio es una inyección IM/IV: marca la verificación de la prueba de sensibilidad antes de liquidar.', 'error');
+              return;
+            }
             if (!confirm('¿Confirmar pago liquidado en caja?')) return;
             /* DRM v3 #6: liquidar también servicios hijos vinculados */
             var batch = cmgDb.batch();
-            batch.update(cmgDb.collection('consultas').doc(id), {
+            var updatePrincipal = {
               status: 'completa',
               pagoLiquidadoEnCaja: true,
               pagoLiquidadoPor: cmgAuth.currentUser.email,
               pagoLiquidadoEn: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            };
+            if (sensChk) {
+              updatePrincipal['pruebaSensibilidadServicio.cajaConfirmada'] = true;
+              updatePrincipal['pruebaSensibilidadServicio.cajaConfirmadaPor'] = cmgAuth.currentUser.email;
+            }
+            batch.update(cmgDb.collection('consultas').doc(id), updatePrincipal);
             cmgDb.collection('consultas').where('consultaPadreId', '==', id).get().then(function(hijos){
               hijos.forEach(function(hijo){
                 batch.update(hijo.ref, {
@@ -2772,6 +2789,17 @@ button.ed-consulta-link {
           '<textarea class="ed-textarea" id="serv-notas" rows="2" placeholder="Indicaciones, cantidad, detalles para el personal"></textarea>' +
         '</div>' +
       '</div>' +
+      '<div class="ed-section" id="serv-sens-section" style="display:none;background:#FFF7ED;border:1px solid #FED7AA">' +
+        '<div class="ed-section-title">🧪 Prueba de sensibilidad requerida</div>' +
+        '<p style="font-size:12px;color:#92400E;margin:0 0 8px">Las inyecciones IM/IV requieren confirmar la prueba de sensibilidad para descartar alergias antes de aplicar.</p>' +
+        '<div class="ed-fgroup full"><label class="ed-label">Resultado de la prueba *</label>' +
+          '<select class="ed-input" id="serv-sens-resultado">' +
+            '<option value="">— Seleccionar —</option>' +
+            '<option value="Negativa (sin reacción)">Negativa (sin reacción) — apto para aplicar</option>' +
+            '<option value="Positiva (reacción alérgica)">Positiva (reacción alérgica) — NO aplicar</option>' +
+          '</select></div>' +
+        '<label class="ed-meds-opt" style="margin-top:8px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="serv-sens-confirm"> Confirmo que se realizó la prueba de sensibilidad al paciente</label>' +
+      '</div>' +
       '<div class="ed-actions">' +
         '<button class="ed-btn ed-btn-primary" id="btn-guardar-servicio">💾 Registrar servicio (queda pendiente)</button>' +
       '</div>';
@@ -2779,6 +2807,7 @@ button.ed-consulta-link {
     $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
     $id('serv-selector').addEventListener('change', function () {
       $id('serv-otro-grupo').style.display = this.value === '__otro__' ? 'block' : 'none';
+      $id('serv-sens-section').style.display = /\((IM|IV)\)/.test(this.value) ? 'block' : 'none';
     });
     $id('btn-guardar-servicio').addEventListener('click', guardarServicio);
   }
@@ -2797,6 +2826,25 @@ button.ed-consulta-link {
       servicioNombre = selVal;
     }
 
+    /* Inyección IM/IV → exige confirmar prueba de sensibilidad (detección de alergias) */
+    var esInyeccion = /\((IM|IV)\)/.test(servicioNombre);
+    var pruebaSensibilidadServicio = null;
+    if (esInyeccion) {
+      var sensConfirm = $id('serv-sens-confirm') && $id('serv-sens-confirm').checked;
+      var sensRes     = $val('serv-sens-resultado');
+      if (!sensRes || !sensConfirm) {
+        showAlert('Para inyecciones IM/IV debes seleccionar el resultado y confirmar la prueba de sensibilidad.', 'error');
+        return;
+      }
+      pruebaSensibilidadServicio = {
+        requerida    : true,
+        confirmada   : true,
+        resultado    : sensRes,
+        confirmadaPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
+        cajaConfirmada: false
+      };
+    }
+
     var dg = pacienteActual.datosGenerales || {};
     var docData = {
       codigoPaciente: pacienteActual.codigoPaciente,
@@ -2804,6 +2852,7 @@ button.ed-consulta-link {
       status: 'servicio',
       servicioNombre: servicioNombre,
       servicioNotas: $val('serv-notas'),
+      pruebaSensibilidadServicio: pruebaSensibilidadServicio,
       fechaServicio: firebase.firestore.FieldValue.serverTimestamp(),
       servicioPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
       servicioEmail: cmgAuth.currentUser.email
@@ -2840,6 +2889,7 @@ button.ed-consulta-link {
         '<div class="ed-vitals-readonly-title">🛎️ Servicio: ' + esc(srv.servicioNombre || '—') +
           ' · ' + fmtDate(srv.fechaServicio) + ' · Registrado por ' + esc(srv.servicioPor || '—') + '</div>' +
         (srv.servicioNotas ? '<div style="margin-top:8px;font-size:12px;color:#374151"><strong>Notas de registro:</strong> ' + esc(srv.servicioNotas) + '</div>' : '') +
+        (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.requerida ? '<div style="margin-top:8px;font-size:12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:8px"><strong>🧪 Prueba de sensibilidad:</strong> ' + esc(srv.pruebaSensibilidadServicio.resultado) + ' · confirmada por ' + esc(srv.pruebaSensibilidadServicio.confirmadaPor || '—') + '</div>' : '') +
       '</div>' +
       '<div class="ed-section">' +
         '<div class="ed-grid ed-grid-2">' +

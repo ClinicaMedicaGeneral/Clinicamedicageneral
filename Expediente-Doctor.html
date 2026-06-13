@@ -2631,6 +2631,28 @@ button.ed-consulta-link {
         '<div class="ed-vital"><div class="ed-vital-label">Glucosa (mg/dL)</div><input id="cons-glucosa" placeholder="90"></div>' +
       '</div>' +
       '<div class="ed-section">' +
+        '<div class="ed-section-title">🧪 Prueba de sensibilidad</div>' +
+        '<p style="font-size:12px;color:#6B7280;margin:0 0 8px">Para detectar alergias antes de aplicar un medicamento que lo requiera, incluso si el paciente vino solo a aplicarse un medicamento que compró fuera.</p>' +
+        '<div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap">' +
+          '<label class="ed-meds-opt"><input type="radio" name="pre-sens" value="no" checked> No se realizó</label>' +
+          '<label class="ed-meds-opt"><input type="radio" name="pre-sens" value="si"> Se realizó</label>' +
+        '</div>' +
+        '<div id="pre-sens-form" style="display:none;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:12px;margin-top:8px">' +
+          '<div class="ed-grid ed-grid-2">' +
+            '<div class="ed-fgroup"><label class="ed-label">Medicamento probado *</label>' +
+              '<input type="text" class="ed-input" id="pre-sens-med" placeholder="Ej. Penicilina 1.2 millones (puede ser comprado fuera)"></div>' +
+            '<div class="ed-fgroup"><label class="ed-label">Resultado *</label>' +
+              '<select class="ed-input" id="pre-sens-resultado">' +
+                '<option value="">— Seleccionar —</option>' +
+                '<option value="Negativa (sin reacción)">Negativa (sin reacción) — apto para aplicar</option>' +
+                '<option value="Positiva (reacción alérgica)">Positiva (reacción alérgica) — NO aplicar</option>' +
+              '</select></div>' +
+            '<div class="ed-fgroup full"><label class="ed-label">Observaciones</label>' +
+              '<textarea class="ed-textarea" id="pre-sens-obs" rows="2" placeholder="Reacción observada, tiempo de espera, etc."></textarea></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ed-section">' +
         '<div class="ed-fgroup full"><label class="ed-label">Notas de pre-clínica (opcional)</label>' +
           '<textarea class="ed-textarea" id="cons-notas-pre" rows="2" placeholder="Observaciones relevantes para el médico"></textarea></div>' +
       '</div>' +
@@ -2640,6 +2662,13 @@ button.ed-consulta-link {
 
     $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
     $id('btn-guardar-preclinica').addEventListener('click', guardarPreclinica);
+
+    /* Toggle del formulario de prueba de sensibilidad */
+    document.querySelectorAll('input[name="pre-sens"]').forEach(function (r) {
+      r.addEventListener('change', function () {
+        $id('pre-sens-form').style.display = (this.value === 'si') ? 'block' : 'none';
+      });
+    });
   }
 
   /* ─── Guardar pre-clínica (crea consulta con status:'preclinica') ─── */
@@ -2652,8 +2681,27 @@ button.ed-consulta-link {
       spo2: $val('cons-spo2'), glucosa: $val('cons-glucosa')
     };
     var algunaVital = Object.keys(vitales).some(function (k) { return vitales[k]; });
-    if (!algunaVital) {
-      showAlert('Registra al menos un signo vital.', 'error');
+
+    /* Prueba de sensibilidad (detección de alergias) */
+    var sensRadio = document.querySelector('input[name="pre-sens"]:checked');
+    var pruebaSensibilidad = null;
+    if (sensRadio && sensRadio.value === 'si') {
+      var sensMed  = $val('pre-sens-med');
+      var sensRes  = $val('pre-sens-resultado');
+      if (!sensMed || !sensRes) {
+        showAlert('Completa el medicamento probado y el resultado de la prueba de sensibilidad.', 'error');
+        return;
+      }
+      pruebaSensibilidad = {
+        realizada    : true,
+        medicamento  : sensMed,
+        resultado    : sensRes,
+        observaciones: $val('pre-sens-obs')
+      };
+    }
+
+    if (!algunaVital && !pruebaSensibilidad) {
+      showAlert('Registra al menos un signo vital o una prueba de sensibilidad.', 'error');
       return;
     }
 
@@ -2665,6 +2713,7 @@ button.ed-consulta-link {
       preclinicaPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
       preclinicaEmail: cmgAuth.currentUser.email,
       signosVitales: vitales,
+      pruebaSensibilidad: pruebaSensibilidad,
       notasPreclinica: $val('cons-notas-pre'),
       pdfUrl: null
     };
@@ -2888,6 +2937,9 @@ button.ed-consulta-link {
 
     /* Catálogo de medicamentos aplicados en la visita, agrupado por categoría */
     var MEDS_VISITA_CATS = [
+      { titulo: '🧪 Prueba de sensibilidad', items: [
+        'Prueba de sensibilidad'
+      ] },
       { titulo: '💉 Inyectable', items: [
         'Alergil', 'Amikacina', 'Antigripal - Antiviral IM', 'Astriaxona 1g', 'Bixicort',
         'Citicolina 500mg', 'Clevium', 'Complejo B', 'Dexametasona 8 mg', 'Dexketoprofeno',
@@ -2952,6 +3004,7 @@ button.ed-consulta-link {
         '<div class="ed-vitals-readonly-title">📊 Signos vitales (pre-clínica · ' + fmtDate(pre.fechaPreclinica) + ' · por ' + esc(pre.preclinicaPor || '—') + ')</div>' +
         (chips.length ? '<div class="ed-vitals-chips">' + chips.join('') + '</div>' : '<div style="font-size:13px;color:#6B7280">Sin signos vitales registrados</div>') +
         (pre.notasPreclinica ? '<div style="margin-top:8px;font-size:12px;color:#374151"><strong>Notas:</strong> ' + esc(pre.notasPreclinica) + '</div>' : '') +
+        (pre.pruebaSensibilidad && pre.pruebaSensibilidad.realizada ? '<div style="margin-top:8px;font-size:12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:8px"><strong>🧪 Prueba de sensibilidad:</strong> ' + esc(pre.pruebaSensibilidad.medicamento) + ' → <strong>' + esc(pre.pruebaSensibilidad.resultado) + '</strong>' + (pre.pruebaSensibilidad.observaciones ? ' · ' + esc(pre.pruebaSensibilidad.observaciones) : '') + '</div>' : '') +
       '</div>' +
 
       /* DRM Fun-2/3/8/11: campos requeridos + médico tratante + meds visita/despacho + incapacidad */
@@ -3640,6 +3693,10 @@ button.ed-consulta-link {
     }
     if (consulta.recetaExterna && consulta.recetaExterna.trim()) {
       bloque('RECETA EXTERNA (COMPRAR EN FARMACIA)', consulta.recetaExterna);
+    }
+    if (consulta.pruebaSensibilidad && consulta.pruebaSensibilidad.realizada) {
+      var ps = consulta.pruebaSensibilidad;
+      bloque('PRUEBA DE SENSIBILIDAD', ps.medicamento + ' → ' + ps.resultado + (ps.observaciones ? '. ' + ps.observaciones : ''));
     }
     if (!consulta.medicamentosVisita && !consulta.medicamentosDespacho && consulta.tratamiento) {
       bloque('PLAN / TRATAMIENTO', consulta.tratamiento);

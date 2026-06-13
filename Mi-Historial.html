@@ -1288,6 +1288,7 @@
         (c.diagnostico ? '<div class="mh-consulta-dx"><strong>Diagnóstico:</strong> ' + esc(c.diagnostico) + '</div>' : '') +
         (c.tratamiento ? '<div class="mh-consulta-dx"><strong>Tratamiento:</strong> ' + esc(c.tratamiento) + '</div>' : '') +
         (c.recetaExterna && c.recetaExterna.trim() ? '<div class="mh-consulta-dx" style="background:#FFF7ED;border:1px solid #FED7AA;padding:8px 12px;border-radius:6px;margin-top:8px"><strong>🏥 Receta externa (comprar en farmacia):</strong><br>' + esc(c.recetaExterna) + '</div>' : '') +
+        (c.pruebaSensibilidad && c.pruebaSensibilidad.realizada ? '<div class="mh-consulta-dx" style="background:#FFF7ED;border:1px solid #FED7AA;padding:8px 12px;border-radius:6px;margin-top:8px"><strong>🧪 Prueba de sensibilidad:</strong> ' + esc(c.pruebaSensibilidad.medicamento) + ' → ' + esc(c.pruebaSensibilidad.resultado) + (c.pruebaSensibilidad.observaciones ? '<br><small>' + esc(c.pruebaSensibilidad.observaciones) + '</small>' : '') + '</div>' : '') +
         (c.proximaCita ? '<div class="mh-consulta-dx" style="color:#FDD22C;background:#213C7D;padding:8px 12px;border-radius:6px;margin-top:10px"><strong>📅 Próxima cita:</strong> ' + esc(new Date(c.proximaCita).toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' })) + '</div>' : '') +
         '<div class="mh-consulta-actions">' +
           (c.pdfUrl ? '<a class="mh-consulta-btn" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Descargar PDF</a>' : '') +

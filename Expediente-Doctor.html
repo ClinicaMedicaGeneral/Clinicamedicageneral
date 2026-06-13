@@ -1617,6 +1617,7 @@ button.ed-consulta-link {
           var d = doc.data();
           var meds1 = (d.medicamentosVisita||[]).join(', ') || '—';
           var meds2 = (d.medicamentosDespacho||[]).join(', ') || '—';
+          var recetaExt = (d.recetaExterna && d.recetaExterna.trim()) ? d.recetaExterna : '';
           var esServicioStandalone = d.tipoRegistro === 'servicio-standalone' || (!d.diagnostico && d.servicioNombre);
           var servicios = (d.serviciosBrindados||[]).join(', ') || (esServicioStandalone ? d.servicioNombre : (d.diagnostico ? 'Consulta médica' : '—'));
           /* DRM v3 #4: badge de constancia emitida */
@@ -1642,6 +1643,7 @@ button.ed-consulta-link {
                 '<div><b>📦 Despacho:</b><br>' + esc(meds2) + '</div>' +
                 '<div><b>🩺 Servicios:</b><br>' + esc(servicios) + '</div>' +
               '</div>' +
+              (recetaExt ? '<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px;font-size:13px"><b>🏥 Receta externa (comprar en farmacia):</b><br>' + esc(recetaExt) + '</div>' : '') +
               /* DRM v3 #6: servicios hijos vinculados a esta consulta */
               '<div data-servicios-hijos="' + doc.id + '" style="margin-top:10px"></div>' +
             '</div>';
@@ -2974,6 +2976,9 @@ button.ed-consulta-link {
               buildMedsCatsHtml(MEDS_DESPACHO_CATS) +
               '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se despachan medicamentos)</label>' +
             '</div></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">🏥 Receta externa (medicamentos a comprar en farmacia)</label>' +
+            '<textarea class="ed-textarea" id="cons-receta-externa" rows="3" placeholder="Medicamentos que el paciente debe comprar en una farmacia externa (no los vendemos). Indica nombre, dosis, vía y frecuencia. Ej: Omeprazol 20 mg — 1 cápsula en ayunas por 14 días"></textarea>' +
+            '<small style="color:#6B7280;display:block;margin-top:4px">Texto libre. Aparecerá en el PDF de la consulta como indicación de compra externa.</small></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">Indicaciones al paciente *</label>' +
             '<textarea class="ed-textarea" id="cons-indicaciones" rows="2" placeholder="Recomendaciones generales, dieta, reposo, signos de alarma" required></textarea></div>' +
           '<div class="ed-fgroup"><label class="ed-label">Próxima cita *</label>' +
@@ -3370,6 +3375,7 @@ button.ed-consulta-link {
     }
     var medsVisita   = collectChecked('cons-meds-visita-list');
     var medsDespacho = collectChecked('cons-meds-despacho-list');
+    var recetaExterna = $val('cons-receta-externa');
     var visitaNinguno   = grupoEsNinguno('cons-meds-visita-list');
     var despachoNinguno = grupoEsNinguno('cons-meds-despacho-list');
     if (!grupoTieneEleccion('cons-meds-visita-list'))   faltantes.push('Medicamentos aplicados en la visita (marca alguno o "Ninguno")');
@@ -3419,6 +3425,7 @@ button.ed-consulta-link {
       tratamiento: tratamientoResumen,
       medicamentosVisita  : medsVisita,
       medicamentosDespacho: medsDespacho,
+      recetaExterna: recetaExterna,
       indicaciones: indicaciones,
       proximaCita: proxCita,
       /* DRM Fun-11 v2: ya no embebemos la constancia en la consulta — flag y referencia */
@@ -3630,6 +3637,9 @@ button.ed-consulta-link {
     }
     if (consulta.medicamentosDespacho && consulta.medicamentosDespacho.length) {
       bloque('MEDICAMENTOS DE DESPACHO', consulta.medicamentosDespacho.join(', '));
+    }
+    if (consulta.recetaExterna && consulta.recetaExterna.trim()) {
+      bloque('RECETA EXTERNA (COMPRAR EN FARMACIA)', consulta.recetaExterna);
     }
     if (!consulta.medicamentosVisita && !consulta.medicamentosDespacho && consulta.tratamiento) {
       bloque('PLAN / TRATAMIENTO', consulta.tratamiento);

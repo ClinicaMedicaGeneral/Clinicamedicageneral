@@ -571,6 +571,20 @@ button.ed-consulta-link {
   border-radius: 8px;
   padding: 10px 12px;
 }
+.ed-meds-cat {
+  grid-column: 1 / -1;
+  margin: 6px 0 2px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #213C7D;
+  background: #EEF2FB;
+  border-left: 3px solid #213C7D;
+  border-radius: 4px;
+}
+.ed-meds-cat:first-child { margin-top: 0; }
 .ed-meds-opt {
   display: flex;
   align-items: center;
@@ -2870,6 +2884,60 @@ button.ed-consulta-link {
     if (sv.spo2) chips.push('<span class="ed-vital-chip"><strong>SpO2:</strong> ' + esc(sv.spo2) + '%</span>');
     if (sv.glucosa) chips.push('<span class="ed-vital-chip"><strong>Glucosa:</strong> ' + esc(sv.glucosa) + '</span>');
 
+    /* Catálogo de medicamentos aplicados en la visita, agrupado por categoría */
+    var MEDS_VISITA_CATS = [
+      { titulo: '💉 Inyectable', items: [
+        'Alergil', 'Amikacina', 'Antigripal - Antiviral IM', 'Astriaxona 1g', 'Bixicort',
+        'Citicolina 500mg', 'Clevium', 'Complejo B', 'Dexametasona 8 mg', 'Dexketoprofeno',
+        'Diazepam', 'Diclofenac Sodico', 'DICLO-NEURAXIN', 'Diclosona', 'Dipirona',
+        'DOLGENAL AMP', 'Dramanyl', 'Epinefrina (Pinadrina 1 mg)', 'Esomeprazol 40 mg', 'Ferroin',
+        'Furosemida', 'Gentamicina', 'Glirron', 'Hidrocortisona 100mg', 'Hidrocortisona 500mg',
+        'Hioscina', 'Insulina Cristalina (UI - Unidad Internacional)', 'Labetalol', 'Levofloxacina 750mg / 150ml', 'Metoclopramida',
+        'Metronidazol 500 MG (I.V.)', 'Onemer (Ketorolaco 30mg)', 'Orfenaflex', 'Paracetamol 10mg /100 ml (Benphamol)', 'Penicilina 1.2 millones',
+        'Ranitidina', 'Rofemed 1g', 'Sertal Compuesto', 'Sulfato de Magnesio 10%', 'Tiamina',
+        'TONVAL (Pantoprazol 40mg)', 'Tramadol', 'Ultra-Neuraxin', 'Vitamina K'
+      ] },
+      { titulo: '🧴 Insumos (Sueros)', items: [
+        'Suero Solución Salina 1000 ml', 'Suero Solución Salina 500 ml', 'Suero Solución Salina 250 ml', 'Suero Solución Salina 100 ml',
+        'Suero Hartman 1000 ml', 'Suero Hartman 500 ml', 'Suero Hartman 250 ml', 'Suero Hartman 100 ml',
+        'Suero Mixto 1000 ml', 'Suero Mixto 500 ml', 'Suero Mixto 250 ml', 'Suero Mixto 100 ml',
+        'Suero Dextrosa 1000 ml', 'Suero Dextrosa 500 ml', 'Suero Dextrosa 250 ml', 'Suero Dextrosa 100 ml'
+      ] },
+      { titulo: '🏥 Sueroterapia (En Consultorio)', items: [
+        'Suero de Glucosa'
+      ] },
+      { titulo: '💊 Tabletas / Oral', items: [
+        'Cetirizina', 'Alergil Tabletas'
+      ] }
+    ];
+    /* Catálogo de medicamentos de despacho, agrupado por categoría */
+    var MEDS_DESPACHO_CATS = [
+      { titulo: '🥤 Suspensión', items: [
+        'Acetaminofen', 'Acla-Med', 'Desloratadina 2.5 mg', 'Dilabrom HH', 'Kold-Grip',
+        'Sales de Rehidratacion Oral', 'Tusivanz', 'VISCOF-D', 'CORIVIT'
+      ] },
+      { titulo: '💊 Tableta / Cápsula', items: [
+        'Acetaminofen 500 mg', 'Amoxicilina + Acido Clavulonico 875 mg / 125 mg (Caja de 14 unidades)', 'Azitromicina 500mg', 'Cetirizina 10 MG', 'Ciprofloxacina 500 MG',
+        'Demoxil 500 mg', 'Desloratadina 5 MG', 'Difenac 75mg', 'Fluconazol 150 mg', 'Gastrolev',
+        'Hidrocloratiazida 25 MG', 'Hioscina 10 MG', 'Ibuprofeno 600 MG', 'KoldGrip', 'Levofloxacino 750 mg (Calox)',
+        'Loratadina 10 MG (Lorat)', 'Paracetamol 750 MG', 'Rhinolar 5mg', 'Ultifenol Plus+'
+      ] },
+      { titulo: '🧴 Tópico', items: [
+        'Ketoconazol 2%', 'Septidex', 'Sulfadiazina de Plata', 'Ultifenol Gel'
+      ] },
+      { titulo: '💧 Gotas', items: [
+        'Otan'
+      ] }
+    ];
+    function buildMedsCatsHtml(cats) {
+      return cats.map(function (c) {
+        return '<div class="ed-meds-cat">' + c.titulo + '</div>' +
+          c.items.map(function (m) {
+            return '<label class="ed-meds-opt"><input type="checkbox" value="' + esc(m) + '"> ' + esc(m) + '</label>';
+          }).join('');
+      }).join('');
+    }
+
     cont.innerHTML =
       '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
       '<div class="ed-patient-summary">' +
@@ -2898,18 +2966,12 @@ button.ed-consulta-link {
           /* DRM Fun-8 + v3.6: Plan/Tratamiento dividido + opción explícita "Ninguno" */
           '<div class="ed-fgroup full"><label class="ed-label">💊 Medicamentos aplicados en la visita *</label>' +
             '<div id="cons-meds-visita-list" class="ed-meds-list" data-meds-group="visita">' +
-              '<label class="ed-meds-opt"><input type="checkbox" value="Bixicort"> Bixicort</label>' +
-              '<label class="ed-meds-opt"><input type="checkbox" value="Alergil"> Alergil</label>' +
-              '<label class="ed-meds-opt"><input type="checkbox" value="Cetirizina"> Cetirizina</label>' +
-              '<label class="ed-meds-opt"><input type="checkbox" value="Alergil Tabletas"> Alergil Tabletas</label>' +
+              buildMedsCatsHtml(MEDS_VISITA_CATS) +
               '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se aplicó ningún medicamento en la visita)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">📦 Medicamentos de despacho *</label>' +
             '<div id="cons-meds-despacho-list" class="ed-meds-list" data-meds-group="despacho">' +
-              '<label class="ed-meds-opt"><input type="checkbox" value="Bixicort"> Bixicort</label>' +
-              '<label class="ed-meds-opt"><input type="checkbox" value="Alergil"> Alergil</label>' +
-              '<label class="ed-meds-opt"><input type="checkbox" value="Cetirizina"> Cetirizina</label>' +
-              '<label class="ed-meds-opt"><input type="checkbox" value="Alergil Tabletas"> Alergil Tabletas</label>' +
+              buildMedsCatsHtml(MEDS_DESPACHO_CATS) +
               '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se despachan medicamentos)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">Indicaciones al paciente *</label>' +

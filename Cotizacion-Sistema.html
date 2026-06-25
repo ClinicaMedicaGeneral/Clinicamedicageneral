@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -15,7 +15,7 @@
 
 <style>
 /* ============================================================
-   SISTEMA DE COTIZACIONES — estilos propios
+   SISTEMA DE COTIZACIONES, estilos propios
    Namespace: .cs-  para no interferir con styles.css global
    ============================================================ */
 
@@ -408,7 +408,7 @@
 }
 
 /* ============================================================
-   PDF PAGE — replica exacta del diseño del ejemplo
+   PDF PAGE, replica exacta del diseño del ejemplo
    ============================================================ */
 #cs-pdf-doc {
   width: 750px;
@@ -632,7 +632,7 @@
 }
 
 /* ============================================================
-   MODO IMPRESIÓN — oculta todo excepto el documento PDF
+   MODO IMPRESIÓN, oculta todo excepto el documento PDF
    El usuario selecciona "Guardar como PDF" en el diálogo
    ============================================================ */
 @media print {
@@ -934,7 +934,7 @@
       <div class="cs-preview-frame">
 
         <!-- ================================================
-             DOCUMENTO PDF — este div se convierte al PDF
+             DOCUMENTO PDF, este div se convierte al PDF
              ================================================ -->
         <div id="cs-pdf-doc">
 
@@ -1397,10 +1397,10 @@ var CS = (function () {
   }
 
   /* ----------------------------------------------------------
-     GENERAR PDF — usa window.print() para máxima compatibilidad
+     GENERAR PDF, usa window.print() para máxima compatibilidad
      El navegador abre el diálogo de impresión; el usuario
      selecciona "Guardar como PDF" o "Destino: PDF".
-     Funciona en Chrome, Firefox, Safari, Edge — sin librerías.
+     Funciona en Chrome, Firefox, Safari, Edge, sin librerías.
   ---------------------------------------------------------- */
 
   function downloadPDF() {
@@ -1464,7 +1464,7 @@ var CS = (function () {
       /* Líneas de ítems */
       var itemLines = state.items.map(function(it) {
         var lineAmt = (parseFloat(it.price)||0) * (parseInt(it.qty)||0) - (parseFloat(it.disc)||0);
-        var line = '• ' + (it.desc || '—') + ' ×' + it.qty + ' — L ' + lineAmt.toFixed(2);
+        var line = '• ' + (it.desc || '—') + ' ×' + it.qty + ', L ' + lineAmt.toFixed(2);
         if (it.comment) line += ' (' + it.comment + ')';
         return line;
       }).join('\n');

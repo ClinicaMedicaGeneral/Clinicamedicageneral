@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -513,8 +513,8 @@
       <span class="lang lang-en">No commitment</span>
     </div>
     <p>
-      <span class="lang lang-es">Selecciona los servicios, procedimientos y exámenes que necesitas. Calculamos el total al instante en Lempiras. Envíanos tu cotización por WhatsApp y resérvala — sin citas, en City Mall Tegucigalpa.</span>
-      <span class="lang lang-en">Pick the services, procedures and tests you need. We calculate the total in Lempiras instantly. Send us your quote by WhatsApp and reserve — walk-in, at City Mall Tegucigalpa.</span>
+      <span class="lang lang-es">Selecciona los servicios, procedimientos y exámenes que necesitas. Calculamos el total al instante en Lempiras. Envíanos tu cotización por WhatsApp y resérvala, sin citas, en City Mall Tegucigalpa.</span>
+      <span class="lang lang-en">Pick the services, procedures and tests you need. We calculate the total in Lempiras instantly. Send us your quote by WhatsApp and reserve, walk-in, at City Mall Tegucigalpa.</span>
     </p>
   </div>
 </section>
@@ -1679,8 +1679,8 @@
       <div class="coti-disc-warning" id="coti-disc-warning" hidden>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         <span>
-          <span class="lang lang-es">Si eres <b>Doctor 365</b> y de tercera o cuarta edad, por favor elige tu rango de edad — te da mejor descuento.</span>
-          <span class="lang lang-en">If you're a <b>Doctor 365</b> member and a senior, please pick your age bracket — it gives you the bigger discount.</span>
+          <span class="lang lang-es">Si eres <b>Doctor 365</b> y de tercera o cuarta edad, por favor elige tu rango de edad, te da mejor descuento.</span>
+          <span class="lang lang-en">If you're a <b>Doctor 365</b> member and a senior, please pick your age bracket, it gives you the bigger discount.</span>
         </span>
       </div>
     </div>
@@ -1993,12 +1993,12 @@
     const intro = lang === 'en' ? 'Hi CMG! I built this quote on your site:' : '¡Hola CMG! Armé esta cotización en su sitio:';
     const totalLabel = lang === 'en' ? 'Total' : 'Total';
     let memberLine = '';
-    if (disc === 'd365')    memberLine = lang === 'en' ? '\n(Doctor 365 member — free consult + 15% off services)'    : '\n(Soy miembro Doctor 365 — consulta gratis + 15% en servicios)';
-    if (disc === 'tercera') memberLine = lang === 'en' ? '\n(Senior 3rd age discount — 25% off)' : '\n(Descuento tercera edad — 25%)';
-    if (disc === 'cuarta')  memberLine = lang === 'en' ? '\n(Senior 4th age discount — 30% off)' : '\n(Descuento cuarta edad — 30%)';
+    if (disc === 'd365')    memberLine = lang === 'en' ? '\n(Doctor 365 member, free consult + 15% off services)'    : '\n(Soy miembro Doctor 365, consulta gratis + 15% en servicios)';
+    if (disc === 'tercera') memberLine = lang === 'en' ? '\n(Senior 3rd age discount, 25% off)' : '\n(Descuento tercera edad, 25%)';
+    if (disc === 'cuarta')  memberLine = lang === 'en' ? '\n(Senior 4th age discount, 30% off)' : '\n(Descuento cuarta edad, 30%)';
     const body = items.length === 0 ?
       (lang === 'en' ? 'Hi CMG! I have a quote question.' : '¡Hola CMG! Tengo una consulta sobre una cotización.') :
-      (intro + '\n\n' + items.map(i => '• ' + i.name + ' ×' + i.qty + ' — ' + fmt(i.line)).join('\n') + '\n\n' + totalLabel + ': ' + fmt(total) + memberLine);
+      (intro + '\n\n' + items.map(i => '• ' + i.name + ' ×' + i.qty + ', ' + fmt(i.line)).join('\n') + '\n\n' + totalLabel + ': ' + fmt(total) + memberLine);
     const waAnchor = document.getElementById('coti-wa-cta');
     if (waAnchor) waAnchor.href = 'https://wa.me/50431555162?text=' + encodeURIComponent(body);
   }

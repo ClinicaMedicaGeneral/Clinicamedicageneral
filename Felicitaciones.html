@@ -624,7 +624,7 @@
           <div class="fel-step-num">2</div>
           <div class="fel-step-text">
             <h4>Preséntate en Caja CMG</h4>
-            <p>Visítanos en City Mall, Sótano 2, Local E214 — sin cita. Te atendemos todos los días del año.</p>
+            <p>Visítanos en City Mall, Sótano 2, Local E214, sin cita. Te atendemos todos los días del año.</p>
           </div>
         </div>
         <div class="fel-step">
@@ -1095,13 +1095,13 @@
       setText('fel-susp-hasta', fmtFecha(data.fechaVencimiento));
       if (docId) initDependientes(docId, uid, false); /* solo ver */
     } else {
-      /* pendiente — mostrar pasos */
+      /* pendiente, mostrar pasos */
       if (stepsCard) stepsCard.style.display = '';
     }
   }
 
   /* ════════════════════════════════════════════
-     DEPENDIENTES — MIEMBRO
+     DEPENDIENTES, MIEMBRO
      ════════════════════════════════════════════ */
   var _depDocId  = null;
   var _depUid    = null;
@@ -1207,7 +1207,7 @@
       var opt = sel.options[i];
       if (opt.value === 'conyugue') {
         opt.disabled    = conyugueCount >= 1;
-        opt.textContent = 'Cónyuge (Esposa/o)' + (conyugueCount >= 1 ? ' — ya registrado' : '');
+        opt.textContent = 'Cónyuge (Esposa/o)' + (conyugueCount >= 1 ? ', ya registrado' : '');
       } else if (opt.value === 'hijo') {
         opt.disabled    = false;
         opt.textContent = 'Hijo';
@@ -1292,7 +1292,7 @@
       .then(function (docRef) {
         /* Actualizar _deps de inmediato (optimista) para que hideDepForm y
            cualquier acción del usuario antes de que loadDeps resuelva ya
-           vean los conteos correctos — evita la condición de carrera donde
+           vean los conteos correctos, evita la condición de carrera donde
            el usuario podía reabrir el form y agregar un tercer hijo. */
         _deps.push({
           _id            : docRef.id,

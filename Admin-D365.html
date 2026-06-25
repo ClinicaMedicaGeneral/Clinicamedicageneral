@@ -634,7 +634,7 @@
 
     var update;
     if (turning) {
-      /* Activar — siempre reinicia el plazo desde hoy */
+      /* Activar, siempre reinicia el plazo desde hoy */
       var ahora = new Date();
       var vence = new Date(ahora);
       vence.setFullYear(vence.getFullYear() + 1);
@@ -644,7 +644,7 @@
         fechaVencimiento: firebase.firestore.Timestamp.fromDate(vence)
       };
     } else {
-      /* Apagar — ¿sigue dentro del plazo original? */
+      /* Apagar, ¿sigue dentro del plazo original? */
       var dentroDePlazo = false;
       if (member && member.fechaVencimiento) {
         var venceDate = member.fechaVencimiento.toDate
@@ -727,7 +727,7 @@
   }
 
   /* ══════════════════════════════════════════
-     DEPENDIENTES — ADMIN
+     DEPENDIENTES, ADMIN
      ══════════════════════════════════════════ */
   function toggleDepRow(docId, btn) {
     var row   = document.getElementById('adm-dep-row-' + docId);

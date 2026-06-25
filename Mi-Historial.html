@@ -1305,7 +1305,7 @@
     if (!cont) return;
     cont.innerHTML = '<div class="mh-spinner"></div>';
 
-    /* Solo consultamos por codigoPaciente — las reglas Firestore permiten
+    /* Solo consultamos por codigoPaciente, las reglas Firestore permiten
        leer únicamente pruebas ligadas al expediente del paciente. */
     cmgDb.collection('resultadosPruebas')
       .where('codigoPaciente', '==', codigo)

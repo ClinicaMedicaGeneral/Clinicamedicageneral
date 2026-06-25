@@ -1345,7 +1345,7 @@ button.ed-consulta-link {
     ]}
   ];
 
-  /* Catálogo ESTRICTO de exámenes de laboratorio — 141 ítems agrupados, sincronizado con Cotizador.html */
+  /* Catálogo ESTRICTO de exámenes de laboratorio, 141 ítems agrupados, sincronizado con Cotizador.html */
   var CATALOGO_LABORATORIO = [
     { label: 'Pruebas comunes', items: [
       'Prueba de embarazo (rápida)', 'Prueba de dengue (rápida)', 'Prueba DUO (VIH 4ª gen.)',
@@ -1647,10 +1647,10 @@ button.ed-consulta-link {
               '</div>' +
               (recetaExt ? '<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px;font-size:13px"><b>🏥 Receta externa (comprar en farmacia):</b><br>' + esc(recetaExt) + '</div>' : '') +
               (requiereSens ? '<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:10px;font-size:13px">' +
-                '<b style="color:#991B1B">🧪 Inyección IM/IV — Prueba de sensibilidad:</b> ' + esc(ps.resultado) + ' · confirmada por ' + esc(ps.confirmadaPor || '—') +
+                '<b style="color:#991B1B">🧪 Inyección IM/IV, Prueba de sensibilidad:</b> ' + esc(ps.resultado) + ' · confirmada por ' + esc(ps.confirmadaPor || '—') +
                 '<label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-weight:700;color:#991B1B;cursor:pointer"><input type="checkbox" class="caja-sens-chk" data-sens-for="' + doc.id + '"' + (ps.cajaConfirmada ? ' checked disabled' : '') + '> Verifiqué la prueba de sensibilidad antes de liquidar</label>' +
               '</div>' : '') +
-              (ps && ps.noRequiere ? '<div style="margin-top:10px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 10px;font-size:12px;color:#166534">🧪 Inyección IM/IV — el médico indicó que <b>este medicamento no necesita prueba de sensibilidad</b>.</div>' : '') +
+              (ps && ps.noRequiere ? '<div style="margin-top:10px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 10px;font-size:12px;color:#166534">🧪 Inyección IM/IV, el médico indicó que <b>este medicamento no necesita prueba de sensibilidad</b>.</div>' : '') +
               /* DRM v3 #6: servicios hijos vinculados a esta consulta */
               '<div data-servicios-hijos="' + doc.id + '" style="margin-top:10px"></div>' +
             '</div>';
@@ -2662,8 +2662,8 @@ button.ed-consulta-link {
             '<div class="ed-fgroup"><label class="ed-label">Resultado *</label>' +
               '<select class="ed-input" id="pre-sens-resultado">' +
                 '<option value="">— Seleccionar —</option>' +
-                '<option value="Negativa (sin reacción)">Negativa (sin reacción) — apto para aplicar</option>' +
-                '<option value="Positiva (reacción alérgica)">Positiva (reacción alérgica) — NO aplicar</option>' +
+                '<option value="Negativa (sin reacción)">Negativa (sin reacción), apto para aplicar</option>' +
+                '<option value="Positiva (reacción alérgica)">Positiva (reacción alérgica), NO aplicar</option>' +
               '</select></div>' +
             '<div class="ed-fgroup full"><label class="ed-label">Observaciones</label>' +
               '<textarea class="ed-textarea" id="pre-sens-obs" rows="2" placeholder="Reacción observada, tiempo de espera, etc."></textarea></div>' +
@@ -2772,7 +2772,7 @@ button.ed-consulta-link {
       '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
       '<div class="ed-patient-summary">' +
         '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
-        '<p class="ed-patient-meta">Etapa 1 · Servicio — quedará pendiente</p></div>' +
+        '<p class="ed-patient-meta">Etapa 1 · Servicio, quedará pendiente</p></div>' +
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
       '<div class="ed-section-title">🛎️ Servicio solicitado</div>' +
@@ -2798,8 +2798,8 @@ button.ed-consulta-link {
           '<div class="ed-fgroup full"><label class="ed-label">Resultado de la prueba *</label>' +
             '<select class="ed-input" id="serv-sens-resultado">' +
               '<option value="">— Seleccionar —</option>' +
-              '<option value="Negativa (sin reacción)">Negativa (sin reacción) — apto para aplicar</option>' +
-              '<option value="Positiva (reacción alérgica)">Positiva (reacción alérgica) — NO aplicar</option>' +
+              '<option value="Negativa (sin reacción)">Negativa (sin reacción), apto para aplicar</option>' +
+              '<option value="Positiva (reacción alérgica)">Positiva (reacción alérgica), NO aplicar</option>' +
             '</select></div>' +
           '<label class="ed-meds-opt" style="margin-top:8px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="serv-sens-confirm"> Confirmo que se realizó la prueba de sensibilidad al paciente</label>' +
         '</div>' +
@@ -3097,7 +3097,7 @@ button.ed-consulta-link {
               '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se despachan medicamentos)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">🏥 Receta externa (medicamentos a comprar en farmacia)</label>' +
-            '<textarea class="ed-textarea" id="cons-receta-externa" rows="3" placeholder="Medicamentos que el paciente debe comprar en una farmacia externa (no los vendemos). Indica nombre, dosis, vía y frecuencia. Ej: Omeprazol 20 mg — 1 cápsula en ayunas por 14 días"></textarea>' +
+            '<textarea class="ed-textarea" id="cons-receta-externa" rows="3" placeholder="Medicamentos que el paciente debe comprar en una farmacia externa (no los vendemos). Indica nombre, dosis, vía y frecuencia. Ej: Omeprazol 20 mg, 1 cápsula en ayunas por 14 días"></textarea>' +
             '<small style="color:#6B7280;display:block;margin-top:4px">Texto libre. Aparecerá en el PDF de la consulta como indicación de compra externa.</small></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">Indicaciones al paciente *</label>' +
             '<textarea class="ed-textarea" id="cons-indicaciones" rows="2" placeholder="Recomendaciones generales, dieta, reposo, signos de alarma" required></textarea></div>' +
@@ -3137,7 +3137,7 @@ button.ed-consulta-link {
       /* DRM v3 #3: acciones rápidas desde la consulta */
       '<div class="ed-section">' +
         '<div class="ed-section-title">⚡ Acciones rápidas durante la consulta</div>' +
-        '<p style="font-size:12px;color:#6B7280;margin:0 0 10px">Estas acciones generan registros adicionales asociados al paciente actual. No reemplazan la consulta — la complementan.</p>' +
+        '<p style="font-size:12px;color:#6B7280;margin:0 0 10px">Estas acciones generan registros adicionales asociados al paciente actual. No reemplazan la consulta, la complementan.</p>' +
         '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
           '<button class="ed-btn ed-btn-ghost" id="btn-acc-prueba">🧪 Crear Prueba Rápida</button>' +
           '<button class="ed-btn ed-btn-ghost" id="btn-acc-lab">🔬 Solicitar Exámenes</button>' +
@@ -3199,7 +3199,7 @@ button.ed-consulta-link {
     });
   }
 
-  /* DRM v3 #3 + v3.1 + v3.3: modal para solicitar exámenes — 141 ítems agrupados + buscador */
+  /* DRM v3 #3 + v3.1 + v3.3: modal para solicitar exámenes, 141 ítems agrupados + buscador */
   function abrirSolicitudExamenesModal(consultaPadreId){
     if (!pacienteActual) return;
     var dg = pacienteActual.datosGenerales || {};
@@ -3367,7 +3367,7 @@ button.ed-consulta-link {
     };
   }
 
-  /* DRM v3 #3+#6 + v3.2: modal para crear servicio — MULTI-SELECT con catálogo + "Otro" */
+  /* DRM v3 #3+#6 + v3.2: modal para crear servicio, MULTI-SELECT con catálogo + "Otro" */
   function abrirRealizarServicioModal(consultaPadreId){
     if (!pacienteActual) return;
     var dg = pacienteActual.datosGenerales || {};
@@ -3431,7 +3431,7 @@ button.ed-consulta-link {
 
       showOverlay('Creando ' + seleccionados.length + ' servicio' + (seleccionados.length>1?'s':'') + '…');
       var notas = $val('qm-srv-notas');
-      /* Un doc de Firestore por cada servicio — todos vinculados a la misma consulta padre */
+      /* Un doc de Firestore por cada servicio, todos vinculados a la misma consulta padre */
       var promesas = seleccionados.map(function(srv){
         return cmgDb.collection('consultas').add({
           codigoPaciente : pacienteActual.codigoPaciente,
@@ -3547,7 +3547,7 @@ button.ed-consulta-link {
       recetaExterna: recetaExterna,
       indicaciones: indicaciones,
       proximaCita: proxCita,
-      /* DRM Fun-11 v2: ya no embebemos la constancia en la consulta — flag y referencia */
+      /* DRM Fun-11 v2: ya no embebemos la constancia en la consulta, flag y referencia */
       tieneConstancia: necesitaIncap,
       constanciaId: null
     });
@@ -4224,7 +4224,7 @@ button.ed-consulta-link {
     }
   }
 
-  /* DRM v3.4: pendientes/procesando GLOBALES — todos los pacientes */
+  /* DRM v3.4: pendientes/procesando GLOBALES, todos los pacientes */
   function cargarLaboratorioPendientesGlobal(){
     var box = $id('laboratorio-pendientes');
     if (!box) return;
@@ -4290,7 +4290,7 @@ button.ed-consulta-link {
       });
   }
 
-  /* DRM v3.4: ahora solo renderiza confirmados del paciente — pendientes son globales */
+  /* DRM v3.4: ahora solo renderiza confirmados del paciente, pendientes son globales */
   function renderLaboratorioConfirmadosDelPaciente(confirmados, vinculadasAhora) {
     var lista = $id('laboratorio-lista');
     if (!lista) return;
@@ -4503,7 +4503,7 @@ button.ed-consulta-link {
           children: [
             new TextRun({ text: '• ' + k + ': ', bold: true }),
             new TextRun({ text: item.tiene ? 'SÍ' : 'NO', bold: true, color: item.tiene ? 'C00000' : '666666' }),
-            new TextRun({ text: item.detalle ? '  —  ' + item.detalle : '' })
+            new TextRun({ text: item.detalle ? ' ,  ' + item.detalle : '' })
           ]
         }));
       });

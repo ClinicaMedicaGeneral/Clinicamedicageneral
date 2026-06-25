@@ -1021,7 +1021,7 @@
     });
   }
 
-  /* DRM Fun-6: handler unificado — soporta confirmar e imprimir o dejar pendiente */
+  /* DRM Fun-6: handler unificado, soporta confirmar e imprimir o dejar pendiente */
   function guardarPrueba(modo /* 'confirmado' | 'pendiente' */) {
     var btn = (modo === 'pendiente') ? $id('btn-pendiente') : $id('btn-guardar');
     if (btn.disabled) return;
@@ -1330,7 +1330,7 @@
     Object.keys(edits).forEach(function (k) {
       if (k.indexOf('r-') === 0) {
         var realKey = k.substring(2);
-        /* Para antigeno el valor incluye ": " al inicio en algunos casos — limpiar */
+        /* Para antigeno el valor incluye ": " al inicio en algunos casos, limpiar */
         var v = edits[k].replace(/^[:\s]+/, '');
         resultados[realKey] = v;
       }

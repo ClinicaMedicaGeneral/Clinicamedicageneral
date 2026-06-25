@@ -107,7 +107,7 @@
 .fel-btn-home  { background: #F4F6FB; color: #213C7D; border: 2px solid #E5E7EB; }
 
 /* ════════════════════════════
-   CONTRATO IMPRIMIBLE
+   CONTRATO CMG · Tu Doctor 365
    ════════════════════════════ */
 .contract-section {
   background: #fff;
@@ -124,87 +124,175 @@
 .contract-section-head h2 {
   font-size: 18px; font-weight: 800; color: #fff; margin: 0;
 }
-.contract-section-body { padding: 32px; }
+/* El contrato maneja su propio spacing interno */
+.contract-section-body { padding: 0; }
+#fel-contrato { position: relative; overflow: hidden; }
 
-/* El documento del contrato */
-#fel-contrato {
-  font-family: 'Times New Roman', serif;
-  font-size: 13px;
-  color: #1F2937;
-  line-height: 1.65;
+/* ── Marca de agua ── */
+.ct-watermark {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none; opacity: .045; z-index: 0;
 }
-.ctr-header {
-  text-align: center;
-  border-bottom: 2px solid #213C7D;
-  padding-bottom: 20px;
-  margin-bottom: 24px;
+.ct-watermark img { width: 55%; max-width: 440px; }
+
+/* ── Header del contrato ── */
+.ct-header {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 32px 16px;
+  border-bottom: 4px solid #FDD22C;
+  background: linear-gradient(180deg,#fafbff 0%,#fff 100%);
+  flex-wrap: wrap; gap: 10px;
 }
-.ctr-logo {
-  width: 56px; margin-bottom: 10px;
+.ct-header-logo { display: flex; align-items: center; gap: 13px; }
+.ct-header-logo img { width: 46px; height: auto; }
+.ct-header-name { font-size: 14px; font-weight: 900; color: #213C7D; margin: 0 0 2px; letter-spacing: .2px; }
+.ct-header-sub  { font-size: 10.5px; color: #6B7280; font-weight: 600; margin: 0; line-height: 1.4; }
+.ct-header-right { text-align: right; font-size: 10.5px; color: #6B7280; line-height: 1.7; }
+
+/* ── Título ── */
+.ct-doc-title {
+  position: relative; z-index: 1;
+  background: #213C7D; padding: 13px 32px; text-align: center;
 }
-.ctr-company {
-  font-size: 14px; font-weight: 700; color: #213C7D;
-  text-transform: uppercase; letter-spacing: .5px;
+.ct-doc-title h2 {
+  font-size: 13px; font-weight: 900; letter-spacing: 1.5px;
+  text-transform: uppercase; color: #FDD22C; margin: 0 0 3px;
 }
-.ctr-sub {
-  font-size: 12px; color: #6B7280; margin-top: 2px;
+.ct-doc-title p { font-size: 11.5px; color: rgba(255,255,255,.7); margin: 0; font-weight: 500; }
+
+/* ── Intro ── */
+.ct-intro {
+  position: relative; z-index: 1;
+  padding: 18px 32px 10px; border-bottom: 1px solid #E5E7EB;
 }
-.ctr-title {
-  font-size: 16px; font-weight: 700; color: #213C7D;
-  text-transform: uppercase; letter-spacing: 1px;
-  margin: 14px 0 4px;
+.ct-intro p { font-size: 13px; line-height: 1.75; text-align: justify; color: #374151; margin: 0; }
+.ct-intro p b { color: #213C7D; }
+
+/* ── Cuerpo ── */
+.ct-body { position: relative; z-index: 1; padding: 0 32px 22px; }
+.ct-clause { margin-top: 20px; }
+.ct-clause-title {
+  font-size: 11.5px; font-weight: 900; letter-spacing: .8px;
+  text-transform: uppercase; color: #213C7D;
+  border-left: 4px solid #FDD22C;
+  padding: 5px 0 5px 11px; margin: 0 0 8px; background: #FAFBFF;
 }
-.ctr-num {
-  font-size: 13px; color: #6B7280;
+.ct-clause p { font-size: 13px; line-height: 1.75; text-align: justify; color: #374151; margin: 0 0 5px; }
+.ct-clause p b { color: #213C7D; }
+
+.ct-list { list-style: none; padding: 0; margin: 6px 0 0; }
+.ct-list li {
+  font-size: 13px; line-height: 1.7; color: #374151; text-align: justify;
+  padding: 4px 0 4px 20px; position: relative; border-bottom: 1px dashed #F3F4F6;
+}
+.ct-list li:last-child { border-bottom: none; }
+.ct-list li::before {
+  content: ''; position: absolute; left: 4px; top: 11px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #FDD22C; border: 1.5px solid #E8BD20;
+}
+.ct-list li b { color: #213C7D; }
+.ct-list li.ct-highlight {
+  background: #FFFBEB; border-left: 3px solid #FDD22C;
+  border-bottom: 1px dashed #F3F4F6;
+  padding-left: 14px; border-radius: 0 4px 4px 0;
+}
+.ct-list li.ct-highlight::before { left: 2px; }
+.ct-rule { border: none; border-top: 1px solid #E5E7EB; margin: 6px 0; }
+
+/* ── Sección de firma ── */
+.ct-sign-section { position: relative; z-index: 1; margin: 0 32px 26px; }
+.ct-sign-title {
+  text-align: center; font-size: 11.5px; font-weight: 900;
+  letter-spacing: 1.2px; text-transform: uppercase; color: #213C7D;
+  border-top: 2px solid #213C7D; border-bottom: 2px solid #213C7D;
+  padding: 8px 0; margin: 0 0 13px; background: #F9FAFB;
+}
+.ct-sign-intro { font-size: 13px; line-height: 1.7; color: #374151; text-align: justify; margin: 0 0 16px; }
+
+.ct-data-grid { border: 1.5px solid #D1D5DB; border-radius: 6px; overflow: hidden; margin-bottom: 11px; }
+.ct-data-grid-head {
+  background: #213C7D; padding: 6px 13px;
+  font-size: 11px; font-weight: 900; color: #FDD22C; letter-spacing: .7px; text-transform: uppercase;
+}
+.ct-data-rows { padding: 11px 13px; }
+.ct-data-row {
+  display: grid; gap: 13px; padding: 6px 0;
+  border-bottom: 1px dashed #E5E7EB; align-items: end;
+}
+.ct-data-row:last-child { border-bottom: none; padding-bottom: 0; }
+.ct-data-row--full  { grid-template-columns: 1fr; }
+.ct-data-row--3col  { grid-template-columns: 2fr 1fr 1fr; }
+
+.ct-field { display: flex; flex-direction: column; gap: 2px; }
+.ct-field-label { font-size: 10px; font-weight: 700; color: #6B7280; letter-spacing: .5px; text-transform: uppercase; }
+.ct-field-line { border-bottom: 1.5px solid #374151; min-height: 22px; display: flex; align-items: flex-end; }
+.ct-field-value { font-size: 13px; font-weight: 700; color: #1F2937; padding-bottom: 2px; line-height: 1; }
+
+.ct-sign-row {
+  display: grid; grid-template-columns: 1fr auto;
+  gap: 34px; padding: 13px 0 4px; align-items: end;
+  border-top: 1px solid #E5E7EB; margin-top: 8px;
+}
+.ct-sign-field { display: flex; flex-direction: column; gap: 2px; }
+.ct-sign-field-label { font-size: 10px; font-weight: 700; color: #6B7280; letter-spacing: .5px; text-transform: uppercase; }
+.ct-sign-line { border-bottom: 1.5px solid #374151; height: 28px; }
+.ct-date-group { display: flex; align-items: center; gap: 5px; white-space: nowrap; padding-bottom: 2px; }
+.ct-date-group > span { font-size: 12.5px; color: #374151; font-weight: 600; }
+.ct-date-box { border-bottom: 1.5px solid #374151; width: 33px; height: 24px; display: inline-block; }
+.ct-date-box--year { width: 52px; }
+
+/* ── Uso interno CMG ── */
+.ct-internal {
+  position: relative; z-index: 1;
+  margin: 0 32px 22px;
+  border: 1.5px dashed #213C7D; border-radius: 8px; overflow: hidden;
+}
+.ct-internal-head {
+  background: #213C7D; padding: 6px 13px;
+  text-align: center; font-size: 11px; font-weight: 900;
+  color: #FDD22C; letter-spacing: .8px; text-transform: uppercase;
+}
+.ct-internal-body { padding: 11px 13px; }
+.ct-internal-row {
+  padding: 5px 0; border-bottom: 1px dashed #E5E7EB;
+  font-size: 12.5px; color: #374151;
+  display: grid; grid-template-columns: 210px 1fr;
+  gap: 10px; align-items: end;
+}
+.ct-internal-row:last-child { border-bottom: none; padding-bottom: 0; }
+.ct-internal-row b { color: #213C7D; font-size: 11px; font-weight: 700; }
+.ct-internal-line { border-bottom: 1.5px solid #9CA3AF; height: 18px; }
+.ct-internal-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 4px; }
+
+.ct-seal-row {
+  display: grid; grid-template-columns: 1fr 175px;
+  gap: 16px; padding-top: 8px; align-items: end;
+  border-top: 1px dashed #E5E7EB; margin-top: 8px;
+}
+.ct-obs-field { display: flex; flex-direction: column; gap: 3px; }
+.ct-obs-label { font-size: 11px; font-weight: 700; color: #213C7D; }
+.ct-obs-lines { display: flex; flex-direction: column; gap: 7px; }
+.ct-obs-line { border-bottom: 1.5px solid #9CA3AF; height: 18px; }
+.ct-seal-box {
+  border: 1.5px solid #D1D5DB; border-radius: 6px; height: 78px;
+  display: flex; align-items: center; justify-content: center; background: #F9FAFB;
+}
+.ct-seal-box span {
+  font-size: 10.5px; font-weight: 700; color: #9CA3AF;
+  font-style: italic; text-align: center; padding: 8px; line-height: 1.4;
 }
 
-.ctr-section { margin: 20px 0; }
-.ctr-section-title {
-  font-size: 12px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 1px;
-  color: #213C7D;
-  border-bottom: 1px solid #E5E7EB;
-  padding-bottom: 6px; margin-bottom: 12px;
+/* ── Footer del contrato ── */
+.ct-foot {
+  position: relative; z-index: 1;
+  padding: 11px 32px 18px; border-top: 1px solid #E5E7EB;
+  background: #F9FAFB; text-align: center;
+  font-size: 10.5px; color: #6B7280; line-height: 1.7;
 }
-.ctr-row {
-  display: flex; gap: 8px; margin-bottom: 6px;
-  font-size: 13px;
-}
-.ctr-row-label {
-  font-weight: 700; min-width: 170px; color: #374151; flex-shrink: 0;
-}
-.ctr-row-val { color: #1F2937; }
-.ctr-row-val.blank {
-  border-bottom: 1px solid #9CA3AF;
-  min-width: 160px;
-  display: inline-block;
-}
-
-.ctr-benefits {
-  list-style: none; padding: 0; margin: 8px 0;
-}
-.ctr-benefits li {
-  padding: 5px 0; border-bottom: 1px solid #F3F4F6;
-  font-size: 13px; display: flex; gap: 8px;
-}
-.ctr-benefits li::before {
-  content: '✓'; color: #213C7D; font-weight: 700; flex-shrink: 0;
-}
-
-.ctr-terms {
-  font-size: 12px; color: #6B7280; line-height: 1.6; margin-top: 8px;
-}
-
-.ctr-signatures {
-  display: flex; gap: 40px; margin-top: 36px;
-}
-.ctr-sig {
-  flex: 1;
-  border-top: 1px solid #374151;
-  padding-top: 8px;
-  font-size: 12px; color: #374151;
-}
-.ctr-sig strong { display: block; margin-bottom: 18px; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+.ct-foot b { color: #213C7D; }
 
 /* ── Active Membership Card ── */
 .fel-active-card {
@@ -401,9 +489,9 @@
     border-radius: 0 !important;
     margin: 0 !important;
   }
-  .contract-section-body { padding: 20px !important; }
-  #fel-contrato { font-size: 12px !important; }
-  .ctr-signatures { page-break-inside: avoid; }
+  .contract-section-body { padding: 0 !important; }
+  .ct-sign-section { page-break-inside: avoid; }
+  .ct-internal { page-break-inside: avoid; }
 }
 </style>
 <!-- Google tag (gtag.js) -->
@@ -636,91 +724,247 @@
 
         <div id="fel-contrato">
 
-          <!-- Encabezado empresa -->
-          <div class="ctr-header">
-            <img class="ctr-logo" src="assets/isotipo-color.png" alt="CMG">
-            <div class="ctr-company">Clínica Médica General S. de R.L.</div>
-            <div class="ctr-sub">Boulevard Económica Europea · City Mall LC-214 · Tegucigalpa, Honduras</div>
-            <div class="ctr-sub">Tel. +504 3155-5162 · clinicamedicacmg@gmail.com</div>
-            <div class="ctr-title">Contrato de Membresía · Doctor 365</div>
-            <div class="ctr-num">N° de Solicitud: <strong id="ctr-num-sol">—</strong> &nbsp;·&nbsp; Fecha: <strong id="ctr-fecha">—</strong></div>
-          </div>
+          <!-- Marca de agua -->
+          <div class="ct-watermark"><img src="assets/isotipo-color.png" alt=""></div>
 
-          <!-- Datos del miembro -->
-          <div class="ctr-section">
-            <div class="ctr-section-title">Datos del Solicitante</div>
-            <div class="ctr-row">
-              <span class="ctr-row-label">Nombre completo:</span>
-              <span class="ctr-row-val" id="ctr-nombre-completo">—</span>
+          <!-- Header -->
+          <div class="ct-header">
+            <div class="ct-header-logo">
+              <img src="assets/isotipo-color.png" alt="CMG">
+              <div>
+                <p class="ct-header-name">CLÍNICA MÉDICA CMG, S. DE R.L.</p>
+                <p class="ct-header-sub">Clínica Médica General<br>Local E-214, Sótano No. 2, City Mall · Comayagüela, Francisco Morazán, M.D.C.</p>
+              </div>
             </div>
-            <div class="ctr-row">
-              <span class="ctr-row-label">Fecha de nacimiento:</span>
-              <span class="ctr-row-val" id="ctr-nacimiento">—</span>
-            </div>
-            <div class="ctr-row">
-              <span class="ctr-row-label">Edad:</span>
-              <span class="ctr-row-val" id="ctr-edad">—</span>
-            </div>
-            <div class="ctr-row">
-              <span class="ctr-row-label">Número telefónico:</span>
-              <span class="ctr-row-val" id="ctr-telefono">—</span>
-            </div>
-            <div class="ctr-row">
-              <span class="ctr-row-label">Correo electrónico:</span>
-              <span class="ctr-row-val" id="ctr-email">—</span>
+            <div class="ct-header-right">
+              administracion@clinicamedicacmg.net<br>(+504) 2262-6764 · (+504) 3155-5162<br>RTN: 08019018002898
             </div>
           </div>
 
-          <!-- Términos -->
-          <div class="ctr-section">
-            <div class="ctr-section-title">Términos de la Membresía</div>
-            <p>El presente contrato establece los derechos y obligaciones entre <strong>Clínica Médica General S. de R.L.</strong> (en adelante "CMG") y el solicitante identificado arriba (en adelante "Miembro"), en relación con la membresía anual <em>Doctor 365</em>.</p>
+          <!-- Título -->
+          <div class="ct-doc-title">
+            <h2>Contrato de Adhesión y Afiliación al Programa "Tu Doctor 365"</h2>
+            <p>Solicitud N° <span id="ct-num-solicitud">—</span> &nbsp;·&nbsp; Fecha: <span id="ct-fecha-solicitud">—</span></p>
           </div>
 
-          <!-- Beneficios -->
-          <div class="ctr-section">
-            <div class="ctr-section-title">Derechos del Miembro</div>
-            <ul class="ctr-benefits">
-              <li>Una (1) consulta médica general gratuita por año de membresía</li>
-              <li>Una (1) sueroterapia de Complejo B de regalo por año</li>
-              <li>15% de descuento en todos los servicios de la Clínica durante la vigencia</li>
-              <li>Atención preferencial sin necesidad de cita previa (walk-in)</li>
-              <li>Acceso a promociones y beneficios exclusivos para miembros</li>
-            </ul>
+          <!-- Intro legal -->
+          <div class="ct-intro">
+            <p>Consta por el presente documento el Contrato de Adhesión para la prestación de servicios de atención médica, que celebran por una parte <b>CLÍNICA MÉDICA GENERAL CMG, S. de R.L.</b>, con RTN número 08019018002898, ubicada en la ciudad de Tegucigalpa, Honduras (en adelante denominada <b>"La Clínica"</b>), y por la otra parte el Afiliado Titular, cuyos datos se consignan al pie de este documento, quienes acuerdan sujetarse a las siguientes cláusulas y condiciones:</p>
           </div>
 
-          <!-- Condiciones -->
-          <div class="ctr-section">
-            <div class="ctr-section-title">Condiciones y Vigencia</div>
-            <div class="ctr-terms">
-              <strong>Pago:</strong> La membresía tiene un costo único anual de <strong>L900.00 (Novecientos Lempiras exactos)</strong>, pagadero en caja CMG al momento de la activación.<br>
-              <strong>Vigencia:</strong> La membresía inicia en la fecha de pago en caja y tiene una duración de 365 (trescientos sesenta y cinco) días calendario.<br>
-              <strong>Intransferibilidad:</strong> La membresía es personal e intransferible. No puede cederse a terceros.<br>
-              <strong>Cancelación:</strong> CMG se reserva el derecho de cancelar la membresía en caso de incumplimiento de los presentes términos.<br>
-              <strong>Modificaciones:</strong> CMG podrá modificar los beneficios del plan con un aviso previo de 30 días.<br>
-              <strong>Renovación:</strong> Al vencimiento, la membresía podrá renovarse por un nuevo período anual bajo las tarifas vigentes.
+          <!-- Cuerpo -->
+          <div class="ct-body">
+
+            <div class="ct-clause">
+              <div class="ct-clause-title">1. Objeto, Beneficiarios y Costo del Programa</div>
+              <p>El presente contrato regula la afiliación al programa de salud anual denominado <b>"Tu Doctor 365"</b>. Este programa otorga el derecho exclusivo de consultas médicas generales presenciales de carácter ordinario, rutinario o de medicina preventiva de forma ilimitada y gratuita durante un año calendario continuo desde la fecha de inscripción o renovación del mismo, aplicable para todo el horario de atención al público de La Clínica.</p>
+              <ul class="ct-list">
+                <li class="ct-highlight">El programa cubre estrictamente a <b>dos (2) personas</b> plenamente identificadas al momento de la firma: el Afiliado Titular y un (1) Beneficiario Designado. Los derechos adquiridos son estrictamente personales e intransferibles.</li>
+                <li class="ct-highlight">El costo anual de afiliación es de <b>Novecientos Lempiras Exactos (L&nbsp;900.00) en total</b>, valor único que cubre a ambos integrantes registrados en el plan y que el Afiliado Titular cancela en un solo pago al momento de suscribir este contrato.</li>
+                <li>Quedan totalmente excluidas de la gratuidad las consultas por urgencias médicas, las cuales deben ser canceladas en su totalidad.</li>
+                <li>Se establece de forma expresa que La Clínica no brinda atención de emergencias médicas.</li>
+                <li>La atención médica es presencial y aplica a las instalaciones disponibles durante la vigencia del contrato.</li>
+              </ul>
             </div>
-          </div>
 
-          <!-- Firmas -->
-          <div class="ctr-signatures">
-            <div class="ctr-sig">
-              <strong>Firma del Miembro</strong>
-              Nombre: <span class="ctr-row-val blank" id="ctr-firma-nombre">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br><br>
-              Fecha: ______ / ______ / ________<br><br>
-              <div style="border-top:1px solid #374151;margin-top:40px;padding-top:6px;font-size:11px;color:#6B7280;">Firma</div>
-            </div>
-            <div class="ctr-sig">
-              <strong>Representante CMG</strong>
-              Nombre: <span class="ctr-row-val blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br><br>
-              Fecha: ______ / ______ / ________<br><br>
-              <div style="border-top:1px solid #374151;margin-top:40px;padding-top:6px;font-size:11px;color:#6B7280;">Sello y Firma Autorizada</div>
-            </div>
-          </div>
+            <hr class="ct-rule">
 
-          <p style="margin-top:24px;font-size:11px;color:#9CA3AF;text-align:center;">
-            Clínica Médica General S. de R.L. · City Mall, Sótano 2, Local E214 · Tegucigalpa, Honduras · © 2026
-          </p>
+            <div class="ct-clause">
+              <div class="ct-clause-title">2. Regalía de Bienvenida</div>
+              <p>Por la primera adquisición y activación del programa <b>"Tu Doctor 365"</b>, se otorgará como beneficio de bienvenida una (1) sola aplicación gratuita de sueroterapia de <b>Complejo B</b>.</p>
+              <ul class="ct-list">
+                <li>Este beneficio aplica únicamente para uno de los dos integrantes registrados (Titular o Beneficiario).</li>
+                <li>Deberá ser canjeado obligatoriamente dentro de los primeros <b>treinta (30) días calendario</b> de vigencia del contrato.</li>
+                <li>No es transferible a terceros, ni acumulable, ni canjeable por dinero en efectivo u otros servicios de La Clínica.</li>
+              </ul>
+            </div>
+
+            <hr class="ct-rule">
+
+            <div class="ct-clause">
+              <div class="ct-clause-title">3. Descuentos en Servicios Complementarios y Exclusiones del Programa</div>
+              <p>Los miembros vigentes de <b>"Tu Doctor 365"</b> tendrán derecho a tarifas preferenciales y descuentos fijos aplicados sobre el precio regular de los servicios de La Clínica, estructurados de la siguiente manera:</p>
+              <ul class="ct-list">
+                <li><b>Beneficios con Descuento de hasta un 15%:</b> Se aplicará exclusivamente en el servicio de <b>Sueroterapia</b> (aplicable únicamente a sueros básicos autorizados).</li>
+                <li><b>Beneficios con Descuento de hasta un 10%:</b> Se aplicará en el servicio de <b>Procedimientos Médicos</b>.</li>
+                <li><b>Beneficios con Descuento de hasta un 5%:</b> Se aplicará en el servicio de <b>Laboratorio Clínico</b>.</li>
+                <li><b>Modificación de descuentos:</b> La Clínica se reserva el derecho de modificar estos porcentajes en cualquier momento. Los cambios serán notificados con 7 días de anticipación.</li>
+                <li><b>Exclusiones Absolutas (No Aplica Descuento):</b> Medicamentos en general; Suero de Glutatión y Suero de Colágeno; Cauterizaciones.</li>
+                <li><b>No acumulación con Descuentos Legales:</b> En cumplimiento del Decreto 199-2006 y sus reformas para la protección de la <b>Tercera Edad, Cuarta Edad, Jubilados, Pensionados y Personas con Discapacidad</b>, los descuentos de este programa <b>no son acumulables</b> con los estipulados por ley. El paciente elegirá el beneficio que más le favorezca.</li>
+              </ul>
+            </div>
+
+            <hr class="ct-rule">
+
+            <div class="ct-clause">
+              <div class="ct-clause-title">4. Política de Atención y Exclusión de Urgencias y Emergencias</div>
+              <p>La prestación de los servicios médicos gratuitos del plan se brindará bajo la modalidad estricta de orden de llegada, respetando rigurosamente el turno de cada paciente en la sala de espera.</p>
+              <ul class="ct-list">
+                <li><b>Exclusión y Cobro de Urgencias:</b> Toda consulta motivada por un cuadro agudo, dolencia severa, repentina o síntoma que requiera atención inmediata (calificada como urgencia médica por el personal de salud) <b>no cuenta como consulta general y deberá ser pagada en su totalidad</b> bajo la tarifa regular vigente.</li>
+                <li><b>Criterio de Remisión de Emergencias:</b> En caso de cuadro clínico crítico o emergencia que supere la capacidad resolutiva de La Clínica, el médico tratante ordenará remisión inmediata a hospital especializado. Los costos de traslado corren por cuenta del paciente.</li>
+                <li>La afiliación a <b>"Tu Doctor 365"</b> no garantiza atención prioritaria sobre pacientes que hayan llegado antes, ni sobre urgencias médicas críticas.</li>
+              </ul>
+            </div>
+
+            <hr class="ct-rule">
+
+            <div class="ct-clause">
+              <div class="ct-clause-title">5. Autonomía y Criterio Médico (Incapacidades)</div>
+              <p>La emisión de incapacidades médicas de cualquier índole (laboral, escolar o particular) queda sujeta exclusivamente al criterio científico, ético y profesional del médico tratante. La adquisición del programa <b>"Tu Doctor 365"</b> no obliga al profesional de la salud a emitir una incapacidad si el cuadro clínico del paciente no lo amerita legal o médicamente.</p>
+            </div>
+
+            <hr class="ct-rule">
+
+            <div class="ct-clause">
+              <div class="ct-clause-title">6. Duración, Renovación, Retiro Voluntario y Reserva de Derechos</div>
+              <p>El presente contrato tiene una vigencia improrrogable de un (1) año ordinario, contado a partir de la fecha de firma.</p>
+              <ul class="ct-list">
+                <li><b>Retiro Voluntario Anticipado:</b> Si el Afiliado Titular o su beneficiario deciden dar por terminada su inscripción antes del vencimiento anual, no aplicará ningún tipo de reembolso o devolución total o parcial del dinero pagado.</li>
+                <li>Al finalizar el término, el programa podrá renovarse únicamente por mutuo acuerdo escrito de ambas partes y bajo las tarifas vigentes del mercado.</li>
+                <li>La Clínica podrá abstenerse de renovar la afiliación a su entera discreción y sin necesidad de justificación o declaración judicial previa.</li>
+              </ul>
+            </div>
+
+            <hr class="ct-rule">
+
+            <div class="ct-clause">
+              <div class="ct-clause-title">7. Causales de Rescisión Anticipada Sin Derecho a Devolución</div>
+              <p>La Clínica podrá dar por terminado el contrato de forma inmediata sin derecho a devolución de los valores pagados, si se constata que:</p>
+              <ul class="ct-list">
+                <li>El afiliado o su beneficiario prestan, alquilan o intentan transferir su derecho de consulta y los beneficios de este programa a terceras personas.</li>
+                <li>El afiliado o su beneficiario incurren en faltas de respeto, insultos, manifestaciones falsas o agresiones físicas o verbales hacia el personal de La Clínica u otros pacientes.</li>
+              </ul>
+            </div>
+
+            <hr class="ct-rule">
+
+            <div class="ct-clause">
+              <div class="ct-clause-title">8. Jurisdicción y Legislación Aplicable</div>
+              <p>Este contrato se rige en su totalidad por las leyes de la República de Honduras. Para cualquier controversia, las partes se someten en primera instancia a la vía administrativa ante la <b>Dirección General de Protección al Consumidor</b>, o en su defecto, a los tribunales competentes de la ciudad de Tegucigalpa, Municipio del Distrito Central.</p>
+            </div>
+
+          </div><!-- /ct-body -->
+
+          <!-- Sección de firma -->
+          <div class="ct-sign-section">
+            <div class="ct-sign-title">Firma de Conformidad y Aceptación del Programa</div>
+            <p class="ct-sign-intro">Al firmar este documento, el Afiliado Titular declara expresamente que ha leído, entendido, recibido una copia y aceptado cada una de las cláusulas, limitaciones y restricciones del programa <b>"Tu Doctor 365"</b>.</p>
+
+            <div class="ct-data-grid">
+              <div class="ct-data-grid-head">Datos del Afiliado Titular</div>
+              <div class="ct-data-rows">
+                <div class="ct-data-row ct-data-row--full">
+                  <div class="ct-field">
+                    <span class="ct-field-label">Nombre Completo</span>
+                    <div class="ct-field-line"><span class="ct-field-value" id="ct-titular-nombre"></span></div>
+                  </div>
+                </div>
+                <div class="ct-data-row ct-data-row--3col">
+                  <div class="ct-field">
+                    <span class="ct-field-label">DNI / Número de Identidad</span>
+                    <div class="ct-field-line"><span class="ct-field-value" id="ct-titular-dni"></span></div>
+                  </div>
+                  <div class="ct-field">
+                    <span class="ct-field-label">Sexo</span>
+                    <div class="ct-field-line"></div>
+                  </div>
+                  <div class="ct-field">
+                    <span class="ct-field-label">Edad</span>
+                    <div class="ct-field-line"><span class="ct-field-value" id="ct-titular-edad"></span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ct-data-grid">
+              <div class="ct-data-grid-head">Datos del Beneficiario Designado</div>
+              <div class="ct-data-rows">
+                <div class="ct-data-row ct-data-row--full">
+                  <div class="ct-field">
+                    <span class="ct-field-label">Nombre Completo</span>
+                    <div class="ct-field-line"></div>
+                  </div>
+                </div>
+                <div class="ct-data-row ct-data-row--3col">
+                  <div class="ct-field">
+                    <span class="ct-field-label">DNI / Número de Identidad</span>
+                    <div class="ct-field-line"></div>
+                  </div>
+                  <div class="ct-field">
+                    <span class="ct-field-label">Sexo</span>
+                    <div class="ct-field-line"></div>
+                  </div>
+                  <div class="ct-field">
+                    <span class="ct-field-label">Edad</span>
+                    <div class="ct-field-line"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ct-sign-row">
+              <div class="ct-sign-field">
+                <span class="ct-sign-field-label">Firma del Afiliado Titular</span>
+                <div class="ct-sign-line"></div>
+              </div>
+              <div>
+                <div class="ct-date-group">
+                  <span>Fecha:</span>
+                  <span class="ct-date-box"></span>
+                  <span>/</span>
+                  <span class="ct-date-box"></span>
+                  <span>/</span>
+                  <span class="ct-date-box ct-date-box--year"></span>
+                </div>
+              </div>
+            </div>
+          </div><!-- /ct-sign-section -->
+
+          <!-- Uso exclusivo CMG -->
+          <div class="ct-internal">
+            <div class="ct-internal-head">Uso Exclusivo de Clínica Médica General CMG</div>
+            <div class="ct-internal-body">
+              <div class="ct-internal-row"><b>Revisado Por:</b><div class="ct-internal-line"></div></div>
+              <div class="ct-internal-row"><b>Documentación Completa:</b><div class="ct-internal-line"></div></div>
+              <div class="ct-internal-row"><b>Identificación de Suscripción:</b><div class="ct-internal-line"></div></div>
+              <div class="ct-internal-dates">
+                <div class="ct-internal-row" style="padding:0;margin-top:5px;">
+                  <b>Inicio de Vigencia:</b>
+                  <div class="ct-date-group" style="padding-bottom:0">
+                    <span class="ct-date-box"></span><span style="font-size:12px;color:#374151">/</span>
+                    <span class="ct-date-box"></span><span style="font-size:12px;color:#374151">/</span>
+                    <span class="ct-date-box ct-date-box--year"></span>
+                  </div>
+                </div>
+                <div class="ct-internal-row" style="padding:0;margin-top:5px;">
+                  <b>Finalización de Vigencia:</b>
+                  <div class="ct-date-group" style="padding-bottom:0">
+                    <span class="ct-date-box"></span><span style="font-size:12px;color:#374151">/</span>
+                    <span class="ct-date-box"></span><span style="font-size:12px;color:#374151">/</span>
+                    <span class="ct-date-box ct-date-box--year"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="ct-seal-row">
+                <div class="ct-obs-field">
+                  <span class="ct-obs-label">Observaciones:</span>
+                  <div class="ct-obs-lines">
+                    <div class="ct-obs-line"></div>
+                    <div class="ct-obs-line"></div>
+                  </div>
+                </div>
+                <div class="ct-seal-box">
+                  <span>Firma y Sello<br>Clínica Médica General CMG</span>
+                </div>
+              </div>
+            </div>
+          </div><!-- /ct-internal -->
+
+          <!-- Footer del contrato -->
+          <div class="ct-foot">
+            <b>Clínica Médica General CMG, S. de R.L.</b> &nbsp;·&nbsp; Local E-214, Sótano No. 2, City Mall · Comayagüela, Francisco Morazán, M.D.C.<br>
+            administracion@clinicamedicacmg.net &nbsp;·&nbsp; (+504) 2262-6764 &nbsp;·&nbsp; (+504) 3155-5162 &nbsp;·&nbsp; clinicamedicacmg.net
+          </div>
 
         </div><!-- /fel-contrato -->
       </div>
@@ -814,15 +1058,12 @@
     setText('fel-nombre-hero', data.nombre || 'nuevo miembro');
     setText('fel-num-hero', data.numSolicitud);
 
-    /* Contrato */
-    setText('ctr-num-sol', data.numSolicitud);
-    setText('ctr-fecha', fmtFecha(data.fechaSolicitud));
-    setText('ctr-nombre-completo', nombreCompleto);
-    setText('ctr-nacimiento', fmtNacimiento(data.fechaNacimiento));
-    setText('ctr-edad', data.edad ? data.edad + ' años' : '—');
-    setText('ctr-telefono', data.telefono);
-    setText('ctr-email', data.email);
-    setText('ctr-firma-nombre', nombreCompleto);
+    /* Contrato CMG · Tu Doctor 365 */
+    setText('ct-num-solicitud', data.numSolicitud || '—');
+    setText('ct-fecha-solicitud', fmtFecha(data.fechaSolicitud));
+    setText('ct-titular-nombre', nombreCompleto);
+    setText('ct-titular-dni', data.numeroIdentidad || '—');
+    setText('ct-titular-edad', data.edad ? data.edad + ' años' : '—');
 
     /* WhatsApp link */
     var waMsg = '¡Hola CMG! Me inscribí a Doctor 365 en línea.\n' +

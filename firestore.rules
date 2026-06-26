@@ -213,6 +213,17 @@ service cloud.firestore {
       allow create, update, delete: if isDoctor();
     }
 
+    // ═══ /catalogoConfig/{itemKey} ════════════════════════════
+    // Overrides de precio público, % de descuento Doctor 365 y
+    // exclusiones por ítem, gestionados desde Admin-Precios.html.
+    //   - Lectura PÚBLICA: el Cotizador lo usan visitantes anónimos
+    //     y necesita los precios/descuentos vigentes.
+    //   - Escritura: solo Admin.
+    match /catalogoConfig/{itemKey} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // ═══ Bloqueo por defecto ═══════════════════════════════════
     // Cualquier otra colección queda bloqueada.
     match /{document=**} {

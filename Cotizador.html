@@ -1932,32 +1932,29 @@
     let d365discount = 0;  // suma de descuentos D365 por ítem (% individual)
     let d365free = 0;      // consulta médica general → 100% off
     let allDiscountable = 0;
-    let aestheticTotal = 0;
 
     document.querySelectorAll('.coti-item').forEach(it => {
       const qty = parseInt(it.querySelector('input').value, 10) || 0;
       if (qty <= 0) return;
       const price = parseFloat(it.dataset.price);
       const cat = it.closest('.coti-cat').dataset.cat;
-      const isAesthetic = it.dataset.aesthetic === '1';
       const isD365Free = it.dataset.d365Free === '1';
       const isD365Excluded = it.dataset.d365Excluded === '1';
       let d365pct = parseFloat(it.dataset.d365Pct);
-      if (isNaN(d365pct)) d365pct = 15;
+      if (isNaN(d365pct)) d365pct = 0;
       const name = lang === 'en' ? it.dataset.nameEn : it.dataset.nameEs;
       const line = price * qty;
       subtotal += line;
-      if (isAesthetic) {
-        aestheticTotal += line;
+      if (isD365Free) {
+        allDiscountable += line;
+        d365free += line;
+      } else if (isD365Excluded) {
+        /* excluido: sin descuento Doctor 365 ni de tercera/cuarta edad */
       } else {
         allDiscountable += line;
-        if (isD365Free) {
-          d365free += line;
-        } else if (!isD365Excluded && d365pct > 0) {
-          d365discount += line * (d365pct / 100);
-        }
+        if (d365pct > 0) d365discount += line * (d365pct / 100);
       }
-      items.push({ name, qty, price, line, cat, isAesthetic, isD365Free, isD365Excluded });
+      items.push({ name, qty, price, line, cat, isD365Free, isD365Excluded });
     });
 
     document.getElementById('coti-count').textContent = items.reduce((a, i) => a + i.qty, 0);
@@ -1973,10 +1970,9 @@
     } else {
       cartList.innerHTML = '<div class="coti-cart-items">' + items.map(i => {
         let badge = '';
-        if (i.isAesthetic) badge = '<small>' + (lang === 'en' ? 'No discount (aesthetic)' : 'Sin descuento (estético)') + '</small>';
-        else if (i.isD365Free && disc === 'd365') badge = '<small style="color:var(--cmg-yellow)">' + (lang === 'en' ? 'Free with Doctor 365' : 'Gratis con Doctor 365') + '</small>';
+        if (i.isD365Free && disc === 'd365') badge = '<small style="color:var(--cmg-yellow)">' + (lang === 'en' ? 'Free with Doctor 365' : 'Gratis con Doctor 365') + '</small>';
         else if (i.isD365Excluded && disc === 'd365') badge = '<small>' + (lang === 'en' ? 'No Doctor 365 discount' : 'Sin descuento Doctor 365') + '</small>';
-        return '<div class="coti-cart-item' + (i.isAesthetic ? ' is-aesthetic' : '') + '">' +
+        return '<div class="coti-cart-item' + (i.isD365Excluded ? ' is-aesthetic' : '') + '">' +
         '<span class="coti-cart-item-name">' + escapeHtml(i.name) + badge + '</span>' +
         '<span class="coti-cart-item-qty">×' + i.qty + '</span>' +
         '<span class="coti-cart-item-price">' + fmt(i.line) + '</span>' +
@@ -2028,20 +2024,17 @@
       const qty = parseInt(it.querySelector('input').value, 10) || 0;
       if (qty <= 0) return;
       const price    = parseFloat(it.dataset.price);
-      const isAes    = it.dataset.aesthetic === '1';
       const isD365Fr = it.dataset.d365Free  === '1';
       const isD365Ex = it.dataset.d365Excluded === '1';
       let d365pct    = parseFloat(it.dataset.d365Pct);
-      if (isNaN(d365pct)) d365pct = 15;
+      if (isNaN(d365pct)) d365pct = 0;
       const name     = lang === 'en' ? it.dataset.nameEn : it.dataset.nameEs;
       const line     = price * qty;
       subtotal += line;
-      if (!isAes) {
-        allDiscountable += line;
-        if (isD365Fr) d365free += line;
-        else if (!isD365Ex && d365pct > 0) d365discount += line * (d365pct / 100);
-      }
-      cartItems.push({ name, qty, price, line, isAesthetic: isAes, isD365Free: isD365Fr });
+      if (isD365Fr) { allDiscountable += line; d365free += line; }
+      else if (isD365Ex) { /* excluido: sin descuento */ }
+      else { allDiscountable += line; if (d365pct > 0) d365discount += line * (d365pct / 100); }
+      cartItems.push({ name, qty, price, line, isD365Free: isD365Fr, isD365Excluded: isD365Ex });
     });
 
     if (cartItems.length === 0) {
@@ -2071,6 +2064,9 @@
   // Clave por ítem: <categoria>__<slug(nombreEs)>. DEBE coincidir con Admin-Precios.html.
   function cmgSlug(s){ return String(s||'').toLowerCase().replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u').replace(/ü/g,'u').replace(/ñ/g,'n').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
   function cmgFmtPrice(n){ return Number.isInteger(n) ? n.toLocaleString('en-US') : n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  // Descuento Doctor 365 por defecto, según categoría (DEBE coincidir con Admin-Precios.html):
+  // suero → 15% · laboratorio → sin descuento · resto de servicios → 10%
+  function catDefaultPct(cat){ if (cat === 'suero') return 15; if (cat === 'lab') return null; return 10; }
   function applyItemKeys(){
     const seen = {};
     document.querySelectorAll('.coti-item').forEach(it => {
@@ -2078,8 +2074,11 @@
       const base = cat + '__' + cmgSlug(it.dataset.nameEs);
       seen[base] = (seen[base] || 0) + 1;
       it.dataset.cfgKey = seen[base] > 1 ? base + '--' + seen[base] : base;
-      if (it.dataset.d365Pct === undefined)      it.dataset.d365Pct = '15';
-      if (it.dataset.d365Excluded === undefined) it.dataset.d365Excluded = '0';
+      if (it.dataset.d365Pct === undefined) {
+        const d = catDefaultPct(cat);
+        it.dataset.d365Pct = (d === null) ? '0' : String(d);
+      }
+      if (it.dataset.d365Excluded === undefined) it.dataset.d365Excluded = (it.dataset.aesthetic === '1') ? '1' : '0';
     });
   }
   function loadCatalogOverrides(){

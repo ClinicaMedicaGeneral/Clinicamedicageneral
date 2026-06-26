@@ -162,7 +162,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
 <div class="ap-wrap">
 
   <div class="ap-note">
-    ℹ️ Aquí defines, por cada ítem: el <b>precio al público</b> que se muestra en el Cotizador, el <b>% de descuento de Doctor 365</b>, y si el ítem <b>queda excluido</b> de los descuentos de Doctor 365. Los cambios se aplican al Cotizador en tiempo real al guardar. Los ítems sin cambios mantienen su precio de catálogo y el 15% por defecto.
+    ℹ️ Aquí defines, por cada ítem: el <b>precio al público</b> que se muestra en el Cotizador, el <b>% de descuento de Doctor 365</b>, y si el ítem <b>queda excluido</b> de los descuentos de Doctor 365. Los cambios se aplican al Cotizador en tiempo real al guardar. Por defecto: <b>Sueroterapias 15%</b>, <b>Servicios 10%</b>, <b>Laboratorio sin descuento</b> (vacío). Los ítems estéticos (glutatión, colágeno, cauterizaciones) vienen <b>excluidos</b>.
   </div>
 
   <div class="ap-controls">
@@ -186,6 +186,13 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
   function isAdmin(email) { return ADMIN_EMAILS.indexOf(email) !== -1; }
 
   var DEFAULT_PCT = 15;
+  /* Descuento Doctor 365 por defecto, según categoría:
+     suero → 15% · laboratorio → sin descuento (vacío) · resto de servicios → 10% */
+  function catDefaultPct(cat){
+    if (cat === 'suero') return 15;
+    if (cat === 'lab')   return null;   /* sin descuento, campo vacío */
+    return 10;
+  }
   var _cats  = [];           /* [{cat, catTitle, items:[...]}] */
   var _cfg   = {};           /* overrides por key */
   var _dirty = {};           /* key -> true */
@@ -285,14 +292,12 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
 
     var discCol, exclCol;
     if (it.free) {
-      discCol = '<div class="ap-field"><span class="ap-tag ap-tag--free">Gratis con D365</span></div>';
+      discCol = '<div class="ap-field"><span class="ap-tag ap-tag--free">Gratis con Doctor 365</span></div>';
       exclCol = '<div class="ap-field"></div>';
-    } else if (it.aesthetic) {
-      discCol = '<div class="ap-field"><span class="ap-tag ap-tag--aes">Estético</span></div>';
-      exclCol = '<div class="ap-field"><div class="ap-row-def">Sin descuento D365</div></div>';
     } else {
-      var pct = (cfg.descuentoD365 !== undefined && cfg.descuentoD365 !== null) ? cfg.descuentoD365 : DEFAULT_PCT;
-      var excl = !!cfg.excluido;
+      var defPct = catDefaultPct(it.cat);
+      var pct  = (cfg.descuentoD365 !== undefined && cfg.descuentoD365 !== null) ? cfg.descuentoD365 : (defPct === null ? '' : defPct);
+      var excl = (cfg.excluido !== undefined && cfg.excluido !== null) ? !!cfg.excluido : !!it.aesthetic;
       discCol = '<div class="ap-field"><span class="ap-field-label">% Doctor 365</span>' +
         '<div class="ap-input-wrap has-suffix"><span class="ap-suffix">%</span>' +
           '<input type="number" min="0" max="100" step="1" class="ap-input" data-key="' + esc(it.key) + '" data-field="descuentoD365" value="' + esc(pct) + '"' + (excl ? ' disabled' : '') + '>' +
@@ -358,9 +363,11 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
     var priceInp = r.querySelector('input[data-field="precio"]');
     var pctInp   = r.querySelector('input[data-field="descuentoD365"]');
     var exclChk  = r.querySelector('input[data-field="excluido"]');
+    var defPct = catDefaultPct(it.cat);
+    var defExcl = !!it.aesthetic;
     if (priceInp) priceInp.value = it.defPrice;
-    if (pctInp)   { pctInp.value = DEFAULT_PCT; pctInp.disabled = false; }
-    if (exclChk)  exclChk.checked = false;
+    if (exclChk)  exclChk.checked = defExcl;
+    if (pctInp)   { pctInp.value = (defPct === null ? '' : defPct); pctInp.disabled = defExcl; }
     markDirty(key);
   }
 
@@ -392,15 +399,12 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
         precio   : priceInp ? (parseFloat(priceInp.value) || 0) : it.defPrice,
         actualizado: firebase.firestore.FieldValue.serverTimestamp()
       };
-      if (!it.free && !it.aesthetic) {
-        payload.excluido      = exclChk ? !!exclChk.checked : false;
-        payload.descuentoD365 = pctInp ? (parseFloat(pctInp.value) || 0) : DEFAULT_PCT;
-      } else if (it.aesthetic) {
-        payload.excluido = true;
-        payload.descuentoD365 = 0;
-      } else { /* free */
+      if (it.free) {
         payload.excluido = false;
         payload.esGratis = true;
+      } else {
+        payload.excluido      = exclChk ? !!exclChk.checked : false;
+        payload.descuentoD365 = pctInp ? (parseFloat(pctInp.value) || 0) : 0;
       }
       batch.set(cmgDb.collection('catalogoConfig').doc(key), payload, { merge: true });
       _cfg[key] = Object.assign({}, _cfg[key], payload);

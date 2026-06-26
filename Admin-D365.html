@@ -755,14 +755,14 @@
   }
 
   function renderDepsPanel(docId, deps, panel) {
-    var tipoLabel = { conyugue: 'Cónyuge', hijo: 'Hijo', hija: 'Hija' };
-    var html = '<div class="adm-dep-panel-title">👨‍👩‍👧‍👦 Dependientes (' + deps.length + ' / 3)</div>';
+    var tipoLabel = { padre: 'Padre', madre: 'Madre', hijo: 'Hijo/Hija', esposo: 'Esposo/Esposa', conyugue: 'Cónyuge', hija: 'Hija' };
+    var html = '<div class="adm-dep-panel-title">👥 Beneficiario (' + deps.length + ' / 1)</div>';
     if (deps.length === 0) {
       html += '<p class="adm-dep-none">Sin dependientes registrados.</p>';
     } else {
       html += '<div class="adm-dep-list">';
       deps.forEach(function (dep) {
-        var tipoCls = dep.tipo === 'conyugue' ? 'conyugue' : 'hijo';
+        var tipoCls = (dep.tipo === 'esposo' || dep.tipo === 'conyugue') ? 'conyugue' : 'hijo';
         var isPend  = dep.estado !== 'aprobado';
         html +=
           '<div class="adm-dep-card">' +

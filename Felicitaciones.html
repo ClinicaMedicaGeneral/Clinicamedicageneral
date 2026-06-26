@@ -662,27 +662,28 @@
     <!-- ════ DEPENDIENTES ════ -->
     <div class="fel-deps-section no-print" id="fel-deps-section" style="display:none">
       <div class="fel-deps-head">
-        <h2>👨‍👩‍👧‍👦 Mis Dependientes</h2>
-        <span class="fel-deps-count" id="fel-deps-count">0 / 3</span>
+        <h2>👥 Mi Beneficiario</h2>
+        <span class="fel-deps-count" id="fel-deps-count">0 / 1</span>
       </div>
       <div class="fel-deps-body">
         <div class="fel-deps-note">
-          ℹ️ Puedes agregar hasta <strong>3 dependientes</strong> (cónyuge e hijos). Una vez enviados, los cambios solo pueden realizarse <strong>presencialmente en Caja CMG</strong>.
+          ℹ️ Puedes agregar <strong>1 beneficiario</strong> (padre, madre, hijo/a o esposo/a). Una vez enviado, los cambios solo pueden realizarse <strong>presencialmente en Caja CMG</strong>.
         </div>
         <div id="fel-deps-list"></div>
         <button class="fel-dep-add-btn" id="fel-dep-add-btn" style="display:none" onclick="showDepForm()">
-          ＋ Agregar dependiente
+          ＋ Agregar beneficiario
         </button>
         <div class="fel-dep-form" id="fel-dep-form" style="display:none">
-          <h4>Nuevo Dependiente</h4>
+          <h4>Nuevo Beneficiario</h4>
           <div class="fel-dep-form-grid">
             <div>
-              <label for="dep-tipo">Tipo de dependiente</label>
+              <label for="dep-tipo">Parentesco</label>
               <select class="fel-dep-input" id="dep-tipo">
                 <option value="">Seleccionar...</option>
-                <option value="conyugue">Cónyuge (Esposa/o)</option>
-                <option value="hijo">Hijo</option>
-                <option value="hija">Hija</option>
+                <option value="padre">Padre</option>
+                <option value="madre">Madre</option>
+                <option value="hijo">Hijo / Hija</option>
+                <option value="esposo">Esposo / Esposa</option>
               </select>
             </div>
             <div>
@@ -1138,15 +1139,15 @@
     var list    = $id('fel-deps-list');
     var countEl = $id('fel-deps-count');
     var addBtn  = $id('fel-dep-add-btn');
-    if (countEl) countEl.textContent = deps.length + ' / 3';
+    if (countEl) countEl.textContent = deps.length + ' / 1';
 
-    var tipoLabel = { conyugue: 'Cónyuge', hijo: 'Hijo', hija: 'Hija' };
+    var tipoLabel = { padre: 'Padre', madre: 'Madre', hijo: 'Hijo/Hija', esposo: 'Esposo/Esposa', conyugue: 'Cónyuge', hija: 'Hija' };
     if (list) {
       if (deps.length === 0) {
-        list.innerHTML = '<p style="font-size:13px;color:#9CA3AF;text-align:center;padding:8px 0 16px;">No tienes dependientes registrados aún.</p>';
+        list.innerHTML = '<p style="font-size:13px;color:#9CA3AF;text-align:center;padding:8px 0 16px;">Aún no has agregado tu beneficiario.</p>';
       } else {
         list.innerHTML = deps.map(function (dep) {
-          var tipoCls = dep.tipo === 'conyugue' ? 'conyugue' : 'hijo';
+          var tipoCls = (dep.tipo === 'esposo' || dep.tipo === 'conyugue') ? 'conyugue' : 'hijo';
           var isPend  = dep.estado !== 'aprobado';
           return '<div class="fel-dep-card">' +
             '<span class="fel-dep-tipo fel-dep-tipo--' + tipoCls + '">' + esc(tipoLabel[dep.tipo] || dep.tipo) + '</span>' +
@@ -1166,18 +1167,18 @@
       }
     }
 
-    var canAddMore = _depCanAdd && deps.length < 3;
+    var canAddMore = _depCanAdd && deps.length < 1;
     if (addBtn) addBtn.style.display = canAddMore ? '' : 'none';
 
-    /* When the 3-dependent limit is reached, show a brief note so the user
+    /* When the 1-beneficiary limit is reached, show a brief note so the user
        knows why the button is gone instead of wondering if it's a bug.     */
     var limitNote = $id('dep-limit-note');
-    if (_depCanAdd && deps.length >= 3) {
+    if (_depCanAdd && deps.length >= 1) {
       if (!limitNote) {
         limitNote = document.createElement('p');
         limitNote.id = 'dep-limit-note';
         limitNote.style.cssText = 'font-size:12px;color:#9CA3AF;text-align:center;padding:4px 0 8px;font-style:italic;';
-        limitNote.textContent = 'Límite de 3 dependientes alcanzado. Para hacer cambios visita Caja CMG.';
+        limitNote.textContent = 'Ya agregaste tu beneficiario. Para hacer cambios visita Caja CMG.';
         if (addBtn && addBtn.parentNode) addBtn.parentNode.insertBefore(limitNote, addBtn);
       }
     } else if (limitNote) {
@@ -1196,29 +1197,13 @@
     updateTipoSelect();
   }
 
-  /* Filtra las opciones del select según los dependientes ya registrados:
-     - Solo 1 cónyuge permitido (deshabilita la opción si ya existe)
-     - Hijos/hijas: sin límite propio, solo aplica el límite total de 3 */
+  /* Solo se permite 1 beneficiario en total, así que todos los parentescos
+     (padre, madre, hijo/a, esposo/a) quedan siempre disponibles. */
   function updateTipoSelect() {
     var sel = $id('dep-tipo');
     if (!sel) return;
-    var conyugueCount = _deps.filter(function(d){ return d.tipo === 'conyugue'; }).length;
     for (var i = 0; i < sel.options.length; i++) {
-      var opt = sel.options[i];
-      if (opt.value === 'conyugue') {
-        opt.disabled    = conyugueCount >= 1;
-        opt.textContent = 'Cónyuge (Esposa/o)' + (conyugueCount >= 1 ? ', ya registrado' : '');
-      } else if (opt.value === 'hijo') {
-        opt.disabled    = false;
-        opt.textContent = 'Hijo';
-      } else if (opt.value === 'hija') {
-        opt.disabled    = false;
-        opt.textContent = 'Hija';
-      }
-    }
-    /* Si la opción actualmente seleccionada quedó deshabilitada, limpiar */
-    if (sel.value && sel.options[sel.selectedIndex] && sel.options[sel.selectedIndex].disabled) {
-      sel.value = '';
+      sel.options[i].disabled = false;
     }
   }
 
@@ -1226,7 +1211,7 @@
     var form = $id('fel-dep-form');
     var btn  = $id('fel-dep-add-btn');
     if (form) form.style.display = 'none';
-    if (btn && _depCanAdd && _deps.length < 3) btn.style.display = '';
+    if (btn && _depCanAdd && _deps.length < 1) btn.style.display = '';
   }
 
   function calcDepAge() {
@@ -1256,17 +1241,9 @@
       return;
     }
 
-    /* Validar reglas de tipo:
-       - Máximo 1 cónyuge
-       - Hijos/hijas sin límite propio; solo aplica el total de 3 */
-    var conyugueCount = _deps.filter(function(d){ return d.tipo === 'conyugue'; }).length;
-
-    if (tipo === 'conyugue' && conyugueCount >= 1) {
-      alert('Ya tienes un cónyuge registrado. Solo se permite uno.');
-      return;
-    }
-    if (_deps.length >= 3) {
-      alert('Ya alcanzaste el límite de 3 dependientes.');
+    /* Solo se permite agregar 1 beneficiario en total. */
+    if (_deps.length >= 1) {
+      alert('Solo puedes agregar un (1) beneficiario.');
       return;
     }
 
@@ -1293,7 +1270,7 @@
         /* Actualizar _deps de inmediato (optimista) para que hideDepForm y
            cualquier acción del usuario antes de que loadDeps resuelva ya
            vean los conteos correctos, evita la condición de carrera donde
-           el usuario podía reabrir el form y agregar un tercer hijo. */
+           el usuario podía reabrir el form y agregar un segundo beneficiario. */
         _deps.push({
           _id            : docRef.id,
           tipo           : tipo,

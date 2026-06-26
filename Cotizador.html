@@ -1774,6 +1774,12 @@
   <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 0 1 8.413 3.488 11.824 11.824 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z"/></svg>
 </a>
 
+<!-- Firebase (overrides de precios/descuentos desde Admin-Precios) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+
 <script>
 (function () {
   // ── Promo strip: dynamic hours by current day ──────────────────
@@ -1923,7 +1929,7 @@
     const cartList = document.getElementById('coti-cart-list');
     const items = [];
     let subtotal = 0;
-    let d365able = 0;      // lab + suero → 15% off
+    let d365discount = 0;  // suma de descuentos D365 por ítem (% individual)
     let d365free = 0;      // consulta médica general → 100% off
     let allDiscountable = 0;
     let aestheticTotal = 0;
@@ -1935,6 +1941,9 @@
       const cat = it.closest('.coti-cat').dataset.cat;
       const isAesthetic = it.dataset.aesthetic === '1';
       const isD365Free = it.dataset.d365Free === '1';
+      const isD365Excluded = it.dataset.d365Excluded === '1';
+      let d365pct = parseFloat(it.dataset.d365Pct);
+      if (isNaN(d365pct)) d365pct = 15;
       const name = lang === 'en' ? it.dataset.nameEn : it.dataset.nameEs;
       const line = price * qty;
       subtotal += line;
@@ -1944,11 +1953,11 @@
         allDiscountable += line;
         if (isD365Free) {
           d365free += line;
-        } else {
-          d365able += line;
+        } else if (!isD365Excluded && d365pct > 0) {
+          d365discount += line * (d365pct / 100);
         }
       }
-      items.push({ name, qty, price, line, cat, isAesthetic, isD365Free });
+      items.push({ name, qty, price, line, cat, isAesthetic, isD365Free, isD365Excluded });
     });
 
     document.getElementById('coti-count').textContent = items.reduce((a, i) => a + i.qty, 0);
@@ -1966,6 +1975,7 @@
         let badge = '';
         if (i.isAesthetic) badge = '<small>' + (lang === 'en' ? 'No discount (aesthetic)' : 'Sin descuento (estético)') + '</small>';
         else if (i.isD365Free && disc === 'd365') badge = '<small style="color:var(--cmg-yellow)">' + (lang === 'en' ? 'Free with Doctor 365' : 'Gratis con Doctor 365') + '</small>';
+        else if (i.isD365Excluded && disc === 'd365') badge = '<small>' + (lang === 'en' ? 'No Doctor 365 discount' : 'Sin descuento Doctor 365') + '</small>';
         return '<div class="coti-cart-item' + (i.isAesthetic ? ' is-aesthetic' : '') + '">' +
         '<span class="coti-cart-item-name">' + escapeHtml(i.name) + badge + '</span>' +
         '<span class="coti-cart-item-qty">×' + i.qty + '</span>' +
@@ -1977,7 +1987,7 @@
     // Discount calculation
     let discount = 0;
     let discountLabel = '';
-    if (disc === 'd365')   { discount = d365free + d365able * 0.15; discountLabel = lang === 'en' ? 'Doctor 365 (free consult + 15% services)' : 'Doctor 365 (consulta gratis + 15% servicios)'; }
+    if (disc === 'd365')   { discount = d365free + d365discount; discountLabel = lang === 'en' ? 'Doctor 365 (free consult + member discounts)' : 'Doctor 365 (consulta gratis + descuentos de miembro)'; }
     if (disc === 'tercera'){ discount = allDiscountable * 0.25;  discountLabel = lang === 'en' ? 'Senior 3rd age (25%)' : 'Tercera edad (25%)'; }
     if (disc === 'cuarta') { discount = allDiscountable * 0.30;  discountLabel = lang === 'en' ? 'Senior 4th age (30%)' : 'Cuarta edad (30%)'; }
     const total = subtotal - discount;
@@ -2012,7 +2022,7 @@
     const lang = document.body.dataset.lang;
     const disc = currentDiscount();
     const cartItems = [];
-    let subtotal = 0, d365able = 0, d365free = 0, allDiscountable = 0;
+    let subtotal = 0, d365discount = 0, d365free = 0, allDiscountable = 0;
 
     document.querySelectorAll('.coti-item').forEach(it => {
       const qty = parseInt(it.querySelector('input').value, 10) || 0;
@@ -2020,12 +2030,16 @@
       const price    = parseFloat(it.dataset.price);
       const isAes    = it.dataset.aesthetic === '1';
       const isD365Fr = it.dataset.d365Free  === '1';
+      const isD365Ex = it.dataset.d365Excluded === '1';
+      let d365pct    = parseFloat(it.dataset.d365Pct);
+      if (isNaN(d365pct)) d365pct = 15;
       const name     = lang === 'en' ? it.dataset.nameEn : it.dataset.nameEs;
       const line     = price * qty;
       subtotal += line;
       if (!isAes) {
         allDiscountable += line;
-        if (isD365Fr) d365free += line; else d365able += line;
+        if (isD365Fr) d365free += line;
+        else if (!isD365Ex && d365pct > 0) d365discount += line * (d365pct / 100);
       }
       cartItems.push({ name, qty, price, line, isAesthetic: isAes, isD365Free: isD365Fr });
     });
@@ -2038,7 +2052,7 @@
     }
 
     let discount = 0, discountLabel = '';
-    if (disc === 'd365')    { discount = d365free + d365able * 0.15; discountLabel = lang === 'en' ? 'Doctor 365 (free consult + 15% off services)' : 'Doctor 365 (consulta gratis + 15% en servicios)'; }
+    if (disc === 'd365')    { discount = d365free + d365discount; discountLabel = lang === 'en' ? 'Doctor 365 (free consult + member discounts)' : 'Doctor 365 (consulta gratis + descuentos de miembro)'; }
     if (disc === 'tercera') { discount = allDiscountable * 0.25; discountLabel = lang === 'en' ? 'Senior discount – 3rd age (25%)' : 'Descuento tercera edad (25%)'; }
     if (disc === 'cuarta')  { discount = allDiscountable * 0.30; discountLabel = lang === 'en' ? 'Senior discount – 4th age (30%)' : 'Descuento cuarta edad (30%)'; }
 
@@ -2053,7 +2067,44 @@
     window.location.href = 'Cotizacion-Sistema.html';
   }
 
+  // ── Overrides de precios/descuentos (Admin-Precios.html) ──────────
+  // Clave por ítem: <categoria>__<slug(nombreEs)>. DEBE coincidir con Admin-Precios.html.
+  function cmgSlug(s){ return String(s||'').toLowerCase().replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u').replace(/ü/g,'u').replace(/ñ/g,'n').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+  function cmgFmtPrice(n){ return Number.isInteger(n) ? n.toLocaleString('en-US') : n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function applyItemKeys(){
+    const seen = {};
+    document.querySelectorAll('.coti-item').forEach(it => {
+      const cat = it.closest('.coti-cat').dataset.cat;
+      const base = cat + '__' + cmgSlug(it.dataset.nameEs);
+      seen[base] = (seen[base] || 0) + 1;
+      it.dataset.cfgKey = seen[base] > 1 ? base + '--' + seen[base] : base;
+      if (it.dataset.d365Pct === undefined)      it.dataset.d365Pct = '15';
+      if (it.dataset.d365Excluded === undefined) it.dataset.d365Excluded = '0';
+    });
+  }
+  function loadCatalogOverrides(){
+    if (!window.cmgDb) return;
+    cmgDb.collection('catalogoConfig').get().then(snap => {
+      const map = {};
+      snap.forEach(d => { map[d.id] = d.data(); });
+      document.querySelectorAll('.coti-item').forEach(it => {
+        const cfg = map[it.dataset.cfgKey];
+        if (!cfg) return;
+        if (cfg.precio !== undefined && cfg.precio !== null && !isNaN(cfg.precio)) {
+          it.dataset.price = String(cfg.precio);
+          const pe = it.querySelector('.coti-item-price');
+          if (pe) pe.innerHTML = '<span class="price-currency">L</span>' + cmgFmtPrice(Number(cfg.precio));
+        }
+        if (cfg.descuentoD365 !== undefined && cfg.descuentoD365 !== null) it.dataset.d365Pct = String(cfg.descuentoD365);
+        if (cfg.excluido !== undefined) it.dataset.d365Excluded = cfg.excluido ? '1' : '0';
+      });
+      render();
+    }).catch(err => { console.warn('[CMG] catalogoConfig:', err); });
+  }
+
+  applyItemKeys();
   render();
+  loadCatalogOverrides();
 
   // Exponer al scope global para que los onclick del HTML puedan llamarla
   window.exportToSistema = exportToSistema;

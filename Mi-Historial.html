@@ -979,7 +979,7 @@
       return;
     }
     currentUser = user;
-    var name = user.displayName || user.email.split('@')[0];
+    var name = user.displayName || user.email.split('@')[0]; if (user.email === 'skarleth.admoncmg@gmail.com' && !/^ing\.?\s/i.test(name)) name = 'Ing. ' + name;
     $id('mh-user-chip').style.display = '';
     $id('mh-avatar').textContent = name.charAt(0).toUpperCase();
     $id('mh-user-name').textContent = name;

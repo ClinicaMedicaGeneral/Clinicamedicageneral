@@ -564,7 +564,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   cmgAuth.onAuthStateChanged(function (user) {
     if (!user) { window.location.href = 'Auth.html?returnTo=Examenes-Laboratorio.html'; return; }
     currentUser = user;
-    var name = user.displayName || user.email.split('@')[0];
+    var name = user.displayName || user.email.split('@')[0]; if (user.email === 'skarleth.admoncmg@gmail.com' && !/^ing\.?\s/i.test(name)) name = 'Ing. ' + name;
     $id('el-user-chip').style.visibility = '';
     $id('el-avatar').textContent = name.charAt(0).toUpperCase();
     $id('el-user-name').textContent = name;

@@ -880,7 +880,7 @@ button.ed-consulta-link {
       </div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
         <div class="ed-user-chip" id="ed-user-chip" style="display:none">
-          <span>Dr. <strong id="ed-user-name">—</strong></span>
+          <span><span id="ed-user-title">Dr. </span><strong id="ed-user-name">—</strong></span>
         </div>
         <button class="ed-logout" id="ed-logout">Cerrar sesión</button>
       </div>
@@ -1997,7 +1997,7 @@ button.ed-consulta-link {
     }
     /* Mostrar nombre del doctor */
     $id('ed-user-chip').style.display = '';
-    $id('ed-user-name').textContent = user.displayName || user.email.split('@')[0];
+    var _edN = user.displayName || user.email.split('@')[0]; if (user.email === 'skarleth.admoncmg@gmail.com') { _edN = 'Ing. ' + _edN; var _t = $id('ed-user-title'); if (_t) _t.textContent = ''; } $id('ed-user-name').textContent = _edN;
     /* Inicializar antecedentes */
     renderAntecedentes('nuevo-pat-container', ANTECEDENTES_PATOLOGICOS, 'nvopat');
     renderAntecedentes('nuevo-nopat-container', ANTECEDENTES_NO_PATOLOGICOS, 'nvonopat');

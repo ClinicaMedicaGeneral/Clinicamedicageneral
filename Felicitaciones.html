@@ -1302,7 +1302,7 @@
     var navLink = $id('cmg-nav-account');
     var navName = $id('cmg-nav-name');
     if (navLink) navLink.href = 'Mis-Cotizaciones.html';
-    if (navName) navName.textContent = (user.displayName || user.email).split(' ')[0];
+    if (navName) { var _navN = (user.displayName || user.email).split(' ')[0]; if (user.email === 'skarleth.admoncmg@gmail.com') _navN = 'Ing. ' + _navN; navName.textContent = _navN; }
 
     /* Admin pill */
     if (['ventasymercadeocmg@gmail.com','rubenwainwrightba@gmail.com','skarleth.admoncmg@gmail.com'].indexOf(user.email) !== -1) {

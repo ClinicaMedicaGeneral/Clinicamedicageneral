@@ -1789,7 +1789,7 @@ if (typeof cmgAuth !== 'undefined') {
     var link = document.getElementById('cmg-nav-account');
     var name = document.getElementById('cmg-nav-name');
     if (user) {
-      var displayName = user.displayName || user.email.split('@')[0];
+      var displayName = user.displayName || user.email.split('@')[0]; if (user.email === 'skarleth.admoncmg@gmail.com' && !/^ing\.?\s/i.test(displayName)) displayName = 'Ing. ' + displayName;
       if (link) link.href = 'Mis-Cotizaciones.html';
       if (name) name.textContent = displayName;
       /* Admin pill */

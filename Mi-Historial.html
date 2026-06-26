@@ -1221,8 +1221,15 @@
         var consultas = [];
         snap.forEach(function (doc) {
           var data = doc.data();
-          /* ocultar solo pre-clínicas pendientes; servicios sí aparecen (pendientes o completados) */
+          /* ocultar pre-clínicas pendientes; servicios sí aparecen (pendientes o completados) */
           if (data.status === 'preclinica') return;
+          /* ocultar consultas incompletas/vacías: documentos creados pero nunca
+             finalizados por un médico (sin motivo ni diagnóstico). Los servicios
+             tienen su propia tarjeta y no deben filtrarse aquí. */
+          var esServicio = data.status === 'servicio' || data.status === 'servicio-completo';
+          var tieneContenido = (data.motivoConsulta && data.motivoConsulta.trim()) ||
+                               (data.diagnostico   && data.diagnostico.trim());
+          if (!esServicio && !tieneContenido) return;
           consultas.push(Object.assign({ _id: doc.id }, data));
         });
         consultas.sort(function (a, b) {

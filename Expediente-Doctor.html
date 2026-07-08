@@ -1009,6 +1009,10 @@ button.ed-consulta-link {
             <label class="ed-label">Alergias conocidas</label>
             <input type="text" class="ed-input" id="nuevo-alergias" placeholder="Penicilina, mariscos, polvo...">
           </div>
+          <div class="ed-fgroup full">
+            <label class="ed-label">Obra social / Seguro médico</label>
+            <input type="text" class="ed-input" id="nuevo-obra-social" placeholder="Ej. IHSS, Seguros Atlántida, BANHCAFE...">
+          </div>
         </div>
 
         <!-- Antecedentes Patológicos -->
@@ -2086,7 +2090,8 @@ button.ed-consulta-link {
         direccion: $val('nuevo-direccion'),
         contactoEmergencia: $val('nuevo-emerg-nombre'),
         telefonoEmergencia: $val('nuevo-emerg-tel'),
-        alergias: $val('nuevo-alergias')
+        alergias: $val('nuevo-alergias'),
+        obraSocial: $val('nuevo-obra-social')
       },
       antecedentesPatologicos: collectAntecedentes('nuevo-pat-container'),
       antecedentesNoPatologicos: collectAntecedentes('nuevo-nopat-container'),
@@ -2461,6 +2466,7 @@ button.ed-consulta-link {
         '<div class="ed-fgroup"><label class="ed-label">Contacto emergencia (nombre)</label>' + inp('edit-emerg-nombre', dg.contactoEmergencia) + '</div>' +
         '<div class="ed-fgroup"><label class="ed-label">Contacto emergencia (tel)</label>' + inp('edit-emerg-tel', dg.telefonoEmergencia, 'tel') + '</div>' +
         '<div class="ed-fgroup full"><label class="ed-label">Alergias</label>' + inp('edit-alergias', dg.alergias) + '</div>' +
+        '<div class="ed-fgroup full"><label class="ed-label">Obra social / Seguro médico</label>' + inp('edit-obra-social', dg.obraSocial) + '</div>' +
       '</div>' +
       '<div class="ed-section"><div class="ed-section-title">🏥 Antecedentes Patológicos</div><div id="edit-pat-container"></div></div>' +
       '<div class="ed-section"><div class="ed-section-title">🚭 Antecedentes No Patológicos</div><div id="edit-nopat-container"></div></div>' +
@@ -2499,7 +2505,8 @@ button.ed-consulta-link {
         direccion: $val('edit-direccion'),
         contactoEmergencia: $val('edit-emerg-nombre'),
         telefonoEmergencia: $val('edit-emerg-tel'),
-        alergias: $val('edit-alergias')
+        alergias: $val('edit-alergias'),
+        obraSocial: $val('edit-obra-social')
       },
       antecedentesPatologicos: collectAntecedentes('edit-pat-container'),
       antecedentesNoPatologicos: collectAntecedentes('edit-nopat-container'),

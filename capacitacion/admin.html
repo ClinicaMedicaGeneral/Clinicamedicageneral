@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Administración · Capacitación CMG</title>
+<link rel="icon" href="../assets/isotipo-color.png">
+<link rel="stylesheet" href="../assets/cmg-tokens.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--neutral-100); color: var(--cmg-navy); min-height: 100vh; font-family: var(--font-body); }
+
+  /* ── Header ── */
+  .cap-header {
+    background: var(--cmg-navy-deep); border-bottom: 2px solid var(--cmg-teal);
+    padding: 14px 24px; display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .cap-header img { height: 28px; }
+  .header-sep { width: 1px; height: 20px; background: rgba(255,255,255,.2); }
+  .header-title { flex: 1; display: flex; align-items: center; gap: 10px; }
+  .module-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    background: rgba(89,159,178,.2); color: var(--cmg-teal-light); padding: 3px 8px; border-radius: 4px;
+  }
+  .header-title span {
+    font-family: var(--font-display); font-size: 14px; font-weight: 900;
+    text-transform: uppercase; letter-spacing: -.01em; color: var(--white);
+  }
+  .back-link {
+    font-size: 12px; color: rgba(255,255,255,.6); text-decoration: none;
+    display: flex; align-items: center; gap: 5px; transition: color .15s; white-space: nowrap;
+  }
+  .back-link:hover { color: var(--cmg-teal-light); }
+
+  /* ── Layout ── */
+  .page-grid {
+    display: grid; grid-template-columns: 260px 1fr;
+    max-width: 1100px; margin: 0 auto; min-height: calc(100vh - 58px);
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    background: var(--cmg-navy); padding: 28px 0;
+    position: sticky; top: 58px; height: calc(100vh - 58px); overflow-y: auto;
+  }
+  .sidebar-heading {
+    font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: rgba(255,255,255,.35); padding: 0 20px 12px;
+  }
+  .lesson-nav { list-style: none; }
+  .lesson-nav-btn {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+    padding: 11px 20px; background: none; border: none; cursor: pointer;
+    text-align: left; color: rgba(255,255,255,.55); font-family: var(--font-body);
+    font-size: 13px; line-height: 1.3; transition: background .15s, color .15s;
+    border-left: 3px solid transparent;
+  }
+  .lesson-nav-btn:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.9); }
+  .lesson-nav-btn.is-active { background: rgba(89,159,178,.1); color: var(--cmg-teal-light); border-left-color: var(--cmg-teal); }
+  .lesson-nav-btn.is-done { color: rgba(255,255,255,.4); }
+  .nav-num {
+    display: flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: rgba(255,255,255,.08); font-size: 11px; font-weight: 700;
+    flex-shrink: 0; font-variant-numeric: tabular-nums; transition: background .15s;
+  }
+  .lesson-nav-btn.is-active .nav-num { background: var(--cmg-teal); color: var(--white); }
+  .lesson-nav-btn.is-done .nav-num { display: none; }
+  .check-icon { display: none; }
+  .lesson-nav-btn.is-done .check-icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; flex-shrink: 0;
+  }
+  .progress-wrap { padding: 20px 20px 0; margin-top: 12px; border-top: 1px solid rgba(255,255,255,.08); }
+  .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,.35); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+  .progress-bar { height: 4px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--cmg-teal); border-radius: 2px; transition: width .4s var(--easing-decel); width: 0%; }
+
+  /* ── Content ── */
+  .main-content { padding: 36px 40px 64px; }
+  .lesson-panel { display: none; }
+  .lesson-panel.is-active { display: block; }
+
+  /* ── Lesson header ── */
+  .lesson-header { margin-bottom: 28px; padding-bottom: 22px; border-bottom: 1px solid var(--neutral-200); }
+  .lesson-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .lesson-num-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: .08em;
+    background: var(--cmg-navy); color: var(--cmg-teal); padding: 3px 10px; border-radius: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .tag-critico { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: rgba(242,15,16,.1); color: #C0292A; padding: 3px 8px; border-radius: 4px; }
+  .tag-config  { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: rgba(89,159,178,.12); color: #2E7A8F; padding: 3px 8px; border-radius: 4px; }
+  .lesson-header h2 {
+    font-family: var(--font-display); font-size: clamp(20px, 3vw, 28px);
+    font-weight: 900; text-transform: uppercase; letter-spacing: -.015em;
+    line-height: 1; color: var(--cmg-navy); margin: 0 0 10px;
+  }
+  .lesson-header p { font-size: 14px; color: var(--neutral-500); margin: 0; line-height: 1.5; }
+  .lesson-meta { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+  .meta-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--neutral-400); }
+
+  .lesson-body { display: flex; flex-direction: column; gap: 24px; }
+
+  /* ── Step card ── */
+  .step-card { background: var(--white); border: 1px solid var(--neutral-200); border-radius: 10px; overflow: hidden; }
+  .step-card-header { display: flex; align-items: center; gap: 14px; padding: 15px 20px; background: var(--cmg-navy); color: var(--white); }
+  .step-n {
+    width: 28px; height: 28px; border-radius: 50%; background: var(--cmg-teal);
+    color: var(--white); display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 900; flex-shrink: 0; font-variant-numeric: tabular-nums;
+  }
+  .step-card-header h3 { font-family: var(--font-display); font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; margin: 0; }
+  .step-card-body { padding: 20px; }
+  .step-card-body p { font-size: 14px; line-height: 1.65; color: var(--neutral-600); margin: 0 0 12px; }
+  .step-card-body p:last-child { margin-bottom: 0; }
+
+  /* ── Callouts ── */
+  .callout { display: flex; gap: 12px; padding: 13px 15px; border-radius: 8px; font-size: 13px; line-height: 1.55; }
+  .callout-icon { flex-shrink: 0; margin-top: 1px; }
+  .callout strong { display: block; margin-bottom: 2px; font-size: 13px; }
+  .callout p { margin: 0; color: inherit; font-size: 13px; }
+  .callout.tip   { background: rgba(89,159,178,.1);  color: #1E5F70; }
+  .callout.warn  { background: rgba(253,210,44,.12); color: #7A5C00; }
+  .callout.alert { background: rgba(242,15,16,.08);  color: #901010; }
+
+  /* ── Checklist ── */
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .checklist li { display: flex; gap: 10px; font-size: 14px; color: var(--neutral-600); line-height: 1.4; align-items: flex-start; }
+  .checklist li::before { content: ''; width: 18px; height: 18px; border: 2px solid var(--neutral-300); border-radius: 4px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Screen mockup ── */
+  .screen-box {
+    background: var(--cmg-navy); border-radius: 8px; padding: 18px;
+    font-size: 13px; color: var(--fg-2); margin: 12px 0;
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  .screen-box .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .screen-box label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.38); display: block; margin-bottom: 4px; }
+  .screen-box .fake-input { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; padding: 7px 11px; font-size: 13px; color: var(--white); }
+  .screen-box .fake-select { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; padding: 7px 11px; font-size: 13px; color: rgba(255,255,255,.6); }
+  .screen-box .fake-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--cmg-teal); color: var(--white); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 8px 16px; border-radius: var(--r-pill); margin-top: 6px; }
+  .screen-box .fake-btn-yellow { background: var(--cmg-yellow); color: var(--cmg-navy); }
+
+  /* ── Data table mockup ── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th {
+    font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--neutral-400); padding: 8px 12px; text-align: left;
+    border-bottom: 1px solid var(--neutral-200); background: var(--neutral-100);
+  }
+  .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--neutral-200); color: var(--neutral-600); vertical-align: middle; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--neutral-100); }
+  .price-cell { font-family: var(--font-display); font-weight: 700; color: var(--cmg-navy); font-variant-numeric: tabular-nums; }
+  .discount-cell { color: var(--cmg-teal); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .edit-btn {
+    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    background: var(--neutral-100); color: var(--cmg-navy); border: 1px solid var(--neutral-200);
+    padding: 4px 10px; border-radius: 4px; cursor: pointer;
+  }
+  .excluded-badge { font-size: 10px; font-weight: 700; background: rgba(242,15,16,.08); color: #B0292A; padding: 2px 7px; border-radius: 3px; }
+  .overflow-x { overflow-x: auto; }
+
+  /* ── Role badge strip ── */
+  .role-strip {
+    display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0;
+  }
+  .role-chip {
+    font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: var(--r-pill);
+    border: 1px solid var(--neutral-200); background: var(--white); color: var(--cmg-navy);
+  }
+  .role-chip.caja   { background: rgba(253,210,44,.12); border-color: rgba(253,210,44,.3); color: #7A5800; }
+  .role-chip.enf    { background: rgba(89,159,178,.12); border-color: rgba(89,159,178,.3); color: #1E5F70; }
+  .role-chip.medico { background: rgba(224,112,112,.12); border-color: rgba(224,112,112,.3); color: #903030; }
+  .role-chip.admin  { background: rgba(89,159,178,.2);  border-color: var(--cmg-teal);     color: #0D4A57; }
+
+  /* ── Stat cards ── */
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0; }
+  .stat-card { background: var(--white); border: 1px solid var(--neutral-200); border-radius: 8px; padding: 14px 16px; }
+  .stat-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--neutral-400); margin-bottom: 4px; }
+  .stat-value { font-family: var(--font-display); font-size: 24px; font-weight: 900; color: var(--cmg-navy); line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat-sub { font-size: 11px; color: var(--neutral-400); margin-top: 3px; }
+
+  /* ── Navigation ── */
+  .lesson-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--neutral-200);
+    flex-wrap: wrap; gap: 12px;
+  }
+  .nav-btn {
+    display: flex; align-items: center; gap: 8px; padding: 10px 20px;
+    border-radius: var(--r-pill); font-size: 13px; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase; cursor: pointer;
+    transition: background .15s, transform .1s; border: none; font-family: var(--font-body);
+  }
+  .nav-btn:active { transform: scale(.97); }
+  .btn-prev { background: var(--neutral-200); color: var(--cmg-navy); }
+  .btn-prev:hover { background: var(--neutral-300); }
+  .btn-next { background: var(--cmg-navy); color: var(--white); }
+  .btn-next:hover { background: var(--cmg-navy-deep); }
+  .btn-done { background: var(--cmg-teal); color: var(--white); }
+  .btn-done:hover { background: #4A8FA3; }
+  .btn-done:disabled { opacity: .5; cursor: default; transform: none; }
+  .mark-done-label { font-size: 12px; color: var(--neutral-400); }
+
+  .completion-banner {
+    display: none; background: var(--cmg-navy); border-radius: 12px;
+    padding: 32px; text-align: center; margin-top: 32px;
+  }
+  .completion-banner.is-visible { display: block; }
+  .completion-banner h3 { font-family: var(--font-display); font-size: 22px; font-weight: 900; text-transform: uppercase; color: var(--cmg-teal-light); margin: 0 0 8px; }
+  .completion-banner p { color: var(--fg-2); font-size: 14px; margin: 0 0 20px; }
+  .completion-banner a { display: inline-flex; align-items: center; gap: 8px; background: var(--cmg-teal); color: var(--white); padding: 11px 24px; border-radius: var(--r-pill); font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; text-decoration: none; }
+
+  @media (max-width: 700px) {
+    .page-grid { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; padding: 16px 0; }
+    .main-content { padding: 22px 18px 48px; }
+    .screen-box .field-row { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { .nav-btn, .lesson-nav-btn { transition: none; } .progress-fill { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="cap-header">
+  <a href="../Inicio.html"><img src="../assets/cmg-logo-white.png" alt="CMG"></a>
+  <div class="header-sep"></div>
+  <div class="header-title">
+    <span class="module-badge">Administración</span>
+    <span>Módulo de Capacitación</span>
+  </div>
+  <a class="back-link" href="index.html">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>
+    Todos los módulos
+  </a>
+</header>
+
+<div class="page-grid">
+
+  <aside class="sidebar">
+    <p class="sidebar-heading">Lecciones</p>
+    <ul class="lesson-nav" id="lesson-nav">
+      <li><button class="lesson-nav-btn is-active" data-lesson="1" type="button"><span class="nav-num">1</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Vista general del panel</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="2" type="button"><span class="nav-num">2</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Catálogo de servicios</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="3" type="button"><span class="nav-num">3</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Precios públicos</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="4" type="button"><span class="nav-num">4</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Descuentos por obra social</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="5" type="button"><span class="nav-num">5</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Reportes de facturación</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="6" type="button"><span class="nav-num">6</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Gestión de usuarios</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="7" type="button"><span class="nav-num">7</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Contenido del sitio web</button></li>
+    </ul>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Progreso</span><span id="progress-text">0 / 7</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+  </aside>
+
+  <main class="main-content" id="main-content">
+
+    <!-- ══ LECCIÓN 1 ══ -->
+    <div class="lesson-panel is-active" id="lesson-1">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 01</span></div>
+        <h2>Vista general del panel administrativo</h2>
+        <p>Qué puede hacer el rol Administrador que ningún otro rol puede, y cómo está organizado el panel.</p>
+        <div class="lesson-meta">
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~15 minutos</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>Acceso al panel</h3></div>
+          <div class="step-card-body">
+            <p>Ve a <strong>clinicamedicacmg.net</strong>, haz clic en <strong>"Acceso al equipo"</strong> e ingresa con tu correo y contraseña de administrador. Al entrar verás el panel de administración, que es distinto al portal de caja o consultorio.</p>
+            <div class="callout alert">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>El acceso de administrador es el de mayor privilegio del sistema.</strong><p>Con él puedes cambiar precios, crear o eliminar usuarios, y modificar el catálogo completo. Nunca compartas estas credenciales. Si sospechas que alguien más las tiene, cámbialas de inmediato.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Secciones del panel</h3></div>
+          <div class="step-card-body">
+            <p>El menú lateral del administrador tiene acceso a todo el sistema:</p>
+            <ul class="checklist">
+              <li><strong>Catálogo</strong> — lista completa de servicios y exámenes disponibles.</li>
+              <li><strong>Precios y Descuentos</strong> — precios públicos y porcentajes por obra social.</li>
+              <li><strong>Reportes</strong> — facturación por período, servicio o convenio.</li>
+              <li><strong>Usuarios</strong> — crear, editar, desactivar cuentas del equipo.</li>
+              <li><strong>Sitio web</strong> — actualizar contenido visible al público.</li>
+              <li><strong>Doctor 365</strong> — gestión del programa de membresía.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Qué ve cada rol — comparación</h3></div>
+          <div class="step-card-body">
+            <p>Para entender el alcance de tu acceso, aquí la diferencia con los otros roles:</p>
+            <div style="overflow-x:auto">
+              <table class="data-table" style="margin-top:10px">
+                <thead>
+                  <tr>
+                    <th>Sección</th>
+                    <th>Caja</th>
+                    <th>Enfermería</th>
+                    <th>Médico</th>
+                    <th>Admin</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Cobros y pacientes</td><td>✓</td><td>—</td><td>—</td><td>✓</td></tr>
+                  <tr><td>Preclinical / agenda</td><td>—</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                  <tr><td>Expediente clínico</td><td>—</td><td>—</td><td>✓</td><td>✓</td></tr>
+                  <tr><td>Catálogo y precios</td><td>—</td><td>—</td><td>—</td><td>✓</td></tr>
+                  <tr><td>Usuarios del sistema</td><td>—</td><td>—</td><td>—</td><td>✓</td></tr>
+                  <tr><td>Reportes</td><td>—</td><td>—</td><td>—</td><td>✓</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <span class="mark-done-label">¿Terminaste esta lección?</span>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
+          <button class="nav-btn btn-next" onclick="goToLesson(2)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LECCIÓN 2 ══ -->
+    <div class="lesson-panel" id="lesson-2">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 02</span><span class="tag-critico">Requiere cuidado</span></div>
+        <h2>Gestión del catálogo de servicios</h2>
+        <p>Agregar, editar y desactivar prestaciones médicas y exámenes de laboratorio en el catálogo.</p>
+        <div class="lesson-meta">
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~30 minutos</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="callout warn">
+          <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div><strong>Los cambios en el catálogo afectan a caja de inmediato.</strong><p>Si desactivas un servicio, caja dejará de verlo al instante. Si agregas uno nuevo sin precio, caja verá el servicio pero con monto en cero. Siempre completa precio y categoría antes de guardar.</p></div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>Estructura del catálogo</h3></div>
+          <div class="step-card-body">
+            <p>El catálogo está organizado en <strong>categorías</strong>. Cada categoría agrupa servicios del mismo tipo. Las categorías predeterminadas son:</p>
+            <ul class="checklist" style="margin-bottom:14px">
+              <li><strong>Consultas</strong> — general, especialista, control, urgencia.</li>
+              <li><strong>Laboratorio clínico</strong> — hemograma, glucosa, perfil lipídico, etc.</li>
+              <li><strong>Pruebas rápidas</strong> — COVID-19, dengue, embarazo, malaria.</li>
+              <li><strong>Procedimientos</strong> — inyecciones, suero, lavado de oído, etc.</li>
+              <li><strong>Doctor 365</strong> — planes de membresía anual.</li>
+            </ul>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>No crees categorías duplicadas.</strong><p>Antes de crear una categoría nueva, busca si ya existe con otro nombre. Demasiadas categorías hacen más difícil la búsqueda para caja.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Agregar un servicio nuevo</h3></div>
+          <div class="step-card-body">
+            <p>Ve a <strong>Catálogo → Agregar servicio</strong>. Completa todos los campos obligatorios:</p>
+            <div class="screen-box">
+              <div class="field-row">
+                <div><label>Nombre del servicio</label><div class="fake-input">Hemograma completo</div></div>
+                <div><label>Categoría</label><div class="fake-select">Laboratorio clínico ▾</div></div>
+              </div>
+              <div class="field-row">
+                <div><label>Precio público (L.)</label><div class="fake-input">350.00</div></div>
+                <div><label>Código interno</label><div class="fake-input">LAB-001</div></div>
+              </div>
+              <div><label>Descripción (opcional)</label><div class="fake-input" style="margin-bottom:10px">BHC — Biometría Hemática Completa con diferencial</div></div>
+              <span class="fake-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Guardar servicio</span>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Editar y desactivar servicios</h3></div>
+          <div class="step-card-body">
+            <p>Para editar, haz clic en el nombre del servicio y luego en <strong>"Editar"</strong>. Puedes cambiar el nombre, categoría, precio o descripción.</p>
+            <p>Para <strong>desactivar</strong> un servicio (sin eliminarlo permanentemente), usa el toggle <strong>"Activo / Inactivo"</strong>. El servicio desaparecerá de caja pero su historial de cobros queda intacto en los reportes.</p>
+            <div class="callout alert">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>Nunca elimines un servicio que tiene cobros históricos.</strong><p>Usa siempre la opción "Inactivo" en lugar de eliminar. Eliminar un servicio que tiene transacciones puede generar inconsistencias en los reportes de facturación.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(2)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
+          <button class="nav-btn btn-next" onclick="goToLesson(3)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LECCIÓN 3 ══ -->
+    <div class="lesson-panel" id="lesson-3">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 03</span><span class="tag-critico">Crítica</span></div>
+        <h2>Configuración de precios públicos</h2>
+        <p>Actualizar los precios de lista que ve caja al momento del cobro — de forma individual o masiva.</p>
+        <div class="lesson-meta">
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~25 minutos</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="callout alert">
+          <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div><strong>Los cambios de precio aplican en el siguiente cobro, no retroactivamente.</strong><p>Un cobro ya registrado no cambia aunque modifiques el precio después. Si aplicaste el precio incorrecto a un cobro ya realizado, repórtalo a contabilidad.</p></div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>Acceder a Precios y Descuentos</h3></div>
+          <div class="step-card-body">
+            <p>En el menú lateral, haz clic en <strong>Precios y Descuentos</strong>. La pantalla muestra todos los servicios del catálogo con su precio actual, agrupados por categoría. Usa la barra de búsqueda para encontrar un servicio específico rápidamente.</p>
+            <p>Esta es la pantalla <strong>Admin-Precios</strong> del sistema — la misma que usas para precios y para descuentos de obras sociales (que veremos en la Lección 4).</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Editar un precio individual</h3></div>
+          <div class="step-card-body">
+            <p>Haz clic en el campo de precio de cualquier servicio — el campo se vuelve editable. Escribe el nuevo valor en lempiras (sin símbolo de moneda) y presiona <strong>Enter</strong> o haz clic fuera del campo. El precio queda en estado <em>pendiente de guardar</em> y se resalta en amarillo.</p>
+            <div class="overflow-x">
+              <table class="data-table" style="margin:12px 0">
+                <thead><tr><th>Servicio</th><th>Categoría</th><th>Precio público (L.)</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td>Consulta General</td><td>Consultas</td><td class="price-cell" style="color:var(--cmg-teal)">350.00 ✎</td><td><button class="edit-btn">Editar</button></td></tr>
+                  <tr><td>Hemograma completo</td><td>Laboratorio</td><td class="price-cell">280.00</td><td><button class="edit-btn">Editar</button></td></tr>
+                  <tr><td>Prueba COVID-19</td><td>Pruebas rápidas</td><td class="price-cell">250.00</td><td><button class="edit-btn">Editar</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="callout warn">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>Haz clic en "Guardar cambios" antes de salir.</strong><p>Si navegas a otra sección sin guardar, los precios modificados se pierden. El botón "Guardar cambios" está fijo en la parte superior de la pantalla y muestra cuántos ítems tienen cambios pendientes.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Actualización masiva de precios</h3></div>
+          <div class="step-card-body">
+            <p>Para aumentar todos los precios de una categoría al mismo tiempo (ej. ajuste por inflación), usa <strong>"Actualizar categoría"</strong> en el encabezado de cada grupo. Puedes aplicar:</p>
+            <ul class="checklist">
+              <li><strong>Porcentaje de aumento</strong> — ej. +10% aplica a todos los servicios de esa categoría.</li>
+              <li><strong>Monto fijo</strong> — suma o resta la misma cantidad a cada servicio.</li>
+            </ul>
+            <p style="margin-top:12px">Revisa el resumen de cambios antes de confirmar — el sistema muestra el precio anterior y el nuevo para cada ítem afectado.</p>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(2)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
+          <button class="nav-btn btn-next" onclick="goToLesson(4)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LECCIÓN 4 ══ -->
+    <div class="lesson-panel" id="lesson-4">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 04</span><span class="tag-config">Obras sociales</span></div>
+        <h2>Descuentos por obra social (D365)</h2>
+        <p>Definir el porcentaje de descuento por convenio y configurar las exclusiones de ítems específicos.</p>
+        <div class="lesson-meta">
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~30 minutos</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>Cómo funciona el sistema de descuentos</h3></div>
+          <div class="step-card-body">
+            <p>Cada obra social (seguro o convenio) tiene un <strong>porcentaje de descuento global</strong> que aplica sobre el precio público de todos los servicios. Adicionalmente, puedes marcar servicios específicos como <strong>excluidos</strong> — esos ítems siempre cobrarán el precio público completo, sin importar el convenio.</p>
+            <p>Cuando caja selecciona un paciente con obra social, el sistema aplica el descuento automáticamente en el cobro — caja no necesita calcular nada.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Configurar el porcentaje de una obra social</h3></div>
+          <div class="step-card-body">
+            <p>En <strong>Precios y Descuentos</strong>, selecciona la pestaña <strong>"Obras sociales"</strong>. Verás la lista de convenios activos con su descuento actual:</p>
+            <div class="overflow-x">
+              <table class="data-table" style="margin:12px 0">
+                <thead><tr><th>Convenio</th><th>Descuento</th><th>Exclusiones</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td>Doctor 365 — Plan Anual</td><td class="discount-cell">30%</td><td>2 servicios</td><td><button class="edit-btn">Editar</button></td></tr>
+                  <tr><td>IHSS</td><td class="discount-cell">20%</td><td>0 servicios</td><td><button class="edit-btn">Editar</button></td></tr>
+                  <tr><td>Seguros Atlántida</td><td class="discount-cell">15%</td><td>1 servicio</td><td><button class="edit-btn">Editar</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>Haz clic en <strong>"Editar"</strong> junto al convenio que quieres modificar y cambia el porcentaje. Guarda antes de salir.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Configurar exclusiones de ítems</h3></div>
+          <div class="step-card-body">
+            <p>Dentro de la configuración de un convenio, desplázate a la sección <strong>"Servicios excluidos"</strong>. Aquí puedes marcar cualquier servicio del catálogo para que ese convenio específico <strong>no</strong> reciba descuento en ese ítem.</p>
+            <p>En la vista del catálogo, los servicios excluidos aparecen con una etiqueta:</p>
+            <div style="display:flex;gap:8px;align-items:center;margin:10px 0 16px;flex-wrap:wrap">
+              <span style="font-size:13px;color:var(--neutral-600)">Prueba de embarazo (hCG)</span>
+              <span class="excluded-badge">Excluido · Doctor 365</span>
+            </div>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>Las exclusiones son por convenio, no globales.</strong><p>Un servicio puede estar excluido del descuento de Doctor 365 pero sí recibir descuento de IHSS. Configura cada convenio de forma independiente.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">4</span><h3>Agregar un convenio nuevo</h3></div>
+          <div class="step-card-body">
+            <p>Haz clic en <strong>"+ Nuevo convenio"</strong>. Ingresa el nombre de la obra social o seguro, el porcentaje de descuento global y, si aplica, los servicios excluidos. El nuevo convenio estará disponible en caja de inmediato.</p>
+            <div class="callout warn">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>Verifica el porcentaje con el contrato del convenio antes de ingresarlo.</strong><p>Un descuento incorrecto afecta directamente la facturación. Si no tienes el contrato a mano, deja el convenio inactivo hasta confirmarlo.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(4)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
+          <button class="nav-btn btn-next" onclick="goToLesson(5)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LECCIÓN 5 ══ -->
+    <div class="lesson-panel" id="lesson-5">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 05</span></div>
+        <h2>Reportes y estadísticas de facturación</h2>
+        <p>Generar reportes por período, por servicio o por obra social, y exportarlos a planilla.</p>
+        <div class="lesson-meta">
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~20 minutos</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>Panel de reportes</h3></div>
+          <div class="step-card-body">
+            <p>Ve a <strong>Reportes</strong> en el menú lateral. El panel muestra primero un resumen del día actual — un vistazo rápido antes de profundizar en períodos más largos:</p>
+            <div class="stat-row">
+              <div class="stat-card"><div class="stat-label">Cobros hoy</div><div class="stat-value">24</div><div class="stat-sub">transacciones</div></div>
+              <div class="stat-card"><div class="stat-label">Total del día</div><div class="stat-value">L.8,420</div><div class="stat-sub">efectivo + tarjeta</div></div>
+              <div class="stat-card"><div class="stat-label">Pacientes</div><div class="stat-value">21</div><div class="stat-sub">atendidos hoy</div></div>
+              <div class="stat-card"><div class="stat-label">Convenios</div><div class="stat-value">6</div><div class="stat-sub">cobros con descuento</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Generar un reporte por período</h3></div>
+          <div class="step-card-body">
+            <p>Haz clic en <strong>"Generar reporte"</strong> y define los filtros:</p>
+            <div class="screen-box">
+              <div class="field-row">
+                <div><label>Fecha desde</label><div class="fake-input">01/07/2026</div></div>
+                <div><label>Fecha hasta</label><div class="fake-input">31/07/2026</div></div>
+              </div>
+              <div class="field-row">
+                <div><label>Categoría (opcional)</label><div class="fake-select">Todas las categorías ▾</div></div>
+                <div><label>Obra social (opcional)</label><div class="fake-select">Todas ▾</div></div>
+              </div>
+              <span class="fake-btn">Ver reporte</span>
+            </div>
+            <p>El reporte muestra cada transacción con: fecha, hora, paciente, servicio, precio, descuento aplicado, forma de pago y usuario de caja que realizó el cobro.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Exportar el reporte</h3></div>
+          <div class="step-card-body">
+            <p>Una vez generado el reporte, usa los botones de exportación:</p>
+            <ul class="checklist" style="margin-bottom:14px">
+              <li><strong>Excel (.xlsx)</strong> — ideal para contabilidad o análisis en planilla.</li>
+              <li><strong>PDF</strong> — para archivar o enviar por correo como documento formal.</li>
+              <li><strong>CSV</strong> — para importar a otro sistema o procesamiento de datos.</li>
+            </ul>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>Reporte mensual de cierre.</strong><p>El primer día de cada mes, genera el reporte del mes anterior y guárdalo. Eso te da un historial de facturación ordenado por mes que facilita el seguimiento contable.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(4)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(5)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
+          <button class="nav-btn btn-next" onclick="goToLesson(6)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LECCIÓN 6 ══ -->
+    <div class="lesson-panel" id="lesson-6">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 06</span><span class="tag-critico">Crítica</span></div>
+        <h2>Alta y gestión de usuarios del sistema</h2>
+        <p>Crear cuentas para nuevo personal, asignar roles y restablecer contraseñas.</p>
+        <div class="lesson-meta">
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~20 minutos</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="callout alert">
+          <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div><strong>Cada usuario del sistema es responsable de lo que hace con su cuenta.</strong><p>Crear un usuario es un acto de autorización. Solo crea cuentas para personal activo de CMG y desactívalas el mismo día que alguien deje de trabajar en la clínica.</p></div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>Crear un usuario nuevo</h3></div>
+          <div class="step-card-body">
+            <p>Ve a <strong>Usuarios → Nuevo usuario</strong>. Completa el formulario:</p>
+            <div class="screen-box">
+              <div class="field-row">
+                <div><label>Nombre completo</label><div class="fake-input">María Alejandra López</div></div>
+                <div><label>Correo electrónico</label><div class="fake-input">m.lopez@clinicamedicacmg.net</div></div>
+              </div>
+              <div class="field-row">
+                <div><label>Rol</label><div class="fake-select">Seleccionar rol ▾</div></div>
+                <div><label>Estado</label><div class="fake-select">Activo ▾</div></div>
+              </div>
+              <span class="fake-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Crear usuario</span>
+            </div>
+            <p style="margin-top:10px">Al crear la cuenta, el sistema envía automáticamente un correo al nuevo usuario con un enlace para establecer su contraseña. La contraseña inicial la elige el empleado, no el administrador.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Roles disponibles y qué puede hacer cada uno</h3></div>
+          <div class="step-card-body">
+            <p>Selecciona el rol correcto según la función del empleado:</p>
+            <div class="role-strip">
+              <span class="role-chip caja">Caja</span>
+              <span class="role-chip enf">Caja · Enfermería</span>
+              <span class="role-chip medico">Médico</span>
+              <span class="role-chip admin">Administrador</span>
+            </div>
+            <ul class="checklist" style="margin-top:12px">
+              <li><strong>Caja</strong> — registro de pacientes y cobros. Sin acceso clínico.</li>
+              <li><strong>Caja · Enfermería</strong> — agenda, preclinical y solicitud de exámenes. Sin cobros.</li>
+              <li><strong>Médico</strong> — expediente clínico, notas, solicitudes y derivaciones. Sin cobros ni precios.</li>
+              <li><strong>Administrador</strong> — acceso completo al sistema.</li>
+            </ul>
+            <div class="callout warn" style="margin-top:14px">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>Asigna el rol mínimo necesario para la función del empleado.</strong><p>No asignes "Administrador" a alguien que solo va a hacer cobros. El principio de mínimo privilegio protege los datos en caso de robo o mal uso de credenciales.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Restablecer contraseña y desactivar usuarios</h3></div>
+          <div class="step-card-body">
+            <p>Si un empleado olvidó su contraseña, ve a <strong>Usuarios</strong>, busca la cuenta y haz clic en <strong>"Restablecer contraseña"</strong>. El sistema le enviará un correo con un enlace para crear una nueva. El empleado debe hacerlo desde el enlace — tú no ves ni defines la contraseña nueva.</p>
+            <p>Cuando un empleado deja de trabajar en CMG, desactiva su cuenta el mismo día: busca la cuenta y cambia el estado a <strong>"Inactivo"</strong>. La cuenta inactiva no puede iniciar sesión pero su historial de acciones queda en el sistema.</p>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(5)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(6)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
+          <button class="nav-btn btn-next" onclick="goToLesson(7)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LECCIÓN 7 ══ -->
+    <div class="lesson-panel" id="lesson-7">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 07</span></div>
+        <h2>Actualización del contenido del sitio web</h2>
+        <p>Modificar horarios, novedades y servicios destacados que ven los pacientes en el sitio público.</p>
+        <div class="lesson-meta">
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~20 minutos</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>Qué puedes actualizar desde el panel</h3></div>
+          <div class="step-card-body">
+            <p>El sitio público (<strong>clinicamedicacmg.net</strong>) tiene secciones cuyo contenido se gestiona desde el panel de administración, sin necesidad de tocar código:</p>
+            <ul class="checklist">
+              <li><strong>Horario de atención</strong> — días, horas de apertura y cierre por día.</li>
+              <li><strong>Anuncio de la tira superior</strong> — el mensaje rotativo que aparece en la barra azul del tope del sitio.</li>
+              <li><strong>Servicios destacados</strong> — los servicios que aparecen en la página de inicio.</li>
+              <li><strong>Datos de contacto</strong> — teléfono, WhatsApp y dirección.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Actualizar el horario de atención</h3></div>
+          <div class="step-card-body">
+            <p>Ve a <strong>Sitio web → Horario</strong>. La pantalla muestra los 7 días de la semana con sus horas actuales. Haz clic en cualquier día para editarlo. Puedes:</p>
+            <ul class="checklist" style="margin-bottom:14px">
+              <li>Cambiar la hora de apertura y cierre.</li>
+              <li>Marcar un día como <strong>cerrado</strong> (ej. festivos).</li>
+              <li>Agregar una nota especial al día (ej. "Solo urgencias de 6am a 8am").</li>
+            </ul>
+            <p>El cambio aparece en el sitio público <strong>inmediatamente</strong> después de guardar. Verifica en <strong>clinicamedicacmg.net</strong> con Ctrl+Shift+R (recarga forzada) para confirmar.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Modificar el anuncio de la tira superior</h3></div>
+          <div class="step-card-body">
+            <p>La tira azul en la parte superior del sitio público muestra mensajes rotativos para los pacientes. Ve a <strong>Sitio web → Anuncio</strong> y edita el texto. Ejemplos de uso:</p>
+            <p style="font-style:italic;color:var(--neutral-400)">"🎉 Nueva: Prueba de malaria disponible" · "Horario navideño: cerrado 25 y 26 de diciembre" · "Doctor 365 — suscripciones abiertas, L.900/año"</p>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>Mantén el anuncio breve y actualizado.</strong><p>Un anuncio desactualizado genera confusión. Si el mensaje ya no es relevante, cámbialo por el horario de atención o una promoción vigente.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">4</span><h3>Verificar cambios en el sitio público</h3></div>
+          <div class="step-card-body">
+            <p>Cada vez que hagas un cambio en el contenido del sitio, abre una pestaña nueva y visita <strong>clinicamedicacmg.net</strong>. Usa <strong>Ctrl + Shift + R</strong> (o Cmd + Shift + R en Mac) para forzar una recarga sin caché y confirmar que el cambio se publicó correctamente.</p>
+            <p>Si el cambio no aparece después de 1 minuto de espera, comunícalo al soporte técnico — puede haber un problema de publicación.</p>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>¡Módulo de Administración completado!</strong><p>Tienes control total del sistema CMG: catálogo, precios, convenios, reportes, usuarios y contenido del sitio. Consulta a tu equipo de soporte ante cualquier duda antes de hacer cambios críticos en producción.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(6)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
+        <button class="nav-btn btn-done" onclick="markDone(7)" id="final-done-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Completar módulo</button>
+      </div>
+      <div class="completion-banner" id="completion-banner">
+        <h3>¡Módulo Administración completado!</h3>
+        <p>Completaste las 7 lecciones. Tienes el conocimiento para gestionar el sistema CMG de forma completa y segura.</p>
+        <a href="index.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15,18 9,12 15,6"/></svg>Volver al índice</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const TOTAL = 7;
+  const done = new Set(JSON.parse(localStorage.getItem('cmg-admin-done') || '[]'));
+  let current = 1;
+  function save() { localStorage.setItem('cmg-admin-done', JSON.stringify([...done])); }
+  function updateProgress() {
+    const pct = Math.round((done.size / TOTAL) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = done.size + ' / ' + TOTAL;
+  }
+  function goToLesson(n) {
+    document.getElementById('lesson-' + current).classList.remove('is-active');
+    document.querySelector('[data-lesson="' + current + '"]').classList.remove('is-active');
+    current = n;
+    document.getElementById('lesson-' + n).classList.add('is-active');
+    document.querySelector('[data-lesson="' + n + '"]').classList.add('is-active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function markDone(n) {
+    done.add(n);
+    save();
+    document.querySelector('[data-lesson="' + n + '"]').classList.add('is-done');
+    updateProgress();
+    if (n === TOTAL && done.size === TOTAL) {
+      document.getElementById('completion-banner').classList.add('is-visible');
+      document.getElementById('final-done-btn').disabled = true;
+    }
+  }
+  done.forEach(n => { const b = document.querySelector('[data-lesson="' + n + '"]'); if (b) b.classList.add('is-done'); });
+  updateProgress();
+</script>
+</body>
+</html>

@@ -8,208 +8,131 @@
 <link rel="stylesheet" href="../assets/cmg-tokens.css">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--cmg-navy); color: var(--fg-1); min-height: 100vh; }
 
-  body {
-    background: var(--cmg-navy);
-    color: var(--fg-1);
-    min-height: 100vh;
-  }
-
-  /* ── Header ── */
   .cap-header {
     background: var(--cmg-navy-deep);
     border-bottom: 2px solid var(--cmg-yellow);
     padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
+    display: flex; align-items: center; gap: 20px;
   }
   .cap-header img { height: 32px; }
   .cap-header-text { flex: 1; }
   .cap-header-text .eyebrow {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--cmg-yellow);
+    font-size: 10px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--cmg-yellow); margin-bottom: .3rem;
   }
   .cap-header-text h1 {
-    font-family: var(--font-display);
-    font-size: 18px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: -.01em;
-    color: var(--white);
-    margin: 0;
+    font-family: var(--font-display); font-size: 18px; font-weight: 900;
+    text-transform: uppercase; letter-spacing: -.01em; color: var(--white); margin: 0;
   }
   .back-link {
-    font-size: 12px;
-    color: var(--fg-2);
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: color .15s;
+    font-size: 12px; color: var(--fg-2); text-decoration: none;
+    display: flex; align-items: center; gap: 6px; transition: color .15s;
   }
   .back-link:hover { color: var(--cmg-yellow); }
 
-  /* ── Hero ── */
   .hero {
-    padding: 56px 24px 48px;
-    text-align: center;
-    max-width: 680px;
-    margin: 0 auto;
+    padding: 52px 24px 40px; text-align: center;
+    max-width: 640px; margin: 0 auto;
   }
   .hero .eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--cmg-yellow);
-    margin-bottom: 12px;
+    font-size: 11px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--cmg-yellow); margin-bottom: 12px;
   }
   .hero h2 {
     font-family: var(--font-display);
-    font-size: clamp(28px, 5vw, 44px);
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: -.02em;
-    line-height: .95;
-    color: var(--white);
-    margin: 0 0 16px;
-    text-wrap: balance;
+    font-size: clamp(26px, 5vw, 42px); font-weight: 900;
+    text-transform: uppercase; letter-spacing: -.02em; line-height: .95;
+    color: var(--white); margin: 0 0 14px; text-wrap: balance;
   }
   .hero h2 span { color: var(--cmg-yellow); }
-  .hero p {
-    color: var(--fg-2);
-    font-size: 15px;
-    line-height: 1.6;
-    margin: 0;
+  .hero p { color: var(--fg-2); font-size: 15px; line-height: 1.6; margin: 0; }
+
+  /* Group labels */
+  .group-label {
+    max-width: 980px; margin: 0 auto;
+    padding: 0 24px 10px;
+    font-size: 10px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: rgba(255,255,255,.35);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .group-label::after {
+    content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.08);
   }
 
-  /* ── Module cards ── */
   .modules {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 0 24px 64px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px; max-width: 980px; margin: 0 auto;
+    padding: 0 24px;
   }
+  .modules + .group-label { margin-top: 32px; }
+  .modules:last-of-type { padding-bottom: 64px; }
+
   .mod-card {
     background: var(--cmg-navy-tint);
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 12px;
-    padding: 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    text-decoration: none;
-    color: inherit;
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 12px; padding: 24px;
+    display: flex; flex-direction: column; gap: 14px;
+    text-decoration: none; color: inherit;
     transition: border-color .2s, transform .2s, box-shadow .2s;
-    position: relative;
-    overflow: hidden;
+    position: relative; overflow: hidden;
   }
   .mod-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
   }
-  .mod-card.caja::before   { background: var(--cmg-yellow); }
-  .mod-card.admin::before  { background: var(--cmg-teal); }
-  .mod-card.consul::before { background: var(--cmg-red); }
-  .mod-card:hover {
-    border-color: rgba(255,255,255,.28);
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-3);
-  }
+  .mod-card.caja::before    { background: var(--cmg-yellow); }
+  .mod-card.admin::before   { background: var(--cmg-teal); }
+  .mod-card.enf::before     { background: #7CB8C8; }
+  .mod-card.medico::before  { background: #E07070; }
+  .mod-card:hover { border-color: rgba(255,255,255,.26); transform: translateY(-3px); box-shadow: var(--shadow-3); }
   .mod-card:focus-visible { outline: 2px solid var(--cmg-yellow); outline-offset: 3px; }
+  .mod-card.coming-soon { opacity: .5; pointer-events: none; }
 
   .mod-tag {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 4px;
-    width: fit-content;
+    display: inline-block; font-size: 10px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 4px; width: fit-content;
   }
-  .tag-caja   { background: rgba(253,210,44,.15); color: var(--cmg-yellow); }
-  .tag-admin  { background: rgba(89,159,178,.15); color: var(--cmg-teal-light); }
-  .tag-consul { background: rgba(242,15,16,.15);  color: #FF6B6B; }
+  .tag-caja  { background: rgba(253,210,44,.14); color: var(--cmg-yellow); }
+  .tag-admin { background: rgba(89,159,178,.14); color: var(--cmg-teal-light); }
+  .tag-enf   { background: rgba(124,184,200,.14); color: #A8D8E4; }
+  .tag-medico{ background: rgba(224,112,112,.14); color: #EDA8A8; }
 
   .mod-card h3 {
-    font-family: var(--font-display);
-    font-size: 20px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: -.01em;
-    color: var(--white);
-    margin: 0;
+    font-family: var(--font-display); font-size: 18px; font-weight: 900;
+    text-transform: uppercase; letter-spacing: -.01em; color: var(--white); margin: 0;
   }
-  .mod-card p {
-    font-size: 13px;
-    color: var(--fg-2);
-    line-height: 1.5;
-    margin: 0;
-    flex: 1;
-  }
+  .mod-card p { font-size: 13px; color: var(--fg-2); line-height: 1.5; margin: 0; flex: 1; }
   .mod-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 12px;
-    border-top: 1px solid rgba(255,255,255,.1);
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 12px; border-top: 1px solid rgba(255,255,255,.08);
   }
-  .mod-count {
-    font-size: 12px;
-    color: var(--fg-3);
-    font-variant-numeric: tabular-nums;
-  }
+  .mod-count { font-size: 12px; color: var(--fg-3); font-variant-numeric: tabular-nums; }
   .mod-count strong {
-    font-size: 22px;
-    font-family: var(--font-display);
-    font-weight: 900;
-    color: var(--white);
-    display: block;
-    line-height: 1;
+    font-size: 20px; font-family: var(--font-display); font-weight: 900;
+    color: var(--white); display: block; line-height: 1;
   }
   .mod-cta {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    color: var(--fg-2);
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: color .15s;
+    font-size: 12px; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--fg-2);
+    display: flex; align-items: center; gap: 5px; transition: color .15s;
   }
   .mod-card:hover .mod-cta { color: var(--cmg-yellow); }
-  .mod-card.coming-soon { opacity: .55; pointer-events: none; cursor: default; }
-  .mod-card.coming-soon:hover { transform: none; box-shadow: none; }
   .soon-badge {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    background: rgba(255,255,255,.08);
-    color: var(--fg-3);
-    padding: 3px 8px;
-    border-radius: 4px;
+    font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    background: rgba(255,255,255,.07); color: var(--fg-3); padding: 3px 8px; border-radius: 4px;
   }
 
-  /* ── Footer ── */
   .cap-footer {
-    text-align: center;
-    padding: 24px;
-    border-top: 1px solid rgba(255,255,255,.08);
-    font-size: 12px;
-    color: var(--fg-3);
+    text-align: center; padding: 24px;
+    border-top: 1px solid rgba(255,255,255,.07);
+    font-size: 12px; color: var(--fg-3);
   }
   .cap-footer a { color: var(--cmg-yellow); }
+
+  @media (prefers-reduced-motion: reduce) { .mod-card { transition: none; } }
 </style>
 </head>
 <body>
@@ -221,7 +144,7 @@
     <h1>Centro de Capacitación</h1>
   </div>
   <a class="back-link" href="../Inicio.html">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>
     Volver al sitio
   </a>
 </header>
@@ -232,55 +155,52 @@
   <p>Tutoriales paso a paso organizados por rol. Selecciona tu módulo para comenzar.</p>
 </section>
 
+<p class="group-label">Recepción y Caja</p>
 <div class="modules">
-
   <a class="mod-card caja" href="caja.html">
     <span class="mod-tag tag-caja">Caja</span>
     <h3>Operador de Caja</h3>
     <p>Registro de pacientes, liquidación de consultas y laboratorio, cierre de caja diario.</p>
     <div class="mod-footer">
-      <div class="mod-count">
-        <strong>6</strong>
-        lecciones · ~2 horas
-      </div>
-      <span class="mod-cta">
-        Comenzar
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="9,18 15,12 9,6"/></svg>
-      </span>
+      <div class="mod-count"><strong>6</strong>lecciones · ~2 h</div>
+      <span class="mod-cta">Comenzar <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg></span>
     </div>
   </a>
-
-  <div class="mod-card admin coming-soon" tabindex="-1" aria-disabled="true">
+  <div class="mod-card admin coming-soon">
     <span class="mod-tag tag-admin">Administración</span>
     <h3>Coordinador Administrativo</h3>
     <p>Catálogo de servicios, precios, descuentos por obra social, reportes y gestión de usuarios.</p>
     <div class="mod-footer">
-      <div class="mod-count">
-        <strong>7</strong>
-        lecciones · ~2.5 horas
-      </div>
+      <div class="mod-count"><strong>7</strong>lecciones · ~2.5 h</div>
       <span class="soon-badge">Próximamente</span>
     </div>
   </div>
+</div>
 
-  <div class="mod-card consul coming-soon" tabindex="-1" aria-disabled="true">
-    <span class="mod-tag tag-consul">Consultorio</span>
-    <h3>Personal de Consultorio</h3>
-    <p>Agenda de turnos, solicitud de estudios, consulta de resultados y registro de observaciones.</p>
+<p class="group-label">Consultorio</p>
+<div class="modules">
+  <a class="mod-card enf" href="enfermeria.html">
+    <span class="mod-tag tag-enf">Caja · Enfermería</span>
+    <h3>Caja &amp; Enfermería</h3>
+    <p>Agenda del día, toma de preclinical (signos vitales, peso, talla, saturación) y solicitud de exámenes.</p>
     <div class="mod-footer">
-      <div class="mod-count">
-        <strong>5</strong>
-        lecciones · ~1.5 horas
-      </div>
-      <span class="soon-badge">Próximamente</span>
+      <div class="mod-count"><strong>6</strong>lecciones · ~1.5 h</div>
+      <span class="mod-cta">Comenzar <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg></span>
     </div>
-  </div>
-
+  </a>
+  <a class="mod-card medico" href="medico.html">
+    <span class="mod-tag tag-medico">Médico</span>
+    <h3>Médico / Doctor</h3>
+    <p>Pacientes del día, expediente clínico, revisión de preclinical, notas de consulta, estudios y cierre.</p>
+    <div class="mod-footer">
+      <div class="mod-count"><strong>7</strong>lecciones · ~2 h</div>
+      <span class="mod-cta">Comenzar <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg></span>
+    </div>
+  </a>
 </div>
 
 <footer class="cap-footer">
   Clínica Médica General · <a href="https://clinicamedicacmg.net">clinicamedicacmg.net</a> · City Mall S2 E214, Tegucigalpa
 </footer>
-
 </body>
 </html>

@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Médico / Doctor · Capacitación CMG</title>
+<link rel="icon" href="../assets/isotipo-color.png">
+<link rel="stylesheet" href="../assets/cmg-tokens.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--neutral-100); color: var(--cmg-navy); min-height: 100vh; font-family: var(--font-body); }
+
+  .cap-header {
+    background: var(--cmg-navy-deep); border-bottom: 2px solid #E07070;
+    padding: 14px 24px; display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .cap-header img { height: 28px; }
+  .header-sep { width: 1px; height: 20px; background: rgba(255,255,255,.2); }
+  .header-title { flex: 1; display: flex; align-items: center; gap: 10px; }
+  .module-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    background: rgba(224,112,112,.2); color: #EDA8A8; padding: 3px 8px; border-radius: 4px;
+  }
+  .header-title span {
+    font-family: var(--font-display); font-size: 14px; font-weight: 900;
+    text-transform: uppercase; letter-spacing: -.01em; color: var(--white);
+  }
+  .back-link {
+    font-size: 12px; color: rgba(255,255,255,.6); text-decoration: none;
+    display: flex; align-items: center; gap: 5px; transition: color .15s; white-space: nowrap;
+  }
+  .back-link:hover { color: #EDA8A8; }
+
+  .page-grid {
+    display: grid; grid-template-columns: 260px 1fr;
+    max-width: 1100px; margin: 0 auto; min-height: calc(100vh - 58px);
+  }
+
+  .sidebar {
+    background: var(--cmg-navy); padding: 28px 0;
+    position: sticky; top: 58px; height: calc(100vh - 58px); overflow-y: auto;
+  }
+  .sidebar-heading {
+    font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: rgba(255,255,255,.35); padding: 0 20px 12px;
+  }
+  .lesson-nav { list-style: none; }
+  .lesson-nav-btn {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+    padding: 11px 20px; background: none; border: none; cursor: pointer;
+    text-align: left; color: rgba(255,255,255,.55); font-family: var(--font-body);
+    font-size: 13px; line-height: 1.3; transition: background .15s, color .15s;
+    border-left: 3px solid transparent;
+  }
+  .lesson-nav-btn:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.9); }
+  .lesson-nav-btn.is-active { background: rgba(224,112,112,.1); color: #EDA8A8; border-left-color: #E07070; }
+  .lesson-nav-btn.is-done { color: rgba(255,255,255,.4); }
+  .nav-num {
+    display: flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: rgba(255,255,255,.08); font-size: 11px; font-weight: 700;
+    flex-shrink: 0; font-variant-numeric: tabular-nums; transition: background .15s;
+    flex-shrink: 0;
+  }
+  .lesson-nav-btn.is-active .nav-num { background: #E07070; color: var(--white); }
+  .lesson-nav-btn.is-done .nav-num { display: none; }
+  .check-icon { display: none; }
+  .lesson-nav-btn.is-done .check-icon {
+    display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex-shrink: 0;
+  }
+  .progress-wrap { padding: 20px 20px 0; margin-top: 12px; border-top: 1px solid rgba(255,255,255,.08); }
+  .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,.35); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+  .progress-bar { height: 4px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #E07070; border-radius: 2px; transition: width .4s var(--easing-decel); width: 0%; }
+
+  .main-content { padding: 36px 40px 64px; }
+  .lesson-panel { display: none; }
+  .lesson-panel.is-active { display: block; }
+
+  .lesson-header { margin-bottom: 28px; padding-bottom: 22px; border-bottom: 1px solid var(--neutral-200); }
+  .lesson-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .lesson-num-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: .08em;
+    background: var(--cmg-navy); color: #E07070; padding: 3px 10px; border-radius: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .tag-critico   { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: rgba(242,15,16,.1); color: #C0292A; padding: 3px 8px; border-radius: 4px; }
+  .tag-clinico   { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: rgba(224,112,112,.12); color: #B04040; padding: 3px 8px; border-radius: 4px; }
+  .lesson-header h2 {
+    font-family: var(--font-display); font-size: clamp(20px, 3vw, 28px);
+    font-weight: 900; text-transform: uppercase; letter-spacing: -.015em;
+    line-height: 1; color: var(--cmg-navy); margin: 0 0 10px;
+  }
+  .lesson-header p { font-size: 14px; color: var(--neutral-500); margin: 0; line-height: 1.5; }
+  .lesson-meta { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+  .meta-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--neutral-400); }
+
+  .lesson-body { display: flex; flex-direction: column; gap: 24px; }
+
+  .step-card { background: var(--white); border: 1px solid var(--neutral-200); border-radius: 10px; overflow: hidden; }
+  .step-card-header { display: flex; align-items: center; gap: 14px; padding: 15px 20px; background: var(--cmg-navy); color: var(--white); }
+  .step-n {
+    width: 28px; height: 28px; border-radius: 50%; background: #E07070;
+    color: var(--white); display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 900; flex-shrink: 0; font-variant-numeric: tabular-nums;
+  }
+  .step-card-header h3 { font-family: var(--font-display); font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; margin: 0; }
+  .step-card-body { padding: 20px; }
+  .step-card-body p { font-size: 14px; line-height: 1.65; color: var(--neutral-600); margin: 0 0 12px; }
+  .step-card-body p:last-child { margin-bottom: 0; }
+
+  .callout { display: flex; gap: 12px; padding: 13px 15px; border-radius: 8px; font-size: 13px; line-height: 1.55; }
+  .callout-icon { flex-shrink: 0; margin-top: 1px; }
+  .callout strong { display: block; margin-bottom: 2px; font-size: 13px; }
+  .callout p { margin: 0; color: inherit; font-size: 13px; }
+  .callout.tip   { background: rgba(89,159,178,.1);  color: #1E5F70; }
+  .callout.warn  { background: rgba(253,210,44,.12); color: #7A5C00; }
+  .callout.alert { background: rgba(242,15,16,.08);  color: #901010; }
+
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .checklist li { display: flex; gap: 10px; font-size: 14px; color: var(--neutral-600); line-height: 1.4; align-items: flex-start; }
+  .checklist li::before { content: ''; width: 18px; height: 18px; border: 2px solid var(--neutral-300); border-radius: 4px; flex-shrink: 0; margin-top: 1px; }
+
+  /* Expediente mockup */
+  .expediente-card {
+    background: var(--cmg-navy); border-radius: 10px; overflow: hidden;
+    margin: 12px 0; border: 1px solid rgba(255,255,255,.06);
+  }
+  .exp-header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .exp-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #E07070; display: flex; align-items: center;
+    justify-content: center; font-family: var(--font-display);
+    font-size: 16px; font-weight: 900; color: var(--white); flex-shrink: 0;
+  }
+  .exp-name { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--white); }
+  .exp-sub  { font-size: 11px; color: rgba(255,255,255,.45); margin-top: 2px; }
+  .exp-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .exp-tab {
+    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    padding: 10px 16px; color: rgba(255,255,255,.4); border-bottom: 2px solid transparent;
+    cursor: pointer;
+  }
+  .exp-tab.active { color: #E07070; border-bottom-color: #E07070; }
+  .exp-body { padding: 14px 18px; }
+  .exp-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 13px; }
+  .exp-row:last-child { border-bottom: none; }
+  .exp-row-label { color: rgba(255,255,255,.4); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  .exp-row-value { color: var(--white); }
+  .vital-alert { color: #FF8080; font-weight: 700; }
+
+  /* Notas clínicas */
+  .notas-box {
+    background: var(--neutral-100); border: 1px solid var(--neutral-200);
+    border-radius: 8px; padding: 14px 16px; font-size: 13.5px;
+    color: var(--neutral-600); line-height: 1.7; margin: 12px 0;
+    font-style: italic;
+  }
+  .notas-section { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--neutral-400); margin-bottom: 4px; font-style: normal; }
+
+  .screen-box {
+    background: var(--cmg-navy); border-radius: 8px; padding: 18px;
+    font-size: 13px; color: var(--fg-2); margin: 12px 0;
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  .screen-box .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .screen-box label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.38); display: block; margin-bottom: 4px; }
+  .screen-box .fake-input { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; padding: 7px 11px; font-size: 13px; color: var(--white); }
+  .screen-box .fake-textarea { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; padding: 10px 12px; font-size: 13px; color: var(--white); min-height: 72px; }
+  .screen-box .fake-btn { display: inline-flex; align-items: center; gap: 6px; background: #E07070; color: var(--white); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 8px 16px; border-radius: var(--r-pill); margin-top: 6px; }
+
+  .lesson-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--neutral-200);
+    flex-wrap: wrap; gap: 12px;
+  }
+  .nav-btn {
+    display: flex; align-items: center; gap: 8px; padding: 10px 20px;
+    border-radius: var(--r-pill); font-size: 13px; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase; cursor: pointer;
+    transition: background .15s, transform .1s; border: none; font-family: var(--font-body);
+  }
+  .nav-btn:active { transform: scale(.97); }
+  .btn-prev { background: var(--neutral-200); color: var(--cmg-navy); }
+  .btn-prev:hover { background: var(--neutral-300); }
+  .btn-next { background: var(--cmg-navy); color: var(--white); }
+  .btn-next:hover { background: var(--cmg-navy-deep); }
+  .btn-done { background: #E07070; color: var(--white); }
+  .btn-done:hover { background: #C85A5A; }
+  .btn-done:disabled { opacity: .5; cursor: default; transform: none; }
+  .mark-done-label { font-size: 12px; color: var(--neutral-400); }
+
+  .completion-banner {
+    display: none; background: var(--cmg-navy); border-radius: 12px;
+    padding: 32px; text-align: center; margin-top: 32px;
+  }
+  .completion-banner.is-visible { display: block; }
+  .completion-banner h3 { font-family: var(--font-display); font-size: 22px; font-weight: 900; text-transform: uppercase; color: #E07070; margin: 0 0 8px; }
+  .completion-banner p { color: var(--fg-2); font-size: 14px; margin: 0 0 20px; }
+  .completion-banner a { display: inline-flex; align-items: center; gap: 8px; background: #E07070; color: var(--white); padding: 11px 24px; border-radius: var(--r-pill); font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; text-decoration: none; }
+
+  @media (max-width: 700px) {
+    .page-grid { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; padding: 16px 0; }
+    .main-content { padding: 22px 18px 48px; }
+    .screen-box .field-row { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { .nav-btn, .lesson-nav-btn { transition: none; } .progress-fill { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="cap-header">
+  <a href="../Inicio.html"><img src="../assets/cmg-logo-white.png" alt="CMG"></a>
+  <div class="header-sep"></div>
+  <div class="header-title">
+    <span class="module-badge">Médico</span>
+    <span>Módulo de Capacitación</span>
+  </div>
+  <a class="back-link" href="index.html">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>
+    Todos los módulos
+  </a>
+</header>
+
+<div class="page-grid">
+  <aside class="sidebar">
+    <p class="sidebar-heading">Lecciones</p>
+    <ul class="lesson-nav" id="lesson-nav">
+      <li><button class="lesson-nav-btn is-active" data-lesson="1" type="button"><span class="nav-num">1</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07070" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Acceso al portal médico</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="2" type="button"><span class="nav-num">2</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07070" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Pacientes del día</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="3" type="button"><span class="nav-num">3</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07070" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Abrir el expediente</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="4" type="button"><span class="nav-num">4</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07070" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Revisar preclinical</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="5" type="button"><span class="nav-num">5</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07070" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Historial y resultados de lab</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="6" type="button"><span class="nav-num">6</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07070" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Notas clínicas y diagnóstico</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="7" type="button"><span class="nav-num">7</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07070" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Estudios, derivaciones y cierre</button></li>
+    </ul>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Progreso</span><span id="progress-text">0 / 7</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+  </aside>
+
+  <main class="main-content" id="main-content">
+
+    <!-- LECCIÓN 1 -->
+    <div class="lesson-panel is-active" id="lesson-1">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 01</span></div>
+        <h2>Acceso al portal del médico</h2>
+        <p>Inicio de sesión, reconocimiento del entorno y diferencias con otros roles del sistema.</p>
+        <div class="lesson-meta">
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~10 minutos</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>Ingresar al sistema</h3></div>
+          <div class="step-card-body">
+            <p>Desde cualquier computadora de la clínica, abre el navegador y ve a <strong>clinicamedicacmg.net</strong>. Haz clic en <strong>"Acceso al equipo"</strong> e ingresa con tu correo y contraseña de médico, asignados por administración.</p>
+            <div class="callout warn">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>Las notas que escribas quedan firmadas con tu nombre.</strong><p>El sistema registra el usuario y la hora de cada acción clínica. No compartas tu acceso con ningún otro miembro del equipo.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Qué puede hacer el rol Médico</h3></div>
+          <div class="step-card-body">
+            <p>Tu rol tiene acceso exclusivo a secciones clínicas que otros roles no ven:</p>
+            <ul class="checklist">
+              <li><strong>Mis pacientes hoy</strong> — agenda del día con estado de cada turno.</li>
+              <li><strong>Expediente clínico</strong> — historial completo, preclinical y notas anteriores.</li>
+              <li><strong>Notas de consulta</strong> — formulario para registrar anamnesis, diagnóstico e indicaciones.</li>
+              <li><strong>Solicitar estudios</strong> — pedir exámenes de laboratorio o imágenes.</li>
+              <li><strong>Derivaciones</strong> — referir a un paciente a otro especialista.</li>
+            </ul>
+            <div class="callout tip" style="margin-top:14px">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>No verás Cobros ni Precios.</strong><p>Esas funciones son de caja. Si un paciente pregunta por costos, indícale que pase por recepción.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <span class="mark-done-label">¿Terminaste esta lección?</span>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
+          <button class="nav-btn btn-next" onclick="goToLesson(2)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LECCIÓN 2 -->
+    <div class="lesson-panel" id="lesson-2">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 02</span></div>
+        <h2>Ver la lista de pacientes del día</h2>
+        <p>Consultar la agenda, identificar quién está listo y manejar el orden de atención.</p>
+        <div class="lesson-meta">
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~15 minutos</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>La pantalla de Mis pacientes hoy</h3></div>
+          <div class="step-card-body">
+            <p>Al entrar al sistema, la pantalla principal muestra tu agenda del día. Cada fila es un turno, ordenado por hora. Verás el nombre del paciente, la hora, el motivo de consulta que ingresó enfermería y el estado actual.</p>
+            <p>La lista se actualiza en tiempo real — cuando enfermería completa el preclinical de un paciente, su estado cambia automáticamente sin que tengas que recargar la página.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Identificar a quién atender primero</h3></div>
+          <div class="step-card-body">
+            <p>Prioriza los pacientes con estado <strong style="color:var(--cmg-navy)">"Listo para médico"</strong> — son los que ya tienen preclinical completo. Un paciente en estado <strong>"En espera"</strong> todavía está con enfermería.</p>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>Puedes ver el preclinical sin abrir la consulta.</strong><p>Haz clic en el nombre del paciente para ver un resumen rápido de sus signos vitales antes de llamarlo al consultorio. Útil para prepararte si hay un valor fuera de rango.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Llamar al paciente</h3></div>
+          <div class="step-card-body">
+            <p>Cuando estés listo para atender, haz clic en <strong>"Iniciar consulta"</strong> en la fila del paciente. Esto cambia su estado a <strong>"En consulta"</strong> y abre el expediente clínico completo. Enfermería verá el cambio en su pantalla también.</p>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(2)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
+          <button class="nav-btn btn-next" onclick="goToLesson(3)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LECCIÓN 3 -->
+    <div class="lesson-panel" id="lesson-3">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 03</span></div>
+        <h2>Abrir el expediente clínico</h2>
+        <p>Estructura del expediente, cómo navegar entre secciones y qué muestra cada pestaña.</p>
+        <div class="lesson-meta">
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~15 minutos</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>Estructura del expediente</h3></div>
+          <div class="step-card-body">
+            <p>El expediente tiene cuatro pestañas principales. Así se ve en pantalla:</p>
+            <div class="expediente-card">
+              <div class="exp-header">
+                <div class="exp-avatar">MR</div>
+                <div>
+                  <div class="exp-name">María Rodríguez López</div>
+                  <div class="exp-sub">DNI 0801-1985-12345 · 38 años · F · Exp. #00247</div>
+                </div>
+              </div>
+              <div class="exp-tabs">
+                <div class="exp-tab active">Preclinical</div>
+                <div class="exp-tab">Historial</div>
+                <div class="exp-tab">Laboratorio</div>
+                <div class="exp-tab">Notas</div>
+              </div>
+              <div class="exp-body">
+                <div class="exp-row"><span class="exp-row-label">Presión arterial</span><span class="exp-row-value vital-alert">148 / 94 mmHg ▲</span></div>
+                <div class="exp-row"><span class="exp-row-label">Frec. cardíaca</span><span class="exp-row-value">88 lpm</span></div>
+                <div class="exp-row"><span class="exp-row-label">Temperatura</span><span class="exp-row-value">37.1 °C</span></div>
+                <div class="exp-row"><span class="exp-row-label">Saturación O₂</span><span class="exp-row-value">96%</span></div>
+                <div class="exp-row"><span class="exp-row-label">Peso / Talla / IMC</span><span class="exp-row-value">72 kg · 1.60 m · 28.1</span></div>
+                <div class="exp-row"><span class="exp-row-label">Motivo</span><span class="exp-row-value">"Dolor de cabeza desde ayer, mareada"</span></div>
+              </div>
+            </div>
+            <p style="margin-top:4px">El valor de presión en rojo ya viene marcado por el sistema cuando está fuera del rango normal.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Qué contiene cada pestaña</h3></div>
+          <div class="step-card-body">
+            <ul class="checklist">
+              <li><strong>Preclinical</strong> — signos vitales del día, ingresados por enfermería.</li>
+              <li><strong>Historial</strong> — consultas anteriores con sus notas y diagnósticos.</li>
+              <li><strong>Laboratorio</strong> — resultados de exámenes, ordenados por fecha.</li>
+              <li><strong>Notas</strong> — formulario para escribir la nota de la consulta actual.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(2)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
+          <button class="nav-btn btn-next" onclick="goToLesson(4)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LECCIÓN 4 -->
+    <div class="lesson-panel" id="lesson-4">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 04</span><span class="tag-clinico">Clínico</span></div>
+        <h2>Revisar datos preclínicos</h2>
+        <p>Cómo interpretar lo que ingresó enfermería y qué valores requieren atención inmediata.</p>
+        <div class="lesson-meta">
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~15 minutos</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>Alertas automáticas del sistema</h3></div>
+          <div class="step-card-body">
+            <p>El sistema marca en <strong style="color:#E07070">rojo</strong> cualquier valor fuera del rango de referencia adulto. Estos son los umbrales configurados:</p>
+            <ul class="checklist">
+              <li>PA sistólica <strong>≥ 140</strong> o <strong>≤ 90</strong> mmHg.</li>
+              <li>PA diastólica <strong>≥ 90</strong> mmHg.</li>
+              <li>Frecuencia cardíaca <strong>≥ 100</strong> o <strong>≤ 55</strong> lpm.</li>
+              <li>Temperatura <strong>≥ 37.5 °C</strong>.</li>
+              <li>Saturación O₂ <strong>≤ 95%</strong>.</li>
+              <li>IMC <strong>≥ 30</strong> (obesidad) o <strong>≤ 18.5</strong> (bajo peso).</li>
+            </ul>
+            <div class="callout tip" style="margin-top:14px">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>Estos umbrales son de referencia, no diagnósticos.</strong><p>Un valor en rojo es una señal para prestar atención clínica — el sistema no reemplaza tu criterio médico.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Si un valor parece incorrecto</h3></div>
+          <div class="step-card-body">
+            <p>Si sospechas un error de captura (ej. una PA de 240/130 en un paciente que entra caminando tranquilamente), puedes solicitar a enfermería que lo tome de nuevo. El sistema permite que enfermería actualice el preclinical mientras la consulta está abierta.</p>
+            <div class="callout alert">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>No edites el preclinical tú mismo.</strong><p>Solo el personal de enfermería puede modificar los signos vitales. Tus cambios deben ir en las notas de consulta, no en el formulario de preclinical.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(4)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
+          <button class="nav-btn btn-next" onclick="goToLesson(5)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LECCIÓN 5 -->
+    <div class="lesson-panel" id="lesson-5">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 05</span></div>
+        <h2>Historial clínico y resultados de laboratorio</h2>
+        <p>Consultar visitas anteriores, notas previas y resultados de exámenes del paciente.</p>
+        <div class="lesson-meta">
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~15 minutos</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>Pestaña Historial</h3></div>
+          <div class="step-card-body">
+            <p>Haz clic en la pestaña <strong>Historial</strong> dentro del expediente. Verás una lista de todas las consultas anteriores del paciente en CMG, ordenadas de más reciente a más antigua. Cada entrada muestra:</p>
+            <ul class="checklist">
+              <li>Fecha y médico que atendió.</li>
+              <li>Diagnóstico registrado (CIE-10 o texto libre).</li>
+              <li>Botón para ver la nota completa de esa consulta.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Pestaña Laboratorio</h3></div>
+          <div class="step-card-body">
+            <p>Haz clic en la pestaña <strong>Laboratorio</strong>. Aparecen todos los resultados disponibles del paciente, ordenados por fecha de realización. Haz clic en cualquier resultado para ver el detalle completo con los valores de referencia.</p>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>Solo ves los resultados de exámenes realizados en CMG.</strong><p>Si el paciente trae resultados de otro laboratorio, puedes anotarlos en las notas de consulta pero no aparecerán en esta pestaña.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Resultados pendientes</h3></div>
+          <div class="step-card-body">
+            <p>Los exámenes solicitados que aún no tienen resultado aparecen con el estado <strong>"Pendiente"</strong> en color amarillo. Cuando laboratorio cargue el resultado, cambiará automáticamente a <strong>"Disponible"</strong> y podrás verlo en esta misma pestaña.</p>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(4)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(5)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
+          <button class="nav-btn btn-next" onclick="goToLesson(6)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LECCIÓN 6 -->
+    <div class="lesson-panel" id="lesson-6">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 06</span><span class="tag-critico">Crítica</span></div>
+        <h2>Registro de notas clínicas y diagnóstico</h2>
+        <p>Cómo documentar la consulta: anamnesis, diagnóstico, indicaciones y firma médica.</p>
+        <div class="lesson-meta">
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~20 minutos</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="callout alert">
+          <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div><strong>La nota queda firmada con tu nombre y número de colegiado.</strong><p>Una vez cerrada la consulta, la nota no puede editarse. Revisa bien antes de hacer clic en "Cerrar consulta".</p></div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>Abrir el formulario de notas</h3></div>
+          <div class="step-card-body">
+            <p>Dentro del expediente, haz clic en la pestaña <strong>Notas</strong>. El formulario tiene cuatro campos de texto libre y uno de diagnóstico estructurado.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Completar la nota SOAP</h3></div>
+          <div class="step-card-body">
+            <p>El sistema organiza la nota en formato SOAP. Un ejemplo:</p>
+            <div class="notas-box">
+              <div class="notas-section">S — Subjetivo (lo que refiere el paciente)</div>
+              Paciente femenina de 38 años que consulta por cefalea frontal de 24h de evolución, asociada a mareo y visión borrosa. Niega trauma craneal. Refiere episodio similar hace 3 meses.
+              <br><br>
+              <div class="notas-section">O — Objetivo (examen físico)</div>
+              PA 148/94 mmHg. FC 88 lpm. T° 37.1°C. SpO₂ 96%. Orientada, sin déficit neurológico. Pupilas isocóricas reactivas. Rigidez de nuca negativa.
+              <br><br>
+              <div class="notas-section">A — Análisis (diagnóstico)</div>
+              HTA estadio 1, no conocida. Cefalea secundaria a HTA.
+              <br><br>
+              <div class="notas-section">P — Plan (indicaciones)</div>
+              Amlodipino 5mg VO cada 24h. Control en 7 días. Restricción de sal. Solicitar perfil lipídico y función renal.
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Diagnóstico CIE-10</h3></div>
+          <div class="step-card-body">
+            <p>El campo de diagnóstico tiene búsqueda por código o descripción. Escribe <strong>"hipertensión"</strong> o <strong>"I10"</strong> y selecciona el código correcto de la lista. Puedes agregar diagnósticos secundarios si corresponde.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">4</span><h3>Guardar borrador vs. confirmar</h3></div>
+          <div class="step-card-body">
+            <p>Mientras escribes, el sistema guarda un <strong>borrador automático</strong> cada 60 segundos. Puedes salir y volver sin perder lo escrito. Cuando la nota esté completa, haz clic en <strong>"Guardar nota"</strong> para confirmarla — esto no cierra la consulta todavía.</p>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>Guarda la nota antes de solicitar exámenes.</strong><p>Puedes volver al expediente a agregar solicitudes de laboratorio sin que la nota se pierda.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(5)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(6)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
+          <button class="nav-btn btn-next" onclick="goToLesson(7)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LECCIÓN 7 -->
+    <div class="lesson-panel" id="lesson-7">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 07</span></div>
+        <h2>Solicitud de estudios, derivaciones y cierre</h2>
+        <p>Pedir exámenes, referir a otro especialista y cerrar la consulta correctamente.</p>
+        <div class="lesson-meta">
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~20 minutos</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>Solicitar exámenes de laboratorio</h3></div>
+          <div class="step-card-body">
+            <p>En el expediente abierto, haz clic en <strong>"Solicitar exámenes"</strong>. Busca cada examen por nombre o siglas y agrégalos a la orden. Al confirmar, la orden queda en el sistema y el paciente debe pasar por <strong>caja a pagarlos</strong> antes de que laboratorio los procese.</p>
+            <p>Los exámenes solicitados aparecerán en la pestaña Laboratorio del expediente con estado <strong>"Pendiente"</strong>.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Emitir una derivación</h3></div>
+          <div class="step-card-body">
+            <p>Si el paciente necesita atención con otro especialista, haz clic en <strong>"Nueva derivación"</strong>. Completa:</p>
+            <ul class="checklist" style="margin-bottom:14px">
+              <li><strong>Especialidad de destino</strong> — selecciona de la lista.</li>
+              <li><strong>Motivo de la derivación</strong> — texto libre, breve y claro.</li>
+              <li><strong>Prioridad</strong> — rutina, preferente o urgente.</li>
+            </ul>
+            <p>El documento de derivación queda registrado en el expediente y puede imprimirse para entregárselo al paciente.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Cerrar la consulta</h3></div>
+          <div class="step-card-body">
+            <p>Cuando hayas completado la nota, el diagnóstico y todas las solicitudes, haz clic en <strong>"Cerrar consulta"</strong>. El sistema pedirá una confirmación. Al aceptar:</p>
+            <ul class="checklist" style="margin-bottom:14px">
+              <li>La nota queda firmada con tu nombre, número de colegiado y la hora exacta.</li>
+              <li>El estado del paciente en la agenda cambia a <strong>"Atendido"</strong>.</li>
+              <li>Enfermería ve el cambio en tiempo real y puede preparar al siguiente paciente.</li>
+            </ul>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>¡Módulo completado!</strong><p>Conoces el flujo completo del médico en el sistema: desde revisar la agenda hasta cerrar una consulta con nota firmada. Practica el flujo una vez con un expediente de prueba antes de operar de forma independiente.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(6)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
+        <button class="nav-btn btn-done" onclick="markDone(7)" id="final-done-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Completar módulo</button>
+      </div>
+      <div class="completion-banner" id="completion-banner">
+        <h3>¡Módulo Médico completado!</h3>
+        <p>Completaste las 7 lecciones. Estás listo para utilizar el sistema de consultorio bajo supervisión inicial.</p>
+        <a href="index.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15,18 9,12 15,6"/></svg>Volver al índice</a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const TOTAL = 7;
+  const done = new Set(JSON.parse(localStorage.getItem('cmg-medico-done') || '[]'));
+  let current = 1;
+  function save() { localStorage.setItem('cmg-medico-done', JSON.stringify([...done])); }
+  function updateProgress() {
+    const pct = Math.round((done.size / TOTAL) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = done.size + ' / ' + TOTAL;
+  }
+  function goToLesson(n) {
+    document.getElementById('lesson-' + current).classList.remove('is-active');
+    document.querySelector('[data-lesson="' + current + '"]').classList.remove('is-active');
+    current = n;
+    document.getElementById('lesson-' + n).classList.add('is-active');
+    document.querySelector('[data-lesson="' + n + '"]').classList.add('is-active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function markDone(n) {
+    done.add(n);
+    save();
+    document.querySelector('[data-lesson="' + n + '"]').classList.add('is-done');
+    updateProgress();
+    if (n === TOTAL && done.size === TOTAL) {
+      document.getElementById('completion-banner').classList.add('is-visible');
+      document.getElementById('final-done-btn').disabled = true;
+    }
+  }
+  done.forEach(n => { const b = document.querySelector('[data-lesson="' + n + '"]'); if (b) b.classList.add('is-done'); });
+  updateProgress();
+</script>
+</body>
+</html>

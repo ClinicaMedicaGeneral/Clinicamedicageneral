@@ -1067,6 +1067,31 @@
         /* Paso 2: Guardar resultado */
         return cmgDb.collection('resultadosPruebas').add(data).then(function (docRef) {
           data._id = docRef.id;
+          /* Generar liquidación pendiente en Caja */
+          var TIPO_LABEL = {
+            embarazo: 'Prueba de Embarazo',
+            dengue:   'Prueba de Dengue',
+            duo:      'Prueba Dúo (Dengue/Chikungunya)',
+            antigeno: 'Prueba de Antígeno COVID'
+          };
+          var tipoPrueba = TIPO_LABEL[data.tipo] || ('Prueba rápida: ' + data.tipo);
+          var now2 = new Date();
+          var pad2 = function(n){ return String(n).padStart(2,'0'); };
+          var fechaLocalPR = now2.getFullYear() + '-' + pad2(now2.getMonth()+1) + '-' + pad2(now2.getDate()) +
+            'T' + pad2(now2.getHours()) + ':' + pad2(now2.getMinutes());
+          cmgDb.collection('consultas').add({
+            status              : 'pendiente_caja',
+            tipoRegistro        : 'prueba-standalone',
+            codigoPaciente      : data.codigoPaciente || null,
+            pacienteNombre      : data.nombre || '—',
+            servicioNombre      : tipoPrueba,
+            serviciosBrindados  : [tipoPrueba],
+            doctorNombre        : data.creadoPorNombre || data.creadoPor,
+            fechaLocal          : fechaLocalPR,
+            resultadosPruebasId : docRef.id,
+            createdAt           : firebase.firestore.FieldValue.serverTimestamp()
+          }).catch(function(e){ console.warn('[CMG] Error creando caja entry para prueba rápida:', e); });
+
           if (modo === 'pendiente') {
             toast('📋 Prueba dejada pendiente. Podrás reabrirla cuando tengas el resultado.');
             cargarPendientes();

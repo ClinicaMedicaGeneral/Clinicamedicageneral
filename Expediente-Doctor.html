@@ -1639,17 +1639,20 @@ button.ed-consulta-link {
           var ps = d.pruebaSensibilidadServicio;
           var requiereSens = !!(ps && ps.requerida);
           var esLabStandalone      = d.tipoRegistro === 'lab-standalone';
-          var esServicioStandalone = d.tipoRegistro === 'servicio-standalone' || (!d.diagnostico && d.servicioNombre && !esLabStandalone);
-          var servicios = (d.serviciosBrindados||[]).join(', ') || (esLabStandalone || esServicioStandalone ? d.servicioNombre : (d.diagnostico ? 'Consulta médica' : '—'));
+          var esPruebaStandalone   = d.tipoRegistro === 'prueba-standalone';
+          var esServicioStandalone = d.tipoRegistro === 'servicio-standalone' || (!d.diagnostico && d.servicioNombre && !esLabStandalone && !esPruebaStandalone);
+          var servicios = (d.serviciosBrindados||[]).join(', ') || (esLabStandalone || esPruebaStandalone || esServicioStandalone ? d.servicioNombre : (d.diagnostico ? 'Consulta médica' : '—'));
           /* DRM v3 #4: badge de constancia emitida */
           var badgeConstancia = (d.tieneConstancia || d.constanciaId)
             ? '<span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">📄 Constancia emitida</span>'
             : '';
-          var tipoLabel = esLabStandalone
-            ? '<span style="background:#EDE9FE;color:#5B21B6;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🔬 Laboratorio</span>'
-            : esServicioStandalone
-              ? '<span style="background:#D1FAE5;color:#065F46;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🛎️ Servicio</span>'
-              : '<span style="background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🩺 Consulta</span>';
+          var tipoLabel = esPruebaStandalone
+            ? '<span style="background:#CCFBF1;color:#0F766E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🧪 Prueba rápida</span>'
+            : esLabStandalone
+              ? '<span style="background:#EDE9FE;color:#5B21B6;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🔬 Laboratorio</span>'
+              : esServicioStandalone
+                ? '<span style="background:#D1FAE5;color:#065F46;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🛎️ Servicio</span>'
+                : '<span style="background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🩺 Consulta</span>';
           /* DRM v3.2: mostrar NOMBRE del paciente prominente, código como subtítulo */
           var nombrePaciente = d.pacienteNombre || '— sin nombre —';
           html +=

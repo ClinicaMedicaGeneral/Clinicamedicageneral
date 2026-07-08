@@ -92,9 +92,13 @@ service cloud.firestore {
           )
         );
 
-      allow create, delete: if isDoctor();
-      // Caja puede actualizar una consulta solo para marcarla como pagada
-      // (transición pendiente_caja → completa). No puede crear ni terminar consultas.
+      // Caja puede crear entradas standalone (prueba-rapida y lab) para liquidación.
+      allow create: if isDoctor()
+        || (isCaja()
+            && request.resource.data.status == 'pendiente_caja'
+            && request.resource.data.tipoRegistro in ['lab-standalone', 'prueba-standalone']);
+      allow delete: if isDoctor();
+      // Caja puede actualizar solo para marcar como pagada (pendiente_caja → completa).
       allow update: if isDoctor()
         || (isCaja()
             && resource.data.status == 'pendiente_caja'
@@ -156,8 +160,9 @@ service cloud.firestore {
             )
           )
         );
-      allow create, update:  if isDoctor();
-      allow delete:          if isDoctor();
+      // Caja puede crear y actualizar pruebas rápidas (recepción las registra).
+      allow create, update: if isDoctor() || isCaja();
+      allow delete:         if isDoctor();
     }
 
     // ═══ /examenesLaboratorio/{id} ════════════════════════════

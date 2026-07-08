@@ -581,6 +581,13 @@
         </button>
       </li>
       <li>
+        <button class="lesson-nav-btn" data-lesson="6" type="button">
+          <span class="nav-num">6</span>
+          <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-yellow)" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+          Cierre de caja
+        </button>
+      </li>
+      <li>
         <button class="lesson-nav-btn" data-lesson="7" type="button">
           <span class="nav-num">7</span>
           <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-yellow)" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
@@ -1039,6 +1046,100 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
             Marcar como completada
           </button>
+          <button class="nav-btn btn-next" onclick="goToLesson(6)">
+            Siguiente
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9,18 15,12 9,6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LECCIÓN 6 ══ -->
+    <div class="lesson-panel" id="lesson-6">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">
+          <span class="lesson-num-badge">Lección 06</span>
+          <span class="lesson-tag-critical">Cierre</span>
+        </div>
+        <h2>Cierre de caja</h2>
+        <p>Cómo ejecutar el cierre al final del turno: cierre en la plataforma externa, cierre de POS y arqueo de efectivo.</p>
+        <div class="lesson-meta">
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+            ~15 minutos
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+
+        <div class="callout tip">
+          <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div><strong>El cierre se hace en la plataforma externa, no en CMG.</strong><p>CMG registra las liquidaciones del día, pero el cuadre de caja, el cierre de POS y el arqueo se gestionan desde la plataforma de cobros externa al finalizar el turno.</p></div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">1</span>
+            <h3>Abrir la plataforma externa</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Al finalizar el turno, abre la plataforma de cobros externa. Asegúrate de que no haya transacciones pendientes de confirmar antes de continuar con el cierre.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">2</span>
+            <h3>Generar el Cierre</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Ejecuta la opción <strong>"Generar Cierre"</strong> en la plataforma externa. Esto produce el resumen de todas las transacciones del turno agrupadas por tipo de cobro.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">3</span>
+            <h3>Generar el Cierre de POS</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Ejecuta la opción <strong>"Generar Cierre de POS"</strong>. Esto cierra el terminal de punto de venta y consolida las transacciones con tarjeta del turno. Guarda o imprime el comprobante del POS.</p>
+            <div class="callout warn">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>Realiza el cierre de POS antes del arqueo.</strong><p>El total de tarjetas que aparece en el arqueo debe coincidir con el comprobante del cierre de POS. Si no coinciden, comunícalo a tu coordinador antes de cerrar.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">4</span>
+            <h3>Calcular y cuadrar con el arqueo</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Cuenta el efectivo físico en la caja y completa el arqueo comparando contra los totales del cierre:</p>
+            <ul class="checklist" style="margin-bottom:14px">
+              <li><strong>Efectivo físico</strong> — cuenta los billetes y monedas en caja.</li>
+              <li><strong>Total tarjetas</strong> — verifica contra el comprobante del cierre de POS.</li>
+              <li><strong>Otros métodos</strong> — transferencias u otros cobros registrados.</li>
+            </ul>
+            <p>Si hay diferencia entre lo físico y lo registrado en la plataforma, anótala y comunícala a tu coordinador. No cierres sin justificar las diferencias.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(5)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
+          Anterior
+        </button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(6)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+            Marcar completada
+          </button>
           <button class="nav-btn btn-next" onclick="goToLesson(7)">
             Siguiente
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9,18 15,12 9,6"/></svg>
@@ -1117,7 +1218,7 @@
       </div>
 
       <div class="lesson-footer">
-        <button class="nav-btn btn-prev" onclick="goToLesson(5)">
+        <button class="nav-btn btn-prev" onclick="goToLesson(6)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
           Anterior
         </button>

@@ -74,8 +74,10 @@ service cloud.firestore {
     }
 
     // ═══ /consultas/{id} ═══════════════════════════════════════
-    // Caja puede LEER consultas pero NO crearlas, editarlas ni cerrarlas
-    // (iniciar/terminar un servicio pendiente es función exclusiva del médico).
+    // Caja puede LEER y LIQUIDAR consultas.
+    // Crear/iniciar/terminar un servicio es función exclusiva del médico.
+    // Caja solo puede hacer update cuando el status pasa de pendiente_caja → completa
+    // (liquidación de pago), no puede crear ni borrar consultas.
     match /consultas/{consultaId} {
       allow read: if isDoctor() || isCaja()
         || (
@@ -90,7 +92,13 @@ service cloud.firestore {
           )
         );
 
-      allow create, update, delete: if isDoctor();
+      allow create, delete: if isDoctor();
+      // Caja puede actualizar una consulta solo para marcarla como pagada
+      // (transición pendiente_caja → completa). No puede crear ni terminar consultas.
+      allow update: if isDoctor()
+        || (isCaja()
+            && resource.data.status == 'pendiente_caja'
+            && request.resource.data.status == 'completa');
     }
 
     // ═══ /quotations/{id} ══════════════════════════════════════
@@ -181,7 +189,8 @@ service cloud.firestore {
           && exists(/databases/$(database)/documents/expedientes/$(request.resource.data.codigoPaciente))
           && get(/databases/$(database)/documents/expedientes/$(request.resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
         );
-      allow update: if isDoctor();
+      // Caja puede actualizar (marcar procesando, subir resultado PDF).
+      allow update: if isDoctor() || isCaja();
       allow delete: if isDoctor();
     }
 

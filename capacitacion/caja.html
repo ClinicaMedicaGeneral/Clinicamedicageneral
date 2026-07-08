@@ -587,6 +587,13 @@
           Cierre de caja
         </button>
       </li>
+      <li>
+        <button class="lesson-nav-btn" data-lesson="7" type="button">
+          <span class="nav-num">7</span>
+          <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-yellow)" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+          Doctor 365
+        </button>
+      </li>
     </ul>
 
     <div class="progress-wrap">
@@ -1174,7 +1181,96 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
           Anterior
         </button>
-        <button class="nav-btn btn-done" onclick="markDone(6)" id="final-done-btn">
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(6)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+            Marcar completada
+          </button>
+          <button class="nav-btn btn-next" onclick="goToLesson(7)">
+            Siguiente
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9,18 15,12 9,6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LECCIÓN 7 ══ -->
+    <div class="lesson-panel" id="lesson-7">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">
+          <span class="lesson-num-badge">Lección 07</span>
+        </div>
+        <h2>Doctor 365 — Inscripción y cobro</h2>
+        <p>Cómo registrar a un paciente en el plan anual, cobrar la membresía y aplicar el descuento en consultas posteriores.</p>
+        <div class="lesson-meta">
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+            ~20 minutos
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+
+        <div class="callout tip">
+          <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div><strong>¿Qué es Doctor 365?</strong><p>Es el plan de membresía anual de CMG. El paciente paga <strong>L.900 al año</strong> y recibe un 30% de descuento en todos sus servicios. Es una suscripción — no se descuenta por consulta, se activa una vez al año.</p></div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">1</span><h3>Inscribir a un paciente en Doctor 365</h3></div>
+          <div class="step-card-body">
+            <p>El paciente debe estar registrado primero (ver Lección 2). Con la ficha abierta, ve a <strong>Cobros → Doctor 365 → Nueva suscripción</strong>.</p>
+            <p>Selecciona al paciente, confirma que el plan es <strong>Doctor 365 Anual — L.900</strong> y elige la forma de pago. Haz clic en <strong>"Activar suscripción"</strong>.</p>
+            <div class="callout warn">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>Verifica que el paciente no tenga ya una suscripción activa.</strong><p>En la ficha del paciente aparece un badge amarillo <strong>"D365 Activo"</strong> si ya está suscrito. Si lo suscribes dos veces se generan dos cobros de L.900. Revisa siempre antes de activar.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Qué incluye — puntos clave para el paciente</h3></div>
+          <div class="step-card-body">
+            <p>Cuando un paciente pregunta sobre Doctor 365, estos son los puntos que debes comunicar:</p>
+            <ul class="checklist">
+              <li><strong>L.900 por año</strong> — pago único, no mensual.</li>
+              <li><strong>30% de descuento</strong> en consultas, laboratorio y procedimientos.</li>
+              <li><strong>Sin citas</strong> — atención walk-in con prioridad Doctor 365.</li>
+              <li>El descuento aplica desde el momento en que se activa la suscripción.</li>
+              <li>Incluye una ampolla de <strong>Complejo B</strong> de regalo al inscribirse.</li>
+            </ul>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>Muéstrale la página si tiene dudas.</strong><p>Abre <strong>clinicamedicacmg.net → Doctor 365</strong> desde cualquier computadora de recepción para que el paciente vea todos los detalles del plan.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Cobro de consulta con Doctor 365 activo</h3></div>
+          <div class="step-card-body">
+            <p>Una vez activada la membresía, el descuento se aplica automáticamente en todos los cobros futuros. Al seleccionar al paciente en el flujo de cobro normal (Lección 4), el sistema reconoce que es Doctor 365 y muestra el precio ya con el 30% aplicado.</p>
+            <p>En el comprobante aparece la línea de descuento de forma separada para que el paciente vea exactamente cuánto ahorró en esa visita.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">4</span><h3>Renovación de la membresía</h3></div>
+          <div class="step-card-body">
+            <p>Cuando la membresía está próxima a vencer, la ficha del paciente muestra <strong>"D365 — vence en X días"</strong>. Puedes ofrecerle renovar en ese momento. El flujo es el mismo que una suscripción nueva: <strong>Cobros → Doctor 365 → Renovar suscripción</strong>.</p>
+            <p>Si el paciente no renueva a tiempo y la membresía vence, el sistema deja de aplicar el descuento automáticamente hasta que renueve.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(6)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
+          Anterior
+        </button>
+        <button class="nav-btn btn-done" onclick="markDone(7)" id="final-done-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
           Completar módulo
         </button>
@@ -1182,7 +1278,7 @@
 
       <div class="completion-banner" id="completion-banner">
         <h3>¡Módulo Caja completado!</h3>
-        <p>Completaste las 6 lecciones del módulo de Caja. Estás listo para operar bajo supervisión.</p>
+        <p>Completaste las 7 lecciones del módulo de Caja. Estás listo para operar bajo supervisión.</p>
         <a href="index.html">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
           Volver al índice de módulos
@@ -1194,7 +1290,7 @@
 </div>
 
 <script>
-  const TOTAL = 6;
+  const TOTAL = 7;
   const done = new Set(JSON.parse(localStorage.getItem('cmg-caja-done') || '[]'));
   let current = 1;
 

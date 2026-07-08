@@ -2683,6 +2683,7 @@ button.ed-consulta-link {
         '<div class="ed-vital"><div class="ed-vital-label">Temp (°C)</div><input id="cons-temp" placeholder="36.5"></div>' +
         '<div class="ed-vital"><div class="ed-vital-label">Peso (kg)</div><input id="cons-peso" placeholder="70"></div>' +
         '<div class="ed-vital"><div class="ed-vital-label">Talla (m)</div><input id="cons-talla" placeholder="1.70"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">IMC</div><input id="cons-imc" placeholder="—" readonly style="background:#F3F4F6;cursor:default;font-weight:700;color:#213C7D"></div>' +
         '<div class="ed-vital"><div class="ed-vital-label">SpO2 (%)</div><input id="cons-spo2" placeholder="98"></div>' +
         '<div class="ed-vital"><div class="ed-vital-label">Glucosa (mg/dL)</div><input id="cons-glucosa" placeholder="90"></div>' +
       '</div>' +
@@ -2719,6 +2720,21 @@ button.ed-consulta-link {
     $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
     $id('btn-guardar-preclinica').addEventListener('click', guardarPreclinica);
 
+    /* Auto-calcular IMC al cambiar peso o talla */
+    function calcularIMC() {
+      var peso  = parseFloat($val('cons-peso'));
+      var talla = parseFloat($val('cons-talla'));
+      var imcInput = $id('cons-imc');
+      if (peso > 0 && talla > 0) {
+        var imc = (peso / (talla * talla)).toFixed(1);
+        imcInput.value = imc;
+      } else {
+        imcInput.value = '';
+      }
+    }
+    $id('cons-peso').addEventListener('input', calcularIMC);
+    $id('cons-talla').addEventListener('input', calcularIMC);
+
     /* Toggle del formulario de prueba de sensibilidad */
     document.querySelectorAll('input[name="pre-sens"]').forEach(function (r) {
       r.addEventListener('change', function () {
@@ -2734,6 +2750,7 @@ button.ed-consulta-link {
     var vitales = {
       ta: $val('cons-ta'), fc: $val('cons-fc'), fr: $val('cons-fr'),
       temp: $val('cons-temp'), peso: $val('cons-peso'), talla: $val('cons-talla'),
+      imc: $val('cons-imc'),
       spo2: $val('cons-spo2'), glucosa: $val('cons-glucosa')
     };
     var algunaVital = Object.keys(vitales).some(function (k) { return vitales[k]; });
@@ -3037,6 +3054,7 @@ button.ed-consulta-link {
     if (sv.temp) chips.push('<span class="ed-vital-chip"><strong>T°:</strong> ' + esc(sv.temp) + '</span>');
     if (sv.peso) chips.push('<span class="ed-vital-chip"><strong>Peso:</strong> ' + esc(sv.peso) + ' kg</span>');
     if (sv.talla) chips.push('<span class="ed-vital-chip"><strong>Talla:</strong> ' + esc(sv.talla) + ' m</span>');
+    if (sv.imc) chips.push('<span class="ed-vital-chip"><strong>IMC:</strong> ' + esc(sv.imc) + '</span>');
     if (sv.spo2) chips.push('<span class="ed-vital-chip"><strong>SpO2:</strong> ' + esc(sv.spo2) + '%</span>');
     if (sv.glucosa) chips.push('<span class="ed-vital-chip"><strong>Glucosa:</strong> ' + esc(sv.glucosa) + '</span>');
 

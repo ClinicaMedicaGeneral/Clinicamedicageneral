@@ -16,6 +16,7 @@ service cloud.firestore {
       return isAuth() && request.auth.token.email in [
         'expedientes.clinicamedicacmg@gmail.com',
         'rubenwainwrightba@gmail.com',
+        'ventasymercadeocmg@gmail.com',
         // DRM Fun-2: médicos tratantes individuales
         'doctor_rojascmg@gmail.com',
         'doctor_hermescmg@gmail.com',
@@ -27,6 +28,7 @@ service cloud.firestore {
     function isAdmin() {
       return isAuth() && request.auth.token.email in [
         'rubenwainwrightba@gmail.com',
+        'ventasymercadeocmg@gmail.com',
         'skarleth.admoncmg@gmail.com'
       ];
     }

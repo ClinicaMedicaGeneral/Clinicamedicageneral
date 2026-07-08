@@ -209,7 +209,7 @@
     <p class="sidebar-heading">Lecciones</p>
     <ul class="lesson-nav" id="lesson-nav">
       <li><button class="lesson-nav-btn is-active" data-lesson="1" type="button"><span class="nav-num">1</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8C8" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Acceso al portal</button></li>
-      <li><button class="lesson-nav-btn" data-lesson="2" type="button"><span class="nav-num">2</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8C8" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Agenda del día</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="2" type="button"><span class="nav-num">2</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8C8" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Iniciar pre-clínica</button></li>
       <li><button class="lesson-nav-btn" data-lesson="3" type="button"><span class="nav-num">3</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8C8" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Toma de preclinical</button></li>
       <li><button class="lesson-nav-btn" data-lesson="4" type="button"><span class="nav-num">4</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8C8" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Registro en el sistema</button></li>
       <li><button class="lesson-nav-btn" data-lesson="5" type="button"><span class="nav-num">5</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8C8" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Notificar al médico</button></li>
@@ -274,48 +274,37 @@
     <div class="lesson-panel" id="lesson-2">
       <div class="lesson-header">
         <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 02</span></div>
-        <h2>Consulta de agenda del día</h2>
-        <p>Ver la lista de pacientes con turno, su estado en el flujo y datos de contacto.</p>
+        <h2>Iniciar una pre-clínica</h2>
+        <p>Cómo registrar una nueva pre-clínica en el sistema para que quede pendiente y el médico pueda completar la consulta.</p>
         <div class="lesson-meta">
           <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~15 minutos</span>
         </div>
       </div>
       <div class="lesson-body">
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">1</span><h3>Abrir la agenda del día</h3></div>
+          <div class="step-card-header"><span class="step-n">1</span><h3>Ir a la pestaña Consulta</h3></div>
           <div class="step-card-body">
-            <p>Haz clic en <strong>Agenda del día</strong> en el menú. La pantalla muestra todos los pacientes con turno para hoy, ordenados por hora.</p>
-            <p>Cada fila muestra: nombre del paciente, hora del turno, médico asignado y estado actual.</p>
+            <p>En la barra superior haz clic en la pestaña <strong>Consulta</strong>. Esta es la pantalla principal desde donde se gestionan todas las consultas del día.</p>
           </div>
         </div>
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">2</span><h3>Interpretar los estados del turno</h3></div>
+          <div class="step-card-header"><span class="step-n">2</span><h3>Iniciar nueva consulta</h3></div>
           <div class="step-card-body">
-            <p>Cada paciente tiene un estado que cambia durante el flujo de la visita:</p>
-            <div style="display:flex;flex-direction:column;gap:8px;margin:12px 0 16px">
-              <div style="display:flex;align-items:center;gap:12px">
-                <span class="status-pill pill-espera">En espera</span>
-                <span style="font-size:13px;color:var(--neutral-500)">El paciente llegó pero aún no pasó a preclinical.</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:12px">
-                <span class="status-pill pill-listo">Listo para médico</span>
-                <span style="font-size:13px;color:var(--neutral-500)">Preclinical completo. Esperando que el médico lo llame.</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:12px">
-                <span class="status-pill pill-en-consulta">En consulta</span>
-                <span style="font-size:13px;color:var(--neutral-500)">Paciente con el médico en este momento.</span>
-              </div>
-            </div>
+            <p>Haz clic en <strong>Nueva Consulta</strong>. Se abre el formulario de <strong>Etapa 1 · Pre-clínica</strong> donde ingresarás los signos vitales del paciente.</p>
             <div class="callout tip">
               <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div><strong>La agenda se actualiza automáticamente.</strong><p>No necesitas recargar la página. Cada cambio de estado que tú o el médico hagan aparece en tiempo real.</p></div>
+              <div><strong>Busca al paciente antes de llenar el formulario.</strong><p>Usa la pestaña <strong>Buscar</strong> para encontrar al paciente por nombre o DNI y vincularlo a la pre-clínica. Si no está registrado, créalo primero desde <strong>Nuevo</strong>.</p></div>
             </div>
           </div>
         </div>
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">3</span><h3>Ver los datos de un paciente</h3></div>
+          <div class="step-card-header"><span class="step-n">3</span><h3>Completar y guardar la pre-clínica</h3></div>
           <div class="step-card-body">
-            <p>Haz clic en el nombre de cualquier paciente para ver su ficha completa: datos de contacto, obra social, alergias registradas e historial de visitas anteriores.</p>
+            <p>Registra los signos vitales del paciente (peso, talla, presión arterial, temperatura, saturación y frecuencia cardíaca) y guarda el formulario. La pre-clínica queda en estado <strong>pendiente</strong> para que el médico la retome y complete la consulta.</p>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>Tu trabajo termina al guardar la pre-clínica.</strong><p>Una vez guardada, el médico verá el registro como pendiente en su vista de <strong>Consulta</strong> y podrá continuar desde ahí.</p></div>
+            </div>
           </div>
         </div>
       </div>

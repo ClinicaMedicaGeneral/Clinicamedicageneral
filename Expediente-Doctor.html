@@ -1059,6 +1059,20 @@ button.ed-consulta-link {
           </div>
         </div>
 
+        <!-- Doctor 365 -->
+        <div class="ed-section">
+          <div class="ed-section-title">⭐ Doctor 365</div>
+          <div class="ed-grid ed-grid-2">
+            <div class="ed-fgroup">
+              <label class="ed-label">¿Paciente Doctor 365?</label>
+              <select class="ed-select" id="nuevo-es-d365">
+                <option value="no">No</option>
+                <option value="si">Sí — Miembro activo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <div class="ed-actions">
           <button class="ed-btn ed-btn-ghost" id="btn-nuevo-limpiar">Limpiar</button>
           <button class="ed-btn ed-btn-primary" id="btn-nuevo-guardar">
@@ -2083,7 +2097,8 @@ button.ed-consulta-link {
         tipoDiscapacidad : $val('nuevo-discapacidad-tipo'),
         notas            : $val('nuevo-discapacidad-notas'),
         documentoUrl     : null
-      }
+      },
+      esD365: $val('nuevo-es-d365') === 'si'
     };
 
     /* Generar código único (reintenta si colisiona) */
@@ -2362,7 +2377,9 @@ button.ed-consulta-link {
     $id('buscar-resultado').innerHTML =
       '<div class="ed-patient-summary">' +
         '<div>' +
-          '<p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
+          '<p class="ed-patient-name">' + esc(dg.nombreCompleto) +
+            (p.esD365 ? ' <span style="background:#FDD22C;color:#213C7D;font-size:11px;font-weight:800;padding:2px 10px;border-radius:100px;letter-spacing:.04em;vertical-align:middle">⭐ DOCTOR 365</span>' : '') +
+          '</p>' +
           '<p class="ed-patient-meta">' +
             (calcEdad(dg.fechaNacimiento) ? calcEdad(dg.fechaNacimiento) + ' · ' : '') +
             esc(dg.sexo === 'M' ? 'Masculino' : (dg.sexo === 'F' ? 'Femenino' : (dg.sexo || ''))) +
@@ -2449,6 +2466,13 @@ button.ed-consulta-link {
       '<div class="ed-section"><div class="ed-section-title">🚭 Antecedentes No Patológicos</div><div id="edit-nopat-container"></div></div>' +
       '<div class="ed-section"><div class="ed-section-title">👨‍👩‍👧 Antecedentes Familiares</div>' +
         '<textarea class="ed-textarea" id="edit-familiares" rows="4">' + esc(p.antecedentesFamiliares || '') + '</textarea>' +
+      '</div>' +
+      '<div class="ed-section"><div class="ed-section-title">⭐ Doctor 365</div>' +
+        '<div class="ed-grid ed-grid-2">' +
+          '<div class="ed-fgroup"><label class="ed-label">¿Paciente Doctor 365?</label>' +
+            sel('edit-es-d365', p.esD365 ? 'si' : 'no', [{v:'no',l:'No'},{v:'si',l:'Sí — Miembro activo'}]) +
+          '</div>' +
+        '</div>' +
       '</div>';
   }
 
@@ -2479,7 +2503,8 @@ button.ed-consulta-link {
       },
       antecedentesPatologicos: collectAntecedentes('edit-pat-container'),
       antecedentesNoPatologicos: collectAntecedentes('edit-nopat-container'),
-      antecedentesFamiliares: $val('edit-familiares')
+      antecedentesFamiliares: $val('edit-familiares'),
+      esD365: $val('edit-es-d365') === 'si'
     };
     showOverlay('Guardando cambios...');
     cmgDb.collection('expedientes').doc(pacienteActual.codigoPaciente).update(update)

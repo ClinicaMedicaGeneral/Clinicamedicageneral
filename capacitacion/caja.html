@@ -907,7 +907,7 @@
           <span class="lesson-tag-critical">Crítica</span>
         </div>
         <h2>Liquidación de una consulta</h2>
-        <p>Selección del servicio, aplicación del precio público o descuento de obra social y emisión del recibo.</p>
+        <p>Cómo marcar una consulta como pagada en CMG una vez que el cobro se procesó en la plataforma externa.</p>
         <div class="lesson-meta">
           <span class="meta-item">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
@@ -918,64 +918,32 @@
 
       <div class="lesson-body">
 
-        <div class="callout alert">
-          <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <div><strong>Practica primero en modo de prueba.</strong><p>Esta lección es crítica. Antes de operar en producción, realiza al menos 2 cobros de práctica con los datos de prueba que te entregará tu coordinador.</p></div>
+        <div class="callout tip">
+          <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div><strong>El cobro se procesa en la plataforma externa.</strong><p>CMG no gestiona el pago directamente. El paciente paga en la plataforma de cobros externa. Una vez confirmado el pago, tu única acción en CMG es marcar la consulta como liquidada.</p></div>
         </div>
 
         <div class="step-card">
           <div class="step-card-header">
             <span class="step-n">1</span>
-            <h3>Seleccionar al paciente</h3>
+            <h3>Procesar el pago en la plataforma externa</h3>
           </div>
           <div class="step-card-body">
-            <p>Ve a <strong>Cobros → Nuevo cobro</strong>. En el buscador, escribe el nombre o DNI del paciente. Selecciónalo de la lista. Verifica que el nombre y la obra social mostrados sean correctos.</p>
+            <p>Abre la plataforma de cobros externa y registra el pago del paciente por el servicio correspondiente (consulta, prueba rápida, etc.). Confirma el monto y el método de pago allí.</p>
           </div>
         </div>
 
         <div class="step-card">
           <div class="step-card-header">
             <span class="step-n">2</span>
-            <h3>Seleccionar el servicio</h3>
+            <h3>Liquidar el pago en CMG</h3>
           </div>
           <div class="step-card-body">
-            <p>Haz clic en <strong>"Agregar servicio"</strong> y busca la consulta médica correspondiente. Los servicios están organizados por categoría:</p>
-            <ul class="checklist" style="margin-bottom:14px">
-              <li><strong>Consulta General</strong> — médico de turno sin especialidad.</li>
-              <li><strong>Consulta con Especialista</strong> — selecciona la especialidad del médico.</li>
-              <li><strong>Prueba Rápida</strong> — COVID-19, dengue, embarazo, etc.</li>
-            </ul>
-            <p>El precio aparece automáticamente según el catálogo vigente. Si el paciente tiene obra social, verás el precio ya con el descuento aplicado.</p>
-          </div>
-        </div>
-
-        <div class="step-card">
-          <div class="step-card-header">
-            <span class="step-n">3</span>
-            <h3>Confirmar el monto y cobrar</h3>
-          </div>
-          <div class="step-card-body">
-            <p>Revisa el resumen: servicio, precio original, descuento (si aplica) y total a cobrar. Selecciona la <strong>forma de pago</strong>:</p>
-            <ul class="checklist" style="margin-bottom:14px">
-              <li>Efectivo</li>
-              <li>Transferencia bancaria</li>
-              <li>Tarjeta (débito o crédito)</li>
-            </ul>
-            <p>Haz clic en <strong>"Registrar cobro"</strong>. El sistema generará un comprobante con número de transacción.</p>
+            <p>Una vez confirmado el cobro en la plataforma externa, ve a la consulta correspondiente en CMG y haz clic en <strong>"Liquidar pago"</strong>. Esto registra en el sistema que la consulta fue pagada y permite al médico continuar con la atención.</p>
             <div class="callout warn">
               <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              <div><strong>Un cobro registrado no se puede eliminar.</strong><p>Si cometiste un error en el monto o el servicio, informa a tu coordinador antes de registrar el cobro. Después de confirmado, solo administración puede hacer la corrección.</p></div>
+              <div><strong>Asegúrate de cobrar antes de liquidar.</strong><p>Liquida en CMG solo después de confirmar el pago en la plataforma externa. Si tienes dudas sobre el monto, consulta con tu coordinador antes de proceder.</p></div>
             </div>
-          </div>
-        </div>
-
-        <div class="step-card">
-          <div class="step-card-header">
-            <span class="step-n">4</span>
-            <h3>Entregar el comprobante</h3>
-          </div>
-          <div class="step-card-body">
-            <p>El sistema permite imprimir el recibo o enviarlo por WhatsApp/correo directamente al paciente. Haz clic en <strong>"Imprimir"</strong> o <strong>"Enviar"</strong> según la preferencia del paciente.</p>
           </div>
         </div>
 
@@ -1007,7 +975,7 @@
           <span class="lesson-tag-lab">Laboratorio</span>
         </div>
         <h2>Liquidación de estudios de laboratorio</h2>
-        <p>Diferencias con la consulta médica: ítems de lab, múltiples prácticas en un mismo cobro.</p>
+        <p>Cómo marcar los exámenes de laboratorio como pagados en CMG una vez cobrados en la plataforma externa.</p>
         <div class="lesson-meta">
           <span class="meta-item">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
@@ -1020,59 +988,29 @@
 
         <div class="callout tip">
           <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <div><strong>¿En qué se diferencia del cobro de consulta?</strong><p>Un paciente puede pedir varios exámenes en la misma visita. El cobro de laboratorio permite agregar múltiples ítems antes de confirmar el total. El descuento de obra social aplica a cada ítem por separado.</p></div>
+          <div><strong>El cobro se procesa en la plataforma externa.</strong><p>Al igual que en las consultas, el pago de laboratorio se registra en la plataforma de cobros externa. En CMG tu única acción es liquidar el pago una vez confirmado.</p></div>
         </div>
 
         <div class="step-card">
           <div class="step-card-header">
             <span class="step-n">1</span>
-            <h3>Iniciar el cobro de laboratorio</h3>
+            <h3>Cobrar en la plataforma externa</h3>
           </div>
           <div class="step-card-body">
-            <p>Ve a <strong>Cobros → Nuevo cobro</strong>. Selecciona al paciente como siempre. En "Tipo de cobro", elige <strong>"Laboratorio"</strong> para acceder al catálogo de exámenes.</p>
+            <p>El médico habrá entregado al paciente una orden con los exámenes solicitados. Procesa el pago de todos los exámenes de la orden en la plataforma de cobros externa. Confirma el monto total antes de continuar.</p>
           </div>
         </div>
 
         <div class="step-card">
           <div class="step-card-header">
             <span class="step-n">2</span>
-            <h3>Agregar los exámenes solicitados</h3>
+            <h3>Liquidar en CMG</h3>
           </div>
           <div class="step-card-body">
-            <p>El médico habrá entregado al paciente una orden de laboratorio (física o digital). Lee cada examen de la orden y agrégalo al cobro con el botón <strong>"+ Agregar examen"</strong>.</p>
-            <p>Ejemplos comunes de la lista:</p>
-            <ul class="checklist" style="margin-bottom:14px">
-              <li>Hemograma completo</li>
-              <li>Glucosa en ayunas</li>
-              <li>Creatinina sérica</li>
-              <li>Examen general de orina (EGO)</li>
-              <li>Prueba de embarazo (hCG)</li>
-            </ul>
-            <p>El subtotal se actualiza automáticamente con cada examen que agregas.</p>
-          </div>
-        </div>
-
-        <div class="step-card">
-          <div class="step-card-header">
-            <span class="step-n">3</span>
-            <h3>Verificar ítems excluidos del descuento</h3>
-          </div>
-          <div class="step-card-body">
-            <p>Algunos exámenes específicos pueden estar <strong>excluidos del descuento</strong> de la obra social por configuración de administración. En esos casos, el sistema mostrará el precio público normal junto a ese ítem con una etiqueta de "Precio público".</p>
-            <p>Si el paciente pregunta por qué un examen no tiene descuento, explícale que ese estudio no está cubierto por su convenio y que puede consultar con administración si tiene dudas.</p>
-          </div>
-        </div>
-
-        <div class="step-card">
-          <div class="step-card-header">
-            <span class="step-n">4</span>
-            <h3>Confirmar y emitir el comprobante</h3>
-          </div>
-          <div class="step-card-body">
-            <p>Revisa la lista completa de exámenes y el total final. Haz clic en <strong>"Registrar cobro"</strong>. El recibo mostrará cada examen con su precio individual y el total.</p>
-            <div class="callout tip">
-              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div><strong>El comprobante también sirve como orden de entrega.</strong><p>El técnico de laboratorio verá los exámenes confirmados en su pantalla una vez que registres el cobro.</p></div>
+            <p>Con el pago confirmado en la plataforma externa, ve al expediente del paciente en CMG y haz clic en <strong>"Liquidar pago"</strong> para los estudios de laboratorio. Esto habilita al técnico de laboratorio para procesar los exámenes.</p>
+            <div class="callout warn">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>No liquidar sin cobro confirmado.</strong><p>El laboratorio solo procesa exámenes que aparezcan como liquidados. Asegúrate de cobrar primero en la plataforma externa antes de dar el paso en CMG.</p></div>
             </div>
           </div>
         </div>
@@ -1220,8 +1158,7 @@
         <div class="step-card">
           <div class="step-card-header"><span class="step-n">1</span><h3>Inscribir a un paciente en Doctor 365</h3></div>
           <div class="step-card-body">
-            <p>El paciente debe estar registrado primero (ver Lección 2). Con la ficha abierta, ve a <strong>Cobros → Doctor 365 → Nueva suscripción</strong>.</p>
-            <p>Selecciona al paciente, confirma que el plan es <strong>Doctor 365 Anual — L.900</strong> y elige la forma de pago. Haz clic en <strong>"Activar suscripción"</strong>.</p>
+            <p>El paciente debe estar registrado primero (ver Lección 2). Cobra la membresía <strong>Doctor 365 Anual — L.900</strong> en la plataforma de cobros externa. Una vez confirmado el pago, ingresa al panel <strong>Admin D365</strong> en CMG y activa la suscripción desde allí.</p>
             <div class="callout warn">
               <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               <div><strong>Verifica que el paciente no tenga ya una suscripción activa.</strong><p>En la ficha del paciente aparece un badge amarillo <strong>"D365 Activo"</strong> si ya está suscrito. Si lo suscribes dos veces se generan dos cobros de L.900. Revisa siempre antes de activar.</p></div>
@@ -1248,18 +1185,17 @@
         </div>
 
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">3</span><h3>Cobro de consulta con Doctor 365 activo</h3></div>
+          <div class="step-card-header"><span class="step-n">3</span><h3>Consultas con Doctor 365 activo</h3></div>
           <div class="step-card-body">
-            <p>Una vez activada la membresía, el descuento se aplica automáticamente en todos los cobros futuros. Al seleccionar al paciente en el flujo de cobro normal (Lección 4), el sistema reconoce que es Doctor 365 y muestra el precio ya con el 30% aplicado.</p>
-            <p>En el comprobante aparece la línea de descuento de forma separada para que el paciente vea exactamente cuánto ahorró en esa visita.</p>
+            <p>Una vez activada la membresía en CMG, el sistema reconoce automáticamente al paciente como Doctor 365. Al momento de <strong>liquidar el pago</strong> de una consulta o laboratorio, el descuento ya aparece aplicado. Cobra en la plataforma externa el precio con descuento y luego liquida en CMG como siempre.</p>
           </div>
         </div>
 
         <div class="step-card">
           <div class="step-card-header"><span class="step-n">4</span><h3>Renovación de la membresía</h3></div>
           <div class="step-card-body">
-            <p>Cuando la membresía está próxima a vencer, la ficha del paciente muestra <strong>"D365 — vence en X días"</strong>. Puedes ofrecerle renovar en ese momento. El flujo es el mismo que una suscripción nueva: <strong>Cobros → Doctor 365 → Renovar suscripción</strong>.</p>
-            <p>Si el paciente no renueva a tiempo y la membresía vence, el sistema deja de aplicar el descuento automáticamente hasta que renueve.</p>
+            <p>Cuando la membresía esté próxima a vencer, ofrécele al paciente renovar. Cobra los L.900 en la plataforma externa y luego actualiza el estado en el panel <strong>Admin D365</strong> de CMG.</p>
+            <p>Si el paciente no renueva a tiempo, el sistema deja de aplicar el descuento automáticamente hasta que se reactive.</p>
           </div>
         </div>
 

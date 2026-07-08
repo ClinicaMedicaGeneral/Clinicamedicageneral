@@ -581,13 +581,6 @@
         </button>
       </li>
       <li>
-        <button class="lesson-nav-btn" data-lesson="6" type="button">
-          <span class="nav-num">6</span>
-          <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-yellow)" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
-          Cierre de caja
-        </button>
-      </li>
-      <li>
         <button class="lesson-nav-btn" data-lesson="7" type="button">
           <span class="nav-num">7</span>
           <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-yellow)" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
@@ -689,7 +682,6 @@
               <li><strong>Inicio</strong> — Resumen del día: cobros realizados y turnos pendientes.</li>
               <li><strong>Pacientes</strong> — Buscar pacientes existentes o registrar uno nuevo.</li>
               <li><strong>Cobros</strong> — Liquidar consultas y estudios de laboratorio.</li>
-              <li><strong>Cierre de caja</strong> — Resumen del turno y arqueo diario.</li>
             </ul>
             <div class="callout tip" style="margin-top:16px">
               <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -1047,103 +1039,6 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
             Marcar como completada
           </button>
-          <button class="nav-btn btn-next" onclick="goToLesson(6)">
-            Siguiente
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9,18 15,12 9,6"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ LECCIÓN 6 ══ -->
-    <div class="lesson-panel" id="lesson-6">
-      <div class="lesson-header">
-        <div class="lesson-eyebrow">
-          <span class="lesson-num-badge">Lección 06</span>
-          <span class="lesson-tag-critical">Cierre</span>
-        </div>
-        <h2>Cierre de caja y arqueo diario</h2>
-        <p>Revisión del listado de movimientos del día y exportación del resumen para administración.</p>
-        <div class="lesson-meta">
-          <span class="meta-item">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-            ~20 minutos
-          </span>
-        </div>
-      </div>
-
-      <div class="lesson-body">
-
-        <div class="callout warn">
-          <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <div><strong>El cierre de caja se realiza una vez al final del turno.</strong><p>No cierres la caja si aún hay pacientes en espera. Una vez cerrada, no se pueden agregar cobros al turno actual.</p></div>
-        </div>
-
-        <div class="step-card">
-          <div class="step-card-header">
-            <span class="step-n">1</span>
-            <h3>Acceder a Cierre de caja</h3>
-          </div>
-          <div class="step-card-body">
-            <p>Haz clic en el botón <strong>Cierre de caja</strong>. El sistema mostrará automáticamente todos los cobros realizados durante tu turno, agrupados por forma de pago.</p>
-          </div>
-        </div>
-
-        <div class="step-card">
-          <div class="step-card-header">
-            <span class="step-n">2</span>
-            <h3>Revisar el listado de movimientos</h3>
-          </div>
-          <div class="step-card-body">
-            <p>Verifica que todos los cobros del turno aparecen en la lista. El sistema muestra:</p>
-            <ul class="checklist" style="margin-bottom:14px">
-              <li>Nombre del paciente y número de transacción.</li>
-              <li>Servicios cobrados y monto individual.</li>
-              <li>Forma de pago utilizada.</li>
-              <li>Hora del cobro.</li>
-            </ul>
-            <p>Si detectas un cobro incorrecto, <strong>no cierres la caja todavía</strong> — comunícalo a tu coordinador para que lo revise.</p>
-          </div>
-        </div>
-
-        <div class="step-card">
-          <div class="step-card-header">
-            <span class="step-n">3</span>
-            <h3>Contar el efectivo y comparar</h3>
-          </div>
-          <div class="step-card-body">
-            <p>Cuenta el efectivo físico en la caja. El sistema te mostrará cuánto debería haber según los cobros registrados. Ingresa el monto físico contado en el campo <strong>"Efectivo en caja"</strong>.</p>
-            <p>Si hay diferencia, el sistema la marcará en rojo. Anota la diferencia y justifícala antes de continuar. Administración revisará las diferencias al día siguiente.</p>
-          </div>
-        </div>
-
-        <div class="step-card">
-          <div class="step-card-header">
-            <span class="step-n">4</span>
-            <h3>Exportar el resumen y cerrar</h3>
-          </div>
-          <div class="step-card-body">
-            <p>Haz clic en <strong>"Exportar resumen"</strong> para descargar un archivo PDF con todos los movimientos del turno. Envíalo por WhatsApp o correo al coordinador según el protocolo de tu clínica.</p>
-            <p>Finalmente, haz clic en <strong>"Cerrar caja"</strong> y confirma la acción. El sistema registrará la hora de cierre y tu nombre de usuario.</p>
-            <div class="callout tip">
-              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div><strong>¡Listo!</strong><p>Con esto completaste el módulo de Caja. El siguiente paso es practicar cada flujo con el apoyo de tu coordinador antes de operar de forma independiente.</p></div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="lesson-footer">
-        <button class="nav-btn btn-prev" onclick="goToLesson(5)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
-          Anterior
-        </button>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="nav-btn btn-done" onclick="markDone(6)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
-            Marcar completada
-          </button>
           <button class="nav-btn btn-next" onclick="goToLesson(7)">
             Siguiente
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9,18 15,12 9,6"/></svg>
@@ -1222,7 +1117,7 @@
       </div>
 
       <div class="lesson-footer">
-        <button class="nav-btn btn-prev" onclick="goToLesson(6)">
+        <button class="nav-btn btn-prev" onclick="goToLesson(5)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
           Anterior
         </button>

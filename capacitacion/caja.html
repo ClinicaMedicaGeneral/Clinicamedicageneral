@@ -907,7 +907,7 @@
           <span class="lesson-tag-critical">Crítica</span>
         </div>
         <h2>Liquidación de una consulta</h2>
-        <p>Cómo marcar una consulta como pagada en CMG una vez que el cobro se procesó en la plataforma externa.</p>
+        <p>Cómo marcar una consulta como pagada en CMG. La liquidación solo ocurre <strong>después de que todos los servicios hayan concluido</strong> y el cobro se haya procesado en la plataforma externa.</p>
         <div class="lesson-meta">
           <span class="meta-item">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
@@ -920,29 +920,39 @@
 
         <div class="callout tip">
           <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <div><strong>El cobro se procesa en la plataforma externa.</strong><p>CMG no gestiona el pago directamente. El paciente paga en la plataforma de cobros externa. Una vez confirmado el pago, tu única acción en CMG es marcar la consulta como liquidada.</p></div>
+          <div><strong>El cobro se procesa en la plataforma externa.</strong><p>CMG no gestiona el pago directamente. El paciente paga en la plataforma de cobros externa. Tu única acción en CMG es liquidar la consulta — y solo cuando todos los servicios hayan terminado.</p></div>
         </div>
 
         <div class="step-card">
           <div class="step-card-header">
             <span class="step-n">1</span>
-            <h3>Procesar el pago en la plataforma externa</h3>
+            <h3>Espera que el médico finalice todos los servicios</h3>
           </div>
           <div class="step-card-body">
-            <p>Abre la plataforma de cobros externa y registra el pago del paciente por el servicio correspondiente (consulta, prueba rápida, etc.). Confirma el monto y el método de pago allí.</p>
+            <p>No se puede liquidar una consulta mientras los servicios estén en curso. El médico debe haber concluido la consulta y todos los procedimientos o estudios indicados. Solo entonces el paciente pasa a caja.</p>
           </div>
         </div>
 
         <div class="step-card">
           <div class="step-card-header">
             <span class="step-n">2</span>
+            <h3>Procesar el cobro en la plataforma externa</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Con todos los servicios concluidos, abre la plataforma de cobros externa y registra el pago del paciente. Confirma el monto y el método de pago allí antes de continuar.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">3</span>
             <h3>Liquidar el pago en CMG</h3>
           </div>
           <div class="step-card-body">
-            <p>Una vez confirmado el cobro en la plataforma externa, ve a la consulta correspondiente en CMG y haz clic en <strong>"Liquidar pago"</strong>. Esto registra en el sistema que la consulta fue pagada y permite al médico continuar con la atención.</p>
+            <p>Con el cobro confirmado en la plataforma externa, ve a la consulta en CMG y haz clic en <strong>"Liquidar pago"</strong>. Esto registra en el sistema que la consulta está pagada.</p>
             <div class="callout warn">
               <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              <div><strong>Asegúrate de cobrar antes de liquidar.</strong><p>Liquida en CMG solo después de confirmar el pago en la plataforma externa. Si tienes dudas sobre el monto, consulta con tu coordinador antes de proceder.</p></div>
+              <div><strong>Servicios terminados + cobro confirmado = liquidar.</strong><p>Nunca liquides antes de que el médico haya concluido todos los servicios, ni antes de confirmar el cobro en la plataforma externa. Si tienes dudas sobre el monto, consulta con tu coordinador.</p></div>
             </div>
           </div>
         </div>
@@ -975,7 +985,7 @@
           <span class="lesson-tag-lab">Laboratorio</span>
         </div>
         <h2>Liquidación de estudios de laboratorio</h2>
-        <p>Cómo marcar los exámenes de laboratorio como pagados en CMG una vez cobrados en la plataforma externa.</p>
+        <p>Cómo marcar los exámenes de laboratorio como pagados en CMG. La liquidación solo ocurre <strong>después de que el médico haya terminado de indicar todos los exámenes</strong> y el cobro se haya confirmado en la plataforma externa.</p>
         <div class="lesson-meta">
           <span class="meta-item">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
@@ -988,29 +998,39 @@
 
         <div class="callout tip">
           <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <div><strong>El cobro se procesa en la plataforma externa.</strong><p>Al igual que en las consultas, el pago de laboratorio se registra en la plataforma de cobros externa. En CMG tu única acción es liquidar el pago una vez confirmado.</p></div>
+          <div><strong>El cobro se procesa en la plataforma externa.</strong><p>Al igual que en las consultas, el pago de laboratorio se registra en la plataforma de cobros externa. En CMG tu única acción es liquidar — y solo cuando el médico haya terminado de indicar todos los exámenes.</p></div>
         </div>
 
         <div class="step-card">
           <div class="step-card-header">
             <span class="step-n">1</span>
-            <h3>Cobrar en la plataforma externa</h3>
+            <h3>Espera la orden completa del médico</h3>
           </div>
           <div class="step-card-body">
-            <p>El médico habrá entregado al paciente una orden con los exámenes solicitados. Procesa el pago de todos los exámenes de la orden en la plataforma de cobros externa. Confirma el monto total antes de continuar.</p>
+            <p>El médico debe haber concluido la indicación de todos los exámenes antes de que el paciente pase a caja. No proceses el cobro ni liquides hasta tener la orden completa.</p>
           </div>
         </div>
 
         <div class="step-card">
           <div class="step-card-header">
             <span class="step-n">2</span>
+            <h3>Cobrar en la plataforma externa</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Con la orden completa, procesa el pago de todos los exámenes en la plataforma de cobros externa. Confirma el monto total antes de continuar.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">3</span>
             <h3>Liquidar en CMG</h3>
           </div>
           <div class="step-card-body">
-            <p>Con el pago confirmado en la plataforma externa, ve al expediente del paciente en CMG y haz clic en <strong>"Liquidar pago"</strong> para los estudios de laboratorio. Esto habilita al técnico de laboratorio para procesar los exámenes.</p>
+            <p>Con el pago confirmado, ve al expediente del paciente en CMG y haz clic en <strong>"Liquidar pago"</strong> para los estudios de laboratorio. Esto habilita al técnico para procesar los exámenes.</p>
             <div class="callout warn">
               <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              <div><strong>No liquidar sin cobro confirmado.</strong><p>El laboratorio solo procesa exámenes que aparezcan como liquidados. Asegúrate de cobrar primero en la plataforma externa antes de dar el paso en CMG.</p></div>
+              <div><strong>Orden completa + cobro confirmado = liquidar.</strong><p>El laboratorio solo procesa exámenes marcados como liquidados. Nunca liquides antes de que el médico termine de indicar ni antes de confirmar el cobro en la plataforma externa.</p></div>
             </div>
           </div>
         </div>
@@ -1187,7 +1207,7 @@
         <div class="step-card">
           <div class="step-card-header"><span class="step-n">3</span><h3>Consultas con Doctor 365 activo</h3></div>
           <div class="step-card-body">
-            <p>Una vez activada la membresía en CMG, el sistema reconoce automáticamente al paciente como Doctor 365. Al momento de <strong>liquidar el pago</strong> de una consulta o laboratorio, el descuento ya aparece aplicado. Cobra en la plataforma externa el precio con descuento y luego liquida en CMG como siempre.</p>
+            <p>Una vez activada la membresía en CMG, el sistema reconoce automáticamente al paciente como Doctor 365 y el descuento ya aparece aplicado. El flujo es el mismo: espera que el médico termine todos los servicios, cobra el precio con descuento en la plataforma externa y luego <strong>liquida en CMG</strong> como siempre.</p>
           </div>
         </div>
 

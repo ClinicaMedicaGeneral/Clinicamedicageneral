@@ -244,7 +244,7 @@
     <p class="sidebar-heading">Lecciones</p>
     <ul class="lesson-nav" id="lesson-nav">
       <li><button class="lesson-nav-btn is-active" data-lesson="1" type="button"><span class="nav-num">1</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Vista general del panel</button></li>
-      <li><button class="lesson-nav-btn" data-lesson="2" type="button"><span class="nav-num">2</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Catálogo de servicios</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="2" type="button"><span class="nav-num">2</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Precios y Descuentos</button></li>
       <li><button class="lesson-nav-btn" data-lesson="3" type="button"><span class="nav-num">3</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Precios públicos</button></li>
       <li><button class="lesson-nav-btn" data-lesson="4" type="button"><span class="nav-num">4</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Descuentos por obra social</button></li>
       <li><button class="lesson-nav-btn" data-lesson="5" type="button"><span class="nav-num">5</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Reportes de facturación</button></li>
@@ -334,60 +334,48 @@
     <div class="lesson-panel" id="lesson-2">
       <div class="lesson-header">
         <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 02</span><span class="tag-critico">Requiere cuidado</span></div>
-        <h2>Gestión del catálogo de servicios</h2>
-        <p>Agregar, editar y desactivar prestaciones médicas y exámenes de laboratorio en el catálogo.</p>
+        <h2>Precios y Descuentos</h2>
+        <p>Cómo modificar precios públicos, aplicar descuentos Doctor 365 y excluir ítems del descuento globalmente.</p>
         <div class="lesson-meta">
-          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~30 minutos</span>
+          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~20 minutos</span>
         </div>
       </div>
       <div class="lesson-body">
         <div class="callout warn">
           <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <div><strong>Los cambios en el catálogo afectan a caja de inmediato.</strong><p>Si desactivas un servicio, caja dejará de verlo al instante. Si agregas uno nuevo sin precio, caja verá el servicio pero con monto en cero. Siempre completa precio y categoría antes de guardar.</p></div>
+          <div><strong>Los cambios aplican en el siguiente cobro, no retroactivamente.</strong><p>Un cobro ya registrado no cambia aunque modifiques el precio o descuento después. Verifica siempre antes de guardar.</p></div>
         </div>
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">1</span><h3>Estructura del catálogo</h3></div>
+          <div class="step-card-header"><span class="step-n">1</span><h3>Acceder al panel</h3></div>
           <div class="step-card-body">
-            <p>El catálogo está organizado en <strong>categorías</strong>. Cada categoría agrupa servicios del mismo tipo. Las categorías predeterminadas son:</p>
+            <p>Desde el panel de administración haz clic en <strong>Precios y Descuentos</strong>. Verás todos los servicios disponibles con su precio público actual y su configuración de descuento Doctor 365.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Modificar precio público</h3></div>
+          <div class="step-card-body">
+            <p>Cada ítem muestra su precio actual. Haz clic en <strong>"Editar"</strong> junto al servicio que quieres cambiar, actualiza el monto en lempiras y guarda. El precio nuevo se refleja de inmediato en el Cotizador y en caja.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Configurar descuento Doctor 365</h3></div>
+          <div class="step-card-body">
+            <p>Cada ítem tiene un campo de <strong>% de descuento Doctor 365</strong>. Los valores por defecto del sistema son:</p>
             <ul class="checklist" style="margin-bottom:14px">
-              <li><strong>Consultas</strong> — general, especialista, control, urgencia.</li>
-              <li><strong>Laboratorio clínico</strong> — hemograma, glucosa, perfil lipídico, etc.</li>
-              <li><strong>Pruebas rápidas</strong> — COVID-19, dengue, embarazo, malaria.</li>
-              <li><strong>Procedimientos</strong> — inyecciones, suero, lavado de oído, etc.</li>
-              <li><strong>Doctor 365</strong> — planes de membresía anual.</li>
+              <li><strong>Sueroterapias</strong> — 15% de descuento.</li>
+              <li><strong>Procedimientos</strong> — 10% de descuento.</li>
+              <li><strong>Laboratorio</strong> — sin descuento por defecto (campo vacío).</li>
             </ul>
+            <p>Puedes ajustar el porcentaje de cualquier ítem individualmente editando su campo de descuento.</p>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">4</span><h3>Excluir un ítem del descuento D365</h3></div>
+          <div class="step-card-body">
+            <p>Si un servicio no debe recibir descuento Doctor 365 bajo ninguna circunstancia, márcalo como <strong>Excluido</strong>. Esto aplica globalmente — aunque el paciente tenga D365 activo, ese ítem siempre se cobra a precio completo.</p>
             <div class="callout tip">
               <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div><strong>No crees categorías duplicadas.</strong><p>Antes de crear una categoría nueva, busca si ya existe con otro nombre. Demasiadas categorías hacen más difícil la búsqueda para caja.</p></div>
-            </div>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-card-header"><span class="step-n">2</span><h3>Agregar un servicio nuevo</h3></div>
-          <div class="step-card-body">
-            <p>Ve a <strong>Catálogo → Agregar servicio</strong>. Completa todos los campos obligatorios:</p>
-            <div class="screen-box">
-              <div class="field-row">
-                <div><label>Nombre del servicio</label><div class="fake-input">Hemograma completo</div></div>
-                <div><label>Categoría</label><div class="fake-select">Laboratorio clínico ▾</div></div>
-              </div>
-              <div class="field-row">
-                <div><label>Precio público (L.)</label><div class="fake-input">350.00</div></div>
-                <div><label>Código interno</label><div class="fake-input">LAB-001</div></div>
-              </div>
-              <div><label>Descripción (opcional)</label><div class="fake-input" style="margin-bottom:10px">BHC — Biometría Hemática Completa con diferencial</div></div>
-              <span class="fake-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Guardar servicio</span>
-            </div>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-card-header"><span class="step-n">3</span><h3>Editar y desactivar servicios</h3></div>
-          <div class="step-card-body">
-            <p>Para editar, haz clic en el nombre del servicio y luego en <strong>"Editar"</strong>. Puedes cambiar el nombre, categoría, precio o descripción.</p>
-            <p>Para <strong>desactivar</strong> un servicio (sin eliminarlo permanentemente), usa el toggle <strong>"Activo / Inactivo"</strong>. El servicio desaparecerá de caja pero su historial de cobros queda intacto en los reportes.</p>
-            <div class="callout alert">
-              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div><strong>Nunca elimines un servicio que tiene cobros históricos.</strong><p>Usa siempre la opción "Inactivo" en lugar de eliminar. Eliminar un servicio que tiene transacciones puede generar inconsistencias en los reportes de facturación.</p></div>
+              <div><strong>Ítems excluidos por defecto.</strong><p>Glutatión, colágeno y cauterizaciones vienen excluidos desde el inicio. No los modifiques sin autorización.</p></div>
             </div>
           </div>
         </div>

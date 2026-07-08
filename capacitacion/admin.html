@@ -247,7 +247,6 @@
       <li><button class="lesson-nav-btn" data-lesson="2" type="button"><span class="nav-num">2</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Precios y Descuentos</button></li>
       <li><button class="lesson-nav-btn" data-lesson="3" type="button"><span class="nav-num">3</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Precios públicos</button></li>
       <li><button class="lesson-nav-btn" data-lesson="4" type="button"><span class="nav-num">4</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Descuentos por obra social</button></li>
-      <li><button class="lesson-nav-btn" data-lesson="5" type="button"><span class="nav-num">5</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Reportes de facturación</button></li>
       <li><button class="lesson-nav-btn" data-lesson="6" type="button"><span class="nav-num">6</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Gestión de usuarios</button></li>
       <li><button class="lesson-nav-btn" data-lesson="7" type="button"><span class="nav-num">7</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-teal)" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Contenido del sitio web</button></li>
     </ul>
@@ -478,72 +477,6 @@
         <button class="nav-btn btn-prev" onclick="goToLesson(3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="nav-btn btn-done" onclick="markDone(4)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
-          <button class="nav-btn btn-next" onclick="goToLesson(5)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ LECCIÓN 5 ══ -->
-    <div class="lesson-panel" id="lesson-5">
-      <div class="lesson-header">
-        <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 05</span></div>
-        <h2>Reportes y estadísticas de facturación</h2>
-        <p>Generar reportes por período, por servicio o por obra social, y exportarlos a planilla.</p>
-        <div class="lesson-meta">
-          <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~20 minutos</span>
-        </div>
-      </div>
-      <div class="lesson-body">
-        <div class="step-card">
-          <div class="step-card-header"><span class="step-n">1</span><h3>Panel de reportes</h3></div>
-          <div class="step-card-body">
-            <p>Haz clic en <strong>Reportes</strong> desde el panel de administración. La pantalla muestra primero un resumen del día actual — un vistazo rápido antes de profundizar en períodos más largos:</p>
-            <div class="stat-row">
-              <div class="stat-card"><div class="stat-label">Cobros hoy</div><div class="stat-value">24</div><div class="stat-sub">transacciones</div></div>
-              <div class="stat-card"><div class="stat-label">Total del día</div><div class="stat-value">L.8,420</div><div class="stat-sub">efectivo + tarjeta</div></div>
-              <div class="stat-card"><div class="stat-label">Pacientes</div><div class="stat-value">21</div><div class="stat-sub">atendidos hoy</div></div>
-              <div class="stat-card"><div class="stat-label">Convenios</div><div class="stat-value">6</div><div class="stat-sub">cobros con descuento</div></div>
-            </div>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-card-header"><span class="step-n">2</span><h3>Generar un reporte por período</h3></div>
-          <div class="step-card-body">
-            <p>Haz clic en <strong>"Generar reporte"</strong> y define los filtros:</p>
-            <div class="screen-box">
-              <div class="field-row">
-                <div><label>Fecha desde</label><div class="fake-input">01/07/2026</div></div>
-                <div><label>Fecha hasta</label><div class="fake-input">31/07/2026</div></div>
-              </div>
-              <div class="field-row">
-                <div><label>Categoría (opcional)</label><div class="fake-select">Todas las categorías ▾</div></div>
-                <div><label>Obra social (opcional)</label><div class="fake-select">Todas ▾</div></div>
-              </div>
-              <span class="fake-btn">Ver reporte</span>
-            </div>
-            <p>El reporte muestra cada transacción con: fecha, hora, paciente, servicio, precio, descuento aplicado, forma de pago y usuario de caja que realizó el cobro.</p>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-card-header"><span class="step-n">3</span><h3>Exportar el reporte</h3></div>
-          <div class="step-card-body">
-            <p>Una vez generado el reporte, usa los botones de exportación:</p>
-            <ul class="checklist" style="margin-bottom:14px">
-              <li><strong>Excel (.xlsx)</strong> — ideal para contabilidad o análisis en planilla.</li>
-              <li><strong>PDF</strong> — para archivar o enviar por correo como documento formal.</li>
-              <li><strong>CSV</strong> — para importar a otro sistema o procesamiento de datos.</li>
-            </ul>
-            <div class="callout tip">
-              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div><strong>Reporte mensual de cierre.</strong><p>El primer día de cada mes, genera el reporte del mes anterior y guárdalo. Eso te da un historial de facturación ordenado por mes que facilita el seguimiento contable.</p></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="lesson-footer">
-        <button class="nav-btn btn-prev" onclick="goToLesson(4)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="nav-btn btn-done" onclick="markDone(5)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
           <button class="nav-btn btn-next" onclick="goToLesson(6)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>
         </div>
       </div>
@@ -613,7 +546,7 @@
         </div>
       </div>
       <div class="lesson-footer">
-        <button class="nav-btn btn-prev" onclick="goToLesson(5)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
+        <button class="nav-btn btn-prev" onclick="goToLesson(4)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>Anterior</button>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button class="nav-btn btn-done" onclick="markDone(6)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Marcar completada</button>
           <button class="nav-btn btn-next" onclick="goToLesson(7)">Siguiente <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg></button>

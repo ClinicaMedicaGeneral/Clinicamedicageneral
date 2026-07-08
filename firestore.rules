@@ -6,11 +6,16 @@ service cloud.firestore {
     function isAuth() {
       return request.auth != null;
     }
+    // isCaja: usuario de la computadora de caja/recepción.
+    // Acceso clínico de solo lectura + gestión completa de D365.
+    // NO puede iniciar/terminar consultas ni modificar precios.
+    function isCaja() {
+      return isAuth() && request.auth.token.email == 'ventasymercadeocmg@gmail.com';
+    }
     function isDoctor() {
       return isAuth() && request.auth.token.email in [
         'expedientes.clinicamedicacmg@gmail.com',
         'rubenwainwrightba@gmail.com',
-        'ventasymercadeocmg@gmail.com',
         // DRM Fun-2: médicos tratantes individuales
         'doctor_rojascmg@gmail.com',
         'doctor_hermescmg@gmail.com',
@@ -21,7 +26,6 @@ service cloud.firestore {
     }
     function isAdmin() {
       return isAuth() && request.auth.token.email in [
-        'ventasymercadeocmg@gmail.com',
         'rubenwainwrightba@gmail.com',
         'skarleth.admoncmg@gmail.com'
       ];
@@ -39,7 +43,7 @@ service cloud.firestore {
     match /expedientes/{codigo} {
       // Cualquier usuario autenticado puede leer un expediente si conoce el código.
       // El código único actúa como control de acceso.
-      allow read: if isDoctor() || isAuth();
+      allow read: if isDoctor() || isCaja() || isAuth();
 
       // Solo el doctor crea expedientes.
       allow create: if isDoctor();
@@ -70,8 +74,10 @@ service cloud.firestore {
     }
 
     // ═══ /consultas/{id} ═══════════════════════════════════════
+    // Caja puede LEER consultas pero NO crearlas, editarlas ni cerrarlas
+    // (iniciar/terminar un servicio pendiente es función exclusiva del médico).
     match /consultas/{consultaId} {
-      allow read: if isDoctor()
+      allow read: if isDoctor() || isCaja()
         || (
           isAuth()
           && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
@@ -100,24 +106,24 @@ service cloud.firestore {
     // ═══ /d365solicitudes/{id} ═════════════════════════════════
     // Solicitudes del programa Doctor 365:
     //   - Usuario: lee/crea/actualiza solo las suyas.
-    //   - Admin: lee y modifica todas.
+    //   - Admin y Caja: leen y modifican todas (gestión de membresías en recepción).
     match /d365solicitudes/{solId} {
-      allow read: if isAdmin()
+      allow read: if isAdmin() || isCaja()
         || (isAuth() && resource.data.userId == request.auth.uid);
       allow create: if isAuth()
         && request.resource.data.userId == request.auth.uid;
-      allow update: if isAdmin()
+      allow update: if isAdmin() || isCaja()
         || (isAuth() && resource.data.userId == request.auth.uid);
-      allow delete: if isAdmin();
+      allow delete: if isAdmin() || isCaja();
 
       // Subcolección /dependientes/{depId}
       match /dependientes/{depId} {
-        allow read: if isAdmin()
+        allow read: if isAdmin() || isCaja()
           || (isAuth()
               && get(/databases/$(database)/documents/d365solicitudes/$(solId)).data.userId == request.auth.uid);
         allow create: if isAuth()
           && get(/databases/$(database)/documents/d365solicitudes/$(solId)).data.userId == request.auth.uid;
-        allow update, delete: if isAdmin()
+        allow update, delete: if isAdmin() || isCaja()
           || (isAuth()
               && get(/databases/$(database)/documents/d365solicitudes/$(solId)).data.userId == request.auth.uid);
       }
@@ -126,10 +132,10 @@ service cloud.firestore {
     // ═══ /resultadosPruebas/{id} ═════════════════════════════
     // Resultados de pruebas rápidas:
     //   - Staff (isDoctor): lectura/escritura total.
-    //   - Paciente: puede leer las pruebas ligadas a su expediente
-    //     (owner o compartido) por codigoPaciente.
+    //   - Caja: solo lectura.
+    //   - Paciente: puede leer las pruebas ligadas a su expediente.
     match /resultadosPruebas/{resultadoId} {
-      allow read: if isDoctor()
+      allow read: if isDoctor() || isCaja()
         || (
           isAuth()
           && resource.data.codigoPaciente != null
@@ -149,12 +155,12 @@ service cloud.firestore {
     // ═══ /examenesLaboratorio/{id} ════════════════════════════
     // Exámenes de laboratorio externos (PDFs):
     //   - Staff (isDoctor): lectura/escritura total.
+    //   - Caja: lectura y carga de exámenes (sin editar ni borrar).
     //   - Paciente: puede leer los exámenes ligados a su expediente.
     //   - Paciente: puede CREAR (subir) exámenes solo a SU PROPIO expediente
     //     (ownerUid === su uid), siempre con flag subidoPorPaciente=true.
-    //   - Paciente: NO puede editar ni borrar (solo staff).
     match /examenesLaboratorio/{examenId} {
-      allow read: if isDoctor()
+      allow read: if isDoctor() || isCaja()
         || (
           isAuth()
           && resource.data.codigoPaciente != null
@@ -167,7 +173,7 @@ service cloud.firestore {
             )
           )
         );
-      allow create: if isDoctor()
+      allow create: if isDoctor() || isCaja()
         || (
           isAuth()
           && request.resource.data.codigoPaciente != null
@@ -195,9 +201,10 @@ service cloud.firestore {
     // ═══ /constancias/{id} ═════════════════════════════════════
     // DRM Fun-11 v2: constancias médicas (incapacidades).
     //   - Staff: lectura/escritura total.
+    //   - Caja: solo lectura.
     //   - Paciente: puede leer las constancias ligadas a su expediente.
     match /constancias/{constanciaId} {
-      allow read: if isDoctor()
+      allow read: if isDoctor() || isCaja()
         || (
           isAuth()
           && resource.data.codigoPaciente != null
@@ -216,9 +223,8 @@ service cloud.firestore {
     // ═══ /catalogoConfig/{itemKey} ════════════════════════════
     // Overrides de precio público, % de descuento Doctor 365 y
     // exclusiones por ítem, gestionados desde Admin-Precios.html.
-    //   - Lectura PÚBLICA: el Cotizador lo usan visitantes anónimos
-    //     y necesita los precios/descuentos vigentes.
-    //   - Escritura: solo Admin.
+    //   - Lectura PÚBLICA: el Cotizador lo usan visitantes anónimos.
+    //   - Escritura: solo Admin (Caja NO puede modificar precios/descuentos).
     match /catalogoConfig/{itemKey} {
       allow read: if true;
       allow write: if isAdmin();

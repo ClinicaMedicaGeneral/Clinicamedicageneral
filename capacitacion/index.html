@@ -155,9 +155,9 @@
   <p>Tutoriales paso a paso organizados por rol. Selecciona tu módulo para comenzar.</p>
 </section>
 
-<p class="group-label">Recepción y Caja</p>
-<div class="modules">
-  <a class="mod-card caja" href="caja.html">
+<p class="group-label" id="grp-recepcion">Recepción y Caja</p>
+<div class="modules" id="mods-recepcion">
+  <a class="mod-card caja" id="mod-caja" href="caja.html">
     <span class="mod-tag tag-caja">Caja</span>
     <h3>Operador de Caja</h3>
     <p>Registro de pacientes, liquidación de consultas y laboratorio, cierre de caja diario.</p>
@@ -166,7 +166,7 @@
       <span class="mod-cta">Comenzar <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg></span>
     </div>
   </a>
-  <a class="mod-card admin" href="admin.html">
+  <a class="mod-card admin" id="mod-admin" href="admin.html">
     <span class="mod-tag tag-admin">Administración</span>
     <h3>Coordinador Administrativo</h3>
     <p>Catálogo de servicios, precios, descuentos por obra social, reportes y gestión de usuarios.</p>
@@ -177,9 +177,9 @@
   </a>
 </div>
 
-<p class="group-label">Consultorio</p>
-<div class="modules">
-  <a class="mod-card enf" href="enfermeria.html">
+<p class="group-label" id="grp-consultorio">Consultorio</p>
+<div class="modules" id="mods-consultorio">
+  <a class="mod-card enf" id="mod-enf" href="enfermeria.html">
     <span class="mod-tag tag-enf">Caja · Enfermería</span>
     <h3>Caja &amp; Enfermería</h3>
     <p>Agenda del día, toma de preclinical (signos vitales, peso, talla, saturación) y solicitud de exámenes.</p>
@@ -188,7 +188,7 @@
       <span class="mod-cta">Comenzar <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9,18 15,12 9,6"/></svg></span>
     </div>
   </a>
-  <a class="mod-card medico" href="medico.html">
+  <a class="mod-card medico" id="mod-medico" href="medico.html">
     <span class="mod-tag tag-medico">Médico</span>
     <h3>Médico / Doctor</h3>
     <p>Pacientes del día, expediente clínico, revisión de preclinical, notas de consulta, estudios y cierre.</p>
@@ -202,5 +202,47 @@
 <footer class="cap-footer">
   Clínica Médica General · <a href="https://clinicamedicacmg.net">clinicamedicacmg.net</a> · City Mall S2 E214, Tegucigalpa
 </footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="../firebase-init.js"></script>
+<script>
+(function () {
+  var GLOBAL  = ['ventasymercadeocmg@gmail.com', 'skarleth.admoncmg@gmail.com', 'rubenwainwrightba@gmail.com'];
+  var CAJA_ENF = ['luz_cmg@gmail.com', 'ana_cmg@gmail.com'];
+  var MEDICO  = ['doctor_rojascmg@gmail.com', 'doctor_hermescmg@gmail.com', 'doctor_alvarezcmg@gmail.com'];
+
+  function canCaja(e)  { return GLOBAL.indexOf(e) !== -1 || CAJA_ENF.indexOf(e) !== -1; }
+  function canMedico(e){ return GLOBAL.indexOf(e) !== -1 || MEDICO.indexOf(e)   !== -1; }
+  function canAdmin(e) { return GLOBAL.indexOf(e) !== -1; }
+  function hasAnyAccess(e) { return canCaja(e) || canMedico(e); }
+
+  function hide(id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; }
+
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) {
+      window.location.href = '../Auth.html?returnTo=capacitacion/index.html';
+      return;
+    }
+    var email = (user.email || '').toLowerCase();
+    if (!hasAnyAccess(email)) {
+      window.location.href = '../Inicio.html';
+      return;
+    }
+
+    // Ocultar módulos sin acceso
+    if (!canCaja(email))   hide('mod-caja');
+    if (!canAdmin(email))  hide('mod-admin');
+    if (!canMedico(email)) hide('mod-enf');
+    if (!canMedico(email)) hide('mod-medico');
+
+    // Ocultar grupos vacíos
+    var recepcionVisible = canCaja(email) || canAdmin(email);
+    var consultorioVisible = canMedico(email);
+    if (!recepcionVisible) { hide('grp-recepcion'); hide('mods-recepcion'); }
+    if (!consultorioVisible) { hide('grp-consultorio'); hide('mods-consultorio'); }
+  });
+})();
+</script>
 </body>
 </html>

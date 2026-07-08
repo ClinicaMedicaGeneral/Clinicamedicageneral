@@ -695,6 +695,10 @@
           <div class="mh-avatar" id="mh-avatar">?</div>
           <span id="mh-user-name">—</span>
         </div>
+        <a id="mh-staff-portal-btn" href="capacitacion/index.html" style="display:none;background:#FDD22C;color:#213C7D;text-decoration:none;padding:8px 16px;border-radius:8px;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;align-items:center;gap:7px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Acceso al Equipo
+        </a>
         <button class="mh-logout" id="mh-logout">Cerrar sesión</button>
       </div>
     </div>
@@ -983,6 +987,16 @@
     $id('mh-user-chip').style.display = '';
     $id('mh-avatar').textContent = name.charAt(0).toUpperCase();
     $id('mh-user-name').textContent = name;
+    var STAFF_EMAILS = [
+      'ventasymercadeocmg@gmail.com','skarleth.admoncmg@gmail.com','rubenwainwrightba@gmail.com',
+      'luz_cmg@gmail.com','ana_cmg@gmail.com',
+      'doctor_rojascmg@gmail.com','doctor_hermescmg@gmail.com','doctor_alvarezcmg@gmail.com',
+      'expedientes.clinicamedicacmg@gmail.com'
+    ];
+    var staffBtn = $id('mh-staff-portal-btn');
+    if (staffBtn && STAFF_EMAILS.indexOf((user.email || '').toLowerCase()) !== -1) {
+      staffBtn.style.display = 'flex';
+    }
     cargarPerfilUsuario();
   });
 

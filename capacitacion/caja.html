@@ -1289,6 +1289,23 @@
   </main>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="../firebase-init.js"></script>
+<script>
+(function () {
+  var ALLOWED = [
+    'ventasymercadeocmg@gmail.com','skarleth.admoncmg@gmail.com','rubenwainwrightba@gmail.com',
+    'luz_cmg@gmail.com','ana_cmg@gmail.com'
+  ];
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = '../Auth.html?returnTo=capacitacion/caja.html'; return; }
+    if (ALLOWED.indexOf((user.email || '').toLowerCase()) === -1) {
+      window.location.href = '../Inicio.html';
+    }
+  });
+})();
+</script>
 <script>
   const TOTAL = 7;
   const done = new Set(JSON.parse(localStorage.getItem('cmg-caja-done') || '[]'));

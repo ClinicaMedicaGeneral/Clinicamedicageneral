@@ -1,0 +1,1243 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Módulo Caja · Capacitación CMG</title>
+<link rel="icon" href="../assets/isotipo-color.png">
+<link rel="stylesheet" href="../assets/cmg-tokens.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--neutral-100);
+    color: var(--cmg-navy);
+    min-height: 100vh;
+    font-family: var(--font-body);
+  }
+
+  /* ── Header ── */
+  .cap-header {
+    background: var(--cmg-navy-deep);
+    border-bottom: 2px solid var(--cmg-yellow);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .cap-header img { height: 28px; }
+  .header-sep {
+    width: 1px; height: 20px;
+    background: rgba(255,255,255,.2);
+  }
+  .header-title {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .module-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    background: rgba(253,210,44,.15);
+    color: var(--cmg-yellow);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .header-title span {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -.01em;
+    color: var(--white);
+  }
+  .back-link {
+    font-size: 12px;
+    color: rgba(255,255,255,.6);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color .15s;
+    white-space: nowrap;
+  }
+  .back-link:hover { color: var(--cmg-yellow); }
+
+  /* ── Layout ── */
+  .page-grid {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1100px;
+    margin: 0 auto;
+    min-height: calc(100vh - 58px);
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    background: var(--cmg-navy);
+    padding: 28px 0;
+    position: sticky;
+    top: 58px;
+    height: calc(100vh - 58px);
+    overflow-y: auto;
+  }
+  .sidebar-heading {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.4);
+    padding: 0 20px 12px;
+  }
+  .lesson-nav { list-style: none; }
+  .lesson-nav li { position: relative; }
+  .lesson-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    color: rgba(255,255,255,.6);
+    font-family: var(--font-body);
+    font-size: 13px;
+    line-height: 1.3;
+    transition: background .15s, color .15s;
+    border-left: 3px solid transparent;
+  }
+  .lesson-nav-btn:hover {
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.9);
+  }
+  .lesson-nav-btn.is-active {
+    background: rgba(253,210,44,.08);
+    color: var(--cmg-yellow);
+    border-left-color: var(--cmg-yellow);
+  }
+  .lesson-nav-btn.is-done {
+    color: rgba(255,255,255,.45);
+  }
+  .lesson-nav-btn.is-done .nav-num {
+    background: rgba(253,210,44,.2);
+    color: var(--cmg-yellow);
+  }
+  .nav-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+    transition: background .15s;
+  }
+  .lesson-nav-btn.is-active .nav-num {
+    background: var(--cmg-yellow);
+    color: var(--cmg-navy);
+  }
+  .check-icon { display: none; }
+  .lesson-nav-btn.is-done .nav-num { display: none; }
+  .lesson-nav-btn.is-done .check-icon { display: flex; align-items: center; justify-content: center; width:24px;height:24px; flex-shrink:0; }
+
+  /* Progress bar */
+  .progress-wrap {
+    padding: 20px 20px 0;
+    margin-top: 12px;
+    border-top: 1px solid rgba(255,255,255,.08);
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: rgba(255,255,255,.4);
+    margin-bottom: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .progress-bar {
+    height: 4px;
+    background: rgba(255,255,255,.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--cmg-yellow);
+    border-radius: 2px;
+    transition: width .4s var(--easing-decel);
+    width: 0%;
+  }
+
+  /* ── Main content ── */
+  .main-content { padding: 36px 40px 64px; }
+
+  .lesson-panel { display: none; }
+  .lesson-panel.is-active { display: block; }
+
+  /* Lesson header */
+  .lesson-header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--neutral-200);
+  }
+  .lesson-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .lesson-num-badge {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    background: var(--cmg-navy);
+    color: var(--cmg-yellow);
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .lesson-tag-critical {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    background: rgba(242,15,16,.1);
+    color: #C0292A;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .lesson-tag-lab {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    background: rgba(89,159,178,.12);
+    color: #2E7A8F;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .lesson-header h2 {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -.015em;
+    line-height: 1;
+    color: var(--cmg-navy);
+    margin: 0 0 10px;
+  }
+  .lesson-header p {
+    font-size: 14px;
+    color: var(--neutral-500);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .lesson-meta {
+    display: flex;
+    gap: 16px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--neutral-400);
+  }
+  .meta-item svg { flex-shrink: 0; }
+
+  /* Content blocks */
+  .lesson-body { display: flex; flex-direction: column; gap: 28px; }
+
+  .step-card {
+    background: var(--white);
+    border: 1px solid var(--neutral-200);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .step-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: var(--cmg-navy);
+    color: var(--white);
+  }
+  .step-n {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--cmg-yellow);
+    color: var(--cmg-navy);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 900;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .step-card-header h3 {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    margin: 0;
+  }
+  .step-card-body { padding: 20px; }
+  .step-card-body p {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--neutral-600);
+    margin: 0 0 12px;
+  }
+  .step-card-body p:last-child { margin-bottom: 0; }
+
+  /* Screen reference pill */
+  .screen-ref {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--neutral-100);
+    color: var(--cmg-navy);
+    border: 1px solid var(--neutral-200);
+    padding: 5px 12px;
+    border-radius: var(--r-pill);
+    margin: 6px 0 14px;
+    text-decoration: none;
+    transition: background .15s, border-color .15s;
+  }
+  .screen-ref:hover { background: var(--neutral-200); }
+  .screen-ref svg { color: var(--cmg-teal); }
+
+  /* Callout boxes */
+  .callout {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .callout-icon { flex-shrink: 0; margin-top: 1px; }
+  .callout strong { display: block; margin-bottom: 2px; font-size: 13px; }
+  .callout p { margin: 0; color: inherit; font-size: 13px; }
+  .callout.tip   { background: rgba(89,159,178,.1);  color: #1E5F70; }
+  .callout.warn  { background: rgba(253,210,44,.12); color: #7A5C00; }
+  .callout.alert { background: rgba(242,15,16,.08);  color: #901010; }
+
+  /* Checklist */
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .checklist li {
+    display: flex;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--neutral-600);
+    line-height: 1.4;
+    align-items: flex-start;
+  }
+  .checklist li::before {
+    content: '';
+    width: 18px; height: 18px;
+    border: 2px solid var(--neutral-300);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Screen mockup label */
+  .screen-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--neutral-400);
+    margin-bottom: 8px;
+  }
+  .screen-box {
+    background: var(--cmg-navy);
+    border-radius: 8px;
+    padding: 20px;
+    font-size: 13px;
+    color: var(--fg-2);
+    margin-bottom: 16px;
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  .screen-box .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .screen-box label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.4);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .screen-box .fake-input {
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--white);
+    font-family: var(--font-body);
+  }
+  .screen-box .fake-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--cmg-yellow);
+    color: var(--cmg-navy);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: 9px 18px;
+    border-radius: var(--r-pill);
+    margin-top: 4px;
+  }
+
+  /* ── Navigation footer ── */
+  .lesson-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid var(--neutral-200);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--r-pill);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background .15s, color .15s, transform .1s;
+    border: none;
+    font-family: var(--font-body);
+  }
+  .nav-btn:active { transform: scale(.97); }
+  .btn-prev {
+    background: var(--neutral-200);
+    color: var(--cmg-navy);
+  }
+  .btn-prev:hover { background: var(--neutral-300); }
+  .btn-next {
+    background: var(--cmg-navy);
+    color: var(--white);
+  }
+  .btn-next:hover { background: var(--cmg-navy-deep); }
+  .btn-done {
+    background: var(--cmg-yellow);
+    color: var(--cmg-navy);
+  }
+  .btn-done:hover { background: var(--cmg-yellow-deep); }
+  .btn-done:disabled {
+    opacity: .5;
+    cursor: default;
+    transform: none;
+  }
+  .mark-done-label {
+    font-size: 12px;
+    color: var(--neutral-400);
+  }
+
+  /* ── Completion banner ── */
+  .completion-banner {
+    display: none;
+    background: var(--cmg-navy);
+    border-radius: 12px;
+    padding: 32px;
+    text-align: center;
+    margin-top: 32px;
+  }
+  .completion-banner.is-visible { display: block; }
+  .completion-banner h3 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--cmg-yellow);
+    margin: 0 0 8px;
+  }
+  .completion-banner p {
+    color: var(--fg-2);
+    font-size: 14px;
+    margin: 0 0 20px;
+  }
+  .completion-banner a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--cmg-yellow);
+    color: var(--cmg-navy);
+    padding: 11px 24px;
+    border-radius: var(--r-pill);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 700px) {
+    .page-grid { grid-template-columns: 1fr; }
+    .sidebar {
+      position: static;
+      height: auto;
+      padding: 16px 0;
+    }
+    .main-content { padding: 24px 20px 48px; }
+    .step-card-body p { font-size: 13.5px; }
+    .screen-box .field-row { grid-template-columns: 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-btn, .lesson-nav-btn, .mod-card { transition: none; }
+    .progress-fill { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="cap-header">
+  <a href="../Inicio.html"><img src="../assets/cmg-logo-white.png" alt="CMG"></a>
+  <div class="header-sep"></div>
+  <div class="header-title">
+    <span class="module-badge">Caja</span>
+    <span>Módulo de Capacitación</span>
+  </div>
+  <a class="back-link" href="index.html">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
+    Todos los módulos
+  </a>
+</header>
+
+<div class="page-grid">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" aria-label="Lecciones">
+    <p class="sidebar-heading">Lecciones</p>
+    <ul class="lesson-nav" id="lesson-nav">
+      <li>
+        <button class="lesson-nav-btn is-active" data-lesson="1" type="button">
+          <span class="nav-num">1</span>
+          <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-yellow)" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+          Acceso y navegación
+        </button>
+      </li>
+      <li>
+        <button class="lesson-nav-btn" data-lesson="2" type="button">
+          <span class="nav-num">2</span>
+          <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-yellow)" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+          Registro de paciente nuevo
+        </button>
+      </li>
+      <li>
+        <button class="lesson-nav-btn" data-lesson="3" type="button">
+          <span class="nav-num">3</span>
+          <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-yellow)" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+          Búsqueda y edición
+        </button>
+      </li>
+      <li>
+        <button class="lesson-nav-btn" data-lesson="4" type="button">
+          <span class="nav-num">4</span>
+          <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-yellow)" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+          Liquidación de consulta
+        </button>
+      </li>
+      <li>
+        <button class="lesson-nav-btn" data-lesson="5" type="button">
+          <span class="nav-num">5</span>
+          <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-yellow)" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+          Laboratorio
+        </button>
+      </li>
+      <li>
+        <button class="lesson-nav-btn" data-lesson="6" type="button">
+          <span class="nav-num">6</span>
+          <svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cmg-yellow)" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+          Cierre de caja
+        </button>
+      </li>
+    </ul>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Progreso</span>
+        <span id="progress-text">0 / 6</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content" id="main-content">
+
+    <!-- ══ LECCIÓN 1 ══ -->
+    <div class="lesson-panel is-active" id="lesson-1">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">
+          <span class="lesson-num-badge">Lección 01</span>
+        </div>
+        <h2>Acceso al sistema y navegación general</h2>
+        <p>Cómo ingresar al sitio, reconocer el menú y orientarse según el turno de trabajo.</p>
+        <div class="lesson-meta">
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+            ~15 minutos
+          </span>
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Lección introductoria
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">1</span>
+            <h3>Abrir el sitio web</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Desde cualquier computadora de la clínica, abre el navegador (Google Chrome o Edge) y escribe la dirección:</p>
+            <a class="screen-ref" href="../Auth.html" target="_blank">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+              clinicamedicacmg.net
+            </a>
+            <p>El sitio abrirá directamente en la pantalla de inicio de la clínica. Para ir a la sección de inicio de sesión del equipo, haz clic en <strong>"Acceso al equipo"</strong> en la esquina superior derecha.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">2</span>
+            <h3>Iniciar sesión</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Ingresa tu correo electrónico y contraseña asignados por administración. Si es tu primera vez, solicita tus credenciales al coordinador.</p>
+            <div class="screen-label">Pantalla de acceso</div>
+            <div class="screen-box">
+              <div class="field-row">
+                <div>
+                  <label>Correo electrónico</label>
+                  <div class="fake-input">caja@clinicamedicacmg.net</div>
+                </div>
+                <div>
+                  <label>Contraseña</label>
+                  <div class="fake-input">••••••••••</div>
+                </div>
+              </div>
+              <div class="fake-btn">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10,17 15,12 10,7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                Ingresar
+              </div>
+            </div>
+            <div class="callout warn">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>No compartas tu contraseña.</strong><p>Cada usuario debe tener acceso individual. Si olvidaste tu contraseña, avísale a administración para restablecerla.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">3</span>
+            <h3>Reconocer el menú de Caja</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Una vez dentro, verás el menú lateral izquierdo con las secciones disponibles para tu rol. Las más importantes para caja son:</p>
+            <ul class="checklist">
+              <li><strong>Inicio</strong> — Resumen del día: cobros realizados y turnos pendientes.</li>
+              <li><strong>Pacientes</strong> — Buscar pacientes existentes o registrar uno nuevo.</li>
+              <li><strong>Cobros</strong> — Liquidar consultas y estudios de laboratorio.</li>
+              <li><strong>Cierre de caja</strong> — Resumen del turno y arqueo diario.</li>
+            </ul>
+            <div class="callout tip" style="margin-top:16px">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>Tip:</strong><p>No verás las secciones de Administración ni Catálogo — esas son exclusivas del rol administrador. Si necesitas hacer un cambio de precio o de catálogo, comunícalo a tu coordinador.</p></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="lesson-footer">
+        <span class="mark-done-label">¿Terminaste esta lección?</span>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+            Marcar como completada
+          </button>
+          <button class="nav-btn btn-next" onclick="goToLesson(2)">
+            Siguiente lección
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9,18 15,12 9,6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LECCIÓN 2 ══ -->
+    <div class="lesson-panel" id="lesson-2">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">
+          <span class="lesson-num-badge">Lección 02</span>
+        </div>
+        <h2>Registro de un paciente nuevo</h2>
+        <p>Alta de datos personales, obra social y número de afiliado desde caja.</p>
+        <div class="lesson-meta">
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+            ~20 minutos
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+
+        <div class="callout tip">
+          <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div><strong>¿Cuándo registrar un paciente nuevo?</strong><p>Antes de hacer cualquier cobro, el paciente debe estar en el sistema. Siempre busca primero por DNI o nombre — si ya existe, no lo registres de nuevo (ver Lección 3).</p></div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">1</span>
+            <h3>Ir a la sección Pacientes</h3>
+          </div>
+          <div class="step-card-body">
+            <p>En el menú lateral, haz clic en <strong>Pacientes</strong>. Luego selecciona el botón <strong>"Nuevo paciente"</strong> en la esquina superior derecha de la pantalla.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">2</span>
+            <h3>Completar los datos personales</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Completa los campos obligatorios. Pide la información al paciente en ventanilla:</p>
+            <ul class="checklist" style="margin-bottom:16px">
+              <li><strong>Nombre completo</strong> — tal como aparece en su documento.</li>
+              <li><strong>Fecha de nacimiento</strong> — formato DD/MM/AAAA.</li>
+              <li><strong>DNI / Identidad</strong> — número sin guiones ni espacios.</li>
+              <li><strong>Teléfono de contacto</strong> — con código de área.</li>
+              <li><strong>Sexo biológico</strong> — requerido para el historial clínico.</li>
+            </ul>
+            <div class="callout warn">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>El DNI es el identificador principal.</strong><p>Si el paciente no lo tiene a mano, ingresa el nombre y deja el DNI como pendiente. Avísale que lo necesitará para próximas visitas.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">3</span>
+            <h3>Datos de obra social o seguro médico</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Si el paciente tiene convenio médico, selecciona la obra social de la lista desplegable e ingresa el <strong>número de afiliado</strong>. Este número aparece en la tarjeta del seguro.</p>
+            <p>Si el paciente paga de forma <strong>particular</strong> (sin seguro), deja el campo de obra social en blanco y el sistema calculará el precio público automáticamente.</p>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>Descuento automático:</strong><p>Al seleccionar la obra social, el sistema aplica el porcentaje de descuento configurado por administración. No necesitas calcular nada manualmente.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">4</span>
+            <h3>Guardar y confirmar</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Haz clic en <strong>"Guardar paciente"</strong>. El sistema mostrará un mensaje de confirmación y asignará un número de expediente automáticamente. Este número es el identificador permanente del paciente en el sistema.</p>
+            <p>Ya puedes proceder a registrar el cobro de la consulta (ver Lección 4).</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(1)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
+          Anterior
+        </button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(2)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+            Marcar como completada
+          </button>
+          <button class="nav-btn btn-next" onclick="goToLesson(3)">
+            Siguiente
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9,18 15,12 9,6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LECCIÓN 3 ══ -->
+    <div class="lesson-panel" id="lesson-3">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">
+          <span class="lesson-num-badge">Lección 03</span>
+        </div>
+        <h2>Búsqueda y edición de paciente existente</h2>
+        <p>Localizar un paciente por nombre o DNI y actualizar datos de contacto o cobertura.</p>
+        <div class="lesson-meta">
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+            ~15 minutos
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">1</span>
+            <h3>Buscar al paciente</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Desde <strong>Pacientes</strong>, usa la barra de búsqueda en la parte superior. Puedes buscar por:</p>
+            <ul class="checklist" style="margin-bottom:14px">
+              <li><strong>Nombre o apellido</strong> — escribe al menos 3 letras.</li>
+              <li><strong>Número de DNI / Identidad</strong> — más rápido y preciso.</li>
+              <li><strong>Número de expediente</strong> — si el paciente lo recuerda.</li>
+            </ul>
+            <p>Los resultados aparecen en tiempo real. Haz clic en el nombre del paciente para abrir su ficha.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">2</span>
+            <h3>Verificar la identidad antes de editar</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Confirma con el paciente al menos <strong>dos datos</strong> antes de modificar su ficha: nombre completo y fecha de nacimiento. Esto evita editar el expediente de otra persona.</p>
+            <div class="callout alert">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>No modifiques el DNI sin autorización.</strong><p>Si el paciente dice que su número de identidad está incorrecto, comunícalo a tu coordinador. El DNI es un campo protegido.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">3</span>
+            <h3>Actualizar los datos</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Dentro de la ficha del paciente, haz clic en <strong>"Editar"</strong>. Puedes actualizar:</p>
+            <ul class="checklist" style="margin-bottom:14px">
+              <li>Teléfono de contacto.</li>
+              <li>Dirección de correo electrónico.</li>
+              <li>Obra social y número de afiliado (si cambió de seguro).</li>
+            </ul>
+            <p>Haz clic en <strong>"Guardar cambios"</strong> al terminar. El sistema registra quién hizo la modificación y a qué hora.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(2)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
+          Anterior
+        </button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(3)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+            Marcar como completada
+          </button>
+          <button class="nav-btn btn-next" onclick="goToLesson(4)">
+            Siguiente
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9,18 15,12 9,6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LECCIÓN 4 ══ -->
+    <div class="lesson-panel" id="lesson-4">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">
+          <span class="lesson-num-badge">Lección 04</span>
+          <span class="lesson-tag-critical">Crítica</span>
+        </div>
+        <h2>Liquidación de una consulta</h2>
+        <p>Selección del servicio, aplicación del precio público o descuento de obra social y emisión del recibo.</p>
+        <div class="lesson-meta">
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+            ~25 minutos
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+
+        <div class="callout alert">
+          <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div><strong>Practica primero en modo de prueba.</strong><p>Esta lección es crítica. Antes de operar en producción, realiza al menos 2 cobros de práctica con los datos de prueba que te entregará tu coordinador.</p></div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">1</span>
+            <h3>Seleccionar al paciente</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Ve a <strong>Cobros → Nuevo cobro</strong>. En el buscador, escribe el nombre o DNI del paciente. Selecciónalo de la lista. Verifica que el nombre y la obra social mostrados sean correctos.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">2</span>
+            <h3>Seleccionar el servicio</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Haz clic en <strong>"Agregar servicio"</strong> y busca la consulta médica correspondiente. Los servicios están organizados por categoría:</p>
+            <ul class="checklist" style="margin-bottom:14px">
+              <li><strong>Consulta General</strong> — médico de turno sin especialidad.</li>
+              <li><strong>Consulta con Especialista</strong> — selecciona la especialidad del médico.</li>
+              <li><strong>Prueba Rápida</strong> — COVID-19, dengue, embarazo, etc.</li>
+            </ul>
+            <p>El precio aparece automáticamente según el catálogo vigente. Si el paciente tiene obra social, verás el precio ya con el descuento aplicado.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">3</span>
+            <h3>Confirmar el monto y cobrar</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Revisa el resumen: servicio, precio original, descuento (si aplica) y total a cobrar. Selecciona la <strong>forma de pago</strong>:</p>
+            <ul class="checklist" style="margin-bottom:14px">
+              <li>Efectivo</li>
+              <li>Transferencia bancaria</li>
+              <li>Tarjeta (débito o crédito)</li>
+            </ul>
+            <p>Haz clic en <strong>"Registrar cobro"</strong>. El sistema generará un comprobante con número de transacción.</p>
+            <div class="callout warn">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>Un cobro registrado no se puede eliminar.</strong><p>Si cometiste un error en el monto o el servicio, informa a tu coordinador antes de registrar el cobro. Después de confirmado, solo administración puede hacer la corrección.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">4</span>
+            <h3>Entregar el comprobante</h3>
+          </div>
+          <div class="step-card-body">
+            <p>El sistema permite imprimir el recibo o enviarlo por WhatsApp/correo directamente al paciente. Haz clic en <strong>"Imprimir"</strong> o <strong>"Enviar"</strong> según la preferencia del paciente.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(3)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
+          Anterior
+        </button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(4)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+            Marcar como completada
+          </button>
+          <button class="nav-btn btn-next" onclick="goToLesson(5)">
+            Siguiente
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9,18 15,12 9,6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LECCIÓN 5 ══ -->
+    <div class="lesson-panel" id="lesson-5">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">
+          <span class="lesson-num-badge">Lección 05</span>
+          <span class="lesson-tag-lab">Laboratorio</span>
+        </div>
+        <h2>Liquidación de estudios de laboratorio</h2>
+        <p>Diferencias con la consulta médica: ítems de lab, múltiples prácticas en un mismo cobro.</p>
+        <div class="lesson-meta">
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+            ~25 minutos
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+
+        <div class="callout tip">
+          <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div><strong>¿En qué se diferencia del cobro de consulta?</strong><p>Un paciente puede pedir varios exámenes en la misma visita. El cobro de laboratorio permite agregar múltiples ítems antes de confirmar el total. El descuento de obra social aplica a cada ítem por separado.</p></div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">1</span>
+            <h3>Iniciar el cobro de laboratorio</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Ve a <strong>Cobros → Nuevo cobro</strong>. Selecciona al paciente como siempre. En "Tipo de cobro", elige <strong>"Laboratorio"</strong> para acceder al catálogo de exámenes.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">2</span>
+            <h3>Agregar los exámenes solicitados</h3>
+          </div>
+          <div class="step-card-body">
+            <p>El médico habrá entregado al paciente una orden de laboratorio (física o digital). Lee cada examen de la orden y agrégalo al cobro con el botón <strong>"+ Agregar examen"</strong>.</p>
+            <p>Ejemplos comunes de la lista:</p>
+            <ul class="checklist" style="margin-bottom:14px">
+              <li>Hemograma completo</li>
+              <li>Glucosa en ayunas</li>
+              <li>Creatinina sérica</li>
+              <li>Examen general de orina (EGO)</li>
+              <li>Prueba de embarazo (hCG)</li>
+            </ul>
+            <p>El subtotal se actualiza automáticamente con cada examen que agregas.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">3</span>
+            <h3>Verificar ítems excluidos del descuento</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Algunos exámenes específicos pueden estar <strong>excluidos del descuento</strong> de la obra social por configuración de administración. En esos casos, el sistema mostrará el precio público normal junto a ese ítem con una etiqueta de "Precio público".</p>
+            <p>Si el paciente pregunta por qué un examen no tiene descuento, explícale que ese estudio no está cubierto por su convenio y que puede consultar con administración si tiene dudas.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">4</span>
+            <h3>Confirmar y emitir el comprobante</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Revisa la lista completa de exámenes y el total final. Haz clic en <strong>"Registrar cobro"</strong>. El recibo mostrará cada examen con su precio individual y el total.</p>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>El comprobante también sirve como orden de entrega.</strong><p>El técnico de laboratorio verá los exámenes confirmados en su pantalla una vez que registres el cobro.</p></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(4)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
+          Anterior
+        </button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="nav-btn btn-done" onclick="markDone(5)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+            Marcar como completada
+          </button>
+          <button class="nav-btn btn-next" onclick="goToLesson(6)">
+            Siguiente
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9,18 15,12 9,6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LECCIÓN 6 ══ -->
+    <div class="lesson-panel" id="lesson-6">
+      <div class="lesson-header">
+        <div class="lesson-eyebrow">
+          <span class="lesson-num-badge">Lección 06</span>
+          <span class="lesson-tag-critical">Cierre</span>
+        </div>
+        <h2>Cierre de caja y arqueo diario</h2>
+        <p>Revisión del listado de movimientos del día y exportación del resumen para administración.</p>
+        <div class="lesson-meta">
+          <span class="meta-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+            ~20 minutos
+          </span>
+        </div>
+      </div>
+
+      <div class="lesson-body">
+
+        <div class="callout warn">
+          <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div><strong>El cierre de caja se realiza una vez al final del turno.</strong><p>No cierres la caja si aún hay pacientes en espera. Una vez cerrada, no se pueden agregar cobros al turno actual.</p></div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">1</span>
+            <h3>Acceder a Cierre de caja</h3>
+          </div>
+          <div class="step-card-body">
+            <p>En el menú lateral, haz clic en <strong>Cierre de caja</strong>. El sistema mostrará automáticamente todos los cobros realizados durante tu turno, agrupados por forma de pago.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">2</span>
+            <h3>Revisar el listado de movimientos</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Verifica que todos los cobros del turno aparecen en la lista. El sistema muestra:</p>
+            <ul class="checklist" style="margin-bottom:14px">
+              <li>Nombre del paciente y número de transacción.</li>
+              <li>Servicios cobrados y monto individual.</li>
+              <li>Forma de pago utilizada.</li>
+              <li>Hora del cobro.</li>
+            </ul>
+            <p>Si detectas un cobro incorrecto, <strong>no cierres la caja todavía</strong> — comunícalo a tu coordinador para que lo revise.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">3</span>
+            <h3>Contar el efectivo y comparar</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Cuenta el efectivo físico en la caja. El sistema te mostrará cuánto debería haber según los cobros registrados. Ingresa el monto físico contado en el campo <strong>"Efectivo en caja"</strong>.</p>
+            <p>Si hay diferencia, el sistema la marcará en rojo. Anota la diferencia y justifícala antes de continuar. Administración revisará las diferencias al día siguiente.</p>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">4</span>
+            <h3>Exportar el resumen y cerrar</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Haz clic en <strong>"Exportar resumen"</strong> para descargar un archivo PDF con todos los movimientos del turno. Envíalo por WhatsApp o correo al coordinador según el protocolo de tu clínica.</p>
+            <p>Finalmente, haz clic en <strong>"Cerrar caja"</strong> y confirma la acción. El sistema registrará la hora de cierre y tu nombre de usuario.</p>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>¡Listo!</strong><p>Con esto completaste el módulo de Caja. El siguiente paso es practicar cada flujo con el apoyo de tu coordinador antes de operar de forma independiente.</p></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="lesson-footer">
+        <button class="nav-btn btn-prev" onclick="goToLesson(5)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
+          Anterior
+        </button>
+        <button class="nav-btn btn-done" onclick="markDone(6)" id="final-done-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20,6 9,17 4,12"/></svg>
+          Completar módulo
+        </button>
+      </div>
+
+      <div class="completion-banner" id="completion-banner">
+        <h3>¡Módulo Caja completado!</h3>
+        <p>Completaste las 6 lecciones del módulo de Caja. Estás listo para operar bajo supervisión.</p>
+        <a href="index.html">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
+          Volver al índice de módulos
+        </a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const TOTAL = 6;
+  const done = new Set(JSON.parse(localStorage.getItem('cmg-caja-done') || '[]'));
+  let current = 1;
+
+  function save() {
+    localStorage.setItem('cmg-caja-done', JSON.stringify([...done]));
+  }
+
+  function updateProgress() {
+    const pct = Math.round((done.size / TOTAL) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = done.size + ' / ' + TOTAL;
+  }
+
+  function goToLesson(n) {
+    document.getElementById('lesson-' + current).classList.remove('is-active');
+    document.querySelector('[data-lesson="' + current + '"]').classList.remove('is-active');
+    current = n;
+    document.getElementById('lesson-' + n).classList.add('is-active');
+    const btn = document.querySelector('[data-lesson="' + n + '"]');
+    btn.classList.add('is-active');
+    document.getElementById('main-content').scrollTop = 0;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function markDone(n) {
+    done.add(n);
+    save();
+    const navBtn = document.querySelector('[data-lesson="' + n + '"]');
+    navBtn.classList.add('is-done');
+    updateProgress();
+    if (n === TOTAL && done.size === TOTAL) {
+      document.getElementById('completion-banner').classList.add('is-visible');
+      document.getElementById('final-done-btn').disabled = true;
+    }
+  }
+
+  // Init: restore done state
+  done.forEach(n => {
+    const btn = document.querySelector('[data-lesson="' + n + '"]');
+    if (btn) btn.classList.add('is-done');
+  });
+  updateProgress();
+</script>
+
+</body>
+</html>

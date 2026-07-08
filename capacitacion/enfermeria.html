@@ -212,7 +212,7 @@
       <li><button class="lesson-nav-btn" data-lesson="2" type="button"><span class="nav-num">2</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8C8" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Iniciar pre-clínica</button></li>
       <li><button class="lesson-nav-btn" data-lesson="3" type="button"><span class="nav-num">3</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8C8" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Toma de preclinical</button></li>
       <li><button class="lesson-nav-btn" data-lesson="4" type="button"><span class="nav-num">4</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8C8" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Registro en el sistema</button></li>
-      <li><button class="lesson-nav-btn" data-lesson="5" type="button"><span class="nav-num">5</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8C8" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Notificar al médico</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="5" type="button"><span class="nav-num">5</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8C8" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Lo que ve el médico</button></li>
       <li><button class="lesson-nav-btn" data-lesson="6" type="button"><span class="nav-num">6</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7CB8C8" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Solicitud de exámenes</button></li>
     </ul>
     <div class="progress-wrap">
@@ -456,39 +456,27 @@
     <div class="lesson-panel" id="lesson-5">
       <div class="lesson-header">
         <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 05</span></div>
-        <h2>Notificar al médico que el paciente está listo</h2>
-        <p>Cambiar el estado del turno para que el médico sepa que el preclinical está completo.</p>
+        <h2>Lo que ve el médico después de la pre-clínica</h2>
+        <p>Qué pasa en el sistema una vez que guardas la pre-clínica y cómo el médico la retoma.</p>
         <div class="lesson-meta">
           <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~10 minutos</span>
         </div>
       </div>
       <div class="lesson-body">
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">1</span><h3>Cambiar estado a "Listo para médico"</h3></div>
+          <div class="step-card-header"><span class="step-n">1</span><h3>La pre-clínica aparece en tiempo real</h3></div>
           <div class="step-card-body">
-            <p>Después de guardar el preclinical, el sistema te preguntará si deseas notificar al médico. Haz clic en <strong>"Sí, notificar"</strong>.</p>
-            <p>También puedes hacerlo manualmente: en la agenda del día, busca al paciente y cambia su estado a <strong>"Listo para médico"</strong> desde el menú desplegable de su fila.</p>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-card-header"><span class="step-n">2</span><h3>Qué ve el médico después</h3></div>
-          <div class="step-card-body">
-            <p>En el portal del médico, el paciente aparece resaltado en su lista de turnos con el estado <strong>"Listo"</strong>. Puede ver el preclinical completo antes de llamar al paciente al consultorio.</p>
+            <p>Al guardar la pre-clínica, el registro queda disponible de inmediato en la pestaña <strong>Consulta</strong> del médico, en la sección de <strong>pendientes</strong>. No necesitas hacer ninguna acción adicional para notificar — el médico la verá al instante.</p>
             <div class="callout tip">
               <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div><strong>El médico no puede ver el preclinical si no lo guardaste primero.</strong><p>Asegúrate de hacer clic en "Guardar preclinical" antes de notificar. Si solo guardas el borrador, el médico no lo verá completo.</p></div>
+              <div><strong>Tu trabajo termina al guardar.</strong><p>Una vez guardada la pre-clínica, ya está en manos del médico. Él la selecciona desde sus pendientes y completa la consulta desde ahí.</p></div>
             </div>
           </div>
         </div>
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">3</span><h3>Gestión de la sala de espera</h3></div>
+          <div class="step-card-header"><span class="step-n">2</span><h3>Qué hace el médico con el registro</h3></div>
           <div class="step-card-body">
-            <p>Mientras el médico atiende a un paciente, sigue tomando preclinical a los siguientes en lista. Mantén el flujo: el objetivo es que cuando el médico termine una consulta, el próximo paciente ya esté listo.</p>
-            <ul class="checklist">
-              <li>Llama a los pacientes por orden de turno, no por llegada.</li>
-              <li>Si un paciente no está cuando lo llamas, márcalo como <strong>"Ausente temporal"</strong> y pasa al siguiente.</li>
-              <li>Avisa al médico si hay un retraso mayor de 20 minutos en la agenda.</li>
-            </ul>
+            <p>El médico ve la pre-clínica como pendiente en su pestaña <strong>Consulta</strong>, la abre, revisa los signos vitales que registraste y completa la hoja de consulta desde la <strong>Etapa 2</strong>.</p>
           </div>
         </div>
       </div>

@@ -1638,15 +1638,18 @@ button.ed-consulta-link {
           var recetaExt = (d.recetaExterna && d.recetaExterna.trim()) ? d.recetaExterna : '';
           var ps = d.pruebaSensibilidadServicio;
           var requiereSens = !!(ps && ps.requerida);
-          var esServicioStandalone = d.tipoRegistro === 'servicio-standalone' || (!d.diagnostico && d.servicioNombre);
-          var servicios = (d.serviciosBrindados||[]).join(', ') || (esServicioStandalone ? d.servicioNombre : (d.diagnostico ? 'Consulta médica' : '—'));
+          var esLabStandalone      = d.tipoRegistro === 'lab-standalone';
+          var esServicioStandalone = d.tipoRegistro === 'servicio-standalone' || (!d.diagnostico && d.servicioNombre && !esLabStandalone);
+          var servicios = (d.serviciosBrindados||[]).join(', ') || (esLabStandalone || esServicioStandalone ? d.servicioNombre : (d.diagnostico ? 'Consulta médica' : '—'));
           /* DRM v3 #4: badge de constancia emitida */
           var badgeConstancia = (d.tieneConstancia || d.constanciaId)
             ? '<span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">📄 Constancia emitida</span>'
             : '';
-          var tipoLabel = esServicioStandalone
-            ? '<span style="background:#D1FAE5;color:#065F46;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🛎️ Servicio</span>'
-            : '<span style="background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🩺 Consulta</span>';
+          var tipoLabel = esLabStandalone
+            ? '<span style="background:#EDE9FE;color:#5B21B6;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🔬 Laboratorio</span>'
+            : esServicioStandalone
+              ? '<span style="background:#D1FAE5;color:#065F46;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🛎️ Servicio</span>'
+              : '<span style="background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🩺 Consulta</span>';
           /* DRM v3.2: mostrar NOMBRE del paciente prominente, código como subtítulo */
           var nombrePaciente = d.pacienteNombre || '— sin nombre —';
           html +=
@@ -3338,9 +3341,28 @@ button.ed-consulta-link {
         solicitadoPorNombre: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
         createdAt      : firebase.firestore.FieldValue.serverTimestamp(),
         pdfUrl         : null
-      }).then(function(){
+      }).then(function(labDocRef){
         document.getElementById('ed-quick-modal').remove();
         showAlert('✓ Orden de laboratorio creada (' + seleccionados.length + ' examen' + (seleccionados.length>1?'es':'') + '). Aparece en pestaña Laboratorio como pendiente.', 'success');
+        /* Orden externa (sin consulta padre): crear liquidación pendiente en Caja */
+        if (!consultaPadreId) {
+          var now = new Date();
+          var pad = function(n){ return String(n).padStart(2,'0'); };
+          var fechaLocal = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate()) +
+            'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+          cmgDb.collection('consultas').add({
+            status               : 'pendiente_caja',
+            tipoRegistro         : 'lab-standalone',
+            codigoPaciente       : pacienteActual.codigoPaciente,
+            pacienteNombre       : dg.nombreCompleto || '',
+            serviciosBrindados   : seleccionados,
+            servicioNombre       : nombreOrden,
+            doctorNombre         : cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
+            fechaLocal           : fechaLocal,
+            examenesLaboratorioId: labDocRef.id,
+            createdAt            : firebase.firestore.FieldValue.serverTimestamp()
+          }).catch(function(e){ console.warn('[CMG] Error creando entrada de caja para orden de lab:', e); });
+        }
       }).catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
     };
   }

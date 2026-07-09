@@ -28,8 +28,8 @@
         <span class="lang lang-en"><b>OPEN</b> <span id="promo-hours-en">6:00 AM – 10:00 PM</span> <span id="promo-day-en"></span> · City Mall S2 E214</span>
       </span>
       <span class="promo-msg" data-msg="d365">
-        <span class="lang lang-es"><b>NUEVO · DOCTOR 365</b> L900/año · Suero Complejo B de regalo · Sin citas</span>
-        <span class="lang lang-en"><b>NEW · DOCTOR 365</b> L900/year · free Complex B IV therapy · Walk-in</span>
+        <span class="lang lang-es" id="promo-announce-es"><b>NUEVO · DOCTOR 365</b> L900/año · Suero Complejo B de regalo · Sin citas</span>
+        <span class="lang lang-en" id="promo-announce-en"><b>NEW · DOCTOR 365</b> L900/year · free Complex B IV therapy · Walk-in</span>
       </span>
     </span>
     <a href="https://wa.me/50431555162" class="promo-wa">
@@ -916,6 +916,7 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
 <script>
 (function () {
@@ -933,6 +934,51 @@
       if (btn) { btn.style.display = 'flex'; }
     }
   });
+})();
+</script>
+
+<script>
+/* ── Firestore: horario y anuncio dinámico ── */
+(function () {
+  if (typeof cmgDb === 'undefined') return;
+
+  var DAY_KEYS = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+  var d = new Date().getDay();
+
+  function to12h(t) {
+    if (!t) return '';
+    var p = t.split(':'); var h = parseInt(p[0], 10); var m = p[1] || '00';
+    var ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+    return h + ':' + m + ' ' + ap;
+  }
+
+  /* Horario de hoy desde Firestore */
+  cmgDb.collection('siteConfig').doc('horario').get().then(function (doc) {
+    if (!doc.exists) return;
+    var day = doc.data()[DAY_KEYS[d]];
+    if (!day) return;
+    var hEs = document.getElementById('promo-hours-es');
+    var hEn = document.getElementById('promo-hours-en');
+    if (day.abierto === false) {
+      if (hEs) hEs.textContent = 'Cerrado hoy';
+      if (hEn) hEn.textContent = 'Closed today';
+    } else {
+      var str = to12h(day.apertura) + ' – ' + to12h(day.cierre);
+      if (hEs) hEs.textContent = str;
+      if (hEn) hEn.textContent = str;
+    }
+  }).catch(function () {});
+
+  /* Anuncio secundario desde Firestore */
+  cmgDb.collection('siteConfig').doc('anuncio').get().then(function (doc) {
+    if (!doc.exists) return;
+    var msgs = (doc.data() || {}).mensajes;
+    if (!Array.isArray(msgs) || !msgs[1]) return;
+    var el = document.getElementById('promo-announce-es');
+    var elEn = document.getElementById('promo-announce-en');
+    if (el) el.textContent = msgs[1];
+    if (elEn) elEn.textContent = msgs[1];
+  }).catch(function () {});
 })();
 </script>
 </body>

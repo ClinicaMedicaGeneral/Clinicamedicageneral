@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contenido del Sitio Web · CMG</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-serif; color: #1F2937; }
+
+/* ── Topbar ── */
+.as-top {
+  background: #213C7D; color: #fff;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 20;
+}
+.as-top-left { display: flex; align-items: center; gap: 12px; }
+.as-top-left img { width: 34px; }
+.as-top-title { font-size: 16px; font-weight: 900; letter-spacing: .3px; }
+.as-top-title small { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6); letter-spacing: .5px; }
+.as-top-right { display: flex; align-items: center; gap: 10px; font-size: 13px; flex-wrap: wrap; }
+.as-email { color: rgba(255,255,255,.7); font-size: 13px; }
+.as-nav-link {
+  color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
+  padding: 6px 12px; border-radius: 7px; border: 1px solid rgba(255,255,255,.25);
+  transition: background .15s;
+}
+.as-nav-link:hover { background: rgba(255,255,255,.1); }
+.as-nav-link.active { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.4); }
+.as-logout {
+  background: transparent; border: 1px solid rgba(255,255,255,.25); color: rgba(255,255,255,.8);
+  padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: background .15s;
+}
+.as-logout:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+/* ── Wrap ── */
+.as-wrap { max-width: 860px; margin: 0 auto; padding: 24px; }
+
+/* ── Tabs ── */
+.as-tabs { display: flex; gap: 4px; margin-bottom: 24px; background: #fff; padding: 5px; border-radius: 12px; box-shadow: 0 1px 6px rgba(33,60,125,.08); }
+.as-tab {
+  flex: 1; padding: 10px 16px; border: none; border-radius: 9px;
+  font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+  background: transparent; color: #6B7280; transition: background .15s, color .15s;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.as-tab:hover { background: #F3F4F6; color: #1F2937; }
+.as-tab.is-active { background: #213C7D; color: #fff; }
+
+/* ── Tab panels ── */
+.as-panel { display: none; }
+.as-panel.is-active { display: block; }
+
+/* ── Section card ── */
+.as-card {
+  background: #fff; border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(33,60,125,.07);
+  margin-bottom: 20px; overflow: hidden;
+}
+.as-card-head {
+  padding: 16px 20px; border-bottom: 1px solid #EEF1F8;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.as-card-title { font-size: 15px; font-weight: 900; color: #213C7D; margin: 0; }
+.as-card-desc  { font-size: 13px; color: #6B7280; margin: 4px 0 0; }
+.as-card-body  { padding: 20px; }
+
+/* ── Save button (per section) ── */
+.as-save-btn {
+  display: flex; align-items: center; gap: 7px;
+  background: #213C7D; color: #fff; border: none;
+  padding: 9px 18px; border-radius: 9px; font-family: inherit;
+  font-size: 13px; font-weight: 800; cursor: pointer;
+  transition: opacity .15s, transform .1s;
+}
+.as-save-btn:hover { opacity: .9; }
+.as-save-btn:active { transform: scale(.97); }
+.as-save-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ── Days grid ── */
+.as-days { display: flex; flex-direction: column; gap: 10px; }
+.as-day-row {
+  display: grid; grid-template-columns: 110px 1fr 1fr 1fr; gap: 12px; align-items: center;
+  padding: 14px 16px; background: #FAFBFF; border: 1px solid #EEF1F8; border-radius: 10px;
+  transition: background .15s;
+}
+.as-day-row.is-closed { background: #F9FAFB; }
+.as-day-name { font-size: 14px; font-weight: 700; color: #1F2937; }
+.as-day-name small { display: block; font-size: 11px; color: #9CA3AF; font-weight: 500; }
+
+.as-field-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: #6B7280; display: block; margin-bottom: 4px; }
+.as-time-input {
+  width: 100%; height: 38px; border: 1.5px solid #E5E7EB; border-radius: 7px;
+  padding: 0 10px; font-family: inherit; font-size: 14px; outline: none; color: #1F2937;
+  transition: border-color .15s;
+}
+.as-time-input:focus { border-color: #213C7D; }
+.as-time-input:disabled { background: #F3F4F6; color: #9CA3AF; cursor: not-allowed; }
+
+/* Toggle switch */
+.as-toggle-wrap { display: flex; flex-direction: column; gap: 4px; }
+.as-toggle-label {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;
+  font-size: 13px; color: #374151; font-weight: 600;
+}
+.as-toggle-label input { display: none; }
+.as-toggle-track {
+  width: 40px; height: 22px; background: #D1D5DB; border-radius: 12px;
+  position: relative; transition: background .15s; flex-shrink: 0;
+}
+.as-toggle-thumb {
+  position: absolute; top: 3px; left: 3px;
+  width: 16px; height: 16px; background: #fff; border-radius: 50%;
+  transition: left .15s; box-shadow: 0 1px 3px rgba(0,0,0,.25);
+}
+.as-toggle-label input:checked + .as-toggle-track { background: #213C7D; }
+.as-toggle-label input:checked + .as-toggle-track .as-toggle-thumb { left: 21px; }
+
+/* Closed label */
+.as-closed-badge {
+  display: none; font-size: 12px; font-weight: 700; color: #6B7280;
+  background: #F3F4F6; padding: 3px 9px; border-radius: 20px;
+}
+.as-day-row.is-closed .as-closed-badge { display: inline-block; }
+
+/* ── Announcement editor ── */
+.as-announce-list { display: flex; flex-direction: column; gap: 12px; }
+.as-msg-item {
+  background: #FAFBFF; border: 1px solid #EEF1F8; border-radius: 10px; padding: 14px;
+}
+.as-msg-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.as-msg-num { width: 24px; height: 24px; border-radius: 50%; background: #213C7D; color: #fff; font-size: 12px; font-weight: 900; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.as-msg-label { font-size: 13px; font-weight: 700; color: #1F2937; flex: 1; }
+.as-msg-textarea {
+  width: 100%; min-height: 64px; border: 1.5px solid #E5E7EB; border-radius: 8px;
+  padding: 10px 12px; font-family: inherit; font-size: 14px; resize: vertical;
+  outline: none; color: #1F2937; line-height: 1.5; transition: border-color .15s;
+}
+.as-msg-textarea:focus { border-color: #213C7D; }
+.as-msg-hint { font-size: 12px; color: #9CA3AF; margin-top: 5px; }
+
+/* ── Contact form ── */
+.as-contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.as-contact-field { display: flex; flex-direction: column; gap: 5px; }
+.as-contact-field.full-width { grid-column: 1 / -1; }
+.as-contact-field label { font-size: 11px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: .4px; }
+.as-contact-input {
+  height: 42px; border: 1.5px solid #E5E7EB; border-radius: 8px;
+  padding: 0 12px; font-family: inherit; font-size: 14px; outline: none; color: #1F2937;
+  transition: border-color .15s;
+}
+.as-contact-input:focus { border-color: #213C7D; }
+
+/* ── Info callout ── */
+.as-info {
+  display: flex; gap: 9px; align-items: flex-start;
+  background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF;
+  border-radius: 9px; padding: 11px 14px; font-size: 13px; line-height: 1.55;
+  margin-top: 16px;
+}
+.as-info b { color: #1E3A8A; }
+
+/* ── Preview strip ── */
+.as-preview-strip {
+  background: #213C7D; color: #fff; border-radius: 9px; padding: 12px 16px;
+  font-size: 13px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+}
+.as-preview-dot { width: 8px; height: 8px; border-radius: 50%; background: #FDD22C; flex-shrink: 0; animation: blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* ── Loading / empty ── */
+.as-loading { text-align: center; padding: 40px 20px; color: #6B7280; }
+.as-spinner { width: 28px; height: 28px; border: 3px solid #E5E7EB; border-top-color: #213C7D; border-radius: 50%; animation: asspin .7s linear infinite; margin: 0 auto 12px; }
+@keyframes asspin { to { transform: rotate(360deg); } }
+
+/* ── Toast ── */
+.as-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #213C7D; color: #fff; padding: 12px 22px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,.25);
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50;
+}
+.as-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.as-toast.err  { background: #C70B0C; }
+.as-toast.ok   { background: #15803D; }
+
+/* ── Verify link ── */
+.as-verify-link {
+  display: inline-flex; align-items: center; gap: 6px; color: #213C7D; font-size: 13px;
+  font-weight: 700; text-decoration: none; padding: 8px 14px;
+  background: #EEF2FF; border-radius: 8px; transition: background .15s;
+}
+.as-verify-link:hover { background: #E0E7FF; }
+
+@media (max-width: 640px) {
+  .as-day-row { grid-template-columns: 1fr 1fr; }
+  .as-day-name { grid-column: 1 / -1; }
+  .as-contact-grid { grid-template-columns: 1fr; }
+  .as-tabs .as-tab span.tab-label { display: none; }
+}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+</head>
+<body>
+
+<div class="as-top">
+  <div class="as-top-left">
+    <img src="assets/isotipo-color.png" alt="CMG">
+    <div class="as-top-title">Contenido del Sitio Web<small>Panel Administrativo</small></div>
+  </div>
+  <div class="as-top-right">
+    <span class="as-email" id="as-email">—</span>
+    <a class="as-nav-link" href="Admin-D365.html">Doctor 365</a>
+    <a class="as-nav-link" href="Admin-Precios.html">Precios</a>
+    <a class="as-nav-link" href="Admin-Usuarios.html">Usuarios</a>
+    <a class="as-nav-link active" href="Admin-Sitio.html">Sitio web</a>
+    <button class="as-logout" id="as-logout">Salir</button>
+  </div>
+</div>
+
+<div class="as-wrap">
+
+  <!-- Tab navigation -->
+  <div class="as-tabs" role="tablist">
+    <button class="as-tab is-active" data-tab="horario" role="tab" aria-selected="true">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span class="tab-label">Horario</span>
+    </button>
+    <button class="as-tab" data-tab="anuncio" role="tab" aria-selected="false">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"/></svg>
+      <span class="tab-label">Anuncio</span>
+    </button>
+    <button class="as-tab" data-tab="contacto" role="tab" aria-selected="false">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      <span class="tab-label">Contacto</span>
+    </button>
+  </div>
+
+  <!-- ══ TAB: HORARIO ══ -->
+  <div class="as-panel is-active" id="panel-horario">
+    <div class="as-card">
+      <div class="as-card-head">
+        <div>
+          <div class="as-card-title">Horario de atención</div>
+          <div class="as-card-desc">Configura días, horarios y días cerrados. Los cambios se reflejan en el sitio inmediatamente.</div>
+        </div>
+        <button class="as-save-btn" id="btn-save-horario" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+          Guardar horario
+        </button>
+      </div>
+      <div class="as-card-body">
+        <div class="as-days" id="days-list">
+          <div class="as-loading"><div class="as-spinner"></div>Cargando horario…</div>
+        </div>
+        <div class="as-info" style="margin-top:16px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>Después de guardar, verifica el cambio en <a href="https://clinicamedicacmg.net" target="_blank" style="color:#1E40AF;font-weight:700">clinicamedicacmg.net</a> con <b>Ctrl + Shift + R</b> para forzar recarga sin caché.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB: ANUNCIO ══ -->
+  <div class="as-panel" id="panel-anuncio">
+    <div class="as-card">
+      <div class="as-card-head">
+        <div>
+          <div class="as-card-title">Anuncio de la tira superior</div>
+          <div class="as-card-desc">Los mensajes aparecen de forma rotativa en la barra azul del tope del sitio público.</div>
+        </div>
+        <button class="as-save-btn" id="btn-save-anuncio" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+          Guardar anuncio
+        </button>
+      </div>
+      <div class="as-card-body">
+
+        <div class="as-preview-strip" id="anuncio-preview">
+          <div class="as-preview-dot"></div>
+          <span id="preview-text">Cargando vista previa…</span>
+        </div>
+
+        <div id="anuncio-form">
+          <div class="as-loading"><div class="as-spinner"></div>Cargando anuncio…</div>
+        </div>
+
+        <div class="as-info">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span><b>Mantén el anuncio breve y actualizado.</b> Un mensaje desactualizado genera confusión en los pacientes. Si no hay novedades, usa el espacio para el horario de atención o una promoción vigente.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB: CONTACTO ══ -->
+  <div class="as-panel" id="panel-contacto">
+    <div class="as-card">
+      <div class="as-card-head">
+        <div>
+          <div class="as-card-title">Datos de contacto</div>
+          <div class="as-card-desc">Teléfono, WhatsApp y dirección que aparecen en el sitio web y en el botón de contacto.</div>
+        </div>
+        <button class="as-save-btn" id="btn-save-contacto" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+          Guardar contacto
+        </button>
+      </div>
+      <div class="as-card-body">
+        <div id="contacto-form">
+          <div class="as-loading"><div class="as-spinner"></div>Cargando datos…</div>
+        </div>
+        <div class="as-info" style="margin-top:16px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>El número de WhatsApp debe incluir el código de país sin el <b>+</b>. Ejemplo: <b>50431555162</b> para Honduras.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="as-card">
+      <div class="as-card-head">
+        <div>
+          <div class="as-card-title">Verificar en el sitio</div>
+          <div class="as-card-desc">Abre el sitio en una pestaña nueva para confirmar que los cambios se publicaron.</div>
+        </div>
+      </div>
+      <div class="as-card-body" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <a href="https://clinicamedicacmg.net" target="_blank" class="as-verify-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Abrir clinicamedicacmg.net
+        </a>
+        <span style="font-size:13px;color:#6B7280">Usa <kbd style="background:#F3F4F6;padding:2px 6px;border-radius:4px;border:1px solid #D1D5DB;font-family:monospace">Ctrl + Shift + R</kbd> para recarga sin caché</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="as-toast" id="as-toast"></div>
+
+<script>
+(function () {
+  var ADMIN_EMAILS = ['ventasymercadeocmg@gmail.com', 'rubenwainwrightba@gmail.com', 'skarleth.admoncmg@gmail.com'];
+
+  var DAYS_CONFIG = [
+    { key: 'lunes',     label: 'Lunes',     short: 'Lun' },
+    { key: 'martes',    label: 'Martes',    short: 'Mar' },
+    { key: 'miercoles', label: 'Miércoles', short: 'Mié' },
+    { key: 'jueves',    label: 'Jueves',    short: 'Jue' },
+    { key: 'viernes',   label: 'Viernes',   short: 'Vie' },
+    { key: 'sabado',    label: 'Sábado',    short: 'Sáb' },
+    { key: 'domingo',   label: 'Domingo',   short: 'Dom' }
+  ];
+
+  var DEFAULT_HORARIO = {};
+  DAYS_CONFIG.forEach(function (d) {
+    DEFAULT_HORARIO[d.key] = { abierto: true, apertura: '06:00', cierre: '22:00', nota: '' };
+  });
+
+  var _horario  = {};
+  var _anuncio  = {};
+  var _contacto = {};
+  var _horarioDirty  = false;
+  var _anuncioDirty  = false;
+  var _contactoDirty = false;
+
+  function $(id) { return document.getElementById(id); }
+
+  /* ── Toast ── */
+  var toastEl = $('as-toast'), toastT;
+  function toast(msg, type) {
+    toastEl.textContent = msg;
+    toastEl.className = 'as-toast show' + (type ? ' ' + type : '');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toastEl.className = 'as-toast'; }, 3500);
+  }
+
+  /* ── Auth guard ── */
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = 'Auth.html?returnTo=Admin-Sitio.html'; return; }
+    if (ADMIN_EMAILS.indexOf(user.email) === -1) { window.location.href = 'Inicio.html'; return; }
+    $('as-email').textContent = user.email;
+    loadAll();
+  });
+  $('as-logout').onclick = function () {
+    cmgAuth.signOut().then(function () { window.location.href = 'Inicio.html'; });
+  };
+
+  /* ── Tab switching ── */
+  document.querySelectorAll('.as-tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.as-tab').forEach(function (b) { b.classList.remove('is-active'); b.setAttribute('aria-selected', 'false'); });
+      document.querySelectorAll('.as-panel').forEach(function (p) { p.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      btn.setAttribute('aria-selected', 'true');
+      $('panel-' + btn.dataset.tab).classList.add('is-active');
+    });
+  });
+
+  /* ── Load all sections ── */
+  function loadAll() {
+    cmgDb.collection('siteConfig').get().then(function (snap) {
+      snap.forEach(function (d) {
+        if (d.id === 'horario')  _horario  = d.data() || {};
+        if (d.id === 'anuncio')  _anuncio  = d.data() || {};
+        if (d.id === 'contacto') _contacto = d.data() || {};
+      });
+      renderHorario();
+      renderAnuncio();
+      renderContacto();
+    }).catch(function (err) {
+      toast('Error al cargar configuración: ' + err.message, 'err');
+      renderHorario();
+      renderAnuncio();
+      renderContacto();
+    });
+  }
+
+  /* ══════════════════════════════
+     HORARIO
+  ══════════════════════════════ */
+  function renderHorario() {
+    var html = DAYS_CONFIG.map(function (d) {
+      var cfg = _horario[d.key] || DEFAULT_HORARIO[d.key];
+      var abierto   = cfg.abierto !== false;
+      var apertura  = cfg.apertura || '06:00';
+      var cierre    = cfg.cierre   || '22:00';
+      var nota      = cfg.nota     || '';
+      return '<div class="as-day-row ' + (abierto ? '' : 'is-closed') + '" id="day-' + d.key + '">' +
+        '<div class="as-day-name">' + d.label + '<small>' + d.short + '</small></div>' +
+        '<div><span class="as-field-lbl">Apertura</span>' +
+          '<input class="as-time-input" type="time" id="ap-' + d.key + '" value="' + esc(apertura) + '" ' + (abierto ? '' : 'disabled') + '></div>' +
+        '<div><span class="as-field-lbl">Cierre</span>' +
+          '<input class="as-time-input" type="time" id="ci-' + d.key + '" value="' + esc(cierre) + '" ' + (abierto ? '' : 'disabled') + '></div>' +
+        '<div class="as-toggle-wrap">' +
+          '<span class="as-field-lbl">Cerrado</span>' +
+          '<label class="as-toggle-label"><input type="checkbox" id="off-' + d.key + '" ' + (abierto ? '' : 'checked') + '>' +
+            '<span class="as-toggle-track"><span class="as-toggle-thumb"></span></span>Cerrado</label>' +
+          '<span class="as-closed-badge">Día cerrado</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    $('days-list').innerHTML = html;
+
+    DAYS_CONFIG.forEach(function (d) {
+      var chk = $('off-' + d.key);
+      var apInp = $('ap-' + d.key);
+      var ciInp = $('ci-' + d.key);
+      var row   = $('day-' + d.key);
+
+      chk.addEventListener('change', function () {
+        var closed = chk.checked;
+        apInp.disabled = closed;
+        ciInp.disabled = closed;
+        row.classList.toggle('is-closed', closed);
+        markDirty('horario');
+      });
+      apInp.addEventListener('change', function () { markDirty('horario'); });
+      ciInp.addEventListener('change', function () { markDirty('horario'); });
+    });
+  }
+
+  $('btn-save-horario').addEventListener('click', function () {
+    var btn = $('btn-save-horario');
+    btn.disabled = true; btn.textContent = 'Guardando…';
+    var payload = {};
+    DAYS_CONFIG.forEach(function (d) {
+      var closed = $('off-' + d.key).checked;
+      payload[d.key] = {
+        abierto:  !closed,
+        apertura: $('ap-' + d.key).value || '06:00',
+        cierre:   $('ci-' + d.key).value || '22:00',
+        nota:     ''
+      };
+    });
+    payload.actualizado = firebase.firestore.FieldValue.serverTimestamp();
+    cmgDb.collection('siteConfig').doc('horario').set(payload, { merge: true })
+      .then(function () {
+        _horario = payload;
+        _horarioDirty = false;
+        $('btn-save-horario').disabled = true;
+        resetBtnLabel('btn-save-horario', 'Guardar horario');
+        toast('✅ Horario guardado. Se refleja en el sitio inmediatamente.', 'ok');
+      })
+      .catch(function (err) {
+        toast('Error al guardar: ' + err.message, 'err');
+        $('btn-save-horario').disabled = false;
+        resetBtnLabel('btn-save-horario', 'Guardar horario');
+      });
+  });
+
+  /* ══════════════════════════════
+     ANUNCIO
+  ══════════════════════════════ */
+  function renderAnuncio() {
+    var msgs = Array.isArray(_anuncio.mensajes) ? _anuncio.mensajes : [
+      'ABIERTO 6:00 AM – 10:00 PM · City Mall S2 E214 · Tegucigalpa',
+      'NUEVO · DOCTOR 365 L900/año · Suero Complejo B de regalo · Sin citas'
+    ];
+    while (msgs.length < 2) msgs.push('');
+
+    $('preview-text').textContent = msgs[0] || '(Sin mensaje 1)';
+
+    var html = msgs.map(function (msg, i) {
+      return '<div class="as-msg-item">' +
+        '<div class="as-msg-header">' +
+          '<div class="as-msg-num">' + (i + 1) + '</div>' +
+          '<div class="as-msg-label">Mensaje ' + (i + 1) + (i === 0 ? ' — Principal (siempre visible)' : ' — Secundario (rotativo)') + '</div>' +
+        '</div>' +
+        '<textarea class="as-msg-textarea" id="msg-' + i + '" rows="2">' + esc(msg) + '</textarea>' +
+        '<div class="as-msg-hint">Ejemplo: "🎉 Nueva: Prueba de malaria disponible" · Mantén el texto bajo 80 caracteres.</div>' +
+      '</div>';
+    }).join('');
+    $('anuncio-form').innerHTML = '<div class="as-announce-list">' + html + '</div>';
+
+    [0, 1].forEach(function (i) {
+      $('msg-' + i).addEventListener('input', function () {
+        if (i === 0) $('preview-text').textContent = this.value || '(vacío)';
+        markDirty('anuncio');
+      });
+    });
+  }
+
+  $('btn-save-anuncio').addEventListener('click', function () {
+    var btn = $('btn-save-anuncio');
+    btn.disabled = true; btn.textContent = 'Guardando…';
+    var mensajes = [
+      ($('msg-0') ? $('msg-0').value.trim() : ''),
+      ($('msg-1') ? $('msg-1').value.trim() : '')
+    ];
+    cmgDb.collection('siteConfig').doc('anuncio').set({
+      mensajes: mensajes,
+      actualizado: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true })
+      .then(function () {
+        _anuncio = { mensajes: mensajes };
+        _anuncioDirty = false;
+        $('btn-save-anuncio').disabled = true;
+        resetBtnLabel('btn-save-anuncio', 'Guardar anuncio');
+        toast('✅ Anuncio guardado. Se refleja en el sitio inmediatamente.', 'ok');
+      })
+      .catch(function (err) {
+        toast('Error al guardar: ' + err.message, 'err');
+        $('btn-save-anuncio').disabled = false;
+        resetBtnLabel('btn-save-anuncio', 'Guardar anuncio');
+      });
+  });
+
+  /* ══════════════════════════════
+     CONTACTO
+  ══════════════════════════════ */
+  function renderContacto() {
+    var c = _contacto;
+    $('contacto-form').innerHTML =
+      '<div class="as-contact-grid">' +
+        '<div class="as-contact-field">' +
+          '<label>Teléfono</label>' +
+          '<input class="as-contact-input" id="c-tel" type="tel" placeholder="+504 3155-5162" value="' + esc(c.telefono || '+504 3155-5162') + '">' +
+        '</div>' +
+        '<div class="as-contact-field">' +
+          '<label>WhatsApp (sin +, sin espacios)</label>' +
+          '<input class="as-contact-input" id="c-wa" type="tel" placeholder="50431555162" value="' + esc(c.whatsapp || '50431555162') + '">' +
+        '</div>' +
+        '<div class="as-contact-field full-width">' +
+          '<label>Dirección</label>' +
+          '<input class="as-contact-input" id="c-dir" type="text" placeholder="City Mall S2 E214, Tegucigalpa" value="' + esc(c.direccion || 'City Mall S2 E214, Tegucigalpa') + '">' +
+        '</div>' +
+        '<div class="as-contact-field full-width">' +
+          '<label>Correo de contacto (opcional)</label>' +
+          '<input class="as-contact-input" id="c-email" type="email" placeholder="contacto@clinicamedicacmg.net" value="' + esc(c.email || '') + '">' +
+        '</div>' +
+      '</div>';
+
+    ['c-tel', 'c-wa', 'c-dir', 'c-email'].forEach(function (id) {
+      $(id).addEventListener('input', function () { markDirty('contacto'); });
+    });
+  }
+
+  $('btn-save-contacto').addEventListener('click', function () {
+    var btn = $('btn-save-contacto');
+    btn.disabled = true; btn.textContent = 'Guardando…';
+    var payload = {
+      telefono:  $('c-tel').value.trim(),
+      whatsapp:  $('c-wa').value.trim().replace(/[^0-9]/g, ''),
+      direccion: $('c-dir').value.trim(),
+      email:     $('c-email').value.trim(),
+      actualizado: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    cmgDb.collection('siteConfig').doc('contacto').set(payload, { merge: true })
+      .then(function () {
+        _contacto = payload;
+        _contactoDirty = false;
+        $('btn-save-contacto').disabled = true;
+        resetBtnLabel('btn-save-contacto', 'Guardar contacto');
+        toast('✅ Datos de contacto guardados.', 'ok');
+      })
+      .catch(function (err) {
+        toast('Error al guardar: ' + err.message, 'err');
+        $('btn-save-contacto').disabled = false;
+        resetBtnLabel('btn-save-contacto', 'Guardar contacto');
+      });
+  });
+
+  /* ── Dirty tracking ── */
+  function markDirty(section) {
+    if (section === 'horario')  { _horarioDirty  = true; $('btn-save-horario').disabled  = false; }
+    if (section === 'anuncio')  { _anuncioDirty  = true; $('btn-save-anuncio').disabled  = false; }
+    if (section === 'contacto') { _contactoDirty = true; $('btn-save-contacto').disabled = false; }
+  }
+
+  function resetBtnLabel(id, label) {
+    $(id).innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg> ' + label;
+  }
+
+  /* ── Warn on unsaved changes ── */
+  window.addEventListener('beforeunload', function (e) {
+    if (_horarioDirty || _anuncioDirty || _contactoDirty) {
+      e.preventDefault(); e.returnValue = '';
+    }
+  });
+
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+})();
+</script>
+</body>
+</html>

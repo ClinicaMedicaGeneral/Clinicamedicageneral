@@ -466,7 +466,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
       .then(function (cred) {
         var uid = cred.user.uid;
         /* Guardar metadata en Firestore */
-        return cmgDb.collection('usuarios').add({
+        return cmgDb.collection('usuarios').doc(uid).set({
           nombre: nombre, email: email, rol: rol, estado: estado,
           uid: uid, creadoEn: firebase.firestore.FieldValue.serverTimestamp()
         });

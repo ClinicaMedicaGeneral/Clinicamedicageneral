@@ -6,31 +6,58 @@ service cloud.firestore {
     function isAuth() {
       return request.auth != null;
     }
-    // isCaja: usuario de la computadora de caja/recepción.
-    // Acceso clínico de solo lectura + gestión completa de D365.
-    // NO puede iniciar/terminar consultas ni modificar precios.
+    // Lookup del doc de usuario en /usuarios/{uid} (ID = Firebase Auth UID).
+    // Las reglas usan esto para otorgar permisos dinámicamente sin tocar este archivo.
+    function userDoc() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid));
+    }
+    function userRole() {
+      return exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
+        ? userDoc().data.rol : '';
+    }
+    function userActivo() {
+      return exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
+        && userDoc().data.estado == 'activo';
+    }
+
+    // isCaja: recepción/cobros. Rol Firestore: caja | enf | admin.
     function isCaja() {
-      return isAuth() && request.auth.token.email == 'ventasymercadeocmg@gmail.com';
+      return isAuth() && (
+        request.auth.token.email in [
+          'ventasymercadeocmg@gmail.com',
+          'skarleth.admoncmg@gmail.com',
+          'administracion@clinicamedicacmg.net'
+        ]
+        || (userActivo() && userRole() in ['caja', 'enf', 'admin'])
+      );
     }
+    // isDoctor: acceso clínico completo. Rol Firestore: medico | enf | admin.
     function isDoctor() {
-      return isAuth() && request.auth.token.email in [
-        'expedientes.clinicamedicacmg@gmail.com',
-        'rubenwainwrightba@gmail.com',
-        'ventasymercadeocmg@gmail.com',
-        // DRM Fun-2: médicos tratantes individuales
-        'doctor_rojascmg@gmail.com',
-        'doctor_hermescmg@gmail.com',
-        'doctor_alvarezcmg@gmail.com',
-        // Admin operativo
-        'skarleth.admoncmg@gmail.com'
-      ];
+      return isAuth() && (
+        request.auth.token.email in [
+          'expedientes.clinicamedicacmg@gmail.com',
+          'rubenwainwrightba@gmail.com',
+          'ventasymercadeocmg@gmail.com',
+          'doctor_rojascmg@gmail.com',
+          'doctor_hermescmg@gmail.com',
+          'doctor_alvarezcmg@gmail.com',
+          'skarleth.admoncmg@gmail.com',
+          'administracion@clinicamedicacmg.net'
+        ]
+        || (userActivo() && userRole() in ['medico', 'enf', 'admin'])
+      );
     }
+    // isAdmin: acceso total a portales y configuración. Rol Firestore: admin.
     function isAdmin() {
-      return isAuth() && request.auth.token.email in [
-        'rubenwainwrightba@gmail.com',
-        'ventasymercadeocmg@gmail.com',
-        'skarleth.admoncmg@gmail.com'
-      ];
+      return isAuth() && (
+        request.auth.token.email in [
+          'rubenwainwrightba@gmail.com',
+          'ventasymercadeocmg@gmail.com',
+          'skarleth.admoncmg@gmail.com',
+          'administracion@clinicamedicacmg.net'
+        ]
+        || (userActivo() && userRole() == 'admin')
+      );
     }
 
     // ═══ /users/{uid} ══════════════════════════════════════════
@@ -250,7 +277,8 @@ service cloud.firestore {
     // Cuentas del personal gestionadas desde Admin-Usuarios.html.
     // Solo admins pueden leer y escribir.
     match /usuarios/{userId} {
-      allow read, write: if isAdmin();
+      allow read: if isAdmin() || (isAuth() && request.auth.uid == userId);
+      allow write: if isAdmin();
     }
 
     // ═══ /siteConfig/{doc} ══════════════════════════════════════

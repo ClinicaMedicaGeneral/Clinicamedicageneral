@@ -246,6 +246,21 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ═══ /usuarios/{id} ════════════════════════════════════════
+    // Cuentas del personal gestionadas desde Admin-Usuarios.html.
+    // Solo admins pueden leer y escribir.
+    match /usuarios/{userId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ═══ /siteConfig/{doc} ══════════════════════════════════════
+    // Configuración pública del sitio (horario, anuncio, contacto).
+    // Lectura pública (Inicio.html sin auth). Escritura solo admins.
+    match /siteConfig/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // ═══ Bloqueo por defecto ═══════════════════════════════════
     // Cualquier otra colección queda bloqueada.
     match /{document=**} {

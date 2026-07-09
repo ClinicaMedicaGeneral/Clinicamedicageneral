@@ -207,6 +207,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
 </head>
 <body>
 
@@ -347,7 +348,6 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
 
 <script>
 (function () {
-  var ADMIN_EMAILS = ['ventasymercadeocmg@gmail.com', 'rubenwainwrightba@gmail.com', 'skarleth.admoncmg@gmail.com', 'administracion@clinicamedicacmg.net'];
 
   var DAYS_CONFIG = [
     { key: 'lunes',     label: 'Lunes',     short: 'Lun' },
@@ -385,9 +385,11 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
   /* ── Auth guard ── */
   cmgAuth.onAuthStateChanged(function (user) {
     if (!user) { window.location.href = 'Auth.html?returnTo=Admin-Sitio.html'; return; }
-    if (ADMIN_EMAILS.indexOf(user.email) === -1) { window.location.href = 'Inicio.html'; return; }
-    $('as-email').textContent = user.email;
-    loadAll();
+    cmgStaff.checkAdmin(user, function (ok) {
+      if (!ok) { window.location.href = 'Inicio.html'; return; }
+      $('as-email').textContent = user.email;
+      loadAll();
+    });
   });
   $('as-logout').onclick = function () {
     cmgAuth.signOut().then(function () { window.location.href = 'Inicio.html'; });

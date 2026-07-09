@@ -914,6 +914,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
 
 <script>
 (function () {
@@ -987,17 +988,10 @@
     $id('mh-user-chip').style.display = '';
     $id('mh-avatar').textContent = name.charAt(0).toUpperCase();
     $id('mh-user-name').textContent = name;
-    var STAFF_EMAILS = [
-      'ventasymercadeocmg@gmail.com','skarleth.admoncmg@gmail.com','rubenwainwrightba@gmail.com',
-      'administracion@clinicamedicacmg.net',
-      'luz_cmg@gmail.com','ana_cmg@gmail.com',
-      'doctor_rojascmg@gmail.com','doctor_hermescmg@gmail.com','doctor_alvarezcmg@gmail.com',
-      'expedientes.clinicamedicacmg@gmail.com'
-    ];
-    var staffBtn = $id('mh-staff-portal-btn');
-    if (staffBtn && STAFF_EMAILS.indexOf((user.email || '').toLowerCase()) !== -1) {
-      staffBtn.style.display = 'flex';
-    }
+    cmgStaff.checkStaff(user, function (ok) {
+      var staffBtn = $id('mh-staff-portal-btn');
+      if (staffBtn && ok) staffBtn.style.display = 'flex';
+    });
     cargarPerfilUsuario();
   });
 

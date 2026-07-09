@@ -263,10 +263,10 @@ body { margin: 0; background: #0F172A; color: #E2E8F0; font-family: 'Segoe UI', 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
 
 <script>
 (function () {
-  var ADMIN_EMAILS = ['ventasymercadeocmg@gmail.com', 'rubenwainwrightba@gmail.com', 'skarleth.admoncmg@gmail.com', 'administracion@clinicamedicacmg.net'];
   var COLECCIONES = ['expedientes','consultas','resultadosPruebas','examenesLaboratorio','quotations','d365solicitudes','users'];
   var STORAGE_PATHS = ['expedientes','examenes-laboratorio'];
 
@@ -286,13 +286,15 @@ body { margin: 0; background: #0F172A; color: #E2E8F0; font-family: 'Segoe UI', 
       window.location.href = 'Auth.html?returnTo=Admin-Reset.html';
       return;
     }
-    if (ADMIN_EMAILS.indexOf(user.email) === -1) {
-      $id('ar-blocked').style.display = '';
-      $id('ar-main').style.display = 'none';
-      return;
-    }
-    $id('ar-main').style.display = '';
-    refrescarContadores();
+    cmgStaff.checkAdmin(user, function (ok) {
+      if (!ok) {
+        $id('ar-blocked').style.display = '';
+        $id('ar-main').style.display = 'none';
+        return;
+      }
+      $id('ar-main').style.display = '';
+      refrescarContadores();
+    });
   });
 
   /* ── Contadores ── */

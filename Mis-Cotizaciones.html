@@ -496,6 +496,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
 
 <script>
 (function () {
@@ -554,12 +555,13 @@
     var nn = $id('cmg-nav-name');  if (nn) nn.textContent = name;
 
     /* Mostrar botones de admin si corresponde */
-    if (['ventasymercadeocmg@gmail.com','rubenwainwrightba@gmail.com','skarleth.admoncmg@gmail.com','administracion@clinicamedicacmg.net'].indexOf(user.email) !== -1) {
+    cmgStaff.checkAdmin(user, function (ok) {
+      if (!ok) return;
       var adminNav  = $id('cmg-nav-admin');
       var adminHero = $id('mc-admin-hero-btn');
       if (adminNav)  adminNav.style.display  = 'inline-flex';
       if (adminHero) adminHero.style.display = 'inline-flex';
-    }
+    });
 
     /* Mostrar botón Portal Médico si es doctor autorizado */
     var DOCTOR_EMAILS = ['expedientes.clinicamedicacmg@gmail.com','rubenwainwrightba@gmail.com','ventasymercadeocmg@gmail.com','doctor_rojascmg@gmail.com','doctor_hermescmg@gmail.com','doctor_alvarezcmg@gmail.com','skarleth.admoncmg@gmail.com'];

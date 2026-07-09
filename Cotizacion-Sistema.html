@@ -12,6 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
 
 <style>
 /* ============================================================
@@ -1793,10 +1794,11 @@ if (typeof cmgAuth !== 'undefined') {
       if (link) link.href = 'Mis-Cotizaciones.html';
       if (name) name.textContent = displayName;
       /* Admin pill */
-      if (['ventasymercadeocmg@gmail.com','rubenwainwrightba@gmail.com','skarleth.admoncmg@gmail.com','administracion@clinicamedicacmg.net'].indexOf(user.email) !== -1) {
+      cmgStaff.checkAdmin(user, function (ok) {
+        if (!ok) return;
         var adminPill = document.getElementById('cmg-nav-admin');
         if (adminPill) adminPill.style.display = 'inline-flex';
-      }
+      });
       /* Auto-guardar cotización pendiente tras login */
       if (window._cmgAutoSave) {
         window._cmgAutoSave = false;

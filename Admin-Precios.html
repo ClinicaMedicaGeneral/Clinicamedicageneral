@@ -144,6 +144,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
 </head>
 <body>
 
@@ -182,8 +183,6 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
 
 <script>
 (function () {
-  var ADMIN_EMAILS = ['ventasymercadeocmg@gmail.com', 'rubenwainwrightba@gmail.com', 'skarleth.admoncmg@gmail.com', 'administracion@clinicamedicacmg.net'];
-  function isAdmin(email) { return ADMIN_EMAILS.indexOf(email) !== -1; }
 
   var DEFAULT_PCT = 15;
   /* Descuento Doctor 365 por defecto, según categoría:
@@ -215,9 +214,11 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
   /* ── Auth ── */
   cmgAuth.onAuthStateChanged(function (user) {
     if (!user) { window.location.href = 'Auth.html?returnTo=Admin-Precios.html'; return; }
-    if (!isAdmin(user.email)) { window.location.href = 'Inicio.html'; return; }
-    $('ap-user-email').textContent = user.email;
-    boot();
+    cmgStaff.checkAdmin(user, function (ok) {
+      if (!ok) { window.location.href = 'Inicio.html'; return; }
+      $('ap-user-email').textContent = user.email;
+      boot();
+    });
   });
   $('ap-logout').addEventListener('click', function (e) {
     e.preventDefault();

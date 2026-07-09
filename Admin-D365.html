@@ -420,11 +420,10 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
 
 <script>
 (function () {
-  var ADMIN_EMAILS = ['ventasymercadeocmg@gmail.com', 'rubenwainwrightba@gmail.com', 'skarleth.admoncmg@gmail.com', 'administracion@clinicamedicacmg.net'];
-  function isAdmin(email) { return ADMIN_EMAILS.indexOf(email) !== -1; }
   var allMembers  = [];
 
   /* ── Toast ── */
@@ -458,12 +457,11 @@
       window.location.href = 'Auth.html?returnTo=Admin-D365.html';
       return;
     }
-    if (!isAdmin(user.email)) {
-      window.location.href = 'Inicio.html';
-      return;
-    }
-    document.getElementById('adm-user-email').textContent = user.email;
-    loadMembers();
+    cmgStaff.checkAdmin(user, function (ok) {
+      if (!ok) { window.location.href = 'Inicio.html'; return; }
+      document.getElementById('adm-user-email').textContent = user.email;
+      loadMembers();
+    });
   });
 
   /* ── Logout ── */

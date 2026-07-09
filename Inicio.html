@@ -918,22 +918,16 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
 <script>
 (function () {
-  var STAFF_EMAILS = [
-    'ventasymercadeocmg@gmail.com','skarleth.admoncmg@gmail.com','rubenwainwrightba@gmail.com',
-    'administracion@clinicamedicacmg.net',
-    'luz_cmg@gmail.com','ana_cmg@gmail.com',
-    'doctor_rojascmg@gmail.com','doctor_hermescmg@gmail.com','doctor_alvarezcmg@gmail.com',
-    'expedientes.clinicamedicacmg@gmail.com'
-  ];
   cmgAuth.onAuthStateChanged(function (user) {
     if (!user) return;
-    var email = (user.email || '').toLowerCase();
-    if (STAFF_EMAILS.indexOf(email) !== -1) {
+    cmgStaff.checkStaff(user, function (ok) {
+      if (!ok) return;
       var btn = document.getElementById('staff-portal-btn');
       if (btn) { btn.style.display = 'flex'; }
-    }
+    });
   });
 })();
 </script>

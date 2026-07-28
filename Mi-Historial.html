@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -1230,7 +1230,7 @@
         var consultas = [];
         snap.forEach(function (doc) {
           var data = doc.data();
-          /* ocultar pre-clínicas pendientes; servicios sí aparecen (pendientes o completados) */
+          /* ocultar Pre clínicas pendientes; servicios sí aparecen (pendientes o completados) */
           if (data.status === 'preclinica') return;
           /* ocultar consultas incompletas/vacías: documentos creados pero nunca
              finalizados por un médico (sin motivo ni diagnóstico). Los servicios

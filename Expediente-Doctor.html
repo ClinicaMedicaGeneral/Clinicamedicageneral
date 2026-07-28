@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -488,7 +488,7 @@ button.ed-consulta-link {
   line-height: 1.45;
 }
 
-/* ── Pre-clínicas pendientes ── */
+/* ── Pre clínicas pendientes ── */
 .ed-pending-item {
   background: #FFFBEB;
   border-left: 4px solid #F59E0B;
@@ -2533,7 +2533,7 @@ button.ed-consulta-link {
   }
 
   /* ════════════════════════════════════════════════════════════
-     CONSULTA - Flujo en 2 etapas (Pre-clínica → Consulta médica)
+     CONSULTA - Flujo en 2 etapas (Pre clínica → Consulta médica)
      ════════════════════════════════════════════════════════════ */
   var consultaPendienteCargada = null; /* id + datos de la preclínica que se está continuando */
 
@@ -2563,7 +2563,7 @@ button.ed-consulta-link {
         '<button class="ed-mode-card" id="btn-modo-preclinica"' + (pacienteActual ? '' : ' disabled style="opacity:.45;cursor:not-allowed"') + '>' +
           '<div class="ed-mode-icon">🩺</div>' +
           '<div>' +
-            '<p class="ed-mode-title">Etapa 1 · Pre-clínica</p>' +
+            '<p class="ed-mode-title">Etapa 1 · Pre clínica</p>' +
             '<p class="ed-mode-desc">' + (pacienteActual ? 'Registrar signos vitales del paciente seleccionado.' : 'Primero busca un paciente en la pestaña "Buscar".') + '</p>' +
           '</div>' +
         '</button>' +
@@ -2585,7 +2585,7 @@ button.ed-consulta-link {
 
     /* Lista de pendientes */
     html +=
-      '<div class="ed-section-title">⏳ Pendientes (pre-clínicas y servicios)</div>' +
+      '<div class="ed-section-title">⏳ Pendientes (Pre clínicas y servicios)</div>' +
       '<div id="preclinicas-pendientes-lista">' +
         '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
       '</div>';
@@ -2600,7 +2600,7 @@ button.ed-consulta-link {
     cargarPreclinicasPendientes();
   }
 
-  /* ─── Cargar pendientes (pre-clínica + servicio) ─── */
+  /* ─── Cargar pendientes (Pre clínica + servicio) ─── */
   function cargarPreclinicasPendientes() {
     var lista = $id('preclinicas-pendientes-lista');
     if (!lista) return;
@@ -2633,7 +2633,7 @@ button.ed-consulta-link {
           }
           var badge = esServicio
             ? '<span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">🛎️ Servicio</span>'
-            : '<span style="background:#dbeafe;color:#1e3a8a;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">🩺 Pre-clínica</span>';
+            : '<span style="background:#dbeafe;color:#1e3a8a;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">🩺 Pre clínica</span>';
           var infoExtra = esServicio
             ? '<div class="ed-pending-vitals">🛎️ ' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>'
             : (chips.length ? '<div class="ed-pending-vitals">' + chips.join(' · ') + '</div>' : '');
@@ -2672,7 +2672,7 @@ button.ed-consulta-link {
       '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
       '<div class="ed-patient-summary">' +
         '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
-        '<p class="ed-patient-meta">Etapa 1 · Pre-clínica</p></div>' +
+        '<p class="ed-patient-meta">Etapa 1 · Pre clínica</p></div>' +
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
       '<div class="ed-section-title">📊 Signos vitales</div>' +
@@ -2710,11 +2710,11 @@ button.ed-consulta-link {
         '</div>' +
       '</div>' +
       '<div class="ed-section">' +
-        '<div class="ed-fgroup full"><label class="ed-label">Notas de pre-clínica (opcional)</label>' +
+        '<div class="ed-fgroup full"><label class="ed-label">Notas de Pre clínica (opcional)</label>' +
           '<textarea class="ed-textarea" id="cons-notas-pre" rows="2" placeholder="Observaciones relevantes para el médico"></textarea></div>' +
       '</div>' +
       '<div class="ed-actions">' +
-        '<button class="ed-btn ed-btn-primary" id="btn-guardar-preclinica">💾 Guardar pre-clínica</button>' +
+        '<button class="ed-btn ed-btn-primary" id="btn-guardar-preclinica">💾 Guardar Pre clínica</button>' +
       '</div>';
 
     $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
@@ -2743,7 +2743,7 @@ button.ed-consulta-link {
     });
   }
 
-  /* ─── Guardar pre-clínica (crea consulta con status:'preclinica') ─── */
+  /* ─── Guardar Pre clínica (crea consulta con status:'preclinica') ─── */
   function guardarPreclinica() {
     if (!pacienteActual) return;
     var dg = pacienteActual.datosGenerales || {};
@@ -2791,11 +2791,11 @@ button.ed-consulta-link {
       pdfUrl: null
     };
 
-    showOverlay('Guardando pre-clínica...');
+    showOverlay('Guardando Pre clínica...');
     cmgDb.collection('consultas').add(docData)
       .then(function () {
         hideOverlay();
-        showAlert('✓ Pre-clínica guardada. El médico podrá continuar la consulta.', 'success');
+        showAlert('✓ Pre clínica guardada. El médico podrá continuar la consulta.', 'success');
         renderConsultaTab();
       })
       .catch(function (err) {
@@ -3124,7 +3124,7 @@ button.ed-consulta-link {
       '</div>' +
 
       '<div class="ed-vitals-readonly">' +
-        '<div class="ed-vitals-readonly-title">📊 Signos vitales (pre-clínica · ' + fmtDate(pre.fechaPreclinica) + ' · por ' + esc(pre.preclinicaPor || '—') + ')</div>' +
+        '<div class="ed-vitals-readonly-title">📊 Signos vitales (Pre clínica · ' + fmtDate(pre.fechaPreclinica) + ' · por ' + esc(pre.preclinicaPor || '—') + ')</div>' +
         (chips.length ? '<div class="ed-vitals-chips">' + chips.join('') + '</div>' : '<div style="font-size:13px;color:#6B7280">Sin signos vitales registrados</div>') +
         (pre.notasPreclinica ? '<div style="margin-top:8px;font-size:12px;color:#374151"><strong>Notas:</strong> ' + esc(pre.notasPreclinica) + '</div>' : '') +
         (pre.pruebaSensibilidad && pre.pruebaSensibilidad.realizada ? '<div style="margin-top:8px;font-size:12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:8px"><strong>🧪 Prueba de sensibilidad:</strong> ' + esc(pre.pruebaSensibilidad.medicamento) + ' → <strong>' + esc(pre.pruebaSensibilidad.resultado) + '</strong>' + (pre.pruebaSensibilidad.observaciones ? ' · ' + esc(pre.pruebaSensibilidad.observaciones) : '') + '</div>' : '') +
@@ -3532,7 +3532,7 @@ button.ed-consulta-link {
     };
   }
 
-  /* ─── Finalizar consulta (actualiza pre-clínica → pendiente_caja) ─── */
+  /* ─── Finalizar consulta (actualiza Pre clínica → pendiente_caja) ─── */
   function guardarConsulta() {
     if (!pacienteActual || !consultaPendienteCargada) return;
 
@@ -3909,7 +3909,7 @@ button.ed-consulta-link {
 
     $id('btn-gen-word').addEventListener('click', generarWordExpediente);
 
-    /* Cargar consultas (solo completas, excluye pre-clínicas pendientes) */
+    /* Cargar consultas (solo completas, excluye Pre clínicas pendientes) */
     cmgDb.collection('consultas')
       .where('codigoPaciente', '==', p.codigoPaciente)
       .get()
@@ -3917,7 +3917,7 @@ button.ed-consulta-link {
         var consultas = [];
         snap.forEach(function (doc) {
           var data = doc.data();
-          /* omitir solo pre-clínicas pendientes; servicios (pendientes y completos) sí aparecen */
+          /* omitir solo Pre clínicas pendientes; servicios (pendientes y completos) sí aparecen */
           if (data.status === 'preclinica') return;
           consultas.push(Object.assign({ _id: doc.id }, data));
         });

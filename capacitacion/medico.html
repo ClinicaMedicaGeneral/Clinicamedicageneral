@@ -532,28 +532,34 @@
         <div class="step-card">
           <div class="step-card-header"><span class="step-n">1</span><h3>Pestaña Historial</h3></div>
           <div class="step-card-body">
-            <p>Haz clic en la pestaña <strong>Historial</strong> dentro del expediente. Verás una lista de todas las consultas anteriores del paciente en CMG, ordenadas de más reciente a más antigua. Cada entrada muestra:</p>
+            <p><strong>Historial</strong> no está dentro del expediente — es una pestaña más del sistema, al mismo nivel que Buscar, Consulta o Laboratorio. Para usarla necesitas tener un paciente ya seleccionado:</p>
             <ul class="checklist">
-              <li>Fecha y médico que atendió.</li>
-              <li>Diagnóstico registrado (CIE-10 o texto libre).</li>
-              <li>Botón para ver la nota completa de esa consulta.</li>
+              <li>Búscalo en la pestaña <strong>Buscar</strong> y, en su tarjeta de resultado, haz clic en <strong>"📂 Ver historial"</strong> — te lleva directo a la pestaña con ese paciente ya cargado.</li>
+              <li>O cambia manualmente a la pestaña <strong>Historial</strong>: si no hay ningún paciente seleccionado todavía, te pedirá buscarlo primero en Buscar.</li>
+            </ul>
+            <p>Ahí verás la lista de sus consultas y servicios anteriores (no incluye Pre clínicas sin completar), de más reciente a más antigua. Cada entrada muestra:</p>
+            <ul class="checklist">
+              <li>Fecha, y una etiqueta si es un servicio (completado o pendiente).</li>
+              <li>Motivo de consulta o nombre del servicio, y el diagnóstico si corresponde.</li>
+              <li>Receta externa y notas, si se registraron.</li>
+              <li>Enlace <strong>"📄 Ver PDF"</strong> para abrir la nota completa de esa consulta.</li>
             </ul>
           </div>
         </div>
         <div class="step-card">
           <div class="step-card-header"><span class="step-n">2</span><h3>Pestaña Laboratorio</h3></div>
           <div class="step-card-body">
-            <p>Haz clic en la pestaña <strong>Laboratorio</strong>. Aparecen todos los resultados disponibles del paciente, ordenados por fecha de realización. Haz clic en cualquier resultado para ver el detalle completo con los valores de referencia.</p>
+            <p>Igual que Historial, <strong>Laboratorio</strong> es una pestaña del sistema y también necesita un paciente seleccionado para mostrar sus exámenes. Debajo del buscador verás la sección <strong>"Exámenes confirmados de [paciente]"</strong>: cada fila es un PDF subido por el proveedor o por el propio paciente, vinculado automáticamente por su número de identidad, con tipo de examen, fecha y proveedor. Haz clic en <strong>"📄 Ver PDF"</strong> para abrir el resultado completo.</p>
             <div class="callout tip">
               <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div><strong>Solo ves los resultados de exámenes realizados en CMG.</strong><p>Si el paciente trae resultados de otro laboratorio, puedes anotarlos en las notas de consulta pero no aparecerán en esta pestaña.</p></div>
+              <div><strong>El sistema no muestra valores de referencia estructurados.</strong><p>Solo abre el PDF tal como lo subió el proveedor. Si el paciente trae resultados de otro laboratorio, puedes anotarlos en las notas de consulta, pero no aparecerán en esta pestaña.</p></div>
             </div>
           </div>
         </div>
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">3</span><h3>Resultados pendientes</h3></div>
+          <div class="step-card-header"><span class="step-n">3</span><h3>Órdenes pendientes de laboratorio</h3></div>
           <div class="step-card-body">
-            <p>Los exámenes solicitados que aún no tienen resultado aparecen con el estado <strong>"Pendiente"</strong> en color amarillo. Cuando laboratorio cargue el resultado, cambiará automáticamente a <strong>"Disponible"</strong> y podrás verlo en esta misma pestaña.</p>
+            <p>Arriba de los exámenes confirmados hay una sección <strong>"⏳ Órdenes pendientes / procesando"</strong> que es global: muestra las órdenes de <strong>todos los pacientes</strong>, no solo la del paciente que tienes seleccionado, con la etiqueta <strong>"Pendiente"</strong> (amarillo) o <strong>"Procesando"</strong> (azul). Cuando se sube el PDF del resultado y se confirma, la orden desaparece de esa lista global y pasa a la sección de exámenes confirmados del paciente correspondiente.</p>
           </div>
         </div>
       </div>

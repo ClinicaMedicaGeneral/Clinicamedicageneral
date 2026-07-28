@@ -205,19 +205,45 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="../firebase-init.js"></script>
 <script>
 (function () {
-  var GLOBAL  = ['ventasymercadeocmg@gmail.com', 'skarleth.admoncmg@gmail.com', 'rubenwainwrightba@gmail.com'];
-  var CAJA_ENF = ['luz_cmg@gmail.com', 'ana_cmg@gmail.com'];
-  var MEDICO  = ['doctor_rojascmg@gmail.com', 'doctor_hermescmg@gmail.com', 'doctor_alvarezcmg@gmail.com'];
+  // Cuentas bootstrap: siempre admin, sin depender de un doc en Firestore.
+  var ADMIN_EMAILS = [
+    'rubenwainwrightba@gmail.com',
+    'ventasymercadeocmg@gmail.com',
+    'skarleth.admoncmg@gmail.com',
+    'administracion@clinicamedicacmg.net'
+  ];
 
-  function canCaja(e)  { return GLOBAL.indexOf(e) !== -1 || CAJA_ENF.indexOf(e) !== -1; }
-  function canMedico(e){ return GLOBAL.indexOf(e) !== -1 || MEDICO.indexOf(e)   !== -1; }
-  function canAdmin(e) { return GLOBAL.indexOf(e) !== -1; }
-  function hasAnyAccess(e) { return canCaja(e) || canMedico(e); }
+  // Matriz de acceso por rol (mismo valor que /usuarios/{uid}.rol):
+  //   caja, enf  → módulo Caja + módulo Caja · Enfermería
+  //   medico     → solo módulo Médico
+  //   admin      → todos los módulos
+  var ACCESS = {
+    caja:   { caja: true,  admin: false, enf: true,  medico: false },
+    enf:    { caja: true,  admin: false, enf: true,  medico: false },
+    medico: { caja: false, admin: false, enf: false, medico: true  },
+    admin:  { caja: true,  admin: true,  enf: true,  medico: true  }
+  };
 
   function hide(id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; }
+
+  function applyAccess(rol) {
+    var perms = ACCESS[rol];
+    if (!perms) { window.location.href = '../Inicio.html'; return; }
+
+    if (!perms.caja)   hide('mod-caja');
+    if (!perms.admin)  hide('mod-admin');
+    if (!perms.enf)    hide('mod-enf');
+    if (!perms.medico) hide('mod-medico');
+
+    var recepcionVisible = perms.caja || perms.admin;
+    var consultorioVisible = perms.enf || perms.medico;
+    if (!recepcionVisible)   { hide('grp-recepcion'); hide('mods-recepcion'); }
+    if (!consultorioVisible) { hide('grp-consultorio'); hide('mods-consultorio'); }
+  }
 
   cmgAuth.onAuthStateChanged(function (user) {
     if (!user) {
@@ -225,22 +251,15 @@
       return;
     }
     var email = (user.email || '').toLowerCase();
-    if (!hasAnyAccess(email)) {
-      window.location.href = '../Inicio.html';
-      return;
-    }
+    if (ADMIN_EMAILS.indexOf(email) !== -1) { applyAccess('admin'); return; }
 
-    // Ocultar módulos sin acceso
-    if (!canCaja(email))   hide('mod-caja');
-    if (!canAdmin(email))  hide('mod-admin');
-    if (!canMedico(email)) hide('mod-enf');
-    if (!canMedico(email)) hide('mod-medico');
-
-    // Ocultar grupos vacíos
-    var recepcionVisible = canCaja(email) || canAdmin(email);
-    var consultorioVisible = canMedico(email);
-    if (!recepcionVisible) { hide('grp-recepcion'); hide('mods-recepcion'); }
-    if (!consultorioVisible) { hide('grp-consultorio'); hide('mods-consultorio'); }
+    cmgDb.collection('usuarios').doc(user.uid).get()
+      .then(function (doc) {
+        var rol = (doc.exists && doc.data().estado === 'activo') ? doc.data().rol : null;
+        if (!rol) { window.location.href = '../Inicio.html'; return; }
+        applyAccess(rol);
+      })
+      .catch(function () { window.location.href = '../Inicio.html'; });
   });
 })();
 </script>

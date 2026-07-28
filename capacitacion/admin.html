@@ -116,6 +116,16 @@
   .step-card-body p { font-size: 14px; line-height: 1.65; color: var(--neutral-600); margin: 0 0 12px; }
   .step-card-body p:last-child { margin-bottom: 0; }
 
+  .screen-ref {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; background: var(--neutral-100);
+    color: var(--cmg-navy); border: 1px solid var(--neutral-200);
+    padding: 5px 12px; border-radius: var(--r-pill); margin: 6px 0 14px;
+    text-decoration: none; transition: background .15s, border-color .15s;
+  }
+  .screen-ref:hover { background: var(--neutral-200); }
+  .screen-ref svg { color: var(--cmg-teal); }
+
   /* ── Callouts ── */
   .callout { display: flex; gap: 12px; padding: 13px 15px; border-radius: 8px; font-size: 13px; line-height: 1.55; }
   .callout-icon { flex-shrink: 0; margin-top: 1px; }
@@ -272,7 +282,12 @@
         <div class="step-card">
           <div class="step-card-header"><span class="step-n">1</span><h3>Acceso al panel</h3></div>
           <div class="step-card-body">
-            <p>Ve a <strong>clinicamedicacmg.net</strong>, haz clic en <strong>"Acceso al equipo"</strong> e ingresa con tu correo y contraseña de administrador. Al entrar verás el panel de administración, que es distinto al portal de caja o consultorio.</p>
+            <p>Ve a la siguiente dirección:</p>
+            <a class="screen-ref" href="../Auth.html" target="_blank">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+              Acceso y Navegación en el módulo de administrador
+            </a>
+            <p>Haz clic en <strong>"Acceso al equipo"</strong> e ingresa con tu correo y contraseña de administrador. Al entrar verás el panel de administración, que es distinto al portal de caja o consultorio.</p>
             <div class="callout alert">
               <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               <div><strong>El acceso de administrador es el de mayor privilegio del sistema.</strong><p>Con él puedes cambiar precios, crear o eliminar usuarios, y modificar el catálogo completo. Nunca compartas estas credenciales. Si sospechas que alguien más las tiene, cámbialas de inmediato.</p></div>

@@ -155,36 +155,35 @@
   .checklist li { display: flex; gap: 10px; font-size: 14px; color: var(--neutral-600); line-height: 1.4; align-items: flex-start; }
   .checklist li::before { content: ''; width: 18px; height: 18px; border: 2px solid var(--neutral-300); border-radius: 4px; flex-shrink: 0; margin-top: 1px; }
 
-  /* Expediente mockup */
-  .expediente-card {
-    background: var(--cmg-navy); border-radius: 10px; overflow: hidden;
-    margin: 12px 0; border: 1px solid rgba(255,255,255,.06);
+  /* Mockups de Buscar / Historial (fieles a Expediente-Doctor.html) */
+  .pat-card {
+    background: linear-gradient(90deg, #FDD22C 0%, #FFE070 100%); border-radius: 12px;
+    padding: 16px 20px; margin: 12px 0; display: flex; align-items: center;
+    justify-content: space-between; gap: 14px; flex-wrap: wrap;
   }
-  .exp-header {
-    display: flex; align-items: center; gap: 16px;
-    padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,.08);
+  .pat-card-name { font-size: 15px; font-weight: 900; color: #213C7D; margin: 0; }
+  .pat-card-meta { font-size: 12px; color: rgba(33,60,125,.7); margin-top: 3px; }
+  .pat-card-code {
+    background: #213C7D; color: #FDD22C; padding: 7px 14px; border-radius: 8px;
+    font-family: 'Courier New', monospace; font-weight: 700; font-size: 13px; letter-spacing: 2px;
   }
-  .exp-avatar {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: #E07070; display: flex; align-items: center;
-    justify-content: center; font-family: var(--font-display);
-    font-size: 16px; font-weight: 900; color: var(--white); flex-shrink: 0;
+  .pat-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 14px; }
+  .pat-btn {
+    display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px;
+    border-radius: 8px; font-size: 12px; font-weight: 700; border: none;
   }
-  .exp-name { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--white); }
-  .exp-sub  { font-size: 11px; color: rgba(255,255,255,.45); margin-top: 2px; }
-  .exp-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,.08); }
-  .exp-tab {
-    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-    padding: 10px 16px; color: rgba(255,255,255,.4); border-bottom: 2px solid transparent;
-    cursor: pointer;
+  .pat-btn-primary { background: #213C7D; color: #fff; }
+  .pat-btn-yellow  { background: #FDD22C; color: #213C7D; }
+  .pat-btn-ghost   { background: #fff; color: #213C7D; border: 1.5px solid var(--neutral-200); }
+  .pat-mock-panel {
+    background: #fff; border: 1px solid var(--neutral-200); border-radius: 12px;
+    padding: 18px 20px; margin: 12px 0; box-shadow: 0 2px 12px rgba(33,60,125,.06);
   }
-  .exp-tab.active { color: #E07070; border-bottom-color: #E07070; }
-  .exp-body { padding: 14px 18px; }
-  .exp-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 13px; }
-  .exp-row:last-child { border-bottom: none; }
-  .exp-row-label { color: rgba(255,255,255,.4); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
-  .exp-row-value { color: var(--white); }
-  .vital-alert { color: #FF8080; font-weight: 700; }
+  .pat-mock-title { font-size: 15px; font-weight: 800; color: #213C7D; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+  .pat-mock-subtitle { font-size: 12px; color: #6B7280; margin: 0 0 14px; }
+  .pat-empty { text-align: center; padding: 26px 16px; color: #9CA3AF; }
+  .pat-empty-icon { font-size: 34px; margin-bottom: 8px; display: block; }
+  .pat-empty p { margin: 0; font-size: 13px; }
 
   /* Notas clínicas */
   .notas-box {
@@ -403,52 +402,69 @@
     <div class="lesson-panel" id="lesson-3">
       <div class="lesson-header">
         <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 03</span></div>
-        <h2>Abrir el expediente clínico</h2>
-        <p>Estructura del expediente, cómo navegar entre secciones y qué muestra cada pestaña.</p>
+        <h2>Buscar y abrir el expediente del paciente</h2>
+        <p>Cómo encontrar a un paciente y qué hace cada acceso una vez que lo seleccionas.</p>
         <div class="lesson-meta">
           <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~15 minutos</span>
         </div>
       </div>
       <div class="lesson-body">
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">1</span><h3>Estructura del expediente</h3></div>
+          <div class="step-card-header"><span class="step-n">1</span><h3>Buscar al paciente</h3></div>
           <div class="step-card-body">
-            <p>El expediente tiene cuatro pestañas principales. Así se ve en pantalla:</p>
-            <div class="expediente-card">
-              <div class="exp-header">
-                <div class="exp-avatar">MR</div>
-                <div>
-                  <div class="exp-name">María Rodríguez López</div>
-                  <div class="exp-sub">DNI 0801-1985-12345 · 38 años · F · Exp. #00247</div>
-                </div>
+            <p>Ve a la tab <strong>Buscar</strong>. Elige el criterio — <strong>Código CMG</strong>, <strong>N° de identidad</strong> o <strong>Fecha de nacimiento</strong> — escribe el valor y haz clic en <strong>Buscar</strong>. Si hay un solo resultado se selecciona directo; si hay varios (por ejemplo buscando por fecha de nacimiento), elige el correcto de la lista.</p>
+            <p>Al seleccionarlo aparece esta tarjeta con datos rápidos y accesos directos:</p>
+            <div class="pat-card">
+              <div>
+                <p class="pat-card-name">Ruben Ernesto Wainwright Aviles</p>
+                <p class="pat-card-meta">38 años · Masculino · 📞 9999-9999</p>
               </div>
-              <div class="exp-tabs">
-                <div class="exp-tab active">Pre clínica</div>
-                <div class="exp-tab">Historial</div>
-                <div class="exp-tab">Laboratorio</div>
-                <div class="exp-tab">Notas</div>
-              </div>
-              <div class="exp-body">
-                <div class="exp-row"><span class="exp-row-label">Presión arterial</span><span class="exp-row-value vital-alert">148 / 94 mmHg ▲</span></div>
-                <div class="exp-row"><span class="exp-row-label">Frec. cardíaca</span><span class="exp-row-value">88 lpm</span></div>
-                <div class="exp-row"><span class="exp-row-label">Temperatura</span><span class="exp-row-value">37.1 °C</span></div>
-                <div class="exp-row"><span class="exp-row-label">Saturación O₂</span><span class="exp-row-value">96%</span></div>
-                <div class="exp-row"><span class="exp-row-label">Peso / Talla / IMC</span><span class="exp-row-value">72 kg · 1.60 m · 28.1</span></div>
-                <div class="exp-row"><span class="exp-row-label">Motivo</span><span class="exp-row-value">"Dolor de cabeza desde ayer, mareada"</span></div>
-              </div>
+              <div class="pat-card-code">CMG-37E7Z5</div>
             </div>
-            <p style="margin-top:4px">El valor de presión en rojo ya viene marcado por el sistema cuando está fuera del rango normal.</p>
+            <div class="pat-actions">
+              <span class="pat-btn pat-btn-primary">✏️ Editar expediente</span>
+              <span class="pat-btn pat-btn-yellow">📝 Nueva consulta</span>
+              <span class="pat-btn pat-btn-ghost">📂 Ver historial</span>
+              <span class="pat-btn pat-btn-ghost">🔬 Solicitar exámenes</span>
+            </div>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>No hay una sola pantalla de "expediente".</strong><p>Cada botón te lleva a una pestaña distinta del sistema — no existe una vista única con signos vitales, historial, laboratorio y notas juntos.</p></div>
+            </div>
           </div>
         </div>
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">2</span><h3>Qué contiene cada pestaña</h3></div>
+          <div class="step-card-header"><span class="step-n">2</span><h3>Qué hace cada acceso</h3></div>
           <div class="step-card-body">
             <ul class="checklist">
-              <li><strong>Pre clínica</strong> — signos vitales del día, ingresados por enfermería.</li>
-              <li><strong>Historial</strong> — consultas anteriores con sus notas y diagnósticos.</li>
-              <li><strong>Laboratorio</strong> — resultados de exámenes, ordenados por fecha.</li>
-              <li><strong>Notas</strong> — formulario para escribir la nota de la consulta actual.</li>
+              <li><strong>✏️ Editar expediente</strong> — abre la tab Editar: datos generales del paciente (nombre, identidad, contacto, alergias, antecedentes). Aquí no se registran signos vitales.</li>
+              <li><strong>📝 Nueva consulta</strong> — abre la tab Consulta, la sección de Pendientes que viste en la lección 2.</li>
+              <li><strong>📂 Ver historial</strong> — abre la tab Historial con las consultas anteriores del paciente.</li>
+              <li><strong>🔬 Solicitar exámenes</strong> — abre directo el formulario para pedir exámenes de laboratorio (lo verás en la lección 7).</li>
             </ul>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Historial y copia en Word</h3></div>
+          <div class="step-card-body">
+            <p>Dentro de <strong>Historial</strong> encontrarás la tarjeta del paciente, un botón <strong>"Generar Word del expediente principal"</strong> para descargar una copia completa en Word, y debajo la lista de consultas anteriores:</p>
+            <div class="pat-mock-panel">
+              <p class="pat-mock-title">📂 Ver historial del paciente</p>
+              <p class="pat-mock-subtitle">Primero busca un paciente. Aquí verás todas sus consultas previas en orden cronológico.</p>
+              <div class="pat-card">
+                <div>
+                  <p class="pat-card-name">Ruben Ernesto Wainwright Aviles</p>
+                  <p class="pat-card-meta">Historial completo de consultas</p>
+                </div>
+                <div class="pat-card-code">CMG-37E7Z5</div>
+              </div>
+              <div class="pat-actions"><span class="pat-btn pat-btn-yellow">📄 Generar Word del expediente principal</span></div>
+              <div class="pat-empty">
+                <span class="pat-empty-icon">📋</span>
+                <p>Aún no hay consultas registradas para este paciente.</p>
+              </div>
+            </div>
+            <p style="margin-top:4px">"Generar Word" no abre el expediente en el sistema — descarga un archivo aparte, útil para imprimir o entregar en papel. Si el paciente ya tiene consultas cerradas, aparecerán listadas en vez del aviso vacío.</p>
           </div>
         </div>
       </div>

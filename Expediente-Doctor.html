@@ -2403,11 +2403,14 @@ button.ed-consulta-link {
         '<button class="ed-btn ed-btn-primary" data-goto="editar">✏️ Editar expediente</button>' +
         '<button class="ed-btn ed-btn-yellow" data-goto="consulta">📝 Nueva consulta</button>' +
         '<button class="ed-btn ed-btn-ghost" data-goto="historial">📂 Ver historial</button>' +
+        '<button class="ed-btn ed-btn-ghost" id="btn-solicitar-examenes-buscar">🔬 Solicitar exámenes</button>' +
       '</div>';
 
     document.querySelectorAll('#buscar-resultado [data-goto]').forEach(function (btn) {
       btn.addEventListener('click', function () { switchTab(btn.dataset.goto); });
     });
+    var btnExBuscar = $id('btn-solicitar-examenes-buscar');
+    if (btnExBuscar) btnExBuscar.addEventListener('click', function () { abrirSolicitudExamenesModal(null); });
   }
 
   /* ════════════════════════════════════════════════════════════

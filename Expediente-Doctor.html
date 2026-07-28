@@ -3150,6 +3150,10 @@ button.ed-consulta-link {
               buildMedsCatsHtml(MEDS_VISITA_CATS) +
               '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se aplicó ningún medicamento en la visita)</label>' +
             '</div></div>' +
+          '<div class="ed-fgroup full" id="cons-sens-wrap" style="display:none;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:12px">' +
+            '<label class="ed-label">🧪 Resultado de la prueba de sensibilidad *</label>' +
+            '<input type="text" class="ed-input" id="cons-sens-resultado" placeholder="Ej. Reactiva / No reactiva">' +
+          '</div>' +
           '<div class="ed-fgroup full"><label class="ed-label">📦 Medicamentos de despacho *</label>' +
             '<div id="cons-meds-despacho-list" class="ed-meds-list" data-meds-group="despacho">' +
               buildMedsCatsHtml(MEDS_DESPACHO_CATS) +
@@ -3191,6 +3195,20 @@ button.ed-consulta-link {
               '<textarea class="ed-textarea" id="incap-obs" rows="2" placeholder="Restricciones, recomendaciones laborales, etc."></textarea></div>' +
           '</div>' +
           '<div style="font-size:11px;color:#92400E;margin-top:6px">El formato sigue la plantilla "FORMATO DE CONSTANCIA (NO CAMBIAR)".</div>' +
+        '</div>' +
+      '</div>' +
+      /* Sala de Emergencia: sección habilitada por checkbox con elementos de uso en horas */
+      '<div class="ed-section" id="cons-emergencia-section">' +
+        '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="cons-emergencia-check"> 🚨 Sala de Emergencia</label>' +
+        '<div id="cons-emergencia-form" style="display:none;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:12px;margin-top:8px">' +
+          '<div class="ed-grid ed-grid-2">' +
+            '<div class="ed-fgroup"><label class="ed-label">Uso de sala de emergencia (horas)</label>' +
+              '<input type="text" class="ed-input" id="emerg-sala-horas" placeholder="Ej. 2 horas"></div>' +
+            '<div class="ed-fgroup"><label class="ed-label">Utilización del monitor de signos vitales (horas)</label>' +
+              '<input type="text" class="ed-input" id="emerg-monitor-horas" placeholder="Ej. 1.5 horas"></div>' +
+            '<div class="ed-fgroup"><label class="ed-label">Utilización de tanque de oxígeno (horas)</label>' +
+              '<input type="text" class="ed-input" id="emerg-oxigeno-horas" placeholder="Ej. 3 horas"></div>' +
+          '</div>' +
         '</div>' +
       '</div>' +
       /* DRM v3 #3: acciones rápidas desde la consulta */
@@ -3236,6 +3254,21 @@ button.ed-consulta-link {
         if (form) form.style.display = (this.value === 'si') ? 'block' : 'none';
       });
     });
+
+    /* Toggle del formulario de Sala de Emergencia */
+    $id('cons-emergencia-check').addEventListener('change', function(){
+      $id('cons-emergencia-form').style.display = this.checked ? 'block' : 'none';
+    });
+
+    /* Toggle del campo de resultado de prueba de sensibilidad cuando se marca ese medicamento */
+    function toggleSensResultado(){
+      var checked = document.querySelector('#cons-meds-visita-list input[type=checkbox][value="Prueba de sensibilidad"]:checked');
+      var wrap = $id('cons-sens-wrap');
+      if (wrap) wrap.style.display = checked ? 'block' : 'none';
+    }
+    var consMedsVisitaList = $id('cons-meds-visita-list');
+    if (consMedsVisitaList) consMedsVisitaList.addEventListener('change', toggleSensResultado);
+    toggleSensResultado();
 
     /* DRM v3.6: exclusión mutua "Ninguno" vs medicamentos reales en cada grupo */
     ['cons-meds-visita-list', 'cons-meds-despacho-list'].forEach(function(listId){
@@ -3578,6 +3611,23 @@ button.ed-consulta-link {
     if (!grupoTieneEleccion('cons-meds-visita-list'))   faltantes.push('Medicamentos aplicados en la visita (marca alguno o "Ninguno")');
     if (!grupoTieneEleccion('cons-meds-despacho-list')) faltantes.push('Medicamentos de despacho (marca alguno o "Ninguno")');
 
+    /* Resultado de prueba de sensibilidad (solo si se marcó ese medicamento) */
+    var sensAplicada = medsVisita.indexOf('Prueba de sensibilidad') !== -1;
+    var sensResultado = $val('cons-sens-resultado');
+    if (sensAplicada && !sensResultado) faltantes.push('Resultado de la prueba de sensibilidad');
+
+    /* Sala de Emergencia (opcional, habilitada por checkbox) */
+    var emergenciaCheck = $id('cons-emergencia-check');
+    var salaEmergencia = null;
+    if (emergenciaCheck && emergenciaCheck.checked) {
+      salaEmergencia = {
+        activa       : true,
+        salaHoras    : $val('emerg-sala-horas'),
+        monitorHoras : $val('emerg-monitor-horas'),
+        oxigenoHoras : $val('emerg-oxigeno-horas')
+      };
+    }
+
     /* DRM Fun-11 v2: incapacidad → constancia como documento HTML aparte */
     var incapRadio = document.querySelector('input[name="cons-incap"]:checked');
     var necesitaIncap = incapRadio && incapRadio.value === 'si';
@@ -3623,6 +3673,8 @@ button.ed-consulta-link {
       medicamentosVisita  : medsVisita,
       medicamentosDespacho: medsDespacho,
       recetaExterna: recetaExterna,
+      resultadoPruebaSensibilidad: sensAplicada ? sensResultado : null,
+      salaEmergencia: salaEmergencia,
       indicaciones: indicaciones,
       proximaCita: proxCita,
       /* DRM Fun-11 v2: ya no embebemos la constancia en la consulta, flag y referencia */
@@ -3841,6 +3893,17 @@ button.ed-consulta-link {
     if (consulta.pruebaSensibilidad && consulta.pruebaSensibilidad.realizada) {
       var ps = consulta.pruebaSensibilidad;
       bloque('PRUEBA DE SENSIBILIDAD', ps.medicamento + ' → ' + ps.resultado + (ps.observaciones ? '. ' + ps.observaciones : ''));
+    }
+    if (consulta.resultadoPruebaSensibilidad) {
+      bloque('RESULTADO PRUEBA DE SENSIBILIDAD (CONSULTA)', consulta.resultadoPruebaSensibilidad);
+    }
+    if (consulta.salaEmergencia && consulta.salaEmergencia.activa) {
+      var se = consulta.salaEmergencia;
+      var seLineas = [];
+      if (se.salaHoras)    seLineas.push('Uso de sala de emergencia: ' + se.salaHoras);
+      if (se.monitorHoras) seLineas.push('Monitor de signos vitales: ' + se.monitorHoras);
+      if (se.oxigenoHoras) seLineas.push('Tanque de oxígeno: ' + se.oxigenoHoras);
+      bloque('SALA DE EMERGENCIA', seLineas.length ? seLineas.join('\n') : 'Se utilizó la sala de emergencia.');
     }
     if (!consulta.medicamentosVisita && !consulta.medicamentosDespacho && consulta.tratamiento) {
       bloque('PLAN / TRATAMIENTO', consulta.tratamiento);

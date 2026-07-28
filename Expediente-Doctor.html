@@ -1638,6 +1638,14 @@ button.ed-consulta-link {
           var recetaExt = (d.recetaExterna && d.recetaExterna.trim()) ? d.recetaExterna : '';
           var ps = d.pruebaSensibilidadServicio;
           var requiereSens = !!(ps && ps.requerida);
+          var resultadoSensConsulta = (d.resultadoPruebaSensibilidad && d.resultadoPruebaSensibilidad.trim()) ? d.resultadoPruebaSensibilidad : '';
+          var se = d.salaEmergencia;
+          var tieneEmergencia = !!(se && se.activa);
+          var emergenciaItems = tieneEmergencia ? [
+            se.salaHoras    ? '<li>Uso de sala de emergencia: <b>' + esc(se.salaHoras) + '</b></li>' : '',
+            se.monitorHoras ? '<li>Monitor de signos vitales: <b>' + esc(se.monitorHoras) + '</b></li>' : '',
+            se.oxigenoHoras ? '<li>Tanque de oxígeno: <b>' + esc(se.oxigenoHoras) + '</b></li>' : ''
+          ].filter(Boolean).join('') : '';
           var esLabStandalone      = d.tipoRegistro === 'lab-standalone';
           var esPruebaStandalone   = d.tipoRegistro === 'prueba-standalone';
           var esServicioStandalone = d.tipoRegistro === 'servicio-standalone' || (!d.diagnostico && d.servicioNombre && !esLabStandalone && !esPruebaStandalone);
@@ -1670,6 +1678,8 @@ button.ed-consulta-link {
                 '<div><b>🩺 Servicios:</b><br>' + esc(servicios) + '</div>' +
               '</div>' +
               (recetaExt ? '<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px;font-size:13px"><b>🏥 Receta externa (comprar en farmacia):</b><br>' + esc(recetaExt) + '</div>' : '') +
+              (resultadoSensConsulta ? '<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px;font-size:13px"><b>🧪 Resultado prueba de sensibilidad:</b> ' + esc(resultadoSensConsulta) + '</div>' : '') +
+              (tieneEmergencia ? '<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:10px;font-size:13px"><b style="color:#991B1B">🚨 Sala de Emergencia:</b>' + (emergenciaItems ? '<ul style="margin:6px 0 0 18px;padding:0">' + emergenciaItems + '</ul>' : ' se utilizó (sin horas detalladas)') + '</div>' : '') +
               (requiereSens ? '<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:10px;font-size:13px">' +
                 '<b style="color:#991B1B">🧪 Inyección IM/IV, Prueba de sensibilidad:</b> ' + esc(ps.resultado) + ' · confirmada por ' + esc(ps.confirmadaPor || '—') +
                 '<label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-weight:700;color:#991B1B;cursor:pointer"><input type="checkbox" class="caja-sens-chk" data-sens-for="' + doc.id + '"' + (ps.cajaConfirmada ? ' checked disabled' : '') + '> Verifiqué la prueba de sensibilidad antes de liquidar</label>' +
@@ -3109,14 +3119,21 @@ button.ed-consulta-link {
         'Otan'
       ] }
     ];
-    function buildMedsCatsHtml(cats) {
+    function buildMedsCatsHtml(cats, extraAfterTitle) {
       return cats.map(function (c) {
-        return '<div class="ed-meds-cat">' + c.titulo + '</div>' +
+        var html = '<div class="ed-meds-cat">' + c.titulo + '</div>' +
           c.items.map(function (m) {
             return '<label class="ed-meds-opt"><input type="checkbox" value="' + esc(m) + '"> ' + esc(m) + '</label>';
           }).join('');
+        if (extraAfterTitle && c.titulo === extraAfterTitle.titulo) html += extraAfterTitle.html;
+        return html;
       }).join('');
     }
+    var SENS_RESULTADO_HTML =
+      '<div class="ed-fgroup full" id="cons-sens-wrap" style="display:none;grid-column:1/-1;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:12px;margin:2px 0 6px">' +
+        '<label class="ed-label">🧪 Resultado de la prueba de sensibilidad *</label>' +
+        '<input type="text" class="ed-input" id="cons-sens-resultado" placeholder="Ej. Reactiva / No reactiva">' +
+      '</div>';
 
     cont.innerHTML =
       '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
@@ -3147,13 +3164,9 @@ button.ed-consulta-link {
           /* DRM Fun-8 + v3.6: Plan/Tratamiento dividido + opción explícita "Ninguno" */
           '<div class="ed-fgroup full"><label class="ed-label">💊 Medicamentos aplicados en la visita *</label>' +
             '<div id="cons-meds-visita-list" class="ed-meds-list" data-meds-group="visita">' +
-              buildMedsCatsHtml(MEDS_VISITA_CATS) +
+              buildMedsCatsHtml(MEDS_VISITA_CATS, { titulo: '🧪 Prueba de sensibilidad', html: SENS_RESULTADO_HTML }) +
               '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se aplicó ningún medicamento en la visita)</label>' +
             '</div></div>' +
-          '<div class="ed-fgroup full" id="cons-sens-wrap" style="display:none;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:12px">' +
-            '<label class="ed-label">🧪 Resultado de la prueba de sensibilidad *</label>' +
-            '<input type="text" class="ed-input" id="cons-sens-resultado" placeholder="Ej. Reactiva / No reactiva">' +
-          '</div>' +
           '<div class="ed-fgroup full"><label class="ed-label">📦 Medicamentos de despacho *</label>' +
             '<div id="cons-meds-despacho-list" class="ed-meds-list" data-meds-group="despacho">' +
               buildMedsCatsHtml(MEDS_DESPACHO_CATS) +

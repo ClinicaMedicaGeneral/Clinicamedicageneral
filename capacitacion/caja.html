@@ -1039,39 +1039,80 @@
 
         <div class="callout tip">
           <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <div><strong>El cobro se procesa en la plataforma externa.</strong><p>Al igual que en las consultas, el pago de laboratorio se registra en la plataforma de cobros externa. En CMG tu única acción es liquidar — y solo cuando el médico haya terminado de indicar todos los exámenes.</p></div>
+          <div><strong>Dos tipos de servicio, mismo flujo.</strong><p>Los <strong>estudios de laboratorio</strong> (exámenes de sangre, orina, heces, etc.) y las <strong>pruebas rápidas</strong> (antígenos, glucosa, embarazo, etc.) siguen el mismo proceso de cobro y liquidación. La diferencia es que las pruebas rápidas se realizan en el momento y no requieren envío a laboratorio externo.</p></div>
         </div>
 
         <div class="step-card">
           <div class="step-card-header">
             <span class="step-n">1</span>
-            <h3>Espera la orden completa del médico</h3>
+            <h3>Esperar la orden completa del médico</h3>
           </div>
           <div class="step-card-body">
-            <p>El médico debe haber concluido la indicación de todos los exámenes antes de que el paciente pase a caja. No proceses el cobro ni liquides hasta tener la orden completa.</p>
+            <p>El médico debe haber terminado de indicar <strong>todos</strong> los exámenes o pruebas desde su portal antes de que el paciente pase a caja. Si el médico aún está en consulta, pide al paciente que espere.</p>
+            <div class="callout warn">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>No proceses el cobro si la orden está incompleta.</strong><p>Si el médico agrega exámenes después de que ya cobraste, tendrás que hacer un cobro adicional y una segunda liquidación. Es mejor esperar a que la orden esté cerrada.</p></div>
+            </div>
           </div>
         </div>
 
         <div class="step-card">
           <div class="step-card-header">
             <span class="step-n">2</span>
-            <h3>Cobrar en la plataforma externa</h3>
+            <h3>Verificar los servicios en la tab Caja</h3>
           </div>
           <div class="step-card-body">
-            <p>Con la orden completa, procesa el pago de todos los exámenes en la plataforma de cobros externa. Confirma el monto total antes de continuar.</p>
+            <p>Ve a la tab <strong>Caja</strong> en el portal CMG. Ahí verás los estudios o pruebas pendientes de pago del paciente. Revisa que los servicios indicados correspondan a lo que el médico ordenó antes de cobrar.</p>
+            <ul class="checklist" style="margin-bottom:12px">
+              <li>Confirma el nombre del paciente y el tipo de examen.</li>
+              <li>Verifica el monto total que aparece en el sistema.</li>
+              <li>Si hay algún servicio que no corresponde, comunícalo al médico antes de continuar.</li>
+            </ul>
           </div>
         </div>
 
         <div class="step-card">
           <div class="step-card-header">
             <span class="step-n">3</span>
+            <h3>Cobrar en la plataforma externa</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Procesa el pago en la plataforma de cobros externa por el monto total de los exámenes. Acepta el método de pago del paciente (efectivo, tarjeta, etc.) y confirma la transacción.</p>
+            <ul class="checklist" style="margin-bottom:12px">
+              <li><strong>Efectivo</strong> — entrega el vuelto y registra el monto recibido.</li>
+              <li><strong>Tarjeta</strong> — espera la confirmación del POS antes de continuar.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">4</span>
             <h3>Liquidar en CMG</h3>
           </div>
           <div class="step-card-body">
-            <p>Con el pago confirmado, ve al expediente del paciente en CMG y haz clic en <strong>"Liquidar pago"</strong> para los estudios de laboratorio. Esto habilita al técnico para procesar los exámenes.</p>
-            <div class="callout warn">
-              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              <div><strong>Orden completa + cobro confirmado = liquidar.</strong><p>El laboratorio solo procesa exámenes marcados como liquidados. Nunca liquides antes de que el médico termine de indicar ni antes de confirmar el cobro en la plataforma externa.</p></div>
+            <p>Con el cobro confirmado, regresa a la tab <strong>Caja</strong> en CMG y haz clic en <strong>"Liquidar pago"</strong>. Esto marca los exámenes como pagados y habilita al técnico de laboratorio para procesarlos.</p>
+            <div class="callout tip" style="margin-top:14px">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>Pruebas de sensibilidad.</strong><p>Si el servicio incluye una prueba de sensibilidad (p. ej. inyectables), el sistema mostrará una casilla de verificación que debes marcar antes de poder liquidar. Confirma que la prueba de sensibilidad fue realizada antes de marcarla.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-card">
+          <div class="step-card-header">
+            <span class="step-n">5</span>
+            <h3>Indicar al paciente qué sigue</h3>
+          </div>
+          <div class="step-card-body">
+            <p>Una vez liquidado, informa al paciente a dónde debe dirigirse:</p>
+            <ul class="checklist" style="margin-bottom:12px">
+              <li><strong>Estudios de laboratorio</strong> — pasar al área de toma de muestras. El técnico ya puede ver la orden en su sistema.</li>
+              <li><strong>Pruebas rápidas</strong> — esperar en sala o pasar directamente con el técnico según las indicaciones de la clínica.</li>
+            </ul>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>El técnico solo ve exámenes liquidados.</strong><p>Si el técnico dice que no aparece la orden del paciente, verifica en CMG que el pago haya sido liquidado correctamente.</p></div>
             </div>
           </div>
         </div>

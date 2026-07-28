@@ -120,6 +120,29 @@
   .screen-ref:hover { background: var(--neutral-200); }
   .screen-ref svg { color: var(--cmg-teal); }
 
+  /* Mockup de la sección Pendientes (Expediente-Doctor) */
+  .pend-mock-title {
+    font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--cmg-navy); display: flex; align-items: center; gap: 8px; margin: 4px 0 12px;
+  }
+  .pend-mock-title::before { content: ''; width: 4px; height: 16px; background: #FDD22C; border-radius: 2px; }
+  .pend-mock-item {
+    background: #FFFBEB; border-left: 4px solid #F59E0B; border-radius: 8px;
+    padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; flex-wrap: wrap; margin: 0 0 10px;
+  }
+  .pend-mock-name { font-size: 14px; font-weight: 700; color: var(--cmg-navy); margin: 0 0 3px; }
+  .pend-mock-badge { background: #dbeafe; color: #1e3a8a; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 20px; margin-left: 6px; }
+  .pend-mock-code { font-weight: 500; color: #6B7280; }
+  .pend-mock-meta { font-size: 12px; color: #6B7280; margin: 0; }
+  .pend-mock-vitals { font-size: 12px; color: #92400E; margin-top: 4px; font-family: 'Courier New', monospace; }
+  .pend-mock-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 40px; padding: 0 18px; border: none; border-radius: 10px;
+    font-family: inherit; font-size: 13px; font-weight: 700; background: #FDD22C; color: var(--cmg-navy);
+    flex-shrink: 0;
+  }
+
   .callout { display: flex; gap: 12px; padding: 13px 15px; border-radius: 8px; font-size: 13px; line-height: 1.55; }
   .callout-icon { flex-shrink: 0; margin-top: 1px; }
   .callout strong { display: block; margin-bottom: 2px; font-size: 13px; }
@@ -319,34 +342,51 @@
     <div class="lesson-panel" id="lesson-2">
       <div class="lesson-header">
         <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 02</span></div>
-        <h2>Ver la lista de pacientes del día</h2>
-        <p>Consultar la tab Consulta, identificar quién está listo y manejar el orden de atención.</p>
+        <h2>Pendientes: pacientes listos para consulta</h2>
+        <p>Leer la sección de Pendientes en la tab Consulta e identificar qué tarjeta atender.</p>
         <div class="lesson-meta">
           <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~15 minutos</span>
         </div>
       </div>
       <div class="lesson-body">
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">1</span><h3>La pantalla de Mis pacientes hoy</h3></div>
+          <div class="step-card-header"><span class="step-n">1</span><h3>La sección de Pendientes</h3></div>
           <div class="step-card-body">
-            <p>Al entrar al sistema, ve a la tab <strong>Consulta</strong>. Ahí verás la lista de pacientes del día. Cada fila muestra el nombre del paciente, el motivo de consulta que ingresó enfermería y el estado actual.</p>
-            <p>La lista se actualiza en tiempo real — cuando enfermería completa el Pre clínica de un paciente, su estado cambia automáticamente sin que tengas que recargar la página.</p>
+            <p>Al entrar al sistema, ve a la tab <strong>Consulta</strong>. Debajo de las opciones de registro verás la sección <strong>"Pendientes (Pre clínicas y servicios)"</strong>: una tarjeta por cada paciente que enfermería o caja ya dejaron listo para que el médico continúe. Así se ve una tarjeta:</p>
+            <div class="pend-mock-title">⏳ Pendientes (Pre clínicas y servicios)</div>
+            <div class="pend-mock-item">
+              <div>
+                <p class="pend-mock-name">Ruben Ernesto Wainwright Aviles<span class="pend-mock-badge">🩺 Pre clínica</span> <span class="pend-mock-code">· CMG-37E7Z5</span></p>
+                <p class="pend-mock-meta">📅 28 de jul de 2026 · 04:32 p. m. · Registrado por Ruben Ernesto Wainwright Aviles</p>
+                <p class="pend-mock-vitals">TA 120/80 · FC 72 · T° 36.5 · SpO2 98%</p>
+              </div>
+              <button class="pend-mock-btn" type="button">Continuar →</button>
+            </div>
+            <p>La lista se actualiza sola, sin que tengas que recargar la página, y no hace falta abrir nada más para ver los signos vitales — ya vienen en la tarjeta.</p>
           </div>
         </div>
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">2</span><h3>Identificar a quién atender primero</h3></div>
+          <div class="step-card-header"><span class="step-n">2</span><h3>Los dos tipos de tarjeta</h3></div>
           <div class="step-card-body">
-            <p>Prioriza los pacientes con estado <strong style="color:var(--cmg-navy)">"Listo para médico"</strong> — son los que ya tienen Pre clínica completo. Un paciente en estado <strong>"En espera"</strong> todavía está con enfermería.</p>
+            <p>No todas las tarjetas son iguales. La etiqueta junto al nombre te dice qué tipo de pendiente es:</p>
+            <ul class="checklist">
+              <li><strong>🩺 Pre clínica</strong> (etiqueta azul) — enfermería ya tomó los signos vitales. Aquí es donde harás la consulta médica completa.</li>
+              <li><strong>🛎️ Servicio</strong> (etiqueta verde) — un servicio sin consulta médica (ej. curación, inyección) que alguien más registró y queda pendiente de completar. El botón dice <strong>"Completar →"</strong> en vez de "Continuar →".</li>
+            </ul>
             <div class="callout tip">
               <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div><strong>Puedes ver el Pre clínica sin abrir la consulta.</strong><p>Haz clic en el nombre del paciente para ver un resumen rápido de sus signos vitales antes de llamarlo al consultorio. Útil para prepararte si hay un valor fuera de rango.</p></div>
+              <div><strong>El orden no es una fila de espera.</strong><p>Las tarjetas se muestran de la más reciente a la más antigua, no hay estados de "en espera" — si aparece en Pendientes, ya está lista para que la atiendas. Revisa la fecha y hora de cada una para no dejar a nadie esperando de más.</p></div>
             </div>
           </div>
         </div>
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">3</span><h3>Llamar al paciente</h3></div>
+          <div class="step-card-header"><span class="step-n">3</span><h3>Continuar con el paciente</h3></div>
           <div class="step-card-body">
-            <p>Cuando estés listo para atender, haz clic en <strong>"Iniciar consulta"</strong> en la fila del paciente. Esto cambia su estado a <strong>"En consulta"</strong> y abre el expediente clínico completo. Enfermería verá el cambio en su pantalla también.</p>
+            <p>Cuando estés listo para atender, haz clic en <strong>"Continuar →"</strong> en la tarjeta de Pre clínica. Esto abre el formulario de consulta con los signos vitales ya cargados, listo para que escribas la nota.</p>
+            <div class="callout warn">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>La tarjeta no desaparece hasta cerrar la consulta.</strong><p>Si otro médico también hace clic en "Continuar" sobre el mismo paciente, verá el mismo registro. Coordina con el equipo para no atender dos veces al mismo paciente.</p></div>
+            </div>
           </div>
         </div>
       </div>

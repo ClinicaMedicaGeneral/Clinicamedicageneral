@@ -269,7 +269,7 @@
       <li><button class="lesson-nav-btn" data-lesson="4" type="button"><span class="nav-num">4</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07070" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Revisar Pre clínica</button></li>
       <li><button class="lesson-nav-btn" data-lesson="5" type="button"><span class="nav-num">5</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07070" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Historial y resultados de lab</button></li>
       <li><button class="lesson-nav-btn" data-lesson="6" type="button"><span class="nav-num">6</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07070" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Notas clínicas y diagnóstico</button></li>
-      <li><button class="lesson-nav-btn" data-lesson="7" type="button"><span class="nav-num">7</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07070" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Estudios, derivaciones y cierre</button></li>
+      <li><button class="lesson-nav-btn" data-lesson="7" type="button"><span class="nav-num">7</span><svg class="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07070" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>Estudios, constancias y cierre</button></li>
     </ul>
     <div class="progress-wrap">
       <div class="progress-label"><span>Progreso</span><span id="progress-text">0 / 7</span></div>
@@ -585,46 +585,69 @@
       <div class="lesson-body">
         <div class="callout alert">
           <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <div><strong>La nota queda firmada con tu nombre y número de colegiado.</strong><p>Una vez cerrada la consulta, la nota no puede editarse. Revisa bien antes de hacer clic en "Cerrar consulta".</p></div>
+          <div><strong>La nota se firma con tu nombre al finalizar, no antes.</strong><p>No hay un paso de "guardar borrador" y otro de "confirmar": todo el formulario se guarda de una sola vez cuando haces clic en "Finalizar consulta + Generar PDF" (lo verás en la lección 7). Revisa bien antes de hacer clic ahí.</p></div>
         </div>
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">1</span><h3>Abrir el formulario de notas</h3></div>
+          <div class="step-card-header"><span class="step-n">1</span><h3>Anamnesis, exploración y diagnóstico</h3></div>
           <div class="step-card-body">
-            <p>Dentro del expediente, haz clic en la pestaña <strong>Notas</strong>. El formulario tiene cuatro campos de texto libre y uno de diagnóstico estructurado.</p>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-card-header"><span class="step-n">2</span><h3>Completar la nota SOAP</h3></div>
-          <div class="step-card-body">
-            <p>El sistema organiza la nota en formato SOAP. Un ejemplo:</p>
-            <div class="notas-box">
-              <div class="notas-section">S — Subjetivo (lo que refiere el paciente)</div>
-              Paciente femenina de 38 años que consulta por cefalea frontal de 24h de evolución, asociada a mareo y visión borrosa. Niega trauma craneal. Refiere episodio similar hace 3 meses.
-              <br><br>
-              <div class="notas-section">O — Objetivo (examen físico)</div>
-              PA 148/94 mmHg. FC 88 lpm. T° 37.1°C. SpO₂ 96%. Orientada, sin déficit neurológico. Pupilas isocóricas reactivas. Rigidez de nuca negativa.
-              <br><br>
-              <div class="notas-section">A — Análisis (diagnóstico)</div>
-              HTA estadio 1, no conocida. Cefalea secundaria a HTA.
-              <br><br>
-              <div class="notas-section">P — Plan (indicaciones)</div>
-              Amlodipino 5mg VO cada 24h. Control en 7 días. Restricción de sal. Solicitar perfil lipídico y función renal.
+            <p>Al hacer clic en <strong>"Continuar →"</strong> sobre una tarjeta de Pre clínica (lección 2) se abre un único formulario largo — no hay una pestaña separada de "Notas" ni un formato SOAP con secciones S/O/A/P. Son cuatro campos de texto libre, todos obligatorios:</p>
+            <div class="screen-box">
+              <div><label>Motivo de consulta *</label><div class="fake-textarea">Cefalea frontal de 24h de evolución, asociada a mareo y visión borrosa.</div></div>
+              <div style="height:10px"></div>
+              <div><label>Padecimiento actual / Síntomas *</label><div class="fake-textarea">Niega trauma craneal. Refiere episodio similar hace 3 meses.</div></div>
+              <div style="height:10px"></div>
+              <div><label>Exploración física *</label><div class="fake-textarea">PA 148/94 mmHg. FC 88 lpm. T° 37.1°C. Orientada, sin déficit neurológico.</div></div>
+              <div style="height:10px"></div>
+              <div><label>Diagnóstico *</label><div class="fake-textarea">HTA estadio 1, no conocida. Cefalea secundaria a HTA.</div></div>
+            </div>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>El diagnóstico es texto libre.</strong><p>No hay buscador de códigos CIE-10 en el sistema — escribe el diagnóstico y los diferenciales en lenguaje natural, como en el ejemplo.</p></div>
             </div>
           </div>
         </div>
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">3</span><h3>Diagnóstico CIE-10</h3></div>
+          <div class="step-card-header"><span class="step-n">2</span><h3>Medicamentos aplicados y de despacho</h3></div>
           <div class="step-card-body">
-            <p>El campo de diagnóstico tiene búsqueda por código o descripción. Escribe <strong>"hipertensión"</strong> o <strong>"I10"</strong> y selecciona el código correcto de la lista. Puedes agregar diagnósticos secundarios si corresponde.</p>
+            <p>Debajo del diagnóstico hay dos listas con checkboxes agrupadas por categoría (Inyectable, Oral, Tópico, Gotas): una para lo que se aplicó durante la visita y otra para lo que se despacha al paciente. <strong>Ambas son obligatorias.</strong></p>
+            <ul class="checklist">
+              <li>💉 Inyectable — ej. Dexametasona 8mg, Diclofenaco 75mg…</li>
+              <li>💊 Oral — ej. Acetaminofén 500mg, Amoxicilina + Ác. Clavulónico…</li>
+              <li>🧴 Tópico — ej. Ketoconazol 2%, Sulfadiazina de Plata…</li>
+              <li>⛔ <strong>Ninguno</strong> — si no se aplicó/despachó nada en ese grupo</li>
+            </ul>
+            <div class="callout warn">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>"Ninguno" es excluyente.</strong><p>Si marcas un medicamento real, "Ninguno" se desmarca solo, y viceversa. El sistema no te deja finalizar la consulta si dejas alguna de las dos listas sin elegir nada.</p></div>
+            </div>
+            <p>También hay un campo opcional <strong>"🏥 Receta externa"</strong> — texto libre para medicamentos que el paciente debe comprar en una farmacia externa (CMG no los vende). Aparece en el PDF como indicación de compra externa.</p>
           </div>
         </div>
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">4</span><h3>Guardar borrador vs. confirmar</h3></div>
+          <div class="step-card-header"><span class="step-n">3</span><h3>Indicaciones y médico tratante</h3></div>
           <div class="step-card-body">
-            <p>Mientras escribes, el sistema guarda un <strong>borrador automático</strong> cada 60 segundos. Puedes salir y volver sin perder lo escrito. Cuando la nota esté completa, haz clic en <strong>"Guardar nota"</strong> para confirmarla — esto no cierra la consulta todavía.</p>
-            <div class="callout tip">
-              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div><strong>Guarda la nota antes de solicitar exámenes.</strong><p>Puedes volver al expediente a agregar solicitudes de laboratorio sin que la nota se pierda.</p></div>
+            <p>Para terminar el formulario principal:</p>
+            <div class="screen-box">
+              <div><label>Indicaciones al paciente *</label><div class="fake-textarea">Control en 7 días. Restricción de sal. Signos de alarma: visión borrosa persistente, dolor torácico.</div></div>
+              <div style="height:10px"></div>
+              <div class="field-row">
+                <div><label>Próxima cita</label><div class="fake-input">—</div></div>
+                <div><label>Médico tratante *</label><div class="fake-input">— Seleccionar —</div></div>
+              </div>
+            </div>
+            <div class="callout warn">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>"Médico tratante" no se llena solo con tu sesión.</strong><p>Es una lista fija con los médicos del consultorio (Doctor Rojas, Doctor Hermes, Doctor Álvarez). Selecciona tu propio nombre cada vez — si eliges otro por error, la nota y el PDF quedan firmados a nombre de ese médico.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">4</span><h3>No hay borrador automático</h3></div>
+          <div class="step-card-body">
+            <p>A diferencia de la sección de Pendientes (que se actualiza sola), este formulario <strong>no guarda nada mientras escribes</strong>.</p>
+            <div class="callout alert">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>Si sales antes de finalizar, se pierde lo escrito.</strong><p>El paciente sigue apareciendo en Pendientes con la etiqueta 🩺 Pre clínica, listo para retomarlo — pero el texto que ya habías escrito no se recupera. En la próxima lección verás cómo cerrar la consulta correctamente.</p></div>
             </div>
           </div>
         </div>
@@ -642,44 +665,69 @@
     <div class="lesson-panel" id="lesson-7">
       <div class="lesson-header">
         <div class="lesson-eyebrow"><span class="lesson-num-badge">Lección 07</span></div>
-        <h2>Solicitud de estudios, derivaciones y cierre</h2>
-        <p>Pedir exámenes, referir a otro especialista y cerrar la consulta correctamente.</p>
+        <h2>Estudios adicionales, constancias y cierre de consulta</h2>
+        <p>Pedir exámenes, generar constancias de incapacidad y finalizar la consulta correctamente.</p>
         <div class="lesson-meta">
           <span class="meta-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>~20 minutos</span>
         </div>
       </div>
       <div class="lesson-body">
         <div class="step-card">
-          <div class="step-card-header"><span class="step-n">1</span><h3>Solicitar exámenes de laboratorio</h3></div>
+          <div class="step-card-header"><span class="step-n">1</span><h3>Solicitar exámenes, pruebas rápidas y servicios</h3></div>
           <div class="step-card-body">
-            <p>En el expediente abierto, haz clic en <strong>"Solicitar exámenes"</strong>. Busca cada examen por nombre o siglas y agrégalos a la orden. Al confirmar, la orden queda en el sistema y el paciente debe pasar por <strong>caja a pagarlos</strong> antes de que laboratorio los procese.</p>
-            <p>Los exámenes solicitados aparecerán en la pestaña Laboratorio del expediente con estado <strong>"Pendiente"</strong>.</p>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-card-header"><span class="step-n">2</span><h3>Emitir una derivación</h3></div>
-          <div class="step-card-body">
-            <p>Si el paciente necesita atención con otro especialista, haz clic en <strong>"Nueva derivación"</strong>. Completa:</p>
-            <ul class="checklist" style="margin-bottom:14px">
-              <li><strong>Especialidad de destino</strong> — selecciona de la lista.</li>
-              <li><strong>Motivo de la derivación</strong> — texto libre, breve y claro.</li>
-              <li><strong>Prioridad</strong> — rutina, preferente o urgente.</li>
-            </ul>
-            <p>El documento de derivación queda registrado en el expediente y puede imprimirse para entregárselo al paciente.</p>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-card-header"><span class="step-n">3</span><h3>Cerrar la consulta</h3></div>
-          <div class="step-card-body">
-            <p>Cuando hayas completado la nota, el diagnóstico y todas las solicitudes, haz clic en <strong>"Cerrar consulta"</strong>. El sistema pedirá una confirmación. Al aceptar:</p>
-            <ul class="checklist" style="margin-bottom:14px">
-              <li>La nota queda firmada con tu nombre, número de colegiado y la hora exacta.</li>
-              <li>El estado del paciente en la tab Consulta cambia a <strong>"Atendido"</strong>.</li>
-              <li>Enfermería ve el cambio en tiempo real y puede preparar al siguiente paciente.</li>
+            <p>Debajo del formulario principal hay una sección <strong>"⚡ Acciones rápidas durante la consulta"</strong> — no reemplazan la nota, la complementan:</p>
+            <div class="pat-actions">
+              <span class="pat-btn pat-btn-ghost">🧪 Crear Prueba Rápida</span>
+              <span class="pat-btn pat-btn-ghost">🔬 Solicitar Exámenes</span>
+              <span class="pat-btn pat-btn-ghost">🛎️ Realizar servicio</span>
+            </div>
+            <ul class="checklist">
+              <li><strong>🔬 Solicitar Exámenes</strong> — abre el catálogo completo de laboratorio con buscador. Marca uno o varios, indica proveedor y prioridad (Rutina/Urgente) y confirma con "📤 Crear orden". Queda vinculada a esta consulta y aparece de inmediato en la pestaña Laboratorio (lección 5) con estado <strong>Pendiente</strong>; su cobro se agrupa con el de la visita en Caja.</li>
+              <li><strong>🧪 Crear Prueba Rápida</strong> — abre Pruebas Rápidas en una pestaña nueva, con el DNI y nombre del paciente ya prellenados.</li>
+              <li><strong>🛎️ Realizar servicio</strong> — crea un servicio adicional (ej. curación, inyección) vinculado a esta consulta, que queda pendiente de completar.</li>
             </ul>
             <div class="callout tip">
               <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <div><strong>¡Módulo completado!</strong><p>Conoces el flujo completo del médico en el sistema: desde revisar la tab Consulta hasta cerrar una consulta con nota firmada. Practica el flujo una vez con un expediente de prueba antes de operar de forma independiente.</p></div>
+              <div><strong>También puedes pedir exámenes sin consulta abierta.</strong><p>Desde Buscar (lección 3) o directo en la pestaña Laboratorio hay el mismo botón de solicitar exámenes; en ese caso sí genera un cargo independiente en Caja, en vez de agruparse con una consulta.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">2</span><h3>Constancia de incapacidad</h3></div>
+          <div class="step-card-body">
+            <p>Si el paciente necesita reposo, usa la sección <strong>"📄 ¿Necesita incapacidad?"</strong>, al final del formulario:</p>
+            <div class="screen-box">
+              <div style="display:flex;gap:14px;margin-bottom:10px">
+                <span style="font-size:12px;color:rgba(255,255,255,.5)">○ No</span>
+                <span style="font-size:12px;color:#FDD22C;font-weight:700">● Sí</span>
+              </div>
+              <div class="field-row">
+                <div><label>Días de incapacidad *</label><div class="fake-input">3</div></div>
+                <div><label>Desde *</label><div class="fake-input">28/07/2026</div></div>
+              </div>
+              <div><label>Motivo / Diagnóstico para la constancia *</label><div class="fake-textarea">Reposo por cuadro gripal agudo.</div></div>
+            </div>
+            <p>Al finalizar la consulta, esto genera una <strong>constancia aparte</strong> (documento independiente, no forma parte del PDF de la nota) que puede imprimirse para el paciente.</p>
+            <div class="callout warn">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>No existe un flujo de "derivación" a otro especialista.</strong><p>El sistema no tiene un formulario para referir pacientes. Si necesitas documentar que el paciente debe ver a otro especialista, escríbelo en Indicaciones (lección 6) — no hay un documento formal de referencia dentro del sistema.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-card">
+          <div class="step-card-header"><span class="step-n">3</span><h3>Finalizar la consulta</h3></div>
+          <div class="step-card-body">
+            <p>Cuando hayas completado todos los campos obligatorios, haz clic en:</p>
+            <div style="margin:14px 0"><span class="pend-mock-btn">💾 Finalizar consulta + Generar PDF</span></div>
+            <ul class="checklist" style="margin-bottom:14px">
+              <li>El sistema valida que no falte ningún campo obligatorio — si falta algo, te dice cuál antes de continuar.</li>
+              <li>Genera el PDF de la consulta y lo sube al expediente del paciente.</li>
+              <li>Si pediste incapacidad, crea la constancia como documento aparte.</li>
+              <li>El registro pasa de <strong>"Pre clínica"</strong> a <strong>"Pendiente de caja"</strong>: desaparece de Pendientes en la tab Consulta y aparece en la tab Caja para que se liquide el pago.</li>
+            </ul>
+            <div class="callout tip">
+              <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>¡Módulo completado!</strong><p>Conoces el flujo real del médico en el sistema: desde revisar la sección de Pendientes hasta finalizar una consulta con nota y PDF generados. Practica el flujo una vez con un expediente de prueba antes de operar de forma independiente.</p></div>
             </div>
           </div>
         </div>

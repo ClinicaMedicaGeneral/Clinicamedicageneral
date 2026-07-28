@@ -401,6 +401,10 @@
             <div class="mc-hero-email" id="mc-user-email">—</div>
           </div>
         </div>
+        <a id="mc-staff-portal-btn" href="capacitacion/index.html" style="display:none;background:#FDD22C;color:#213C7D;text-decoration:none;padding:8px 16px;border-radius:8px;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;align-items:center;gap:7px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Acceso al Equipo
+        </a>
         <button class="mc-logout-btn" id="mc-logout-btn">Cerrar sesión</button>
       </div>
     </div>
@@ -569,6 +573,12 @@
       var docBtn = $id('mc-doctor-btn');
       if (docBtn) docBtn.style.display = 'inline-flex';
     }
+
+    /* Mostrar botón Acceso al Equipo si es staff */
+    cmgStaff.checkStaff(user, function (ok) {
+      var staffBtn = $id('mc-staff-portal-btn');
+      if (staffBtn && ok) staffBtn.style.display = 'flex';
+    });
 
     /* Cargar cotizaciones */
     loadQuotes(user.uid);

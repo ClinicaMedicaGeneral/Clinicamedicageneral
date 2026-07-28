@@ -641,7 +641,7 @@
 })();
 </script>
 <script>
-  const TOTAL = 7;
+  const TOTAL = 6;
   const done = new Set(JSON.parse(localStorage.getItem('cmg-admin-done') || '[]'));
   let current = 1;
   function save() { localStorage.setItem('cmg-admin-done', JSON.stringify([...done])); }
@@ -663,7 +663,7 @@
     save();
     document.querySelector('[data-lesson="' + n + '"]').classList.add('is-done');
     updateProgress();
-    if (n === TOTAL && done.size === TOTAL) {
+    if (done.size >= TOTAL) {
       document.getElementById('completion-banner').classList.add('is-visible');
       document.getElementById('final-done-btn').disabled = true;
     }

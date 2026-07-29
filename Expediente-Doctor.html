@@ -1172,7 +1172,7 @@ button.ed-consulta-link {
             <h2 class="ed-card-title" style="margin-bottom:4px">🧪 Pruebas rápidas del paciente</h2>
             <p class="ed-card-subtitle" style="margin:0">Resultados vinculados automáticamente por número de identidad.</p>
           </div>
-          <a class="ed-btn ed-btn-yellow" href="Pruebas-Rapidas.html" target="_blank" rel="noopener">
+          <a class="ed-btn ed-btn-yellow" id="pruebas-nueva-link" href="Pruebas-Rapidas.html" target="_blank" rel="noopener">
             🧪 Registrar nueva prueba ↗
           </a>
         </div>
@@ -3139,6 +3139,87 @@ button.ed-consulta-link {
     toggle();
   }
 
+  /* ─── Constancia médica (incapacidad), compartida entre Consulta y Completar servicio ─── */
+  function buildIncapSectionHtml(prefix) {
+    return '<div class="ed-section" id="' + prefix + '-incap-section">' +
+      '<div class="ed-section-title">📄 ¿Necesita incapacidad?</div>' +
+      '<div style="display:flex;gap:12px;margin-bottom:8px">' +
+        '<label class="ed-meds-opt"><input type="radio" name="' + prefix + '-incap" value="no" checked> No</label>' +
+        '<label class="ed-meds-opt"><input type="radio" name="' + prefix + '-incap" value="si"> Sí</label>' +
+      '</div>' +
+      '<div id="' + prefix + '-incap-form" style="display:none;background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:12px;margin-top:8px">' +
+        '<div class="ed-grid ed-grid-2">' +
+          '<div class="ed-fgroup"><label class="ed-label">Días de incapacidad *</label>' +
+            '<input type="number" min="1" class="ed-input" id="' + prefix + '-incap-dias" placeholder="Ej. 3"></div>' +
+          '<div class="ed-fgroup"><label class="ed-label">Desde *</label>' +
+            '<input type="date" class="ed-input" id="' + prefix + '-incap-desde"></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Motivo / Diagnóstico para la constancia *</label>' +
+            '<textarea class="ed-textarea" id="' + prefix + '-incap-motivo" rows="2" placeholder="Texto que aparecerá en la constancia (ej. Reposo por cuadro gripal agudo)"></textarea></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Observaciones adicionales</label>' +
+            '<textarea class="ed-textarea" id="' + prefix + '-incap-obs" rows="2" placeholder="Restricciones, recomendaciones laborales, etc."></textarea></div>' +
+        '</div>' +
+        '<div style="font-size:11px;color:#92400E;margin-top:6px">El formato sigue la plantilla "FORMATO DE CONSTANCIA (NO CAMBIAR)".</div>' +
+      '</div>' +
+    '</div>';
+  }
+  function wireIncapToggle(prefix) {
+    document.querySelectorAll('input[name="' + prefix + '-incap"]').forEach(function (r) {
+      r.addEventListener('change', function () {
+        var form = $id(prefix + '-incap-form');
+        if (form) form.style.display = (this.value === 'si') ? 'block' : 'none';
+      });
+    });
+  }
+  /* Lee la respuesta de incapacidad y agrega los campos faltantes al arreglo dado */
+  function collectIncapData(prefix, faltantes) {
+    var radio = document.querySelector('input[name="' + prefix + '-incap"]:checked');
+    var necesita = !!(radio && radio.value === 'si');
+    var datos = null;
+    if (necesita) {
+      var dias = $val(prefix + '-incap-dias');
+      var desde = $val(prefix + '-incap-desde');
+      var motivo = $val(prefix + '-incap-motivo');
+      if (!dias)   faltantes.push('Días de incapacidad');
+      if (!desde)  faltantes.push('Fecha de inicio de incapacidad');
+      if (!motivo) faltantes.push('Motivo de la constancia');
+      datos = { dias: dias, desde: desde, motivo: motivo, observaciones: $val(prefix + '-incap-obs') };
+    }
+    return { necesita: necesita, datos: datos };
+  }
+  /* Arma un ref nuevo (id conocido de antemano) + los datos de la constancia, sin escribir todavía.
+     Así el caller puede incluir constanciaId en la MISMA escritura que guarda la consulta/servicio
+     (batch atómico) en vez de depender de un update() de seguimiento que Caja/Enfermería no
+     siempre tienen permiso de hacer una vez que el status del registro ya cambió. */
+  function prepararConstancia(consultaId, paciente, datosIncap, emitidaPor) {
+    var dg2 = (paciente && paciente.datosGenerales) || {};
+    var nowIso = new Date().toISOString();
+    var numero = 'CONS-' + nowIso.slice(0, 10).replace(/-/g, '') + '-' + Math.floor(Math.random() * 9000 + 1000);
+    var ref = cmgDb.collection('constancias').doc();
+    var data = {
+      numero: numero,
+      consultaId: consultaId,
+      codigoPaciente: paciente.codigoPaciente,
+      pacienteNombre: dg2.nombreCompleto || '',
+      pacienteTipoId: dg2.tipoIdentidad || '',
+      pacienteDNI: dg2.numeroIdentidad || '',
+      pacienteFechaNacimiento: dg2.fechaNacimiento || '',
+      pacienteEdad: (function (f) {
+        if (!f) return '';
+        try { var d = new Date(f), h = new Date(), e = h.getFullYear() - d.getFullYear(), m = h.getMonth() - d.getMonth(); if (m < 0 || (m === 0 && h.getDate() < d.getDate())) e--; return e + ' años'; } catch (_) { return ''; }
+      })(dg2.fechaNacimiento),
+      fechaConsulta: nowIso.slice(0, 10),
+      dias: datosIncap.dias,
+      desde: datosIncap.desde,
+      motivo: datosIncap.motivo,
+      observaciones: datosIncap.observaciones,
+      emitidaPor: emitidaPor,
+      emitidaPorEmail: cmgAuth.currentUser.email,
+      emitidaEn: nowIso,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    return { ref: ref, data: data };
+  }
+
   /* ─── Formulario para completar un servicio pendiente ─── */
   function renderCompletarServicioForm() {
     var cont = $id('consulta-contenido');
@@ -3179,6 +3260,7 @@ button.ed-consulta-link {
             '<textarea class="ed-textarea" id="serv-receta-externa" rows="3" placeholder="Medicamentos que el paciente debe comprar en una farmacia externa (no los vendemos). Indica nombre, dosis, vía y frecuencia."></textarea></div>' +
         '</div>' +
       '</div>' +
+      buildIncapSectionHtml('serv') +
       '<div class="ed-section">' +
         '<div class="ed-grid ed-grid-2">' +
           '<div class="ed-fgroup full"><label class="ed-label">Notas de finalización (opcional)</label>' +
@@ -3201,6 +3283,7 @@ button.ed-consulta-link {
 
     wireSensToggle('serv-meds-visita-list', 'serv-sens-wrap');
     ['serv-meds-visita-list', 'serv-meds-despacho-list'].forEach(wireMedsGroupNinguno);
+    wireIncapToggle('serv');
   }
 
   /* ─── Marcar servicio como completado (status:'servicio-completo') ─── */
@@ -3211,8 +3294,17 @@ button.ed-consulta-link {
     var esVinculado = !!consultaPendienteCargada.consultaPadreId;
     var convertidoConsulta = !!($id('serv-convertido-consulta') && $id('serv-convertido-consulta').checked);
     var medico = $val('serv-realizado-por');
-    if (!medico) { showAlert('Selecciona el médico tratante.', 'error'); return; }
+    var faltantes = [];
+    if (!medico) faltantes.push('Médico tratante');
+    var incap = collectIncapData('serv', faltantes);
+    if (faltantes.length) {
+      showAlert('Faltan campos obligatorios: ' + faltantes.join(', '), 'error');
+      return;
+    }
     var medsVisitaServ = collectChecked('serv-meds-visita-list');
+    var servicioId = consultaPendienteCargada._id;
+    /* Ref con id conocido de antemano para poder incluir constanciaId en el mismo batch */
+    var constanciaPrep = incap.necesita ? prepararConstancia(servicioId, pacienteActual, incap.datos, medico) : null;
     var updateData = {
       status: esVinculado ? 'servicio-completo' : 'pendiente_caja',
       tipoRegistro: esVinculado ? 'servicio-vinculado' : 'servicio-standalone',
@@ -3225,16 +3317,24 @@ button.ed-consulta-link {
       convertidoConsulta: convertidoConsulta,
       medicamentosVisita: medsVisitaServ,
       medicamentosDespacho: collectChecked('serv-meds-despacho-list'),
-      recetaExterna: $val('serv-receta-externa')
+      recetaExterna: $val('serv-receta-externa'),
+      tieneConstancia: incap.necesita,
+      constanciaId: constanciaPrep ? constanciaPrep.ref.id : null
     };
     if (medsVisitaServ.indexOf('Prueba de sensibilidad') !== -1) {
       updateData.resultadoPruebaSensibilidad = $val('serv-sens-resultado');
     }
     showOverlay('Completando servicio...');
-    cmgDb.collection('consultas').doc(consultaPendienteCargada._id).update(updateData)
+    var batch = cmgDb.batch();
+    batch.update(cmgDb.collection('consultas').doc(servicioId), updateData);
+    if (constanciaPrep) batch.set(constanciaPrep.ref, constanciaPrep.data);
+    batch.commit()
       .then(function () {
         hideOverlay();
-        if (esVinculado) {
+        if (constanciaPrep) {
+          showAlert('✓ Servicio completado. Abriendo constancia médica en otra pestaña…', 'success');
+          window.open('Constancia-Medica.html?id=' + encodeURIComponent(constanciaPrep.ref.id), '_blank', 'noopener');
+        } else if (esVinculado) {
           showAlert('✓ Servicio completado y vinculado al pago de la consulta padre.', 'success');
         } else {
           showAlert('✓ Servicio completado. Generó pendiente de pago en Caja.', 'success');
@@ -3350,26 +3450,7 @@ button.ed-consulta-link {
         '</div>' +
       '</div>' +
       /* DRM Fun-11: pregunta de incapacidad */
-      '<div class="ed-section" id="cons-incap-section">' +
-        '<div class="ed-section-title">📄 ¿Necesita incapacidad?</div>' +
-        '<div style="display:flex;gap:12px;margin-bottom:8px">' +
-          '<label class="ed-meds-opt"><input type="radio" name="cons-incap" value="no" checked> No</label>' +
-          '<label class="ed-meds-opt"><input type="radio" name="cons-incap" value="si"> Sí</label>' +
-        '</div>' +
-        '<div id="cons-incap-form" style="display:none;background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:12px;margin-top:8px">' +
-          '<div class="ed-grid ed-grid-2">' +
-            '<div class="ed-fgroup"><label class="ed-label">Días de incapacidad *</label>' +
-              '<input type="number" min="1" class="ed-input" id="incap-dias" placeholder="Ej. 3"></div>' +
-            '<div class="ed-fgroup"><label class="ed-label">Desde *</label>' +
-              '<input type="date" class="ed-input" id="incap-desde"></div>' +
-            '<div class="ed-fgroup full"><label class="ed-label">Motivo / Diagnóstico para la constancia *</label>' +
-              '<textarea class="ed-textarea" id="incap-motivo" rows="2" placeholder="Texto que aparecerá en la constancia (ej. Reposo por cuadro gripal agudo)"></textarea></div>' +
-            '<div class="ed-fgroup full"><label class="ed-label">Observaciones adicionales</label>' +
-              '<textarea class="ed-textarea" id="incap-obs" rows="2" placeholder="Restricciones, recomendaciones laborales, etc."></textarea></div>' +
-          '</div>' +
-          '<div style="font-size:11px;color:#92400E;margin-top:6px">El formato sigue la plantilla "FORMATO DE CONSTANCIA (NO CAMBIAR)".</div>' +
-        '</div>' +
-      '</div>' +
+      buildIncapSectionHtml('cons') +
       /* Área de Estabilización: sección habilitada por checkbox con elementos de uso en horas */
       '<div class="ed-section" id="cons-emergencia-section">' +
         '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="cons-emergencia-check"> 🚨 Área de Estabilización</label>' +
@@ -3422,12 +3503,7 @@ button.ed-consulta-link {
     });
 
     /* DRM Fun-11: toggle del formulario de incapacidad */
-    document.querySelectorAll('input[name="cons-incap"]').forEach(function(r){
-      r.addEventListener('change', function(){
-        var form = $id('cons-incap-form');
-        if (form) form.style.display = (this.value === 'si') ? 'block' : 'none';
-      });
-    });
+    wireIncapToggle('cons');
 
     /* Toggle del formulario de Área de Estabilización */
     $id('cons-emergencia-check').addEventListener('change', function(){
@@ -3766,35 +3842,24 @@ button.ed-consulta-link {
     }
 
     /* DRM Fun-11 v2: incapacidad → constancia como documento HTML aparte */
-    var incapRadio = document.querySelector('input[name="cons-incap"]:checked');
-    var necesitaIncap = incapRadio && incapRadio.value === 'si';
-    var datosIncap = null;
-    if (necesitaIncap) {
-      var dias   = $val('incap-dias');
-      var desde  = $val('incap-desde');
-      var motivoIncap = $val('incap-motivo');
-      if (!dias)        faltantes.push('Días de incapacidad');
-      if (!desde)       faltantes.push('Fecha de inicio de incapacidad');
-      if (!motivoIncap) faltantes.push('Motivo de la constancia');
-      datosIncap = {
-        dias        : dias,
-        desde       : desde,
-        motivo      : motivoIncap,
-        observaciones: $val('incap-obs')
-      };
-    }
+    var incap = collectIncapData('cons', faltantes);
+    var necesitaIncap = incap.necesita;
+    var datosIncap = incap.datos;
 
     if (faltantes.length) {
       showAlert('Faltan campos obligatorios: ' + faltantes.join(', '), 'error');
       return;
     }
 
+    var preId = consultaPendienteCargada._id;
+    /* Ref con id conocido de antemano para poder incluir constanciaId en el mismo batch */
+    var constanciaPrep = necesitaIncap ? prepararConstancia(preId, pacienteActual, datosIncap, medico) : null;
+
     /* Compatibilidad: campo tratamiento legado = resumen de medicamentos */
     var tratamientoResumen =
       (medsVisita.length   ? 'Se le aplicó: ' + medsVisita.join(', ') + '. ' : '') +
       (medsDespacho.length ? 'Medicamentos de despacho: ' + medsDespacho.join(', ') + '.' : '');
 
-    var preId = consultaPendienteCargada._id;
     var consulta = Object.assign({}, consultaPendienteCargada, {
       /* DRM Fun-9: pasa a pendiente_caja en vez de completa */
       status: 'pendiente_caja',
@@ -3816,7 +3881,7 @@ button.ed-consulta-link {
       proximaCita: proxCita,
       /* DRM Fun-11 v2: ya no embebemos la constancia en la consulta, flag y referencia */
       tieneConstancia: necesitaIncap,
-      constanciaId: null
+      constanciaId: constanciaPrep ? constanciaPrep.ref.id : null
     });
     delete consulta._id;
 
@@ -3841,47 +3906,17 @@ button.ed-consulta-link {
       .then(function (url) {
         consulta.pdfUrl = url;
         consulta.storagePath = storagePath;
-        /* Paso 3: Actualizar documento existente */
-        return cmgDb.collection('consultas').doc(preId).update(consulta);
+        /* Paso 3: Actualizar documento existente + crear constancia (si aplica) en un solo batch atómico */
+        var batch = cmgDb.batch();
+        batch.update(cmgDb.collection('consultas').doc(preId), consulta);
+        if (constanciaPrep) batch.set(constanciaPrep.ref, constanciaPrep.data);
+        return batch.commit();
       })
       .then(function () {
-        /* DRM Fun-11 v2: si pidió constancia, crear documento aparte */
-        if (!necesitaIncap || !datosIncap) return null;
-        var dg2 = (pacienteActual && pacienteActual.datosGenerales) || {};
-        var nowIso = new Date().toISOString();
-        var numero = 'CONS-' + nowIso.slice(0,10).replace(/-/g,'') + '-' + Math.floor(Math.random()*9000+1000);
-        return cmgDb.collection('constancias').add({
-          numero            : numero,
-          consultaId        : preId,
-          codigoPaciente    : pacienteActual.codigoPaciente,
-          pacienteNombre    : dg2.nombreCompleto || '',
-          pacienteTipoId    : dg2.tipoIdentidad || '',
-          pacienteDNI       : dg2.numeroIdentidad || '',
-          pacienteFechaNacimiento: dg2.fechaNacimiento || '',
-          pacienteEdad      : (function(f){
-            if (!f) return '';
-            try { var d=new Date(f), h=new Date(), e=h.getFullYear()-d.getFullYear(), m=h.getMonth()-d.getMonth(); if (m<0||(m===0&&h.getDate()<d.getDate())) e--; return e+' años'; } catch(_){ return ''; }
-          })(dg2.fechaNacimiento),
-          fechaConsulta     : nowIso.slice(0,10),
-          dias              : datosIncap.dias,
-          desde             : datosIncap.desde,
-          motivo            : datosIncap.motivo,
-          observaciones     : datosIncap.observaciones,
-          emitidaPor        : medico,
-          emitidaPorEmail   : cmgAuth.currentUser.email,
-          emitidaEn         : nowIso,
-          createdAt         : firebase.firestore.FieldValue.serverTimestamp()
-        }).then(function(ref){
-          /* Vincular el id de la constancia a la consulta */
-          return cmgDb.collection('consultas').doc(preId).update({ constanciaId: ref.id })
-            .then(function(){ return ref.id; });
-        });
-      })
-      .then(function (constanciaId) {
         hideOverlay();
-        if (constanciaId) {
+        if (constanciaPrep) {
           showAlert('✓ Consulta finalizada. Abriendo constancia médica en otra pestaña…', 'success');
-          window.open('Constancia-Medica.html?id=' + encodeURIComponent(constanciaId), '_blank', 'noopener');
+          window.open('Constancia-Medica.html?id=' + encodeURIComponent(constanciaPrep.ref.id), '_blank', 'noopener');
         } else {
           showAlert('✓ Consulta finalizada exitosamente. PDF generado.', 'success');
         }
@@ -4306,6 +4341,14 @@ button.ed-consulta-link {
     var p = pacienteActual;
     var dg = p.datosGenerales || {};
     var dniNormalizado = (dg.numeroIdentidad || '').replace(/\D/g, '');
+
+    /* DRM v3 #3: pre-llenar Pruebas-Rapidas con los datos del paciente ya seleccionado */
+    var nuevaLink = $id('pruebas-nueva-link');
+    if (nuevaLink) {
+      nuevaLink.href = 'Pruebas-Rapidas.html?dni=' + encodeURIComponent(dg.numeroIdentidad || '') +
+        '&nombre=' + encodeURIComponent(dg.nombreCompleto || '') +
+        '&fechanac=' + encodeURIComponent(dg.fechaNacimiento || '');
+    }
 
     cont.innerHTML =
       '<div class="ed-patient-summary">' +

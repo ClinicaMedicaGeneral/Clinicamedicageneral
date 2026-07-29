@@ -1303,6 +1303,7 @@ button.ed-consulta-link {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
 
 <!-- jsPDF para generar PDF de consultas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1314,17 +1315,9 @@ button.ed-consulta-link {
   /* ════════════════════════════════════════════════════════════
      CONFIGURACIÓN
      ════════════════════════════════════════════════════════════ */
-  var DOCTOR_EMAILS = [
-    'expedientes.clinicamedicacmg@gmail.com',
-    'rubenwainwrightba@gmail.com',
-    'ventasymercadeocmg@gmail.com',
-    // DRM Fun-2: médicos tratantes individuales
-    'doctor_rojascmg@gmail.com',
-    'doctor_hermescmg@gmail.com',
-    'doctor_alvarezcmg@gmail.com',
-    // Admin operativo
-    'skarleth.admoncmg@gmail.com'
-  ];
+  /* El acceso al portal se resuelve vía cmgStaff.checkDoctor (cmg-staff.js):
+     rol medico | enf | admin en /usuarios, con las cuentas reales como
+     respaldo. Ver AUTH GUARD más abajo. */
 
   /* ─── DRM v3.1: catálogos compartidos para evitar errores de tipeo ─── */
   var CATALOGO_SERVICIOS = [
@@ -1752,13 +1745,11 @@ button.ed-consulta-link {
   /* ════════════════════════════════════════════════════════════
      DRM Fun-5 v2: UNIFICAR con flujo de aprobación
      ════════════════════════════════════════════════════════════ */
-  var ADMIN_UNIF_EMAILS = [
-    'ventasymercadeocmg@gmail.com',
-    'rubenwainwrightba@gmail.com',
-    'skarleth.admoncmg@gmail.com'
-  ];
+  /* Resuelto de forma async en el AUTH GUARD (cmgStaff.checkAdmin) y cacheado
+     aquí porque esAdminUnif() se usa de forma síncrona en el render de Unificar. */
+  var _isAdminUnifCache = false;
   function esAdminUnif() {
-    return cmgAuth.currentUser && ADMIN_UNIF_EMAILS.indexOf(cmgAuth.currentUser.email) !== -1;
+    return !!(cmgAuth.currentUser && _isAdminUnifCache);
   }
   var unifA = null, unifB = null;
   function renderUnificarTab() {
@@ -2020,21 +2011,25 @@ button.ed-consulta-link {
       window.location.href = 'Auth.html?returnTo=Expediente-Doctor.html';
       return;
     }
-    if (DOCTOR_EMAILS.indexOf(user.email) === -1) {
-      document.body.innerHTML =
-        '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;font-family:system-ui">' +
-        '<div><h1 style="color:#991B1B">🚫 Acceso restringido</h1>' +
-        '<p style="color:#6B7280;margin:14px 0 24px">Solo el personal médico autorizado puede acceder a este portal.</p>' +
-        '<a href="Inicio.html" style="background:#213C7D;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">Volver al sitio</a>' +
-        '</div></div>';
-      return;
-    }
-    /* Mostrar nombre del doctor */
-    $id('ed-user-chip').style.display = '';
-    var _edN = user.displayName || user.email.split('@')[0]; if (user.email === 'skarleth.admoncmg@gmail.com') { _edN = 'Ing. ' + _edN; var _t = $id('ed-user-title'); if (_t) _t.textContent = ''; } $id('ed-user-name').textContent = _edN;
-    /* Inicializar antecedentes */
-    renderAntecedentes('nuevo-pat-container', ANTECEDENTES_PATOLOGICOS, 'nvopat');
-    renderAntecedentes('nuevo-nopat-container', ANTECEDENTES_NO_PATOLOGICOS, 'nvonopat');
+    cmgStaff.checkDoctor(user, function (ok) {
+      if (!ok) {
+        document.body.innerHTML =
+          '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;font-family:system-ui">' +
+          '<div><h1 style="color:#991B1B">🚫 Acceso restringido</h1>' +
+          '<p style="color:#6B7280;margin:14px 0 24px">Solo el personal médico autorizado puede acceder a este portal.</p>' +
+          '<a href="Inicio.html" style="background:#213C7D;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">Volver al sitio</a>' +
+          '</div></div>';
+        return;
+      }
+      /* Cachea si es admin, para esAdminUnif() (uso síncrono en la pestaña Unificar) */
+      cmgStaff.checkAdmin(user, function (isAdm) { _isAdminUnifCache = isAdm; });
+      /* Mostrar nombre del doctor */
+      $id('ed-user-chip').style.display = '';
+      var _edN = user.displayName || user.email.split('@')[0]; if (user.email === 'skarleth.admoncmg@gmail.com') { _edN = 'Ing. ' + _edN; var _t = $id('ed-user-title'); if (_t) _t.textContent = ''; } $id('ed-user-name').textContent = _edN;
+      /* Inicializar antecedentes */
+      renderAntecedentes('nuevo-pat-container', ANTECEDENTES_PATOLOGICOS, 'nvopat');
+      renderAntecedentes('nuevo-nopat-container', ANTECEDENTES_NO_PATOLOGICOS, 'nvonopat');
+    });
   });
 
   /* Logout */

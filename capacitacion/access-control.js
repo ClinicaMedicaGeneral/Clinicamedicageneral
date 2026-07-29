@@ -9,9 +9,9 @@
    ============================================================ */
 (function (global) {
   // Cuentas bootstrap: siempre admin, sin depender de un doc en Firestore.
+  // Debe reflejar exactamente las cuentas con rol Administrador en Admin-Usuarios.html.
   var ADMIN_EMAILS = [
     'rubenwainwrightba@gmail.com',
-    'ventasymercadeocmg@gmail.com',
     'skarleth.admoncmg@gmail.com',
     'administracion@clinicamedicacmg.net'
   ];

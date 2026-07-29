@@ -7,21 +7,19 @@
 (function (global) {
   'use strict';
 
-  /* ── Cuentas bootstrap (siempre tienen acceso sin doc Firestore) ── */
+  /* ── Cuentas bootstrap (siempre tienen acceso sin doc Firestore) ──
+     Debe reflejar exactamente las cuentas activas en Admin-Usuarios.html. */
   var ADMIN_EMAILS = [
     'rubenwainwrightba@gmail.com',
-    'ventasymercadeocmg@gmail.com',
     'skarleth.admoncmg@gmail.com',
     'administracion@clinicamedicacmg.net'
   ];
 
   var STAFF_EMAILS = ADMIN_EMAILS.concat([
-    'expedientes.clinicamedicacmg@gmail.com',
-    'luz_cmg@gmail.com',
-    'ana_cmg@gmail.com',
-    'doctor_rojascmg@gmail.com',
-    'doctor_hermescmg@gmail.com',
-    'doctor_alvarezcmg@gmail.com'
+    'reneherrerarojas667@gmail.com',
+    'luzidaliaortiz2021@gmail.com',
+    'ruizterann83@gmail.com',
+    'caja.clinicacmg@gmail.com'
   ]);
 
   /* ── Lookup en Firestore /usuarios/{uid} ── */
@@ -50,6 +48,13 @@
       if (!user) { cb(false); return; }
       if (STAFF_EMAILS.indexOf((user.email || '').toLowerCase()) !== -1) { cb(true); return; }
       firestoreRole(user.uid, function (rol) { cb(!!rol); });
+    },
+    // checkDoctor: acceso al portal clínico (Expediente-Doctor.html). Mismo
+    // criterio que isDoctor() en firestore.rules: rol medico | enf | admin.
+    checkDoctor: function (user, cb) {
+      if (!user) { cb(false); return; }
+      if (STAFF_EMAILS.indexOf((user.email || '').toLowerCase()) !== -1) { cb(true); return; }
+      firestoreRole(user.uid, function (rol) { cb(rol === 'medico' || rol === 'enf' || rol === 'admin'); });
     }
   };
 })(window);

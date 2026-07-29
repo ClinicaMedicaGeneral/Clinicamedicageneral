@@ -2597,7 +2597,10 @@ button.ed-consulta-link {
 
     /* Lista de pendientes */
     html +=
-      '<div class="ed-section-title">⏳ Pendientes (Pre clínicas y servicios)</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">' +
+        '<div class="ed-section-title" style="margin:0">⏳ Pendientes (Pre clínicas y servicios)</div>' +
+        '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-pendientes" type="button" style="padding:6px 12px;font-size:12px">🔄 Refrescar</button>' +
+      '</div>' +
       '<div id="preclinicas-pendientes-lista">' +
         '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
       '</div>';
@@ -2609,6 +2612,10 @@ button.ed-consulta-link {
       $id('btn-modo-servicio').addEventListener('click', function () { renderServicioForm(); });
     }
 
+    $id('btn-refrescar-pendientes').addEventListener('click', function () {
+      cargarPreclinicasPendientes();
+    });
+
     cargarPreclinicasPendientes();
   }
 
@@ -2616,6 +2623,7 @@ button.ed-consulta-link {
   function cargarPreclinicasPendientes() {
     var lista = $id('preclinicas-pendientes-lista');
     if (!lista) return;
+    lista.innerHTML = '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>';
     cmgDb.collection('consultas')
       .where('status', 'in', ['preclinica', 'servicio'])
       .get()

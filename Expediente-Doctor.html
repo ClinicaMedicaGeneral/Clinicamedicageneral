@@ -1635,7 +1635,7 @@ button.ed-consulta-link {
           var se = d.salaEmergencia;
           var tieneEmergencia = !!(se && se.activa);
           var emergenciaItems = tieneEmergencia ? [
-            se.salaHoras    ? '<li>Uso de sala de emergencia: <b>' + esc(se.salaHoras) + '</b></li>' : '',
+            se.salaHoras    ? '<li>Uso de área de estabilización: <b>' + esc(se.salaHoras) + '</b></li>' : '',
             se.monitorHoras ? '<li>Monitor de signos vitales: <b>' + esc(se.monitorHoras) + '</b></li>' : '',
             se.oxigenoHoras ? '<li>Tanque de oxígeno: <b>' + esc(se.oxigenoHoras) + '</b></li>' : ''
           ].filter(Boolean).join('') : '';
@@ -1672,7 +1672,7 @@ button.ed-consulta-link {
               '</div>' +
               (recetaExt ? '<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px;font-size:13px"><b>🏥 Receta externa (comprar en farmacia):</b><br>' + esc(recetaExt) + '</div>' : '') +
               (resultadoSensConsulta ? '<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px;font-size:13px"><b>🧪 Resultado prueba de sensibilidad:</b> ' + esc(resultadoSensConsulta) + '</div>' : '') +
-              (tieneEmergencia ? '<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:10px;font-size:13px"><b style="color:#991B1B">🚨 Sala de Emergencia:</b>' + (emergenciaItems ? '<ul style="margin:6px 0 0 18px;padding:0">' + emergenciaItems + '</ul>' : ' se utilizó (sin horas detalladas)') + '</div>' : '') +
+              (tieneEmergencia ? '<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:10px;font-size:13px"><b style="color:#991B1B">🚨 Área de Estabilización:</b>' + (emergenciaItems ? '<ul style="margin:6px 0 0 18px;padding:0">' + emergenciaItems + '</ul>' : ' se utilizó (sin horas detalladas)') + '</div>' : '') +
               (requiereSens ? '<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:10px;font-size:13px">' +
                 '<b style="color:#991B1B">🧪 Inyección IM/IV, Prueba de sensibilidad:</b> ' + esc(ps.resultado) + ' · confirmada por ' + esc(ps.confirmadaPor || '—') +
                 '<label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-weight:700;color:#991B1B;cursor:pointer"><input type="checkbox" class="caja-sens-chk" data-sens-for="' + doc.id + '"' + (ps.cajaConfirmada ? ' checked disabled' : '') + '> Verifiqué la prueba de sensibilidad antes de liquidar</label>' +
@@ -3205,12 +3205,12 @@ button.ed-consulta-link {
           '<div style="font-size:11px;color:#92400E;margin-top:6px">El formato sigue la plantilla "FORMATO DE CONSTANCIA (NO CAMBIAR)".</div>' +
         '</div>' +
       '</div>' +
-      /* Sala de Emergencia: sección habilitada por checkbox con elementos de uso en horas */
+      /* Área de Estabilización: sección habilitada por checkbox con elementos de uso en horas */
       '<div class="ed-section" id="cons-emergencia-section">' +
-        '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="cons-emergencia-check"> 🚨 Sala de Emergencia</label>' +
+        '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="cons-emergencia-check"> 🚨 Área de Estabilización</label>' +
         '<div id="cons-emergencia-form" style="display:none;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:12px;margin-top:8px">' +
           '<div class="ed-grid ed-grid-2">' +
-            '<div class="ed-fgroup"><label class="ed-label">Uso de sala de emergencia (horas)</label>' +
+            '<div class="ed-fgroup"><label class="ed-label">Uso de área de estabilización (horas)</label>' +
               '<input type="text" class="ed-input" id="emerg-sala-horas" placeholder="Ej. 2 horas"></div>' +
             '<div class="ed-fgroup"><label class="ed-label">Utilización del monitor de signos vitales (horas)</label>' +
               '<input type="text" class="ed-input" id="emerg-monitor-horas" placeholder="Ej. 1.5 horas"></div>' +
@@ -3263,7 +3263,7 @@ button.ed-consulta-link {
       });
     });
 
-    /* Toggle del formulario de Sala de Emergencia */
+    /* Toggle del formulario de Área de Estabilización */
     $id('cons-emergencia-check').addEventListener('change', function(){
       $id('cons-emergencia-form').style.display = this.checked ? 'block' : 'none';
     });
@@ -3624,7 +3624,7 @@ button.ed-consulta-link {
     var sensResultado = $val('cons-sens-resultado');
     if (sensAplicada && !sensResultado) faltantes.push('Resultado de la prueba de sensibilidad');
 
-    /* Sala de Emergencia (opcional, habilitada por checkbox) */
+    /* Área de Estabilización (opcional, habilitada por checkbox) */
     var emergenciaCheck = $id('cons-emergencia-check');
     var salaEmergencia = null;
     if (emergenciaCheck && emergenciaCheck.checked) {
@@ -3908,10 +3908,10 @@ button.ed-consulta-link {
     if (consulta.salaEmergencia && consulta.salaEmergencia.activa) {
       var se = consulta.salaEmergencia;
       var seLineas = [];
-      if (se.salaHoras)    seLineas.push('Uso de sala de emergencia: ' + se.salaHoras);
+      if (se.salaHoras)    seLineas.push('Uso de área de estabilización: ' + se.salaHoras);
       if (se.monitorHoras) seLineas.push('Monitor de signos vitales: ' + se.monitorHoras);
       if (se.oxigenoHoras) seLineas.push('Tanque de oxígeno: ' + se.oxigenoHoras);
-      bloque('SALA DE EMERGENCIA', seLineas.length ? seLineas.join('\n') : 'Se utilizó la sala de emergencia.');
+      bloque('ÁREA DE ESTABILIZACIÓN', seLineas.length ? seLineas.join('\n') : 'Se utilizó el área de estabilización.');
     }
     if (!consulta.medicamentosVisita && !consulta.medicamentosDespacho && consulta.tratamiento) {
       bloque('PLAN / TRATAMIENTO', consulta.tratamiento);

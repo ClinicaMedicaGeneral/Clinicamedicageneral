@@ -4274,6 +4274,7 @@ button.ed-consulta-link {
         (c.recetaExterna && c.recetaExterna.trim() ? '<div class="ed-consulta-motivo" style="color:#9A3412"><strong>🏥 Receta externa:</strong> ' + esc(c.recetaExterna).slice(0, 120) + (c.recetaExterna.length > 120 ? '...' : '') + '</div>' : '') +
         (esServicio && c.servicioNotas ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas:</strong> ' + esc(c.servicioNotas).slice(0, 100) + '</div>' : '') +
         (esServicio && c.servicioNotasFin ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas de finalización:</strong> ' + esc(c.servicioNotasFin).slice(0, 100) + '</div>' : '') +
+        (esServicio ? '<div class="ed-consulta-motivo" style="color:#9CA3AF;font-size:11px;font-family:monospace">id: ' + esc(c._id) + ' · status: ' + esc(c.status) + ' · tipoRegistro: ' + esc(c.tipoRegistro || '—') + ' · convertidoConsulta: ' + String(!!c.convertidoConsulta) + '</div>' : '') +
       '</div>' +
       '<div class="ed-consulta-actions">' +
         (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Ver PDF</a>' : '') +

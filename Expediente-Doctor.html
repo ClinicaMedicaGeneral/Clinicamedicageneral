@@ -1638,7 +1638,7 @@ button.ed-consulta-link {
             se.salaHoras    ? '<li>Uso de área de estabilización: <b>' + esc(se.salaHoras) + '</b></li>' : '',
             se.monitorHoras ? '<li>Monitor de signos vitales: <b>' + esc(se.monitorHoras) + '</b></li>' : '',
             se.oxigenoLitros ? '<li>Tanque de oxígeno: <b>' + esc(se.oxigenoLitros) + '</b></li>' : '',
-            se.bombaHoras   ? '<li>Bomba de infusión: <b>' + esc(se.bombaHoras) + '</b></li>' : ''
+            se.bombaInfusion ? '<li>Bomba de infusión: <b>utilizada</b></li>' : ''
           ].filter(Boolean).join('') : '';
           var esLabStandalone      = d.tipoRegistro === 'lab-standalone';
           var esPruebaStandalone   = d.tipoRegistro === 'prueba-standalone';
@@ -3217,8 +3217,7 @@ button.ed-consulta-link {
               '<input type="text" class="ed-input" id="emerg-monitor-horas" placeholder="Ej. 1.5 horas"></div>' +
             '<div class="ed-fgroup"><label class="ed-label">Utilización de tanque de oxígeno (litros)</label>' +
               '<input type="text" class="ed-input" id="emerg-oxigeno-litros" placeholder="Ej. 3 litros"></div>' +
-            '<div class="ed-fgroup"><label class="ed-label">Utilización de bomba de infusión (horas)</label>' +
-              '<input type="text" class="ed-input" id="emerg-bomba-horas" placeholder="Ej. 2 horas"></div>' +
+            '<div class="ed-fgroup" style="align-self:end"><label class="ed-meds-opt" style="background:#fff"><input type="checkbox" id="emerg-bomba-check"> Utilización de bomba de infusión</label></div>' +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -3636,7 +3635,7 @@ button.ed-consulta-link {
         salaHoras    : $val('emerg-sala-horas'),
         monitorHoras : $val('emerg-monitor-horas'),
         oxigenoLitros : $val('emerg-oxigeno-litros'),
-        bombaHoras   : $val('emerg-bomba-horas')
+        bombaInfusion : !!($id('emerg-bomba-check') && $id('emerg-bomba-check').checked)
       };
     }
 
@@ -3915,7 +3914,7 @@ button.ed-consulta-link {
       if (se.salaHoras)    seLineas.push('Uso de área de estabilización: ' + se.salaHoras);
       if (se.monitorHoras) seLineas.push('Monitor de signos vitales: ' + se.monitorHoras);
       if (se.oxigenoLitros) seLineas.push('Tanque de oxígeno: ' + se.oxigenoLitros);
-      if (se.bombaHoras)   seLineas.push('Bomba de infusión: ' + se.bombaHoras);
+      if (se.bombaInfusion) seLineas.push('Bomba de infusión: utilizada');
       bloque('ÁREA DE ESTABILIZACIÓN', seLineas.length ? seLineas.join('\n') : 'Se utilizó el área de estabilización.');
     }
     if (!consulta.medicamentosVisita && !consulta.medicamentosDespacho && consulta.tratamiento) {

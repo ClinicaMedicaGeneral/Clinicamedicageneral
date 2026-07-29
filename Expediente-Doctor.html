@@ -3105,8 +3105,13 @@ button.ed-consulta-link {
         '<div class="ed-grid ed-grid-2">' +
           '<div class="ed-fgroup full"><label class="ed-label">Notas de finalización (opcional)</label>' +
             '<textarea class="ed-textarea" id="serv-notas-fin" rows="2" placeholder="Observaciones al completar el servicio"></textarea></div>' +
-          '<div class="ed-fgroup"><label class="ed-label">Realizado por</label>' +
-            '<input type="text" class="ed-input" id="serv-realizado-por" value="' + esc(cmgAuth.currentUser.displayName || cmgAuth.currentUser.email) + '"></div>' +
+          '<div class="ed-fgroup"><label class="ed-label">Médico tratante *</label>' +
+            '<select class="ed-input" id="serv-realizado-por">' +
+              '<option value="">— Seleccionar —</option>' +
+              '<option value="Doctor Rojas">Doctor Rojas</option>' +
+              '<option value="Doctor Hermes">Doctor Hermes</option>' +
+              '<option value="Doctor Álvarez">Doctor Álvarez</option>' +
+            '</select></div>' +
         '</div>' +
       '</div>' +
       '<div class="ed-actions">' +
@@ -3118,14 +3123,6 @@ button.ed-consulta-link {
 
     wireSensToggle('serv-meds-visita-list', 'serv-sens-wrap');
     ['serv-meds-visita-list', 'serv-meds-despacho-list'].forEach(wireMedsGroupNinguno);
-
-    var convertidoChk = $id('serv-convertido-consulta');
-    var medsSection = $id('serv-meds-section');
-    if (convertidoChk) {
-      convertidoChk.addEventListener('change', function () {
-        if (medsSection) medsSection.style.display = this.checked ? 'none' : '';
-      });
-    }
   }
 
   /* ─── Marcar servicio como completado (status:'servicio-completo') ─── */
@@ -3135,24 +3132,25 @@ button.ed-consulta-link {
        si es standalone, genera su propio pendiente_caja. */
     var esVinculado = !!consultaPendienteCargada.consultaPadreId;
     var convertidoConsulta = !!($id('serv-convertido-consulta') && $id('serv-convertido-consulta').checked);
+    var medico = $val('serv-realizado-por');
+    if (!medico) { showAlert('Selecciona el médico tratante.', 'error'); return; }
+    var medsVisitaServ = collectChecked('serv-meds-visita-list');
     var updateData = {
       status: esVinculado ? 'servicio-completo' : 'pendiente_caja',
       tipoRegistro: esVinculado ? 'servicio-vinculado' : 'servicio-standalone',
       fecha: firebase.firestore.FieldValue.serverTimestamp(),
       fechaLocal: new Date().toISOString(),
       servicioNotasFin: $val('serv-notas-fin'),
-      servicioRealizadoPor: $val('serv-realizado-por'),
+      servicioRealizadoPor: medico,
+      doctorNombre: medico,
       doctorEmail: cmgAuth.currentUser.email,
-      convertidoConsulta: convertidoConsulta
+      convertidoConsulta: convertidoConsulta,
+      medicamentosVisita: medsVisitaServ,
+      medicamentosDespacho: collectChecked('serv-meds-despacho-list'),
+      recetaExterna: $val('serv-receta-externa')
     };
-    if (!convertidoConsulta) {
-      var medsVisitaServ = collectChecked('serv-meds-visita-list');
-      updateData.medicamentosVisita = medsVisitaServ;
-      updateData.medicamentosDespacho = collectChecked('serv-meds-despacho-list');
-      updateData.recetaExterna = $val('serv-receta-externa');
-      if (medsVisitaServ.indexOf('Prueba de sensibilidad') !== -1) {
-        updateData.resultadoPruebaSensibilidad = $val('serv-sens-resultado');
-      }
+    if (medsVisitaServ.indexOf('Prueba de sensibilidad') !== -1) {
+      updateData.resultadoPruebaSensibilidad = $val('serv-sens-resultado');
     }
     showOverlay('Completando servicio...');
     cmgDb.collection('consultas').doc(consultaPendienteCargada._id).update(updateData)

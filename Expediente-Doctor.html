@@ -4192,7 +4192,10 @@ button.ed-consulta-link {
            una prueba rápida o una orden de laboratorio (ya se listan aparte, abajo). */
         if (data.status === 'preclinica') return;
         if (data.tipoRegistro === 'prueba-standalone' || data.tipoRegistro === 'lab-standalone') return;
-        var esServicio = data.status === 'servicio' || data.status === 'servicio-completo';
+        /* Un servicio standalone completado pasa a status 'pendiente_caja' (igual que una
+           consulta), así que hay que distinguirlo por tipoRegistro, no solo por status. */
+        var esServicio = data.status === 'servicio' || data.status === 'servicio-completo' ||
+          data.tipoRegistro === 'servicio-standalone' || data.tipoRegistro === 'servicio-vinculado';
         items.push(Object.assign({ _id: doc.id, _kind: esServicio ? 'servicio' : 'consulta' }, data));
       });
       results[1].forEach(function (doc) {
@@ -4231,8 +4234,8 @@ button.ed-consulta-link {
   /* ─── Item: Consulta médica o Servicio/Procedimiento (colección consultas) ─── */
   function renderHistorialItemConsulta(c) {
     var esServicio = c._kind === 'servicio';
-    var esServicioCompleto  = c.status === 'servicio-completo';
-    var esServicioPendiente = c.status === 'servicio';
+    var esServicioPendiente = esServicio && c.status === 'servicio';
+    var esServicioCompleto  = esServicio && !esServicioPendiente;
 
     var badge = '<span style="background:#DBEAFE;color:#1E40AF;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🩺 Consulta</span>';
     if (esServicioCompleto)  badge = ' <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🛎️ Procedimiento completado</span>';

@@ -2935,6 +2935,21 @@ button.ed-consulta-link {
           '<textarea class="ed-textarea" id="serv-notas" rows="2" placeholder="Indicaciones, cantidad, detalles para el personal"></textarea>' +
         '</div>' +
       '</div>' +
+      '<div class="ed-section" id="serv-vitales-section" style="display:none">' +
+        '<div class="ed-section-title">📊 Signos vitales (queda pendiente para el médico)</div>' +
+        '<p style="font-size:12px;color:#6B7280;margin:0 0 8px">Las sueroterapias suelen requerir monitorear al paciente. Estos datos quedan guardados en el pendiente y el médico los verá al completar el servicio.</p>' +
+        '<div class="ed-vitals">' +
+          '<div class="ed-vital"><div class="ed-vital-label">TA (mmHg)</div><input id="servvit-ta" placeholder="120/80"></div>' +
+          '<div class="ed-vital"><div class="ed-vital-label">FC (lpm)</div><input id="servvit-fc" placeholder="72"></div>' +
+          '<div class="ed-vital"><div class="ed-vital-label">FR (rpm)</div><input id="servvit-fr" placeholder="16"></div>' +
+          '<div class="ed-vital"><div class="ed-vital-label">Temp (°C)</div><input id="servvit-temp" placeholder="36.5"></div>' +
+          '<div class="ed-vital"><div class="ed-vital-label">Peso (kg)</div><input id="servvit-peso" placeholder="70"></div>' +
+          '<div class="ed-vital"><div class="ed-vital-label">Talla (m)</div><input id="servvit-talla" placeholder="1.70"></div>' +
+          '<div class="ed-vital"><div class="ed-vital-label">IMC</div><input id="servvit-imc" placeholder="—" readonly style="background:#F3F4F6;cursor:default;font-weight:700;color:#213C7D"></div>' +
+          '<div class="ed-vital"><div class="ed-vital-label">SpO2 (%)</div><input id="servvit-spo2" placeholder="98"></div>' +
+          '<div class="ed-vital"><div class="ed-vital-label">Glucosa (mg/dL)</div><input id="servvit-glucosa" placeholder="90"></div>' +
+        '</div>' +
+      '</div>' +
       '<div class="ed-section" id="serv-sens-section" style="display:none;background:#FFF7ED;border:1px solid #FED7AA">' +
         '<div class="ed-section-title">🧪 Prueba de sensibilidad requerida</div>' +
         '<p style="font-size:12px;color:#92400E;margin:0 0 8px">Las inyecciones IM/IV requieren confirmar la prueba de sensibilidad para descartar alergias antes de aplicar.</p>' +
@@ -2957,10 +2972,20 @@ button.ed-consulta-link {
     $id('serv-selector').addEventListener('change', function () {
       $id('serv-otro-grupo').style.display = this.value === '__otro__' ? 'block' : 'none';
       $id('serv-sens-section').style.display = /\((IM|IV)\)/.test(this.value) ? 'block' : 'none';
+      $id('serv-vitales-section').style.display = /^Sueroterapia/i.test(this.value) ? 'block' : 'none';
     });
     $id('serv-sens-norequiere').addEventListener('change', function () {
       $id('serv-sens-detalle').style.display = this.checked ? 'none' : 'block';
     });
+    /* Auto-calcular IMC al cambiar peso o talla */
+    function calcularIMCServicio() {
+      var peso  = parseFloat($val('servvit-peso'));
+      var talla = parseFloat($val('servvit-talla'));
+      var imcInput = $id('servvit-imc');
+      imcInput.value = (peso > 0 && talla > 0) ? (peso / (talla * talla)).toFixed(1) : '';
+    }
+    $id('servvit-peso').addEventListener('input', calcularIMCServicio);
+    $id('servvit-talla').addEventListener('input', calcularIMCServicio);
     $id('btn-guardar-servicio').addEventListener('click', guardarServicio);
   }
 
@@ -3006,6 +3031,14 @@ button.ed-consulta-link {
       }
     }
 
+    /* Signos vitales (sueroterapias): opcional, solo si se llenó al menos uno */
+    var vitalesServicio = {
+      ta: $val('servvit-ta'), fc: $val('servvit-fc'), fr: $val('servvit-fr'),
+      temp: $val('servvit-temp'), peso: $val('servvit-peso'), talla: $val('servvit-talla'),
+      imc: $val('servvit-imc'), spo2: $val('servvit-spo2'), glucosa: $val('servvit-glucosa')
+    };
+    var tieneVitalesServicio = Object.keys(vitalesServicio).some(function (k) { return vitalesServicio[k]; });
+
     var dg = pacienteActual.datosGenerales || {};
     var docData = {
       codigoPaciente: pacienteActual.codigoPaciente,
@@ -3014,6 +3047,7 @@ button.ed-consulta-link {
       servicioNombre: servicioNombre,
       servicioNotas: $val('serv-notas'),
       pruebaSensibilidadServicio: pruebaSensibilidadServicio,
+      signosVitales: tieneVitalesServicio ? vitalesServicio : null,
       fechaServicio: firebase.firestore.FieldValue.serverTimestamp(),
       servicioPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
       servicioEmail: cmgAuth.currentUser.email
@@ -3240,6 +3274,7 @@ button.ed-consulta-link {
         (srv.servicioNotas ? '<div style="margin-top:8px;font-size:12px;color:#374151"><strong>Notas de registro:</strong> ' + esc(srv.servicioNotas) + '</div>' : '') +
         (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.requerida ? '<div style="margin-top:8px;font-size:12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:8px"><strong>🧪 Prueba de sensibilidad:</strong> ' + esc(srv.pruebaSensibilidadServicio.resultado) + ' · confirmada por ' + esc(srv.pruebaSensibilidadServicio.confirmadaPor || '—') + '</div>' : '') +
         (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.noRequiere ? '<div style="margin-top:8px;font-size:12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px;color:#166534"><strong>🧪 Prueba de sensibilidad:</strong> no necesaria para este medicamento.</div>' : '') +
+        (srv.signosVitales && buildVitalsChipsHtml(srv.signosVitales) ? '<div style="margin-top:8px"><div style="font-size:12px;font-weight:700;color:#213C7D;margin-bottom:4px">📊 Signos vitales</div><div class="ed-vitals-chips">' + buildVitalsChipsHtml(srv.signosVitales) + '</div></div>' : '') +
       '</div>' +
       '<div class="ed-section">' +
         '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="serv-convertido-consulta"> ❌ Este servicio no se realizó (se convirtió en consulta médica)</label>' +
@@ -3375,14 +3410,9 @@ button.ed-consulta-link {
       });
   }
 
-  /* ─── Formulario de consulta médica (Etapa 2) ─── */
-  function renderConsultaForm() {
-    var cont = $id('consulta-contenido');
-    var p = pacienteActual;
-    var dg = p.datosGenerales || {};
-    var pre = consultaPendienteCargada || {};
-    var sv = pre.signosVitales || {};
-
+  /* Chips de signos vitales para mostrar en modo lectura (Consulta y Completar servicio) */
+  function buildVitalsChipsHtml(sv) {
+    sv = sv || {};
     var chips = [];
     if (sv.ta) chips.push('<span class="ed-vital-chip"><strong>TA:</strong> ' + esc(sv.ta) + '</span>');
     if (sv.fc) chips.push('<span class="ed-vital-chip"><strong>FC:</strong> ' + esc(sv.fc) + '</span>');
@@ -3393,6 +3423,17 @@ button.ed-consulta-link {
     if (sv.imc) chips.push('<span class="ed-vital-chip"><strong>IMC:</strong> ' + esc(sv.imc) + '</span>');
     if (sv.spo2) chips.push('<span class="ed-vital-chip"><strong>SpO2:</strong> ' + esc(sv.spo2) + '%</span>');
     if (sv.glucosa) chips.push('<span class="ed-vital-chip"><strong>Glucosa:</strong> ' + esc(sv.glucosa) + '</span>');
+    return chips.join('');
+  }
+
+  /* ─── Formulario de consulta médica (Etapa 2) ─── */
+  function renderConsultaForm() {
+    var cont = $id('consulta-contenido');
+    var p = pacienteActual;
+    var dg = p.datosGenerales || {};
+    var pre = consultaPendienteCargada || {};
+    var sv = pre.signosVitales || {};
+    var chips = [buildVitalsChipsHtml(sv)].filter(Boolean);
 
 
     cont.innerHTML =

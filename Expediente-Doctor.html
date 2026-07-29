@@ -2442,6 +2442,11 @@ button.ed-consulta-link {
       buildEditarForm(p) +
       '<div class="ed-actions">' +
         '<button class="ed-btn ed-btn-primary" id="btn-editar-guardar">💾 Guardar cambios</button>' +
+      '</div>' +
+      '<div class="ed-section" style="background:#FEF2F2;border:1px solid #FCA5A5">' +
+        '<div class="ed-section-title" style="color:#991B1B">⚠️ Zona de peligro</div>' +
+        '<p style="font-size:12px;color:#7F1D1D;margin:0 0 10px">Elimina permanentemente este expediente y todos sus registros vinculados (pre clínicas, servicios, consultas, pruebas rápidas, exámenes de laboratorio y constancias). Esta acción no se puede deshacer.</p>' +
+        '<button class="ed-btn" style="background:#DC2626;color:#fff" id="btn-eliminar-expediente">🗑️ Eliminar expediente</button>' +
       '</div>';
 
     /* Render antecedentes con datos */
@@ -2451,6 +2456,7 @@ button.ed-consulta-link {
     setAntecedentes('edit-nopat-container', p.antecedentesNoPatologicos);
 
     $id('btn-editar-guardar').addEventListener('click', guardarEdicion);
+    $id('btn-eliminar-expediente').addEventListener('click', abrirEliminarExpedienteModal);
   }
 
   function buildEditarForm(p) {
@@ -2541,6 +2547,70 @@ button.ed-consulta-link {
       .catch(function (err) {
         hideOverlay();
         showAlert('Error al guardar: ' + err.message, 'error');
+      });
+  }
+
+  /* ─── Eliminar expediente completo (requiere escribir el código para confirmar) ─── */
+  function abrirEliminarExpedienteModal() {
+    if (!pacienteActual) return;
+    var codigo = pacienteActual.codigoPaciente;
+    var dg = pacienteActual.datosGenerales || {};
+    var html =
+      '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
+        '<div style="background:#fff;border-radius:12px;max-width:480px;width:100%;padding:24px">' +
+          '<h3 style="margin:0 0 6px;color:#991B1B">🗑️ Eliminar expediente</h3>' +
+          '<p style="margin:0 0 14px;font-size:13px;color:#374151">Vas a eliminar <b>permanentemente</b> el expediente de <b>' + esc(dg.nombreCompleto || codigo) + '</b> (<code>' + esc(codigo) + '</code>) y todos sus registros vinculados: pre clínicas, servicios, consultas médicas, pruebas rápidas, exámenes de laboratorio y constancias. Esta acción no se puede deshacer.</p>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Escribe el código <b>' + esc(codigo) + '</b> para confirmar</label>' +
+            '<input type="text" class="ed-input" id="qm-del-confirm" autocomplete="off"></div>' +
+          '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
+            '<button class="ed-btn ed-btn-ghost" id="qm-cancelar">Cancelar</button>' +
+            '<button class="ed-btn" style="background:#DC2626;color:#fff" id="qm-del-confirmar">🗑️ Eliminar permanentemente</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+    $id('qm-cancelar').onclick = function () { document.getElementById('ed-quick-modal').remove(); };
+    $id('qm-del-confirmar').onclick = function () {
+      if ($val('qm-del-confirm').trim() !== codigo) {
+        showAlert('El código no coincide. Escribe exactamente "' + codigo + '".', 'error');
+        return;
+      }
+      var modal = document.getElementById('ed-quick-modal');
+      if (modal) modal.remove();
+      eliminarExpedienteCompleto(codigo);
+    };
+  }
+
+  function eliminarExpedienteCompleto(codigo) {
+    showOverlay('Eliminando expediente y registros vinculados...');
+    var colecciones = ['consultas', 'resultadosPruebas', 'examenesLaboratorio', 'constancias'];
+    Promise.all(colecciones.map(function (col) {
+      return cmgDb.collection(col).where('codigoPaciente', '==', codigo).get();
+    }))
+      .then(function (snaps) {
+        var refs = [];
+        snaps.forEach(function (snap) { snap.forEach(function (doc) { refs.push(doc.ref); }); });
+        refs.push(cmgDb.collection('expedientes').doc(codigo));
+        /* Firestore permite máx. 500 operaciones por batch */
+        var lotes = [];
+        for (var i = 0; i < refs.length; i += 450) lotes.push(refs.slice(i, i + 450));
+        return lotes.reduce(function (prev, grupo) {
+          return prev.then(function () {
+            var batch = cmgDb.batch();
+            grupo.forEach(function (ref) { batch.delete(ref); });
+            return batch.commit();
+          });
+        }, Promise.resolve());
+      })
+      .then(function () {
+        hideOverlay();
+        showAlert('✓ Expediente y registros vinculados eliminados.', 'success');
+        pacienteActual = null;
+        switchTab('pacientes');
+      })
+      .catch(function (err) {
+        hideOverlay();
+        showAlert('Error al eliminar: ' + err.message, 'error');
       });
   }
 

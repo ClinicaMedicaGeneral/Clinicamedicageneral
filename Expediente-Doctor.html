@@ -4125,8 +4125,39 @@ button.ed-consulta-link {
   }
 
   /* ════════════════════════════════════════════════════════════
-     HISTORIAL DE CONSULTAS
+     HISTORIAL — vista unificada: consultas, procedimientos,
+     pruebas rápidas y laboratorios, todo en la misma línea de tiempo.
      ════════════════════════════════════════════════════════════ */
+  var LABELS_PRUEBA_TIPO = {
+    embarazo: '🤰 Prueba de Embarazo',
+    dengue:   '🦟 Prueba de Dengue',
+    duo:      '🧪 Prueba Dúo (COVID/Influenza)',
+    antigeno: '🩹 Prueba de Antígeno COVID'
+  };
+  var LABELS_PRUEBA_CAMPO = {
+    'res-embarazo': 'Embarazo', 'res-igg': 'IgG', 'res-igm': 'IgM', 'res-ns1': 'NS1',
+    'res-sarcov2': 'SARS-CoV-2', 'res-tipoa': 'Influenza A', 'res-tipob': 'Influenza B',
+    'res-antigeno': 'Antígeno'
+  };
+  var LABELS_LAB_STATUS = {
+    pendiente: { txt: '🕐 Pendiente', bg: '#FEF3C7', fg: '#92400E' },
+    procesando: { txt: '⏳ Procesando', bg: '#DBEAFE', fg: '#1E40AF' },
+    confirmado: { txt: '✅ Confirmado', bg: '#D1FAE5', fg: '#065F46' }
+  };
+
+  /* Timestamp comparable para ordenar cualquier tipo de registro del historial */
+  function getFechaMs(it) {
+    var f = it.fecha || it.fechaServicio || it.createdAt;
+    if (f && f.toMillis) return f.toMillis();
+    var s = it.fechaLocal || (typeof f === 'string' ? f : null);
+    if (s) { var t = new Date(s).getTime(); if (!isNaN(t)) return t; }
+    return 0;
+  }
+  /* Valor a mostrar en fmtDate() para cada tipo de registro */
+  function getFechaDisplay(it) {
+    return it.fecha || it.fechaServicio || it.createdAt || it.fechaLocal || null;
+  }
+
   function renderHistorialTab() {
     var cont = $id('historial-contenido');
     if (!pacienteActual) {
@@ -4138,7 +4169,7 @@ button.ed-consulta-link {
     cont.innerHTML =
       '<div class="ed-patient-summary">' +
         '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
-        '<p class="ed-patient-meta">Historial completo de consultas</p></div>' +
+        '<p class="ed-patient-meta">Historial completo: consultas, procedimientos, pruebas rápidas y laboratorios</p></div>' +
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
       '<div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap">' +
@@ -4148,80 +4179,45 @@ button.ed-consulta-link {
 
     $id('btn-gen-word').addEventListener('click', generarWordExpediente);
 
-    /* Cargar consultas (solo completas, excluye Pre clínicas pendientes) */
-    cmgDb.collection('consultas')
-      .where('codigoPaciente', '==', p.codigoPaciente)
-      .get()
-      .then(function (snap) {
-        var consultas = [];
-        snap.forEach(function (doc) {
-          var data = doc.data();
-          /* omitir solo Pre clínicas pendientes; servicios (pendientes y completos) sí aparecen */
-          if (data.status === 'preclinica') return;
-          consultas.push(Object.assign({ _id: doc.id }, data));
-        });
-        consultas.sort(function (a, b) {
-          var getMs = function (c) {
-            var f = c.fecha || c.fechaServicio;
-            return f && f.toMillis ? f.toMillis() : 0;
-          };
-          return getMs(b) - getMs(a);
-        });
-        renderConsultasLista(consultas);
-      })
-      .catch(function (err) {
-        $id('historial-lista').innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar consultas: ' + esc(err.message) + '</div>';
+    var codigo = p.codigoPaciente;
+    Promise.all([
+      cmgDb.collection('consultas').where('codigoPaciente', '==', codigo).get(),
+      cmgDb.collection('resultadosPruebas').where('codigoPaciente', '==', codigo).get(),
+      cmgDb.collection('examenesLaboratorio').where('codigoPaciente', '==', codigo).get()
+    ]).then(function (results) {
+      var items = [];
+      results[0].forEach(function (doc) {
+        var data = doc.data();
+        /* Omitir Pre clínicas pendientes y los "stub" de facturación que solo duplican
+           una prueba rápida o una orden de laboratorio (ya se listan aparte, abajo). */
+        if (data.status === 'preclinica') return;
+        if (data.tipoRegistro === 'prueba-standalone' || data.tipoRegistro === 'lab-standalone') return;
+        var esServicio = data.status === 'servicio' || data.status === 'servicio-completo';
+        items.push(Object.assign({ _id: doc.id, _kind: esServicio ? 'servicio' : 'consulta' }, data));
       });
+      results[1].forEach(function (doc) {
+        items.push(Object.assign({ _id: doc.id, _kind: 'prueba' }, doc.data()));
+      });
+      results[2].forEach(function (doc) {
+        items.push(Object.assign({ _id: doc.id, _kind: 'laboratorio' }, doc.data()));
+      });
+      items.sort(function (a, b) { return getFechaMs(b) - getFechaMs(a); });
+      renderHistorialUnificado(items);
+    }).catch(function (err) {
+      $id('historial-lista').innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar historial: ' + esc(err.message) + '</div>';
+    });
   }
 
-  function renderConsultasLista(consultas) {
+  function renderHistorialUnificado(items) {
     var lista = $id('historial-lista');
-    if (!consultas.length) {
-      lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">📋</div><p>Aún no hay consultas registradas para este paciente.</p></div>';
+    if (!items.length) {
+      lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">📋</div><p>Aún no hay registros para este paciente.</p></div>';
       return;
     }
-    lista.innerHTML = consultas.map(function (c) {
-      var esServicioCompleto  = c.status === 'servicio-completo';
-      var esServicioPendiente = c.status === 'servicio';
-      var esServicio = esServicioCompleto || esServicioPendiente;
-
-      var badge = '';
-      if (esServicioCompleto)  badge = ' <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🛎️ Servicio completado</span>';
-      if (esServicioPendiente) badge = ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🕐 Servicio pendiente</span>';
-      if (c.convertidoConsulta) badge += ' <span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🔄 Convertido en consulta</span>';
-
-      var fechaDisplay = c.fecha || c.fechaServicio;
-      var titulo = esServicio
-        ? esc(c.servicioNombre || 'Servicio')
-        : esc(c.motivoConsulta || '').slice(0, 120) + (c.motivoConsulta && c.motivoConsulta.length > 120 ? '...' : '');
-
-      /* DRM v3 #5: badge constancia + permitir editar si < 24h */
-      var constanciaBadge = '';
-      var puedeEditarConstancia = false;
-      if (c.constanciaId) {
-        constanciaBadge = ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">📄 Con constancia</span>';
-        /* Ventana de 24h desde la fecha de la consulta */
-        var fechaConsulta = (c.fecha && c.fecha.toMillis) ? c.fecha.toMillis()
-                          : (c.fechaLocal ? new Date(c.fechaLocal).getTime() : 0);
-        if (fechaConsulta && (Date.now() - fechaConsulta) < (24 * 60 * 60 * 1000)) {
-          puedeEditarConstancia = true;
-        }
-      }
-
-      return '<div class="ed-consulta-item">' +
-        '<div>' +
-          '<div class="ed-consulta-fecha">📅 ' + fmtDate(fechaDisplay) + badge + constanciaBadge + '</div>' +
-          '<div class="ed-consulta-motivo">' + titulo + '</div>' +
-          (!esServicio && c.diagnostico ? '<div class="ed-consulta-motivo"><strong>Dx:</strong> ' + esc(c.diagnostico).slice(0, 100) + '</div>' : '') +
-          (c.recetaExterna && c.recetaExterna.trim() ? '<div class="ed-consulta-motivo" style="color:#9A3412"><strong>🏥 Receta externa:</strong> ' + esc(c.recetaExterna).slice(0, 120) + (c.recetaExterna.length > 120 ? '...' : '') + '</div>' : '') +
-          (esServicio && c.servicioNotas ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas:</strong> ' + esc(c.servicioNotas).slice(0, 100) + '</div>' : '') +
-        '</div>' +
-        '<div class="ed-consulta-actions">' +
-          (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Ver PDF</a>' : '') +
-          (c.constanciaId ? '<a class="ed-consulta-link" href="Constancia-Medica.html?id=' + esc(c.constanciaId) + '" target="_blank">📄 Ver constancia</a>' : '') +
-          (puedeEditarConstancia ? '<button class="ed-consulta-link ed-link-blue" data-editar-constancia="' + esc(c.constanciaId) + '">✏️ Editar constancia</button>' : '') +
-        '</div>' +
-      '</div>';
+    lista.innerHTML = items.map(function (c) {
+      if (c._kind === 'prueba') return renderHistorialItemPrueba(c);
+      if (c._kind === 'laboratorio') return renderHistorialItemLab(c);
+      return renderHistorialItemConsulta(c);
     }).join('');
 
     /* DRM v3 #5: handler editar constancia (solo 24h) */
@@ -4230,6 +4226,103 @@ button.ed-consulta-link {
         abrirEditarConstanciaModal(this.getAttribute('data-editar-constancia'));
       });
     });
+  }
+
+  /* ─── Item: Consulta médica o Servicio/Procedimiento (colección consultas) ─── */
+  function renderHistorialItemConsulta(c) {
+    var esServicio = c._kind === 'servicio';
+    var esServicioCompleto  = c.status === 'servicio-completo';
+    var esServicioPendiente = c.status === 'servicio';
+
+    var badge = '<span style="background:#DBEAFE;color:#1E40AF;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🩺 Consulta</span>';
+    if (esServicioCompleto)  badge = ' <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🛎️ Procedimiento completado</span>';
+    if (esServicioPendiente) badge = ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🕐 Procedimiento pendiente</span>';
+    if (c.convertidoConsulta) badge += ' <span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🔄 Convertido en consulta</span>';
+
+    var titulo = esServicio
+      ? esc(c.servicioNombre || 'Servicio')
+      : esc(c.motivoConsulta || '').slice(0, 120) + (c.motivoConsulta && c.motivoConsulta.length > 120 ? '...' : '');
+
+    var medsVisita   = (c.medicamentosVisita || []).filter(Boolean);
+    var medsDespacho = (c.medicamentosDespacho || []).filter(Boolean);
+
+    /* DRM v3 #5: badge constancia + permitir editar si < 24h */
+    var constanciaBadge = '';
+    var puedeEditarConstancia = false;
+    if (c.constanciaId) {
+      constanciaBadge = ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">📄 Con constancia</span>';
+      var fechaConsulta = (c.fecha && c.fecha.toMillis) ? c.fecha.toMillis()
+                        : (c.fechaLocal ? new Date(c.fechaLocal).getTime() : 0);
+      if (fechaConsulta && (Date.now() - fechaConsulta) < (24 * 60 * 60 * 1000)) {
+        puedeEditarConstancia = true;
+      }
+    }
+
+    return '<div class="ed-consulta-item">' +
+      '<div>' +
+        '<div class="ed-consulta-fecha">📅 ' + fmtDate(getFechaDisplay(c)) + badge + constanciaBadge + '</div>' +
+        '<div class="ed-consulta-motivo">' + titulo + '</div>' +
+        (!esServicio && c.diagnostico ? '<div class="ed-consulta-motivo"><strong>Dx:</strong> ' + esc(c.diagnostico).slice(0, 100) + '</div>' : '') +
+        (medsVisita.length ? '<div class="ed-consulta-motivo" style="color:#374151"><strong>💊 Aplicado en consulta:</strong> ' + esc(medsVisita.join(', ')) + '</div>' : '') +
+        (medsDespacho.length ? '<div class="ed-consulta-motivo" style="color:#374151"><strong>📦 Despacho:</strong> ' + esc(medsDespacho.join(', ')) + '</div>' : '') +
+        (c.recetaExterna && c.recetaExterna.trim() ? '<div class="ed-consulta-motivo" style="color:#9A3412"><strong>🏥 Receta externa:</strong> ' + esc(c.recetaExterna).slice(0, 120) + (c.recetaExterna.length > 120 ? '...' : '') + '</div>' : '') +
+        (esServicio && c.servicioNotas ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas:</strong> ' + esc(c.servicioNotas).slice(0, 100) + '</div>' : '') +
+        (esServicio && c.servicioNotasFin ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas de finalización:</strong> ' + esc(c.servicioNotasFin).slice(0, 100) + '</div>' : '') +
+      '</div>' +
+      '<div class="ed-consulta-actions">' +
+        (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Ver PDF</a>' : '') +
+        (c.constanciaId ? '<a class="ed-consulta-link" href="Constancia-Medica.html?id=' + esc(c.constanciaId) + '" target="_blank">📄 Ver constancia</a>' : '') +
+        (puedeEditarConstancia ? '<button class="ed-consulta-link ed-link-blue" data-editar-constancia="' + esc(c.constanciaId) + '">✏️ Editar constancia</button>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ─── Item: Prueba rápida (colección resultadosPruebas) ─── */
+  function renderHistorialItemPrueba(c) {
+    var titulo = LABELS_PRUEBA_TIPO[c.tipo] || ('🧪 Prueba rápida: ' + (c.tipo || '—'));
+    var esPendiente = c.status === 'pendiente_resultado';
+    var badge = esPendiente
+      ? ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🕐 Resultado pendiente</span>'
+      : ' <span style="background:#EDE9FE;color:#5B21B6;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🧪 Prueba rápida</span>';
+
+    var resultados = c.resultados || {};
+    var resumen = Object.keys(resultados).map(function (k) {
+      var label = LABELS_PRUEBA_CAMPO[k] || k.replace(/^res-/, '');
+      var val = String(resultados[k] || '');
+      var esPos = /POSIT/i.test(val);
+      var color = esPos ? '#991B1B' : '#166534';
+      return '<span style="color:' + color + '">' + esc(label) + ': <b>' + esc(val) + '</b></span>';
+    }).join(' · ');
+
+    return '<div class="ed-consulta-item">' +
+      '<div>' +
+        '<div class="ed-consulta-fecha">📅 ' + fmtDate(getFechaDisplay(c)) + badge + '</div>' +
+        '<div class="ed-consulta-motivo">' + esc(titulo) + '</div>' +
+        (resumen ? '<div class="ed-consulta-motivo">' + resumen + '</div>' : '') +
+      '</div>' +
+      '<div class="ed-consulta-actions">' +
+        '<a class="ed-consulta-link" href="Ver-Prueba.html?id=' + esc(c._id) + '" target="_blank">📄 Ver resultado</a>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ─── Item: Laboratorio (colección examenesLaboratorio) ─── */
+  function renderHistorialItemLab(c) {
+    var titulo = c.tipoNombre || (c.examenesArray || []).join(', ') || 'Orden de laboratorio';
+    var st = LABELS_LAB_STATUS[c.status] || LABELS_LAB_STATUS.pendiente;
+    var badge = ' <span style="background:' + st.bg + ';color:' + st.fg + ';font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">' + st.txt + '</span>';
+
+    return '<div class="ed-consulta-item">' +
+      '<div>' +
+        '<div class="ed-consulta-fecha">📅 ' + fmtDate(getFechaDisplay(c)) + ' <span style="background:#F3F4F6;color:#374151;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🔬 Laboratorio</span>' + badge + '</div>' +
+        '<div class="ed-consulta-motivo">' + esc(titulo) + '</div>' +
+        (c.proveedor ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Proveedor:</strong> ' + esc(c.proveedor) + '</div>' : '') +
+        (c.notas ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas:</strong> ' + esc(c.notas).slice(0, 100) + '</div>' : '') +
+      '</div>' +
+      '<div class="ed-consulta-actions">' +
+        (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Ver resultado</a>' : '') +
+      '</div>' +
+    '</div>';
   }
 
   /* DRM v3 #5: modal para editar una constancia dentro de la ventana de 24h */

@@ -59,6 +59,30 @@ service cloud.firestore {
         || (userActivo() && userRole() == 'admin')
       );
     }
+    // isEnfermeria: personal de enfermería. Rol Firestore: enf | admin.
+    function isEnfermeria() {
+      return isAuth() && userActivo() && userRole() in ['enf', 'admin'];
+    }
+    // isMedicoTratante: SOLO médico (rol medico | admin, o correos de doctores).
+    // A diferencia de isDoctor(), NO incluye enfermería: se usa para la finalización
+    // de la Consulta médica (diagnóstico/tratamiento), que solo puede hacer el médico
+    // físicamente presente en el consultorio, incluso si hay dos turnos y el médico
+    // no está siempre frente a la computadora.
+    function isMedicoTratante() {
+      return isAuth() && (
+        request.auth.token.email in [
+          'expedientes.clinicamedicacmg@gmail.com',
+          'rubenwainwrightba@gmail.com',
+          'ventasymercadeocmg@gmail.com',
+          'doctor_rojascmg@gmail.com',
+          'doctor_hermescmg@gmail.com',
+          'doctor_alvarezcmg@gmail.com',
+          'skarleth.admoncmg@gmail.com',
+          'administracion@clinicamedicacmg.net'
+        ]
+        || (userActivo() && userRole() in ['medico', 'admin'])
+      );
+    }
 
     // ═══ /users/{uid} ══════════════════════════════════════════
     // Perfil del usuario (códigos de expediente vinculados/compartidos).
@@ -104,7 +128,11 @@ service cloud.firestore {
 
     // ═══ /consultas/{id} ═══════════════════════════════════════
     // Caja puede LEER y LIQUIDAR consultas.
-    // Crear/iniciar/terminar un servicio es función exclusiva del médico.
+    // La Consulta médica (diagnóstico/tratamiento, preclinica → pendiente_caja) es
+    // función EXCLUSIVA del médico tratante: solo puede hacerse en el consultorio,
+    // aunque haya dos turnos y el médico no esté siempre frente a la computadora.
+    // Un Servicio (status 'servicio', p.ej. inyecciones) sí puede ser continuado y
+    // completado por Caja o Enfermería, para no depender de que el médico esté presente.
     // Caja solo puede hacer update cuando el status pasa de pendiente_caja → completa
     // (liquidación de pago), no puede crear ni borrar consultas.
     match /consultas/{consultaId} {
@@ -122,13 +150,27 @@ service cloud.firestore {
         );
 
       // Caja puede crear entradas standalone (prueba-rapida y lab) para liquidación.
+      // Pre clínica (vitales) y registro de un Servicio los crea el personal clínico
+      // (médico o enfermería), vía isDoctor().
       allow create: if isDoctor()
         || (isCaja()
             && request.resource.data.status == 'pendiente_caja'
             && request.resource.data.tipoRegistro in ['lab-standalone', 'prueba-standalone']);
       allow delete: if isDoctor();
-      // Caja puede actualizar solo para marcar como pagada (pendiente_caja → completa).
-      allow update: if isDoctor()
+
+      // Update:
+      //   - Médico tratante: siempre, incluida la finalización de la Consulta médica
+      //     (preclinica → pendiente_caja).
+      //   - Caja o Enfermería: SOLO pueden continuar/completar un Servicio
+      //     (status 'servicio' → 'servicio-completo' o 'pendiente_caja'). Nunca una
+      //     Consulta médica.
+      //   - Caja: liquidar el pago (pendiente_caja → completa).
+      allow update: if isMedicoTratante()
+        || (
+          (isCaja() || isEnfermeria())
+          && resource.data.status == 'servicio'
+          && request.resource.data.status in ['servicio-completo', 'pendiente_caja']
+        )
         || (isCaja()
             && resource.data.status == 'pendiente_caja'
             && request.resource.data.status == 'completa');

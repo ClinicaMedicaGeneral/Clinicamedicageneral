@@ -1648,6 +1648,9 @@ button.ed-consulta-link {
           var badgeConstancia = (d.tieneConstancia || d.constanciaId)
             ? '<span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">📄 Constancia emitida</span>'
             : '';
+          var badgeConvertido = d.convertidoConsulta
+            ? '<span style="background:#FEE2E2;color:#991B1B;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🔄 No se realizó, se convirtió en consulta</span>'
+            : '';
           var tipoLabel = esPruebaStandalone
             ? '<span style="background:#CCFBF1;color:#0F766E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🧪 Prueba rápida</span>'
             : esLabStandalone
@@ -1661,7 +1664,7 @@ button.ed-consulta-link {
             '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:14px">' +
               '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">' +
                 '<div>' +
-                  '<b style="color:#213C7D;font-size:16px">' + esc(nombrePaciente) + '</b>' + tipoLabel + badgeConstancia + '<br>' +
+                  '<b style="color:#213C7D;font-size:16px">' + esc(nombrePaciente) + '</b>' + tipoLabel + badgeConstancia + badgeConvertido + '<br>' +
                   '<small style="color:#6B7280">Expediente: <code style="background:#F3F4F6;padding:1px 6px;border-radius:4px">' + esc(d.codigoPaciente || '—') + '</code> · Médico: ' + esc(d.doctorNombre || d.servicioRealizadoPor || '—') + ' · ' + esc(d.fechaLocal ? d.fechaLocal.slice(0,16).replace('T',' ') : '') + '</small>' +
                 '</div>' +
                 '<button class="ed-btn ed-btn-primary" data-caja-id="' + doc.id + '">✅ Pago Liquidado en Caja</button>' +
@@ -2951,6 +2954,113 @@ button.ed-consulta-link {
       });
   }
 
+  /* ─── Catálogos de medicamentos, compartidos entre Consulta y Completar servicio ─── */
+  var MEDS_VISITA_CATS = [
+    { titulo: '🧪 Prueba de sensibilidad', items: [
+      'Prueba de sensibilidad'
+    ] },
+    { titulo: '💉 Inyectable', items: [
+      'Alergil', 'Amikacina', 'Antigripal - Antiviral IM', 'Astriaxona 1g', 'Bixicort',
+      'Citicolina 500mg', 'Clevium', 'Complejo B', 'Dexametasona 8 mg', 'Dexketoprofeno',
+      'Diazepam', 'Diclofenac Sodico', 'DICLO-NEURAXIN', 'Diclosona', 'Dipirona',
+      'DOLGENAL AMP', 'Dramanyl', 'Epinefrina (Pinadrina 1 mg)', 'Esomeprazol 40 mg', 'Ferroin',
+      'Furosemida', 'Gentamicina', 'Glirron', 'Hidrocortisona 100mg', 'Hidrocortisona 500mg',
+      'Hioscina', 'Insulina Cristalina (UI - Unidad Internacional)', 'Labetalol', 'Levofloxacina 750mg / 150ml', 'Metoclopramida',
+      'Metronidazol 500 MG (I.V.)', 'Onemer (Ketorolaco 30mg)', 'Orfenaflex', 'Paracetamol 10mg /100 ml (Benphamol)', 'Penicilina 1.2 millones',
+      'Ranitidina', 'Rofemed 1g', 'Sertal Compuesto', 'Sulfato de Magnesio 10%', 'Tiamina',
+      'TONVAL (Pantoprazol 40mg)', 'Tramadol', 'Ultra-Neuraxin', 'Vitamina K'
+    ] },
+    { titulo: '🧴 Insumos (Sueros)', items: [
+      'Suero Solución Salina 1000 ml', 'Suero Solución Salina 500 ml', 'Suero Solución Salina 250 ml', 'Suero Solución Salina 100 ml',
+      'Suero Hartman 1000 ml', 'Suero Hartman 500 ml', 'Suero Hartman 250 ml', 'Suero Hartman 100 ml',
+      'Suero Mixto 1000 ml', 'Suero Mixto 500 ml', 'Suero Mixto 250 ml', 'Suero Mixto 100 ml',
+      'Suero Dextrosa 1000 ml', 'Suero Dextrosa 500 ml', 'Suero Dextrosa 250 ml', 'Suero Dextrosa 100 ml'
+    ] },
+    { titulo: '🏥 Sueroterapia (En Consultorio)', items: [
+      'Suero de Glucosa'
+    ] },
+    { titulo: '💊 Tabletas / Oral', items: [
+      'Cetirizina', 'Alergil Tabletas'
+    ] }
+  ];
+  var MEDS_DESPACHO_CATS = [
+    { titulo: '🥤 Suspensión', items: [
+      'Acetaminofen', 'Acla-Med', 'Desloratadina 2.5 mg', 'Dilabrom HH', 'Kold-Grip',
+      'Sales de Rehidratacion Oral', 'Tusivanz', 'VISCOF-D', 'CORIVIT'
+    ] },
+    { titulo: '💊 Tableta / Cápsula', items: [
+      'Acetaminofen 500 mg', 'Amoxicilina + Acido Clavulonico 875 mg / 125 mg (Caja de 14 unidades)', 'Azitromicina 500mg', 'Cetirizina 10 MG', 'Ciprofloxacina 500 MG',
+      'Demoxil 500 mg', 'Desloratadina 5 MG', 'Difenac 75mg', 'Fluconazol 150 mg', 'Gastrolev',
+      'Hidrocloratiazida 25 MG', 'Hioscina 10 MG', 'Ibuprofeno 600 MG', 'KoldGrip', 'Levofloxacino 750 mg (Calox)',
+      'Loratadina 10 MG (Lorat)', 'Paracetamol 750 MG', 'Rhinolar 5mg', 'Ultifenol Plus+'
+    ] },
+    { titulo: '🧴 Tópico', items: [
+      'Ketoconazol 2%', 'Septidex', 'Sulfadiazina de Plata', 'Ultifenol Gel'
+    ] },
+    { titulo: '💧 Gotas', items: [
+      'Otan'
+    ] }
+  ];
+  function buildMedsCatsHtml(cats, extraAfterTitle) {
+    return cats.map(function (c) {
+      var html = '<div class="ed-meds-cat">' + c.titulo + '</div>' +
+        c.items.map(function (m) {
+          return '<label class="ed-meds-opt"><input type="checkbox" value="' + esc(m) + '"> ' + esc(m) + '</label>';
+        }).join('');
+      if (extraAfterTitle && c.titulo === extraAfterTitle.titulo) html += extraAfterTitle.html;
+      return html;
+    }).join('');
+  }
+  function buildSensResultadoHtml(prefix) {
+    return '<div class="ed-fgroup full" id="' + prefix + '-sens-wrap" style="display:none;grid-column:1/-1;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:12px;margin:2px 0 6px">' +
+        '<label class="ed-label">🧪 Resultado de la prueba de sensibilidad *</label>' +
+        '<input type="text" class="ed-input" id="' + prefix + '-sens-resultado" placeholder="Ej. Reactiva / No reactiva">' +
+      '</div>';
+  }
+  /* Recolecta checkboxes marcados de una lista de medicamentos (excluye la opción "Ninguno") */
+  function collectChecked(listId) {
+    var out = [];
+    document.querySelectorAll('#' + listId + ' input[type=checkbox]:checked').forEach(function(c){
+      if (c.dataset.medsNinguno !== '1') out.push(c.value);
+    });
+    return out;
+  }
+  function grupoTieneEleccion(listId){
+    return document.querySelectorAll('#' + listId + ' input[type=checkbox]:checked').length > 0;
+  }
+  function grupoEsNinguno(listId){
+    var n = document.querySelector('#' + listId + ' input[data-meds-ninguno="1"]:checked');
+    return !!n;
+  }
+  /* Exclusión mutua "Ninguno" vs medicamentos reales dentro de un grupo */
+  function wireMedsGroupNinguno(listId){
+    var list = $id(listId);
+    if (!list) return;
+    list.addEventListener('change', function(e){
+      var t = e.target;
+      if (!t || t.tagName !== 'INPUT') return;
+      if (t.dataset.medsNinguno === '1' && t.checked) {
+        list.querySelectorAll('input[type=checkbox]').forEach(function(c){
+          if (c !== t) c.checked = false;
+        });
+      } else if (t.checked && t.dataset.medsNinguno !== '1') {
+        var ninguno = list.querySelector('input[data-meds-ninguno="1"]');
+        if (ninguno) ninguno.checked = false;
+      }
+    });
+  }
+  /* Muestra/oculta el campo de resultado de sensibilidad cuando se marca ese medicamento */
+  function wireSensToggle(listId, wrapId){
+    function toggle(){
+      var checked = document.querySelector('#' + listId + ' input[type=checkbox][value="Prueba de sensibilidad"]:checked');
+      var wrap = $id(wrapId);
+      if (wrap) wrap.style.display = checked ? 'block' : 'none';
+    }
+    var list = $id(listId);
+    if (list) list.addEventListener('change', toggle);
+    toggle();
+  }
+
   /* ─── Formulario para completar un servicio pendiente ─── */
   function renderCompletarServicioForm() {
     var cont = $id('consulta-contenido');
@@ -2973,6 +3083,25 @@ button.ed-consulta-link {
         (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.noRequiere ? '<div style="margin-top:8px;font-size:12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px;color:#166534"><strong>🧪 Prueba de sensibilidad:</strong> no necesaria para este medicamento.</div>' : '') +
       '</div>' +
       '<div class="ed-section">' +
+        '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="serv-convertido-consulta"> ❌ Este servicio no se realizó (se convirtió en consulta médica)</label>' +
+      '</div>' +
+      '<div class="ed-section" id="serv-meds-section">' +
+        '<div class="ed-grid ed-grid-2">' +
+          '<div class="ed-fgroup full"><label class="ed-label">💊 Medicamentos aplicados en consulta</label>' +
+            '<div id="serv-meds-visita-list" class="ed-meds-list" data-meds-group="visita">' +
+              buildMedsCatsHtml(MEDS_VISITA_CATS, { titulo: '🧪 Prueba de sensibilidad', html: buildSensResultadoHtml('serv') }) +
+              '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se aplicó ningún medicamento)</label>' +
+            '</div></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">📦 Medicamentos de despacho</label>' +
+            '<div id="serv-meds-despacho-list" class="ed-meds-list" data-meds-group="despacho">' +
+              buildMedsCatsHtml(MEDS_DESPACHO_CATS) +
+              '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se despachan medicamentos)</label>' +
+            '</div></div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">🏥 Receta externa (medicamentos a comprar en farmacia)</label>' +
+            '<textarea class="ed-textarea" id="serv-receta-externa" rows="3" placeholder="Medicamentos que el paciente debe comprar en una farmacia externa (no los vendemos). Indica nombre, dosis, vía y frecuencia."></textarea></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ed-section">' +
         '<div class="ed-grid ed-grid-2">' +
           '<div class="ed-fgroup full"><label class="ed-label">Notas de finalización (opcional)</label>' +
             '<textarea class="ed-textarea" id="serv-notas-fin" rows="2" placeholder="Observaciones al completar el servicio"></textarea></div>' +
@@ -2986,6 +3115,17 @@ button.ed-consulta-link {
 
     $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
     $id('btn-completar-servicio').addEventListener('click', completarServicio);
+
+    wireSensToggle('serv-meds-visita-list', 'serv-sens-wrap');
+    ['serv-meds-visita-list', 'serv-meds-despacho-list'].forEach(wireMedsGroupNinguno);
+
+    var convertidoChk = $id('serv-convertido-consulta');
+    var medsSection = $id('serv-meds-section');
+    if (convertidoChk) {
+      convertidoChk.addEventListener('change', function () {
+        if (medsSection) medsSection.style.display = this.checked ? 'none' : '';
+      });
+    }
   }
 
   /* ─── Marcar servicio como completado (status:'servicio-completo') ─── */
@@ -2994,6 +3134,7 @@ button.ed-consulta-link {
     /* DRM v3 #6: si el servicio está vinculado a una consulta padre, va al mismo grupo;
        si es standalone, genera su propio pendiente_caja. */
     var esVinculado = !!consultaPendienteCargada.consultaPadreId;
+    var convertidoConsulta = !!($id('serv-convertido-consulta') && $id('serv-convertido-consulta').checked);
     var updateData = {
       status: esVinculado ? 'servicio-completo' : 'pendiente_caja',
       tipoRegistro: esVinculado ? 'servicio-vinculado' : 'servicio-standalone',
@@ -3001,8 +3142,18 @@ button.ed-consulta-link {
       fechaLocal: new Date().toISOString(),
       servicioNotasFin: $val('serv-notas-fin'),
       servicioRealizadoPor: $val('serv-realizado-por'),
-      doctorEmail: cmgAuth.currentUser.email
+      doctorEmail: cmgAuth.currentUser.email,
+      convertidoConsulta: convertidoConsulta
     };
+    if (!convertidoConsulta) {
+      var medsVisitaServ = collectChecked('serv-meds-visita-list');
+      updateData.medicamentosVisita = medsVisitaServ;
+      updateData.medicamentosDespacho = collectChecked('serv-meds-despacho-list');
+      updateData.recetaExterna = $val('serv-receta-externa');
+      if (medsVisitaServ.indexOf('Prueba de sensibilidad') !== -1) {
+        updateData.resultadoPruebaSensibilidad = $val('serv-sens-resultado');
+      }
+    }
     showOverlay('Completando servicio...');
     cmgDb.collection('consultas').doc(consultaPendienteCargada._id).update(updateData)
       .then(function () {
@@ -3067,69 +3218,6 @@ button.ed-consulta-link {
     if (sv.spo2) chips.push('<span class="ed-vital-chip"><strong>SpO2:</strong> ' + esc(sv.spo2) + '%</span>');
     if (sv.glucosa) chips.push('<span class="ed-vital-chip"><strong>Glucosa:</strong> ' + esc(sv.glucosa) + '</span>');
 
-    /* Catálogo de medicamentos aplicados en la visita, agrupado por categoría */
-    var MEDS_VISITA_CATS = [
-      { titulo: '🧪 Prueba de sensibilidad', items: [
-        'Prueba de sensibilidad'
-      ] },
-      { titulo: '💉 Inyectable', items: [
-        'Alergil', 'Amikacina', 'Antigripal - Antiviral IM', 'Astriaxona 1g', 'Bixicort',
-        'Citicolina 500mg', 'Clevium', 'Complejo B', 'Dexametasona 8 mg', 'Dexketoprofeno',
-        'Diazepam', 'Diclofenac Sodico', 'DICLO-NEURAXIN', 'Diclosona', 'Dipirona',
-        'DOLGENAL AMP', 'Dramanyl', 'Epinefrina (Pinadrina 1 mg)', 'Esomeprazol 40 mg', 'Ferroin',
-        'Furosemida', 'Gentamicina', 'Glirron', 'Hidrocortisona 100mg', 'Hidrocortisona 500mg',
-        'Hioscina', 'Insulina Cristalina (UI - Unidad Internacional)', 'Labetalol', 'Levofloxacina 750mg / 150ml', 'Metoclopramida',
-        'Metronidazol 500 MG (I.V.)', 'Onemer (Ketorolaco 30mg)', 'Orfenaflex', 'Paracetamol 10mg /100 ml (Benphamol)', 'Penicilina 1.2 millones',
-        'Ranitidina', 'Rofemed 1g', 'Sertal Compuesto', 'Sulfato de Magnesio 10%', 'Tiamina',
-        'TONVAL (Pantoprazol 40mg)', 'Tramadol', 'Ultra-Neuraxin', 'Vitamina K'
-      ] },
-      { titulo: '🧴 Insumos (Sueros)', items: [
-        'Suero Solución Salina 1000 ml', 'Suero Solución Salina 500 ml', 'Suero Solución Salina 250 ml', 'Suero Solución Salina 100 ml',
-        'Suero Hartman 1000 ml', 'Suero Hartman 500 ml', 'Suero Hartman 250 ml', 'Suero Hartman 100 ml',
-        'Suero Mixto 1000 ml', 'Suero Mixto 500 ml', 'Suero Mixto 250 ml', 'Suero Mixto 100 ml',
-        'Suero Dextrosa 1000 ml', 'Suero Dextrosa 500 ml', 'Suero Dextrosa 250 ml', 'Suero Dextrosa 100 ml'
-      ] },
-      { titulo: '🏥 Sueroterapia (En Consultorio)', items: [
-        'Suero de Glucosa'
-      ] },
-      { titulo: '💊 Tabletas / Oral', items: [
-        'Cetirizina', 'Alergil Tabletas'
-      ] }
-    ];
-    /* Catálogo de medicamentos de despacho, agrupado por categoría */
-    var MEDS_DESPACHO_CATS = [
-      { titulo: '🥤 Suspensión', items: [
-        'Acetaminofen', 'Acla-Med', 'Desloratadina 2.5 mg', 'Dilabrom HH', 'Kold-Grip',
-        'Sales de Rehidratacion Oral', 'Tusivanz', 'VISCOF-D', 'CORIVIT'
-      ] },
-      { titulo: '💊 Tableta / Cápsula', items: [
-        'Acetaminofen 500 mg', 'Amoxicilina + Acido Clavulonico 875 mg / 125 mg (Caja de 14 unidades)', 'Azitromicina 500mg', 'Cetirizina 10 MG', 'Ciprofloxacina 500 MG',
-        'Demoxil 500 mg', 'Desloratadina 5 MG', 'Difenac 75mg', 'Fluconazol 150 mg', 'Gastrolev',
-        'Hidrocloratiazida 25 MG', 'Hioscina 10 MG', 'Ibuprofeno 600 MG', 'KoldGrip', 'Levofloxacino 750 mg (Calox)',
-        'Loratadina 10 MG (Lorat)', 'Paracetamol 750 MG', 'Rhinolar 5mg', 'Ultifenol Plus+'
-      ] },
-      { titulo: '🧴 Tópico', items: [
-        'Ketoconazol 2%', 'Septidex', 'Sulfadiazina de Plata', 'Ultifenol Gel'
-      ] },
-      { titulo: '💧 Gotas', items: [
-        'Otan'
-      ] }
-    ];
-    function buildMedsCatsHtml(cats, extraAfterTitle) {
-      return cats.map(function (c) {
-        var html = '<div class="ed-meds-cat">' + c.titulo + '</div>' +
-          c.items.map(function (m) {
-            return '<label class="ed-meds-opt"><input type="checkbox" value="' + esc(m) + '"> ' + esc(m) + '</label>';
-          }).join('');
-        if (extraAfterTitle && c.titulo === extraAfterTitle.titulo) html += extraAfterTitle.html;
-        return html;
-      }).join('');
-    }
-    var SENS_RESULTADO_HTML =
-      '<div class="ed-fgroup full" id="cons-sens-wrap" style="display:none;grid-column:1/-1;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:12px;margin:2px 0 6px">' +
-        '<label class="ed-label">🧪 Resultado de la prueba de sensibilidad *</label>' +
-        '<input type="text" class="ed-input" id="cons-sens-resultado" placeholder="Ej. Reactiva / No reactiva">' +
-      '</div>';
 
     cont.innerHTML =
       '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
@@ -3160,7 +3248,7 @@ button.ed-consulta-link {
           /* DRM Fun-8 + v3.6: Plan/Tratamiento dividido + opción explícita "Ninguno" */
           '<div class="ed-fgroup full"><label class="ed-label">💊 Medicamentos aplicados en la visita *</label>' +
             '<div id="cons-meds-visita-list" class="ed-meds-list" data-meds-group="visita">' +
-              buildMedsCatsHtml(MEDS_VISITA_CATS, { titulo: '🧪 Prueba de sensibilidad', html: SENS_RESULTADO_HTML }) +
+              buildMedsCatsHtml(MEDS_VISITA_CATS, { titulo: '🧪 Prueba de sensibilidad', html: buildSensResultadoHtml('cons') }) +
               '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se aplicó ningún medicamento en la visita)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">📦 Medicamentos de despacho *</label>' +
@@ -3271,34 +3359,10 @@ button.ed-consulta-link {
     });
 
     /* Toggle del campo de resultado de prueba de sensibilidad cuando se marca ese medicamento */
-    function toggleSensResultado(){
-      var checked = document.querySelector('#cons-meds-visita-list input[type=checkbox][value="Prueba de sensibilidad"]:checked');
-      var wrap = $id('cons-sens-wrap');
-      if (wrap) wrap.style.display = checked ? 'block' : 'none';
-    }
-    var consMedsVisitaList = $id('cons-meds-visita-list');
-    if (consMedsVisitaList) consMedsVisitaList.addEventListener('change', toggleSensResultado);
-    toggleSensResultado();
+    wireSensToggle('cons-meds-visita-list', 'cons-sens-wrap');
 
     /* DRM v3.6: exclusión mutua "Ninguno" vs medicamentos reales en cada grupo */
-    ['cons-meds-visita-list', 'cons-meds-despacho-list'].forEach(function(listId){
-      var list = $id(listId);
-      if (!list) return;
-      list.addEventListener('change', function(e){
-        var t = e.target;
-        if (!t || t.tagName !== 'INPUT') return;
-        if (t.dataset.medsNinguno === '1' && t.checked) {
-          /* Marcaron "Ninguno" → desmarcar todos los medicamentos reales */
-          list.querySelectorAll('input[type=checkbox]').forEach(function(c){
-            if (c !== t) c.checked = false;
-          });
-        } else if (t.checked && t.dataset.medsNinguno !== '1') {
-          /* Marcaron un medicamento real → desmarcar "Ninguno" */
-          var ninguno = list.querySelector('input[data-meds-ninguno="1"]');
-          if (ninguno) ninguno.checked = false;
-        }
-      });
-    });
+    ['cons-meds-visita-list', 'cons-meds-despacho-list'].forEach(wireMedsGroupNinguno);
   }
 
   /* DRM v3 #3 + v3.1 + v3.3: modal para solicitar exámenes, 141 ítems agrupados + buscador */
@@ -3599,20 +3663,6 @@ button.ed-consulta-link {
     if (!medico)       faltantes.push('Médico tratante');
 
     /* DRM Fun-8 + v3.6: recolectar medicamentos, validar que cada grupo tenga elección (real o "Ninguno") */
-    function collectChecked(listId) {
-      var out = [];
-      document.querySelectorAll('#' + listId + ' input[type=checkbox]:checked').forEach(function(c){
-        if (c.dataset.medsNinguno !== '1') out.push(c.value);
-      });
-      return out;
-    }
-    function grupoTieneEleccion(listId){
-      return document.querySelectorAll('#' + listId + ' input[type=checkbox]:checked').length > 0;
-    }
-    function grupoEsNinguno(listId){
-      var n = document.querySelector('#' + listId + ' input[data-meds-ninguno="1"]:checked');
-      return !!n;
-    }
     var medsVisita   = collectChecked('cons-meds-visita-list');
     var medsDespacho = collectChecked('cons-meds-despacho-list');
     var recetaExterna = $val('cons-receta-externa');
@@ -4027,6 +4077,7 @@ button.ed-consulta-link {
       var badge = '';
       if (esServicioCompleto)  badge = ' <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🛎️ Servicio completado</span>';
       if (esServicioPendiente) badge = ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🕐 Servicio pendiente</span>';
+      if (c.convertidoConsulta) badge += ' <span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🔄 Convertido en consulta</span>';
 
       var fechaDisplay = c.fecha || c.fechaServicio;
       var titulo = esServicio

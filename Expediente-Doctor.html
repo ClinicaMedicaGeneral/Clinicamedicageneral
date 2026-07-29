@@ -4237,10 +4237,13 @@ button.ed-consulta-link {
     var esServicioPendiente = esServicio && c.status === 'servicio';
     var esServicioCompleto  = esServicio && !esServicioPendiente;
 
+    /* Si el servicio se marcó como "no realizado, se convirtió en consulta", esa
+       etiqueta manda: no tiene sentido mostrar "Procedimiento completado" al lado
+       cuando en realidad el procedimiento NUNCA se hizo. */
     var badge = '<span style="background:#DBEAFE;color:#1E40AF;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🩺 Consulta</span>';
     if (esServicioCompleto)  badge = ' <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🛎️ Procedimiento completado</span>';
     if (esServicioPendiente) badge = ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🕐 Procedimiento pendiente</span>';
-    if (c.convertidoConsulta) badge += ' <span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🔄 Convertido en consulta</span>';
+    if (c.convertidoConsulta) badge = ' <span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">❌ Servicio NO realizado · convertido en consulta</span>';
 
     var titulo = esServicio
       ? esc(c.servicioNombre || 'Servicio')

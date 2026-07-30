@@ -1792,6 +1792,15 @@ button.ed-consulta-link {
   function esAdminUnif() {
     return !!(cmgAuth.currentUser && _isAdminUnifCache);
   }
+
+  /* Resuelto de forma async en el AUTH GUARD (cmgStaff.checkMedico) y cacheado
+     aquí para uso síncrono al renderizar la pestaña Consulta: enfermería no
+     debe poder ni abrir el formulario de Consulta médica (Etapa 3), solo
+     médico/admin. Un Servicio sí lo puede cerrar enfermería, sin restricción. */
+  var _isMedicoTratanteCache = false;
+  function esMedicoTratanteClient() {
+    return !!(cmgAuth.currentUser && _isMedicoTratanteCache);
+  }
   var unifA = null, unifB = null;
   function renderUnificarTab() {
     unifA = null; unifB = null;
@@ -2064,6 +2073,12 @@ button.ed-consulta-link {
       }
       /* Cachea si es admin, para esAdminUnif() (uso síncrono en la pestaña Unificar) */
       cmgStaff.checkAdmin(user, function (isAdm) { _isAdminUnifCache = isAdm; });
+      /* Cachea si es médico tratante, para esMedicoTratanteClient() (uso síncrono
+         en la pestaña Consulta: oculta/bloquea la Consulta médica a enfermería) */
+      cmgStaff.checkMedico(user, function (isMed) {
+        _isMedicoTratanteCache = isMed;
+        if ($id('tab-consulta').style.display !== 'none') renderConsultaTab();
+      });
       /* Mostrar nombre del doctor */
       $id('ed-user-chip').style.display = '';
       var _edN = user.displayName || user.email.split('@')[0]; if (user.email === 'skarleth.admoncmg@gmail.com') { _edN = 'Ing. ' + _edN; var _t = $id('ed-user-title'); if (_t) _t.textContent = ''; } $id('ed-user-name').textContent = _edN;
@@ -2950,6 +2965,12 @@ button.ed-consulta-link {
           var fechaMostrar = it.fechaPreclinica || it.fechaServicio;
           var registradoPor = it.preclinicaPor || it.servicioPor || '—';
           var btnLabel = esServicio ? 'Completar →' : 'Continuar →';
+          /* Consulta (no Servicio) es exclusiva de médico/admin: enfermería ni
+             siquiera puede abrir el formulario, solo ver que está pendiente. */
+          var puedeEntrar = esServicio || esMedicoTratanteClient();
+          var btnHtml = puedeEntrar
+            ? '<button class="ed-btn ed-btn-yellow" data-continuar="' + esc(it._id) + '">' + btnLabel + '</button>'
+            : '<span class="ed-btn" style="background:#E5E7EB;color:#6B7280;cursor:not-allowed" title="Solo médico o admin puede completar una Consulta">🔒 Solo médico</span>';
           return '<div class="ed-pending-item">' +
             '<div class="ed-pending-info">' +
               '<p class="ed-pending-name">' + esc(it.pacienteNombre || it.codigoPaciente) + badge +
@@ -2958,7 +2979,7 @@ button.ed-consulta-link {
               infoExtra +
             '</div>' +
             '<div style="display:flex;flex-direction:column;gap:6px;align-items:stretch">' +
-              '<button class="ed-btn ed-btn-yellow" data-continuar="' + esc(it._id) + '">' + btnLabel + '</button>' +
+              btnHtml +
               '<button class="ed-consulta-link ed-link-red" data-borrar-pendiente="' + esc(it._id) + '" style="font-size:11px;text-align:center">🗑️ Quitar</button>' +
             '</div>' +
           '</div>';
@@ -3825,6 +3846,13 @@ button.ed-consulta-link {
       .then(function (snap) {
         if (!snap.exists) throw new Error('Registro no encontrado');
         var data = snap.data();
+        /* Consulta (no Servicio) es exclusiva de médico/admin: enfermería ni
+           siquiera puede abrir el formulario, aunque llegue aquí por otra vía. */
+        if (data.status !== 'listo_enfermeria' && data.status !== 'servicio' && !esMedicoTratanteClient()) {
+          hideOverlay();
+          showAlert('Esta Consulta médica solo puede completarla un médico o admin.', 'error');
+          return;
+        }
         /* Cargar paciente */
         return cmgDb.collection('expedientes').doc(data.codigoPaciente).get()
           .then(function (psnap) {

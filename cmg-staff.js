@@ -55,6 +55,17 @@
       if (!user) { cb(false); return; }
       if (STAFF_EMAILS.indexOf((user.email || '').toLowerCase()) !== -1) { cb(true); return; }
       firestoreRole(user.uid, function (rol) { cb(rol === 'medico' || rol === 'enf' || rol === 'admin'); });
+    },
+    // checkMedico: SOLO médico (rol medico | admin, o correos de doctores).
+    // Mismo criterio que isMedicoTratante() en firestore.rules — enfermería
+    // (rol enf) NO debe pasar esto. Se usa para ocultar/bloquear en el cliente
+    // la Etapa de Consulta médica (diagnóstico/tratamiento), que solo puede
+    // completar el médico tratante o un admin.
+    checkMedico: function (user, cb) {
+      if (!user) { cb(false); return; }
+      var MEDICO_EMAILS = ADMIN_EMAILS.concat(['reneherrerarojas667@gmail.com']);
+      if (MEDICO_EMAILS.indexOf((user.email || '').toLowerCase()) !== -1) { cb(true); return; }
+      firestoreRole(user.uid, function (rol) { cb(rol === 'medico' || rol === 'admin'); });
     }
   };
 })(window);

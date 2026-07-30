@@ -319,10 +319,10 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
         <div class="ek-strip-empty">Sin imagen adjunta. Espacio reservado para el trazo del electrocardiograma.</div>
       </div>
 
-      <!-- Firma: no se interpreta el trazo, se muestra la firma genérica de los médicos de la clínica -->
+      <!-- Firma: médico tratante que finalizó el servicio (no interpreta el trazo) -->
       <div class="ek-firma">
         <div class="ek-firma-box">
-          <b>Doctor Rojas/Hermes/Alvarez</b>
+          <b id="ek-medico-nombre">—</b>
           <small>Médico General · Clínica Médica General CMG</small>
         </div>
       </div>
@@ -395,6 +395,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     if (data.imagenUrl) {
       $('ek-strip').innerHTML = '<img src="' + esc(data.imagenUrl) + '" alt="Electrocardiograma">';
     }
+    $('ek-medico-nombre').textContent = data.medico || '—';
     $('ek-loading').style.display = 'none';
     $('ek-container').style.display = '';
     document.title = 'EKG ' + (data.pacienteNombre || '') + ' · CMG';

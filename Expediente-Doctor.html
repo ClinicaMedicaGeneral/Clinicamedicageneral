@@ -5260,6 +5260,34 @@ button.ed-consulta-link {
         }
         var arr = [];
         snap.forEach(function(d){ arr.push(Object.assign({ _id: d.id }, d.data())); });
+
+        /* DRM: órdenes creadas antes de guardar fechaNacimiento/dni en el propio
+           documento se completan aquí consultando el expediente por su código. */
+        var codigosFaltantes = [];
+        arr.forEach(function(ex){
+          if (ex.codigoPaciente && (!ex.fechaNacimiento || !ex.dni) && codigosFaltantes.indexOf(ex.codigoPaciente) === -1) {
+            codigosFaltantes.push(ex.codigoPaciente);
+          }
+        });
+        var completarDatos = codigosFaltantes.length
+          ? Promise.all(codigosFaltantes.map(function(cod){
+              return cmgDb.collection('expedientes').doc(cod).get().then(function(doc){
+                return { codigo: cod, dg: doc.exists ? (doc.data().datosGenerales || {}) : null };
+              });
+            }))
+          : Promise.resolve([]);
+
+        completarDatos.then(function(resultados){
+        var dgPorCodigo = {};
+        resultados.forEach(function(r){ if (r.dg) dgPorCodigo[r.codigo] = r.dg; });
+        arr.forEach(function(ex){
+          var dg = ex.codigoPaciente && dgPorCodigo[ex.codigoPaciente];
+          if (dg) {
+            if (!ex.fechaNacimiento) ex.fechaNacimiento = dg.fechaNacimiento || '';
+            if (!ex.dni) ex.dni = dg.numeroIdentidad || '';
+          }
+        });
+
         arr.sort(function(a, b){
           /* Urgentes primero, luego por fecha desc */
           var ua = a.prioridad === 'urgente' ? 1 : 0;
@@ -5313,6 +5341,7 @@ button.ed-consulta-link {
         box.querySelectorAll('[data-subir-orden]').forEach(function(b){
           b.addEventListener('click', function(){ abrirSubirResultadoModal(this.getAttribute('data-subir-orden')); });
         });
+        }); /* fin completarDatos.then */
       })
       .catch(function(err){
         box.innerHTML = '<div style="color:#b91c1c">Error: ' + esc(err.message) + '</div>';

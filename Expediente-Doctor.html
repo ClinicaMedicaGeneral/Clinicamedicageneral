@@ -1351,6 +1351,7 @@ button.ed-consulta-link {
       'Inyección intramuscular (IM)', 'Inyección intravenosa (IV)'
     ]},
     { label: 'Sueroterapias', items: [
+      'Aplicación de Suero',
       'Sueroterapia Complejo B', 'Sueroterapia Oxigenador Cerebral',
       'Sueroterapia Vitamina C', 'Sueroterapia Vitamina D',
       'Sueroterapia Hígado Detox', 'Sueroterapia Boost (Complejo B + Oxigenador)',
@@ -3000,7 +3001,7 @@ button.ed-consulta-link {
           var sv = it.signosVitales || {};
           var chips = [];
           if (!esServicio) {
-            if (sv.ta)   chips.push('TA ' + esc(sv.ta));
+            if (sv.ta)   chips.push('PA ' + esc(sv.ta));
             if (sv.fc)   chips.push('FC ' + esc(sv.fc));
             if (sv.temp) chips.push('T° ' + esc(sv.temp));
             if (sv.spo2) chips.push('SpO2 ' + esc(sv.spo2) + '%');
@@ -3237,6 +3238,13 @@ button.ed-consulta-link {
     '</div>';
   }
 
+  /* DRM: "Sueroterapia*" y "Aplicación de Suero" comparten reglas de enfermería:
+     signos vitales obligatorios y, específicamente, glucometría obligatoria
+     (no basta con cualquier signo vital) antes de poder avanzar a médico. */
+  function esServicioSuero(nombre) {
+    return /^(Sueroterapia|Aplicaci[oó]n de Suero)/i.test(nombre || '');
+  }
+
   /* ─── Formulario de atención de Enfermería (Etapa 2) para un registro
      'listo_enfermeria'. Toma signos vitales (obligatorios solo en Consulta y
      Sueroterapias, opcionales en el resto) y, si aplica, la prueba de
@@ -3253,7 +3261,8 @@ button.ed-consulta-link {
     var it = consultaPendienteCargada;
     var esServicio = it.tipo === 'servicio';
     var esInyeccion = esServicio && /\((IM|IV)\)/.test(it.servicioNombre || '');
-    var vitalesObligatorios = !esServicio || /^Sueroterapia/i.test(it.servicioNombre || '');
+    var esSuero = esServicio && esServicioSuero(it.servicioNombre);
+    var vitalesObligatorios = !esServicio || esSuero;
 
     cont.innerHTML =
       '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
@@ -3264,15 +3273,16 @@ button.ed-consulta-link {
       '</div>' +
       (it.notasRegistro ? '<div style="font-size:12px;color:#374151;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;margin-bottom:12px"><strong>Notas de registro (Caja):</strong> ' + esc(it.notasRegistro) + '</div>' : '') +
       '<div class="ed-section-title">📊 Signos vitales' + (vitalesObligatorios ? ' *' : ' (opcional para este servicio)') + '</div>' +
+      (esSuero ? '<p style="font-size:12px;color:#92400E;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:8px 12px;margin:0 0 10px">🩸 La glucometría es obligatoria para sueroterapias y no se puede avanzar a médico sin registrarla.</p>' : '') +
       '<div class="ed-vitals">' +
         '<div class="ed-vital"><div class="ed-vital-label">FC (lpm)</div><input id="enf-fc"></div>' +
         '<div class="ed-vital"><div class="ed-vital-label">SpO2 (%)</div><input id="enf-spo2"></div>' +
-        '<div class="ed-vital"><div class="ed-vital-label">TA (mmHg)</div><input id="enf-ta"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">PA (mmHg)</div><input id="enf-ta"></div>' +
         '<div class="ed-vital"><div class="ed-vital-label">Temp (°C)</div><input id="enf-temp"></div>' +
         '<div class="ed-vital"><div class="ed-vital-label">Peso (kg)</div><input id="enf-peso"></div>' +
         '<div class="ed-vital"><div class="ed-vital-label">Talla (m)</div><input id="enf-talla"></div>' +
         '<div class="ed-vital"><div class="ed-vital-label">IMC</div><input id="enf-imc" placeholder="—" readonly style="background:#F3F4F6;cursor:default;font-weight:700;color:#213C7D"></div>' +
-        '<div class="ed-vital"><div class="ed-vital-label">Glucosa (mg/dL)</div><input id="enf-glucosa"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">Glucosa (mg/dL)' + (esSuero ? ' *' : '') + '</div><input id="enf-glucosa"></div>' +
       '</div>' +
       (!esServicio
         ? '<div class="ed-section">' +
@@ -3353,7 +3363,8 @@ button.ed-consulta-link {
     var it = consultaPendienteCargada;
     var esServicio = it.tipo === 'servicio';
     var esInyeccion = esServicio && /\((IM|IV)\)/.test(it.servicioNombre || '');
-    var vitalesObligatorios = !esServicio || /^Sueroterapia/i.test(it.servicioNombre || '');
+    var esSuero = esServicio && esServicioSuero(it.servicioNombre);
+    var vitalesObligatorios = !esServicio || esSuero;
 
     var vitales = {
       fc: $val('enf-fc'), spo2: $val('enf-spo2'), ta: $val('enf-ta'),
@@ -3361,6 +3372,13 @@ button.ed-consulta-link {
       imc: $val('enf-imc'), glucosa: $val('enf-glucosa')
     };
     var algunaVital = Object.keys(vitales).some(function (k) { return vitales[k]; });
+
+    /* DRM: para sueroterapias (y Aplicación de Suero) la glucometría es
+       específicamente obligatoria — no basta con cualquier signo vital. */
+    if (esSuero && !vitales.glucosa) {
+      showAlert('La glucometría es obligatoria antes de continuar con esta sueroterapia.', 'error');
+      return;
+    }
 
     if (vitalesObligatorios && !algunaVital) {
       showAlert('Registra al menos un signo vital. Es obligatorio para ' + (esServicio ? 'esta sueroterapia' : 'la consulta') + '.', 'error');
@@ -3927,7 +3945,7 @@ button.ed-consulta-link {
   function buildVitalsChipsHtml(sv) {
     sv = sv || {};
     var chips = [];
-    if (sv.ta) chips.push('<span class="ed-vital-chip"><strong>TA:</strong> ' + esc(sv.ta) + '</span>');
+    if (sv.ta) chips.push('<span class="ed-vital-chip"><strong>PA:</strong> ' + esc(sv.ta) + '</span>');
     if (sv.fc) chips.push('<span class="ed-vital-chip"><strong>FC:</strong> ' + esc(sv.fc) + '</span>');
     if (sv.fr) chips.push('<span class="ed-vital-chip"><strong>FR:</strong> ' + esc(sv.fr) + '</span>');
     if (sv.temp) chips.push('<span class="ed-vital-chip"><strong>T°:</strong> ' + esc(sv.temp) + '</span>');
@@ -4542,7 +4560,7 @@ button.ed-consulta-link {
 
     var sv = consulta.signosVitales;
     var vitalsLine = [];
-    if (sv.ta) vitalsLine.push('TA: ' + sv.ta);
+    if (sv.ta) vitalsLine.push('PA: ' + sv.ta);
     if (sv.fc) vitalsLine.push('FC: ' + sv.fc);
     if (sv.fr) vitalsLine.push('FR: ' + sv.fr);
     if (sv.temp) vitalsLine.push('T°: ' + sv.temp + '°C');

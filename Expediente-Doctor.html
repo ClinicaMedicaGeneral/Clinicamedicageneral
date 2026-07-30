@@ -691,6 +691,20 @@ button.ed-consulta-link {
 }
 .ed-pt-table tr:last-child td { border-bottom: none; }
 .ed-pt-table tr:hover td { background: #F9FAFB; cursor: pointer; }
+.ed-pt-table tr.is-selected td { background: #FFF9E0; }
+.ed-pt-table tr.is-selected td:first-child { border-left: 3px solid #FDD22C; }
+.ed-pt-table tr.is-selected:hover td { background: #FFF3C4; }
+.ed-pt-selected-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  background: #213C7D;
+  color: #FDD22C;
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
 .ed-pt-code-chip {
   font-family: 'Courier New', monospace;
   font-size: 11px;
@@ -2278,8 +2292,10 @@ button.ed-consulta-link {
       var dg = p.datosGenerales || {};
       var edad = calcEdad(dg.fechaNacimiento);
       var fecha = p.createdAt ? fmtDate(p.createdAt).split('·')[0].trim() : '—';
-      html += '<tr data-codigo="' + esc(p.codigoPaciente) + '">' +
+      var esSeleccionado = !!(pacienteActual && pacienteActual.codigoPaciente === p.codigoPaciente);
+      html += '<tr data-codigo="' + esc(p.codigoPaciente) + '"' + (esSeleccionado ? ' class="is-selected"' : '') + '>' +
         '<td><strong>' + esc(dg.nombreCompleto || '—') + '</strong>' +
+          (esSeleccionado ? '<span class="ed-pt-selected-badge">✓ Actual</span>' : '') +
           (dg.sexo ? '<br><span style="font-size:11px;color:#6B7280">' + (dg.sexo === 'M' ? 'Masculino' : dg.sexo === 'F' ? 'Femenino' : dg.sexo) + '</span>' : '') +
         '</td>' +
         '<td>' + (dg.tipoIdentidad && dg.tipoIdentidad !== 'dni' ? '<span style="font-size:10px;font-weight:700;background:#F3F4F6;color:#374151;padding:1px 5px;border-radius:10px;margin-right:4px">' + (dg.tipoIdentidad === 'residencia' ? '🟡 RES' : '🌎 EXT') + '</span>' : '') + esc(dg.numeroIdentidad || '—') + '</td>' +

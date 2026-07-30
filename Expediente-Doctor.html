@@ -1522,6 +1522,27 @@ button.ed-consulta-link {
            ' · ' + d.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
   }
 
+  /* DRM: milisegundos para ordenar por fecha. Soporta Timestamp de Firestore,
+     Date, string/millis, y el caso de un serverTimestamp() recién escrito que
+     aún no resolvió en el cache local (llega como null) — ese caso se trata
+     como "ahora" (el más reciente), no como epoch 0, para no romper el orden
+     cronológico de listas que se refrescan justo después de guardar. */
+  function tsMillis(ts) {
+    if (!ts) return Date.now();
+    if (ts.toMillis) return ts.toMillis();
+    if (typeof ts.seconds === 'number') return ts.seconds * 1000;
+    var d = ts instanceof Date ? ts : new Date(ts);
+    return isNaN(d.getTime()) ? Date.now() : d.getTime();
+  }
+
+  /* Formatea una fecha cruda "YYYY-MM-DD" (de <input type="date">) a día/mes/año */
+  function fmtFechaCorta(fechaStr) {
+    if (!fechaStr) return '';
+    var d = new Date(fechaStr + 'T00:00:00');
+    if (isNaN(d.getTime())) return fechaStr;
+    return d.toLocaleDateString('es-HN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
   function calcEdad(fechaNac) {
     if (!fechaNac) return '';
     var fn = new Date(fechaNac);
@@ -2892,8 +2913,8 @@ button.ed-consulta-link {
         var items = [];
         snap.forEach(function (d) { items.push(Object.assign({ _id: d.id }, d.data())); });
         items.sort(function (a, b) {
-          var ta = a.fechaRegistro && a.fechaRegistro.toMillis ? a.fechaRegistro.toMillis() : 0;
-          var tb = b.fechaRegistro && b.fechaRegistro.toMillis ? b.fechaRegistro.toMillis() : 0;
+          var ta = tsMillis(a.fechaRegistro);
+          var tb = tsMillis(b.fechaRegistro);
           return tb - ta;
         });
         if (!items.length) {
@@ -2966,8 +2987,7 @@ button.ed-consulta-link {
         snap.forEach(function (d) { items.push(Object.assign({ _id: d.id }, d.data())); });
         items.sort(function (a, b) {
           var getFecha = function (it) {
-            var f = it.fechaPreclinica || it.fechaServicio;
-            return f && f.toMillis ? f.toMillis() : 0;
+            return tsMillis(it.fechaPreclinica || it.fechaServicio);
           };
           return getFecha(b) - getFecha(a);
         });
@@ -5028,8 +5048,8 @@ button.ed-consulta-link {
           }
 
           arr.sort(function (a, b) {
-            var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
-            var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+            var ta = tsMillis(a.createdAt);
+            var tb = tsMillis(b.createdAt);
             return tb - ta;
           });
           renderPruebasLista(arr, pendientesVincular.length, sufijo);
@@ -5061,12 +5081,12 @@ button.ed-consulta-link {
         var arr = [];
         snap.forEach(function(d){ arr.push(Object.assign({ _id: d.id }, d.data())); });
         arr.sort(function(a, b){
-          var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
-          var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+          var ta = tsMillis(a.createdAt);
+          var tb = tsMillis(b.createdAt);
           return tb - ta;
         });
         box.innerHTML = arr.map(function(pr){
-          var fecha = (pr.createdAt && pr.createdAt.toMillis) ? new Date(pr.createdAt.toMillis()).toLocaleString('es-HN') : (pr.fecha || '—');
+          var fecha = (pr.createdAt && pr.createdAt.toMillis) ? new Date(pr.createdAt.toMillis()).toLocaleString('es-HN') : (fmtFechaCorta(pr.fecha) || '—');
           var nombrePaciente = pr.nombre || pr.pacienteNombreExpediente || '— sin paciente —';
           return '<div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:10px;padding:12px;margin-bottom:8px">' +
             '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">' +
@@ -5114,7 +5134,7 @@ button.ed-consulta-link {
           return '<strong>' + esc(k) + ':</strong> ' + esc(pr.resultados[k]);
         }).join(' · ');
       }
-      var fechaTxt = pr.fecha || (pr.createdAt && pr.createdAt.toMillis ? new Date(pr.createdAt.toMillis()).toLocaleDateString('es-HN') : '—');
+      var fechaTxt = fmtFechaCorta(pr.fecha) || (pr.createdAt && pr.createdAt.toMillis ? new Date(pr.createdAt.toMillis()).toLocaleDateString('es-HN') : '—');
       return '<div class="ed-consulta-item">' +
         '<div style="flex:1;min-width:0">' +
           '<div class="ed-consulta-fecha">' + (labels[pr.tipo] || '🧪 ' + esc(pr.tipo)) + ' · 📅 ' + esc(fechaTxt) + (pr.horaToma ? ' ' + esc(pr.horaToma) : '') + '</div>' +
@@ -5227,8 +5247,8 @@ button.ed-consulta-link {
           }
 
           arr.sort(function (a, b) {
-            var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
-            var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+            var ta = tsMillis(a.createdAt);
+            var tb = tsMillis(b.createdAt);
             return tb - ta;
           });
           /* Solo render de CONFIRMADOS del paciente (los pendientes se cargan globalmente) */
@@ -5293,8 +5313,8 @@ button.ed-consulta-link {
           var ua = a.prioridad === 'urgente' ? 1 : 0;
           var ub = b.prioridad === 'urgente' ? 1 : 0;
           if (ua !== ub) return ub - ua;
-          var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
-          var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+          var ta = tsMillis(a.createdAt);
+          var tb = tsMillis(b.createdAt);
           return tb - ta;
         });
         box.innerHTML = arr.map(function(ex){
@@ -5313,7 +5333,7 @@ button.ed-consulta-link {
                 '</div>' +
                 '<div style="font-size:12px;color:#6B7280;margin-top:2px">' +
                   '🪪 ' + (ex.dni ? esc(ex.dni) : 'Sin DNI') +
-                  ' · 🎂 ' + (ex.fechaNacimiento ? esc(ex.fechaNacimiento) : 'Sin fecha de nacimiento') +
+                  ' · 🎂 ' + (ex.fechaNacimiento ? esc(fmtFechaCorta(ex.fechaNacimiento)) : 'Sin fecha de nacimiento') +
                   (edadTxt ? ' (' + esc(edadTxt) + ')' : '') +
                 '</div>' +
                 '<div style="font-weight:600;color:#374151;margin-top:4px">🔬 ' + esc(ex.examenesSolicitados || ex.tipoNombre || '—') + ' <span style="background:' + col + ';color:#fff;font-size:10px;padding:2px 8px;border-radius:100px;margin-left:6px">' + st + '</span></div>' +
@@ -5590,7 +5610,7 @@ button.ed-consulta-link {
       H('1. DATOS GENERALES'),
       P('Nombre completo', dg.nombreCompleto),
       P('Número de identidad', dg.numeroIdentidad),
-      P('Fecha de nacimiento', dg.fechaNacimiento),
+      P('Fecha de nacimiento', fmtFechaCorta(dg.fechaNacimiento)),
       P('Edad', calcEdad(dg.fechaNacimiento)),
       P('Sexo', dg.sexo === 'M' ? 'Masculino' : dg.sexo === 'F' ? 'Femenino' : dg.sexo),
       P('Tipo de sangre', dg.tipoSangre),

@@ -1155,7 +1155,7 @@
             '<div class="fel-dep-info">' +
               '<div class="fel-dep-nombre">' + esc(dep.nombreCompleto) + '</div>' +
               '<div class="fel-dep-meta">' +
-                esc(dep.fechaNacimiento || '—') +
+                fmtNacimiento(dep.fechaNacimiento) +
                 (dep.edad ? ' · ' + dep.edad + ' años' : '') +
                 (dep.esMenor ? ' · Menor de edad' : '') +
               '</div>' +

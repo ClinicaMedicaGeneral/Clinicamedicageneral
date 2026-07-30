@@ -529,6 +529,13 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
+  /* Formatea una fecha cruda "YYYY-MM-DD" (de <input type="date">) a día/mes/año */
+  function fmtFechaCorta(fechaStr) {
+    if (!fechaStr) return '';
+    var d = new Date(fechaStr + 'T00:00:00');
+    if (isNaN(d.getTime())) return fechaStr;
+    return d.toLocaleDateString('es-HN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
   function toast(msg) {
     var t = $id('el-toast');
     t.textContent = msg;
@@ -833,7 +840,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
         var html = '';
         snap.forEach(function (doc) {
           var d = doc.data();
-          var fecha = d.fechaExamen || (d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toLocaleDateString('es-HN') : '—');
+          var fecha = fmtFechaCorta(d.fechaExamen) || (d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toLocaleDateString('es-HN') : '—');
           var vinculado = d.codigoPaciente
             ? '<span class="el-history-pill">' + esc(d.codigoPaciente) + '</span>'
             : '<span class="el-history-pending">Sin vincular</span>';

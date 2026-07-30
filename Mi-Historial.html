@@ -952,6 +952,13 @@
     if (m < 0 || (m === 0 && hoy.getDate() < fn.getDate())) e--;
     return e + ' años';
   }
+  /* Formatea una fecha cruda "YYYY-MM-DD" (de <input type="date">) a día/mes/año */
+  function fmtFechaCorta(fechaStr) {
+    if (!fechaStr) return '';
+    var d = new Date(fechaStr + 'T00:00:00');
+    if (isNaN(d.getTime())) return fechaStr;
+    return d.toLocaleDateString('es-HN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
   function toast(msg, ms) {
     var t = $id('mh-toast');
     t.textContent = msg;
@@ -1448,7 +1455,7 @@
       return;
     }
     cont.innerHTML = examenes.map(function (ex) {
-      var fecha = ex.fechaExamen || '—';
+      var fecha = fmtFechaCorta(ex.fechaExamen) || '—';
       var origen = ex.subidoPorPaciente
         ? '<span style="background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;margin-left:6px">Subido por ti</span>'
         : '<span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:700;margin-left:6px">Por CMG</span>';

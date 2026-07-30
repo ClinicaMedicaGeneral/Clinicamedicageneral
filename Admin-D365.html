@@ -772,7 +772,7 @@
             '<span class="adm-dep-tipo-badge ' + tipoCls + '">' + esc(tipoLabel[dep.tipo] || dep.tipo) + '</span>' +
             '<div class="adm-dep-info">' +
               '<strong>' + esc(dep.nombreCompleto) + '</strong>' +
-              '<span>' + esc(dep.fechaNacimiento || '—') +
+              '<span>' + fmtNac(dep.fechaNacimiento) +
                 (dep.edad ? ' · ' + dep.edad + ' años' : '') +
                 (dep.esMenor ? ' · Menor de edad' : '') +
               '</span>' +

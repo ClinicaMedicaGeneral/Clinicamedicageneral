@@ -290,7 +290,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 
       <div class="rs-footer">
         Local E-214, Sótano No. 2, City Mall - Comayagüela, Francisco Morazán, M.D. C.<br>
-        Correo-e: <a href="mailto:clinicamedicacmg@gmail.com">clinicamedicacmg@gmail.com</a><br>
+        Correo-e: <a href="mailto:administracion@clinicamedicacmg.net">administracion@clinicamedicacmg.net</a><br>
         Teléfonos: (+504) 2262-6764 / (+504) 3155-5162
       </div>
     </div>
@@ -396,14 +396,14 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     var pacienteHTML = '';
     if (isAntigeno) {
       pacienteHTML =
-        '<tr><td>Paciente</td><td>' + esc(data.nombre) + '</td><td>Fecha de Nac</td><td>' + esc(data.fechaNacimiento) + '</td></tr>' +
+        '<tr><td>Paciente</td><td>' + esc(data.nombre) + '</td><td>Fecha de Nac</td><td>' + esc(data.fechaNacimientoTxt || formatDateLong(data.fechaNacimiento)) + '</td></tr>' +
         '<tr><td>Pasaporte</td><td>' + esc(data.pasaporte || '—') + '</td><td>Edad</td><td>' + esc(edad) + '</td></tr>' +
         '<tr><td>Identidad</td><td>' + esc(data.dni || '—') + '</td><td>Sexo</td><td>' + esc(data.sexo || '—') + '</td></tr>';
       $id('rs-paciente-table').classList.add('rs-table-2col');
     } else {
       pacienteHTML =
         '<tr><td>Nombre</td><td>' + esc(data.nombre) + '</td></tr>' +
-        '<tr><td>Fecha de Nacimiento</td><td>' + esc(data.fechaNacimiento) + '</td></tr>';
+        '<tr><td>Fecha de Nacimiento</td><td>' + esc(data.fechaNacimientoTxt || formatDateLong(data.fechaNacimiento)) + '</td></tr>';
       if (data.tipo !== 'embarazo') {
         pacienteHTML += '<tr><td>Edad</td><td>' + esc(edad) + '</td></tr>';
       }

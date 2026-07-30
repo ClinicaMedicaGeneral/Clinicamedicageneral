@@ -2461,6 +2461,7 @@ button.ed-consulta-link {
 
   function buildEditarForm(p) {
     var dg = p.datosGenerales || {};
+    var ce = p.clienteEspecial || {};
     function inp(id, v, t) { return '<input type="' + (t || 'text') + '" class="ed-input" id="' + id + '" value="' + esc(v || '') + '">'; }
     function sel(id, v, opts) {
       var html = '<select class="ed-select" id="' + id + '">';
@@ -2503,11 +2504,31 @@ button.ed-consulta-link {
             sel('edit-es-d365', p.esD365 ? 'si' : 'no', [{v:'no',l:'No'},{v:'si',l:'Sí — Miembro activo'}]) +
           '</div>' +
         '</div>' +
+      '</div>' +
+      /* DRM Fun-10: Cliente especial, editable también sobre un expediente ya creado */
+      '<div class="ed-section"><div class="ed-section-title">♿ Cliente especial</div>' +
+        '<div class="ed-grid ed-grid-2">' +
+          '<div class="ed-fgroup"><label class="ed-label">¿Presenta alguna discapacidad?</label>' +
+            sel('edit-discapacidad-flag', ce.tieneDiscapacidad ? 'si' : 'no', [{v:'no',l:'No'},{v:'si',l:'Sí'}]) +
+          '</div>' +
+          '<div class="ed-fgroup"><label class="ed-label">Tipo de discapacidad</label>' +
+            '<input type="text" class="ed-input" id="edit-discapacidad-tipo" value="' + esc(ce.tipoDiscapacidad || '') + '" placeholder="Visual, auditiva, motora, intelectual…">' +
+          '</div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Notas / Consideraciones especiales</label>' +
+            '<textarea class="ed-textarea" id="edit-discapacidad-notas" rows="2" placeholder="Apoyos requeridos, acompañante, accesibilidad…">' + esc(ce.notas || '') + '</textarea>' +
+          '</div>' +
+          '<div class="ed-fgroup full"><label class="ed-label">Documento de respaldo (PDF / imagen)</label>' +
+            (ce.documentoUrl ? '<div style="margin-bottom:6px;font-size:12px"><a href="' + esc(ce.documentoUrl) + '" target="_blank">📎 Ver documento actual</a></div>' : '') +
+            '<input type="file" class="ed-input" id="edit-discapacidad-doc" accept=".pdf,image/*">' +
+            '<small style="color:#6B7280">Carné de discapacidad u otro documento oficial. Sube uno nuevo solo si quieres reemplazar el actual.</small>' +
+          '</div>' +
+        '</div>' +
       '</div>';
   }
 
   function guardarEdicion() {
     if (!pacienteActual) return;
+    var ceExistente = pacienteActual.clienteEspecial || {};
     var update = {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       _searchIdentidad: $val('edit-identidad').replace(/\D/g, ''),
@@ -2535,10 +2556,28 @@ button.ed-consulta-link {
       antecedentesPatologicos: collectAntecedentes('edit-pat-container'),
       antecedentesNoPatologicos: collectAntecedentes('edit-nopat-container'),
       antecedentesFamiliares: $val('edit-familiares'),
-      esD365: $val('edit-es-d365') === 'si'
+      esD365: $val('edit-es-d365') === 'si',
+      /* DRM Fun-10: Cliente especial, editable sobre un expediente ya creado */
+      clienteEspecial: {
+        tieneDiscapacidad: $val('edit-discapacidad-flag') === 'si',
+        tipoDiscapacidad : $val('edit-discapacidad-tipo'),
+        notas            : $val('edit-discapacidad-notas'),
+        documentoUrl     : ceExistente.documentoUrl || null
+      }
     };
+
     showOverlay('Guardando cambios...');
-    cmgDb.collection('expedientes').doc(pacienteActual.codigoPaciente).update(update)
+    var codigo = pacienteActual.codigoPaciente;
+    var docInput = $id('edit-discapacidad-doc');
+    var docFile  = docInput && docInput.files && docInput.files[0] ? docInput.files[0] : null;
+    var subirDocumento = docFile
+      ? firebase.storage().ref('expedientes/' + codigo + '/cliente-especial/' + docFile.name).put(docFile)
+          .then(function (snap) { return snap.ref.getDownloadURL(); })
+          .then(function (url) { update.clienteEspecial.documentoUrl = url; })
+      : Promise.resolve();
+
+    subirDocumento
+      .then(function () { return cmgDb.collection('expedientes').doc(codigo).update(update); })
       .then(function () {
         hideOverlay();
         Object.assign(pacienteActual, update);

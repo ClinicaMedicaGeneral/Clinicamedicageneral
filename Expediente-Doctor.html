@@ -2783,56 +2783,111 @@ button.ed-consulta-link {
     /* Selector de modo */
     html +=
       '<div class="ed-mode-grid">' +
-        '<button class="ed-mode-card" id="btn-modo-preclinica"' + (pacienteActual ? '' : ' disabled style="opacity:.45;cursor:not-allowed"') + '>' +
+        '<button class="ed-mode-card" id="btn-modo-registro"' + (pacienteActual ? '' : ' disabled style="opacity:.45;cursor:not-allowed"') + '>' +
+          '<div class="ed-mode-icon">🧾</div>' +
+          '<div>' +
+            '<p class="ed-mode-title">Etapa 1 · Registrar visita (Caja)</p>' +
+            '<p class="ed-mode-desc">' + (pacienteActual ? 'Indica si el paciente necesita Consulta o un Servicio. Queda listo para enfermería.' : 'Primero busca un paciente en la pestaña "Buscar".') + '</p>' +
+          '</div>' +
+        '</button>' +
+        '<div class="ed-mode-card is-green" style="cursor:default">' +
           '<div class="ed-mode-icon">🩺</div>' +
           '<div>' +
-            '<p class="ed-mode-title">Etapa 1 · Pre clínica</p>' +
-            '<p class="ed-mode-desc">' + (pacienteActual ? 'Registrar signos vitales del paciente seleccionado.' : 'Primero busca un paciente en la pestaña "Buscar".') + '</p>' +
+            '<p class="ed-mode-title">Etapa 2 · Enfermería</p>' +
+            '<p class="ed-mode-desc">Selecciona un registro en "Pendiente para Enfermería" para tomar signos vitales.</p>' +
           '</div>' +
-        '</button>' +
-        '<button class="ed-mode-card is-green" id="btn-modo-servicio"' + (pacienteActual ? '' : ' disabled style="opacity:.45;cursor:not-allowed"') + '>' +
-          '<div class="ed-mode-icon">🛎️</div>' +
-          '<div>' +
-            '<p class="ed-mode-title">Etapa 1 · Servicio</p>' +
-            '<p class="ed-mode-desc">' + (pacienteActual ? 'Registrar servicio sin consulta médica (queda pendiente).' : 'Primero busca un paciente en la pestaña "Buscar".') + '</p>' +
-          '</div>' +
-        '</button>' +
+        '</div>' +
         '<div class="ed-mode-card is-yellow" style="cursor:default">' +
           '<div class="ed-mode-icon">📝</div>' +
           '<div>' +
-            '<p class="ed-mode-title">Etapa 2 · Consulta / Completar</p>' +
-            '<p class="ed-mode-desc">Selecciona un registro pendiente abajo para continuar o completar.</p>' +
+            '<p class="ed-mode-title">Etapa 3 · Médico / Completar</p>' +
+            '<p class="ed-mode-desc">Selecciona un registro en "Pendiente para Médico" para continuar o completar.</p>' +
           '</div>' +
         '</div>' +
       '</div>';
 
-    /* Lista de pendientes */
+    /* Listas de pendientes: separadas por a quién le toca actuar */
     html +=
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">' +
-        '<div class="ed-section-title" style="margin:0">⏳ Pendientes (Pre clínicas y servicios)</div>' +
-        '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-pendientes" type="button" style="padding:6px 12px;font-size:12px">🔄 Refrescar</button>' +
+        '<div class="ed-section-title" style="margin:0">⏳ Pendiente para Enfermería</div>' +
+        '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-pendientes-enf" type="button" style="padding:6px 12px;font-size:12px">🔄 Refrescar</button>' +
       '</div>' +
-      '<div id="preclinicas-pendientes-lista">' +
+      '<div id="pendientes-enfermeria-lista">' +
+        '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:22px">' +
+        '<div class="ed-section-title" style="margin:0">⏳ Pendiente para Médico</div>' +
+        '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-pendientes-med" type="button" style="padding:6px 12px;font-size:12px">🔄 Refrescar</button>' +
+      '</div>' +
+      '<div id="pendientes-medico-lista">' +
         '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
       '</div>';
 
     cont.innerHTML = html;
 
     if (pacienteActual) {
-      $id('btn-modo-preclinica').addEventListener('click', function () { renderPreclinicaForm(); });
-      $id('btn-modo-servicio').addEventListener('click', function () { renderServicioForm(); });
+      $id('btn-modo-registro').addEventListener('click', function () { renderRegistroVisitaForm(); });
     }
 
-    $id('btn-refrescar-pendientes').addEventListener('click', function () {
-      cargarPreclinicasPendientes();
-    });
+    $id('btn-refrescar-pendientes-enf').addEventListener('click', cargarPendientesEnfermeria);
+    $id('btn-refrescar-pendientes-med').addEventListener('click', cargarPendientesMedico);
 
-    cargarPreclinicasPendientes();
+    cargarPendientesEnfermeria();
+    cargarPendientesMedico();
   }
 
-  /* ─── Cargar pendientes (Pre clínica + servicio) ─── */
-  function cargarPreclinicasPendientes() {
-    var lista = $id('preclinicas-pendientes-lista');
+  /* ─── Cargar pendientes para Enfermería (recién registrados por Caja) ─── */
+  function cargarPendientesEnfermeria() {
+    var lista = $id('pendientes-enfermeria-lista');
+    if (!lista) return;
+    lista.innerHTML = '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>';
+    cmgDb.collection('consultas')
+      .where('status', '==', 'listo_enfermeria')
+      .get()
+      .then(function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ _id: d.id }, d.data())); });
+        items.sort(function (a, b) {
+          var ta = a.fechaRegistro && a.fechaRegistro.toMillis ? a.fechaRegistro.toMillis() : 0;
+          var tb = b.fechaRegistro && b.fechaRegistro.toMillis ? b.fechaRegistro.toMillis() : 0;
+          return tb - ta;
+        });
+        if (!items.length) {
+          lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">✅</div><p>No hay registros pendientes para enfermería.</p></div>';
+          return;
+        }
+        lista.innerHTML = items.map(function (it) {
+          var esServicio = it.tipo === 'servicio';
+          var badge = esServicio
+            ? '<span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">🛎️ Servicio</span>'
+            : '<span style="background:#dbeafe;color:#1e3a8a;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px">📝 Consulta</span>';
+          var infoExtra = esServicio
+            ? '<div class="ed-pending-vitals">🛎️ ' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>'
+            : (it.notasRegistro ? '<div class="ed-pending-vitals">' + esc(it.notasRegistro) + '</div>' : '');
+          return '<div class="ed-pending-item">' +
+            '<div class="ed-pending-info">' +
+              '<p class="ed-pending-name">' + esc(it.pacienteNombre || it.codigoPaciente) + badge +
+                ' <span style="font-weight:500;color:#6B7280">· ' + esc(it.codigoPaciente) + '</span></p>' +
+              '<p class="ed-pending-meta">📅 ' + fmtDate(it.fechaRegistro) + ' · Registrado por ' + esc(it.registradoPor || '—') + '</p>' +
+              infoExtra +
+            '</div>' +
+            '<button class="ed-btn ed-btn-yellow" data-atender="' + esc(it._id) + '">Atender →</button>' +
+          '</div>';
+        }).join('');
+        lista.querySelectorAll('[data-atender]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            continuarConsulta(b.getAttribute('data-atender'));
+          });
+        });
+      })
+      .catch(function (err) {
+        lista.innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error: ' + esc(err.message) + '</div>';
+      });
+  }
+
+  /* ─── Cargar pendientes para Médico (pre clínica lista + servicios por completar) ─── */
+  function cargarPendientesMedico() {
+    var lista = $id('pendientes-medico-lista');
     if (!lista) return;
     lista.innerHTML = '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>';
     cmgDb.collection('consultas')
@@ -2849,7 +2904,7 @@ button.ed-consulta-link {
           return getFecha(b) - getFecha(a);
         });
         if (!items.length) {
-          lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">✅</div><p>No hay registros pendientes.</p></div>';
+          lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">✅</div><p>No hay registros pendientes para médico.</p></div>';
           return;
         }
         lista.innerHTML = items.map(function (it) {
@@ -2893,140 +2948,110 @@ button.ed-consulta-link {
   }
 
   /* ─── Formulario solo signos vitales (Etapa 1) ─── */
-  function renderPreclinicaForm() {
+  /* ─── Formulario de registro de visita (Etapa 1 · Caja) ───
+     Caja solo indica qué necesita el paciente (Consulta o Servicio), sin datos
+     clínicos: eso lo captura enfermería en la Etapa 2 (renderAtenderEnfermeriaForm). */
+  function renderRegistroVisitaForm() {
     if (!pacienteActual) return;
     var cont = $id('consulta-contenido');
     var p = pacienteActual;
     var dg = p.datosGenerales || {};
 
+    var grupos = CATALOGO_SERVICIOS;
+    var optsHtml = '<option value="">— Seleccionar servicio —</option>';
+    grupos.forEach(function (grp) {
+      optsHtml += '<optgroup label="' + esc(grp.label) + '">';
+      grp.items.forEach(function (s) {
+        optsHtml += '<option value="' + esc(s) + '">' + esc(s) + '</option>';
+      });
+      optsHtml += '</optgroup>';
+    });
+    optsHtml += '<option value="__otro__">✏️ Otro (escribir)</option>';
+
     cont.innerHTML =
       '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
       '<div class="ed-patient-summary">' +
         '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
-        '<p class="ed-patient-meta">Etapa 1 · Pre clínica</p></div>' +
+        '<p class="ed-patient-meta">Etapa 1 · Registrar visita, queda listo para enfermería</p></div>' +
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
-      '<div class="ed-section-title">📊 Signos vitales</div>' +
-      '<div class="ed-vitals">' +
-        '<div class="ed-vital"><div class="ed-vital-label">TA (mmHg)</div><input id="cons-ta" placeholder="120/80"></div>' +
-        '<div class="ed-vital"><div class="ed-vital-label">FC (lpm)</div><input id="cons-fc" placeholder="72"></div>' +
-        '<div class="ed-vital"><div class="ed-vital-label">FR (rpm)</div><input id="cons-fr" placeholder="16"></div>' +
-        '<div class="ed-vital"><div class="ed-vital-label">Temp (°C)</div><input id="cons-temp" placeholder="36.5"></div>' +
-        '<div class="ed-vital"><div class="ed-vital-label">Peso (kg)</div><input id="cons-peso" placeholder="70"></div>' +
-        '<div class="ed-vital"><div class="ed-vital-label">Talla (m)</div><input id="cons-talla" placeholder="1.70"></div>' +
-        '<div class="ed-vital"><div class="ed-vital-label">IMC</div><input id="cons-imc" placeholder="—" readonly style="background:#F3F4F6;cursor:default;font-weight:700;color:#213C7D"></div>' +
-        '<div class="ed-vital"><div class="ed-vital-label">SpO2 (%)</div><input id="cons-spo2" placeholder="98"></div>' +
-        '<div class="ed-vital"><div class="ed-vital-label">Glucosa (mg/dL)</div><input id="cons-glucosa" placeholder="90"></div>' +
-      '</div>' +
+      '<div class="ed-section-title">🧾 ¿Qué necesita el paciente?</div>' +
       '<div class="ed-section">' +
-        '<div class="ed-section-title">🧪 Prueba de sensibilidad</div>' +
-        '<p style="font-size:12px;color:#6B7280;margin:0 0 8px">Para detectar alergias antes de aplicar un medicamento que lo requiera, incluso si el paciente vino solo a aplicarse un medicamento que compró fuera.</p>' +
-        '<div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap">' +
-          '<label class="ed-meds-opt"><input type="radio" name="pre-sens" value="no" checked> No se realizó</label>' +
-          '<label class="ed-meds-opt"><input type="radio" name="pre-sens" value="si"> Se realizó</label>' +
+        '<div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap">' +
+          '<label class="ed-meds-opt"><input type="radio" name="reg-tipo" value="consulta" checked> 📝 Consulta médica</label>' +
+          '<label class="ed-meds-opt"><input type="radio" name="reg-tipo" value="servicio"> 🛎️ Servicio</label>' +
         '</div>' +
-        '<div id="pre-sens-form" style="display:none;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:12px;margin-top:8px">' +
-          '<div class="ed-grid ed-grid-2">' +
-            '<div class="ed-fgroup"><label class="ed-label">Medicamento probado *</label>' +
-              '<input type="text" class="ed-input" id="pre-sens-med" placeholder="Ej. Penicilina 1.2 millones (puede ser comprado fuera)"></div>' +
-            '<div class="ed-fgroup"><label class="ed-label">Resultado *</label>' +
-              '<select class="ed-input" id="pre-sens-resultado">' +
-                '<option value="">— Seleccionar —</option>' +
-                '<option value="Negativa (sin reacción)">Negativa (sin reacción), apto para aplicar</option>' +
-                '<option value="Positiva (reacción alérgica)">Positiva (reacción alérgica), NO aplicar</option>' +
-              '</select></div>' +
-            '<div class="ed-fgroup full"><label class="ed-label">Observaciones</label>' +
-              '<textarea class="ed-textarea" id="pre-sens-obs" rows="2" placeholder="Reacción observada, tiempo de espera, etc."></textarea></div>' +
-          '</div>' +
+        '<div class="ed-fgroup full" id="reg-servicio-grupo" style="display:none">' +
+          '<label class="ed-label">Servicio *</label>' +
+          '<select class="ed-input" id="reg-serv-selector" style="appearance:auto;-webkit-appearance:menulist">' + optsHtml + '</select>' +
+        '</div>' +
+        '<div class="ed-fgroup full" id="reg-serv-otro-grupo" style="display:none">' +
+          '<label class="ed-label">Especifica el servicio *</label>' +
+          '<input type="text" class="ed-input" id="reg-serv-otro" placeholder="Describe el servicio a realizar">' +
+        '</div>' +
+        '<div class="ed-fgroup full">' +
+          '<label class="ed-label">Notas (opcional)</label>' +
+          '<textarea class="ed-textarea" id="reg-notas" rows="2" placeholder="Indicaciones para enfermería"></textarea>' +
         '</div>' +
       '</div>' +
-      '<div class="ed-section">' +
-        '<div class="ed-fgroup full"><label class="ed-label">Notas de Pre clínica (opcional)</label>' +
-          '<textarea class="ed-textarea" id="cons-notas-pre" rows="2" placeholder="Observaciones relevantes para el médico"></textarea></div>' +
-      '</div>' +
+      buildEmergenciaSectionHtml('reg') +
       '<div class="ed-actions">' +
-        '<button class="ed-btn ed-btn-primary" id="btn-guardar-preclinica">💾 Guardar Pre clínica</button>' +
+        '<button class="ed-btn ed-btn-primary" id="btn-guardar-registro">💾 Registrar (queda listo para enfermería)</button>' +
       '</div>';
 
     $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
-    $id('btn-guardar-preclinica').addEventListener('click', guardarPreclinica);
-
-    /* Auto-calcular IMC al cambiar peso o talla */
-    function calcularIMC() {
-      var peso  = parseFloat($val('cons-peso'));
-      var talla = parseFloat($val('cons-talla'));
-      var imcInput = $id('cons-imc');
-      if (peso > 0 && talla > 0) {
-        var imc = (peso / (talla * talla)).toFixed(1);
-        imcInput.value = imc;
-      } else {
-        imcInput.value = '';
-      }
-    }
-    $id('cons-peso').addEventListener('input', calcularIMC);
-    $id('cons-talla').addEventListener('input', calcularIMC);
-
-    /* Toggle del formulario de prueba de sensibilidad */
-    document.querySelectorAll('input[name="pre-sens"]').forEach(function (r) {
+    document.querySelectorAll('input[name="reg-tipo"]').forEach(function (r) {
       r.addEventListener('change', function () {
-        $id('pre-sens-form').style.display = (this.value === 'si') ? 'block' : 'none';
+        var esServ = this.value === 'servicio';
+        $id('reg-servicio-grupo').style.display = esServ ? 'block' : 'none';
+        if (!esServ) $id('reg-serv-otro-grupo').style.display = 'none';
       });
     });
+    $id('reg-serv-selector').addEventListener('change', function () {
+      $id('reg-serv-otro-grupo').style.display = this.value === '__otro__' ? 'block' : 'none';
+    });
+    wireEmergenciaToggle('reg');
+    $id('btn-guardar-registro').addEventListener('click', guardarRegistroVisita);
   }
 
-  /* ─── Guardar Pre clínica (crea consulta con status:'preclinica') ─── */
-  function guardarPreclinica() {
+  /* ─── Guardar registro de visita (crea consulta con status:'listo_enfermeria') ─── */
+  function guardarRegistroVisita() {
     if (!pacienteActual) return;
     var dg = pacienteActual.datosGenerales || {};
-    var vitales = {
-      ta: $val('cons-ta'), fc: $val('cons-fc'), fr: $val('cons-fr'),
-      temp: $val('cons-temp'), peso: $val('cons-peso'), talla: $val('cons-talla'),
-      imc: $val('cons-imc'),
-      spo2: $val('cons-spo2'), glucosa: $val('cons-glucosa')
-    };
-    var algunaVital = Object.keys(vitales).some(function (k) { return vitales[k]; });
-
-    /* Prueba de sensibilidad (detección de alergias) */
-    var sensRadio = document.querySelector('input[name="pre-sens"]:checked');
-    var pruebaSensibilidad = null;
-    if (sensRadio && sensRadio.value === 'si') {
-      var sensMed  = $val('pre-sens-med');
-      var sensRes  = $val('pre-sens-resultado');
-      if (!sensMed || !sensRes) {
-        showAlert('Completa el medicamento probado y el resultado de la prueba de sensibilidad.', 'error');
-        return;
-      }
-      pruebaSensibilidad = {
-        realizada    : true,
-        medicamento  : sensMed,
-        resultado    : sensRes,
-        observaciones: $val('pre-sens-obs')
-      };
-    }
-
-    if (!algunaVital && !pruebaSensibilidad) {
-      showAlert('Registra al menos un signo vital o una prueba de sensibilidad.', 'error');
-      return;
-    }
+    var tipoRadio = document.querySelector('input[name="reg-tipo"]:checked');
+    var tipo = tipoRadio ? tipoRadio.value : 'consulta';
 
     var docData = {
       codigoPaciente: pacienteActual.codigoPaciente,
       pacienteNombre: dg.nombreCompleto || '',
-      status: 'preclinica',
-      fechaPreclinica: firebase.firestore.FieldValue.serverTimestamp(),
-      preclinicaPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
-      preclinicaEmail: cmgAuth.currentUser.email,
-      signosVitales: vitales,
-      pruebaSensibilidad: pruebaSensibilidad,
-      notasPreclinica: $val('cons-notas-pre'),
-      pdfUrl: null
+      status: 'listo_enfermeria',
+      tipo: tipo,
+      notasRegistro: $val('reg-notas'),
+      salaEmergencia: collectEmergenciaData('reg'),
+      fechaRegistro: firebase.firestore.FieldValue.serverTimestamp(),
+      registradoPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
+      registradoEmail: cmgAuth.currentUser.email
     };
 
-    showOverlay('Guardando Pre clínica...');
+    if (tipo === 'servicio') {
+      var selVal = $id('reg-serv-selector').value;
+      if (!selVal) { showAlert('Selecciona un servicio.', 'error'); return; }
+      var servicioNombre;
+      if (selVal === '__otro__') {
+        servicioNombre = ($id('reg-serv-otro').value || '').trim();
+        if (!servicioNombre) { showAlert('Escribe el nombre del servicio.', 'error'); return; }
+      } else {
+        servicioNombre = selVal;
+      }
+      docData.servicioNombre = servicioNombre;
+      docData.servicioNotas = $val('reg-notas');
+    }
+
+    showOverlay('Registrando...');
     cmgDb.collection('consultas').add(docData)
       .then(function () {
         hideOverlay();
-        showAlert('✓ Pre clínica guardada. El médico podrá continuar la consulta.', 'success');
+        showAlert('✓ Registrado. Queda listo para enfermería.', 'success');
         renderConsultaTab();
       })
       .catch(function (err) {
@@ -3110,176 +3135,201 @@ button.ed-consulta-link {
     '</div>';
   }
 
-  /* ─── Formulario de registro de servicio (Etapa 1 · Servicio) ─── */
-  function renderServicioForm() {
-    if (!pacienteActual) return;
+  /* ─── Formulario de atención de Enfermería (Etapa 2) para un registro
+     'listo_enfermeria'. Toma signos vitales (obligatorios solo en Consulta y
+     Sueroterapias, opcionales en el resto) y, si aplica, la prueba de
+     sensibilidad para inyecciones IM/IV. Al completar, pasa a 'preclinica'
+     (si tipo:'consulta') o 'servicio' (si tipo:'servicio') — mismas formas de
+     datos que antes escribían guardarPreclinica/guardarServicio, para que
+     Etapa 3 (continuarConsulta → renderConsultaForm/renderCompletarServicioForm)
+     no necesite cambios. */
+  function renderAtenderEnfermeriaForm() {
+    if (!pacienteActual || !consultaPendienteCargada) return;
     var cont = $id('consulta-contenido');
     var p = pacienteActual;
     var dg = p.datosGenerales || {};
-
-    var grupos = CATALOGO_SERVICIOS;
-
-    var optsHtml = '<option value="">— Seleccionar servicio —</option>';
-    grupos.forEach(function (grp) {
-      optsHtml += '<optgroup label="' + esc(grp.label) + '">';
-      grp.items.forEach(function (s) {
-        optsHtml += '<option value="' + esc(s) + '">' + esc(s) + '</option>';
-      });
-      optsHtml += '</optgroup>';
-    });
-    optsHtml += '<option value="__otro__">✏️ Otro (escribir)</option>';
+    var it = consultaPendienteCargada;
+    var esServicio = it.tipo === 'servicio';
+    var esInyeccion = esServicio && /\((IM|IV)\)/.test(it.servicioNombre || '');
+    var vitalesObligatorios = !esServicio || /^Sueroterapia/i.test(it.servicioNombre || '');
 
     cont.innerHTML =
       '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
       '<div class="ed-patient-summary">' +
         '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
-        '<p class="ed-patient-meta">Etapa 1 · Servicio, quedará pendiente</p></div>' +
+        '<p class="ed-patient-meta">Etapa 2 · Enfermería · ' + (esServicio ? '🛎️ ' + esc(it.servicioNombre || '—') : '📝 Consulta médica') + '</p></div>' +
         '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
       '</div>' +
-      '<div class="ed-section-title">🛎️ Servicio solicitado</div>' +
+      (it.notasRegistro ? '<div style="font-size:12px;color:#374151;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;margin-bottom:12px"><strong>Notas de registro (Caja):</strong> ' + esc(it.notasRegistro) + '</div>' : '') +
+      '<div class="ed-section-title">📊 Signos vitales' + (vitalesObligatorios ? ' *' : ' (opcional para este servicio)') + '</div>' +
+      '<div class="ed-vitals">' +
+        '<div class="ed-vital"><div class="ed-vital-label">TA (mmHg)</div><input id="enf-ta" placeholder="120/80"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">FC (lpm)</div><input id="enf-fc" placeholder="72"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">FR (rpm)</div><input id="enf-fr" placeholder="16"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">Temp (°C)</div><input id="enf-temp" placeholder="36.5"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">Peso (kg)</div><input id="enf-peso" placeholder="70"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">Talla (m)</div><input id="enf-talla" placeholder="1.70"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">IMC</div><input id="enf-imc" placeholder="—" readonly style="background:#F3F4F6;cursor:default;font-weight:700;color:#213C7D"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">SpO2 (%)</div><input id="enf-spo2" placeholder="98"></div>' +
+        '<div class="ed-vital"><div class="ed-vital-label">Glucosa (mg/dL)</div><input id="enf-glucosa" placeholder="90"></div>' +
+      '</div>' +
+      (!esServicio
+        ? '<div class="ed-section">' +
+            '<div class="ed-section-title">🧪 Prueba de sensibilidad</div>' +
+            '<p style="font-size:12px;color:#6B7280;margin:0 0 8px">Para detectar alergias antes de aplicar un medicamento que lo requiera.</p>' +
+            '<div style="display:flex;gap:12px;margin-bottom:8px;flex-wrap:wrap">' +
+              '<label class="ed-meds-opt"><input type="radio" name="enf-sens" value="no" checked> No se realizó</label>' +
+              '<label class="ed-meds-opt"><input type="radio" name="enf-sens" value="si"> Se realizó</label>' +
+            '</div>' +
+            '<div id="enf-sens-form" style="display:none;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:12px;margin-top:8px">' +
+              '<div class="ed-grid ed-grid-2">' +
+                '<div class="ed-fgroup"><label class="ed-label">Medicamento probado *</label>' +
+                  '<input type="text" class="ed-input" id="enf-sens-med" placeholder="Ej. Penicilina 1.2 millones (puede ser comprado fuera)"></div>' +
+                '<div class="ed-fgroup"><label class="ed-label">Resultado *</label>' +
+                  '<select class="ed-input" id="enf-sens-resultado">' +
+                    '<option value="">— Seleccionar —</option>' +
+                    '<option value="Negativa (sin reacción)">Negativa (sin reacción), apto para aplicar</option>' +
+                    '<option value="Positiva (reacción alérgica)">Positiva (reacción alérgica), NO aplicar</option>' +
+                  '</select></div>' +
+                '<div class="ed-fgroup full"><label class="ed-label">Observaciones</label>' +
+                  '<textarea class="ed-textarea" id="enf-sens-obs" rows="2" placeholder="Reacción observada, tiempo de espera, etc."></textarea></div>' +
+              '</div>' +
+            '</div>' +
+          '</div>'
+        : (esInyeccion
+          ? '<div class="ed-section" style="background:#FFF7ED;border:1px solid #FED7AA">' +
+              '<div class="ed-section-title">🧪 Prueba de sensibilidad requerida</div>' +
+              '<p style="font-size:12px;color:#92400E;margin:0 0 8px">Las inyecciones IM/IV requieren confirmar la prueba de sensibilidad para descartar alergias antes de aplicar.</p>' +
+              '<label class="ed-meds-opt" style="margin-bottom:10px;display:flex;gap:8px;align-items:center;background:#fff;border:1px dashed #F59E0B"><input type="checkbox" id="enf-sens-norequiere"> Este medicamento no necesita prueba de sensibilidad</label>' +
+              '<div id="enf-sens-detalle">' +
+                '<div class="ed-fgroup full"><label class="ed-label">Resultado de la prueba *</label>' +
+                  '<select class="ed-input" id="enf-sens-resultado-serv">' +
+                    '<option value="">— Seleccionar —</option>' +
+                    '<option value="Negativa (sin reacción)">Negativa (sin reacción), apto para aplicar</option>' +
+                    '<option value="Positiva (reacción alérgica)">Positiva (reacción alérgica), NO aplicar</option>' +
+                  '</select></div>' +
+                '<label class="ed-meds-opt" style="margin-top:8px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="enf-sens-confirm"> Confirmo que se realizó la prueba de sensibilidad al paciente</label>' +
+              '</div>' +
+            '</div>'
+          : '')) +
       '<div class="ed-section">' +
-        '<div class="ed-fgroup full">' +
-          '<label class="ed-label">Servicio *</label>' +
-          '<select class="ed-input" id="serv-selector" style="appearance:auto;-webkit-appearance:menulist">' + optsHtml + '</select>' +
-        '</div>' +
-        '<div class="ed-fgroup full" id="serv-otro-grupo" style="display:none">' +
-          '<label class="ed-label">Especifica el servicio *</label>' +
-          '<input type="text" class="ed-input" id="serv-otro" placeholder="Describe el servicio a realizar">' +
-        '</div>' +
-        '<div class="ed-fgroup full">' +
-          '<label class="ed-label">Notas (opcional)</label>' +
-          '<textarea class="ed-textarea" id="serv-notas" rows="2" placeholder="Indicaciones, cantidad, detalles para el personal"></textarea>' +
-        '</div>' +
+        '<div class="ed-fgroup full"><label class="ed-label">Notas de enfermería (opcional)</label>' +
+          '<textarea class="ed-textarea" id="enf-notas" rows="2" placeholder="Observaciones relevantes"></textarea></div>' +
       '</div>' +
-      '<div class="ed-section" id="serv-vitales-section" style="display:none">' +
-        '<div class="ed-section-title">📊 Signos vitales (queda pendiente para el médico)</div>' +
-        '<p style="font-size:12px;color:#6B7280;margin:0 0 8px">Las sueroterapias suelen requerir monitorear al paciente. Estos datos quedan guardados en el pendiente y el médico los verá al completar el servicio.</p>' +
-        '<div class="ed-vitals">' +
-          '<div class="ed-vital"><div class="ed-vital-label">TA (mmHg)</div><input id="servvit-ta" placeholder="120/80"></div>' +
-          '<div class="ed-vital"><div class="ed-vital-label">FC (lpm)</div><input id="servvit-fc" placeholder="72"></div>' +
-          '<div class="ed-vital"><div class="ed-vital-label">FR (rpm)</div><input id="servvit-fr" placeholder="16"></div>' +
-          '<div class="ed-vital"><div class="ed-vital-label">Temp (°C)</div><input id="servvit-temp" placeholder="36.5"></div>' +
-          '<div class="ed-vital"><div class="ed-vital-label">Peso (kg)</div><input id="servvit-peso" placeholder="70"></div>' +
-          '<div class="ed-vital"><div class="ed-vital-label">Talla (m)</div><input id="servvit-talla" placeholder="1.70"></div>' +
-          '<div class="ed-vital"><div class="ed-vital-label">IMC</div><input id="servvit-imc" placeholder="—" readonly style="background:#F3F4F6;cursor:default;font-weight:700;color:#213C7D"></div>' +
-          '<div class="ed-vital"><div class="ed-vital-label">SpO2 (%)</div><input id="servvit-spo2" placeholder="98"></div>' +
-          '<div class="ed-vital"><div class="ed-vital-label">Glucosa (mg/dL)</div><input id="servvit-glucosa" placeholder="90"></div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="ed-section" id="serv-sens-section" style="display:none;background:#FFF7ED;border:1px solid #FED7AA">' +
-        '<div class="ed-section-title">🧪 Prueba de sensibilidad requerida</div>' +
-        '<p style="font-size:12px;color:#92400E;margin:0 0 8px">Las inyecciones IM/IV requieren confirmar la prueba de sensibilidad para descartar alergias antes de aplicar.</p>' +
-        '<label class="ed-meds-opt" style="margin-bottom:10px;display:flex;gap:8px;align-items:center;background:#fff;border:1px dashed #F59E0B"><input type="checkbox" id="serv-sens-norequiere"> Este medicamento no necesita prueba de sensibilidad</label>' +
-        '<div id="serv-sens-detalle">' +
-          '<div class="ed-fgroup full"><label class="ed-label">Resultado de la prueba *</label>' +
-            '<select class="ed-input" id="serv-sens-resultado">' +
-              '<option value="">— Seleccionar —</option>' +
-              '<option value="Negativa (sin reacción)">Negativa (sin reacción), apto para aplicar</option>' +
-              '<option value="Positiva (reacción alérgica)">Positiva (reacción alérgica), NO aplicar</option>' +
-            '</select></div>' +
-          '<label class="ed-meds-opt" style="margin-top:8px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="serv-sens-confirm"> Confirmo que se realizó la prueba de sensibilidad al paciente</label>' +
-        '</div>' +
-      '</div>' +
-      buildEmergenciaSectionHtml('servreg') +
       '<div class="ed-actions">' +
-        '<button class="ed-btn ed-btn-primary" id="btn-guardar-servicio">💾 Registrar servicio (queda pendiente)</button>' +
+        '<button class="ed-btn ed-btn-primary" id="btn-completar-enfermeria">✅ Completar y enviar a médico</button>' +
       '</div>';
 
     $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
-    $id('serv-selector').addEventListener('change', function () {
-      $id('serv-otro-grupo').style.display = this.value === '__otro__' ? 'block' : 'none';
-      $id('serv-sens-section').style.display = /\((IM|IV)\)/.test(this.value) ? 'block' : 'none';
-      $id('serv-vitales-section').style.display = /^Sueroterapia/i.test(this.value) ? 'block' : 'none';
-    });
-    $id('serv-sens-norequiere').addEventListener('change', function () {
-      $id('serv-sens-detalle').style.display = this.checked ? 'none' : 'block';
-    });
-    wireEmergenciaToggle('servreg');
+    $id('btn-completar-enfermeria').addEventListener('click', guardarAtencionEnfermeria);
+
     /* Auto-calcular IMC al cambiar peso o talla */
-    function calcularIMCServicio() {
-      var peso  = parseFloat($val('servvit-peso'));
-      var talla = parseFloat($val('servvit-talla'));
-      var imcInput = $id('servvit-imc');
+    function calcularIMC() {
+      var peso  = parseFloat($val('enf-peso'));
+      var talla = parseFloat($val('enf-talla'));
+      var imcInput = $id('enf-imc');
       imcInput.value = (peso > 0 && talla > 0) ? (peso / (talla * talla)).toFixed(1) : '';
     }
-    $id('servvit-peso').addEventListener('input', calcularIMCServicio);
-    $id('servvit-talla').addEventListener('input', calcularIMCServicio);
-    $id('btn-guardar-servicio').addEventListener('click', guardarServicio);
+    $id('enf-peso').addEventListener('input', calcularIMC);
+    $id('enf-talla').addEventListener('input', calcularIMC);
+
+    if (!esServicio) {
+      document.querySelectorAll('input[name="enf-sens"]').forEach(function (r) {
+        r.addEventListener('change', function () {
+          $id('enf-sens-form').style.display = (this.value === 'si') ? 'block' : 'none';
+        });
+      });
+    } else if (esInyeccion) {
+      $id('enf-sens-norequiere').addEventListener('change', function () {
+        $id('enf-sens-detalle').style.display = this.checked ? 'none' : 'block';
+      });
+    }
   }
 
-  /* ─── Guardar servicio (status:'servicio') ─── */
-  function guardarServicio() {
-    if (!pacienteActual) return;
-    var selVal = $id('serv-selector').value;
-    if (!selVal) { showAlert('Selecciona un servicio.', 'error'); return; }
+  /* ─── Guardar atención de Enfermería: 'listo_enfermeria' → 'preclinica' o 'servicio' ─── */
+  function guardarAtencionEnfermeria() {
+    if (!pacienteActual || !consultaPendienteCargada) return;
+    var it = consultaPendienteCargada;
+    var esServicio = it.tipo === 'servicio';
+    var esInyeccion = esServicio && /\((IM|IV)\)/.test(it.servicioNombre || '');
+    var vitalesObligatorios = !esServicio || /^Sueroterapia/i.test(it.servicioNombre || '');
 
-    var servicioNombre;
-    if (selVal === '__otro__') {
-      servicioNombre = ($id('serv-otro').value || '').trim();
-      if (!servicioNombre) { showAlert('Escribe el nombre del servicio.', 'error'); return; }
-    } else {
-      servicioNombre = selVal;
+    var vitales = {
+      ta: $val('enf-ta'), fc: $val('enf-fc'), fr: $val('enf-fr'),
+      temp: $val('enf-temp'), peso: $val('enf-peso'), talla: $val('enf-talla'),
+      imc: $val('enf-imc'), spo2: $val('enf-spo2'), glucosa: $val('enf-glucosa')
+    };
+    var algunaVital = Object.keys(vitales).some(function (k) { return vitales[k]; });
+
+    if (vitalesObligatorios && !algunaVital) {
+      showAlert('Registra al menos un signo vital. Es obligatorio para ' + (esServicio ? 'esta sueroterapia' : 'la consulta') + '.', 'error');
+      return;
     }
 
-    /* Inyección IM/IV → exige confirmar prueba de sensibilidad (detección de alergias) */
-    var esInyeccion = /\((IM|IV)\)/.test(servicioNombre);
-    var pruebaSensibilidadServicio = null;
-    if (esInyeccion) {
-      var sensNoRequiere = $id('serv-sens-norequiere') && $id('serv-sens-norequiere').checked;
-      if (sensNoRequiere) {
-        pruebaSensibilidadServicio = {
-          requerida    : false,
-          noRequiere   : true,
-          confirmadaPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email
-        };
-      } else {
-        var sensConfirm = $id('serv-sens-confirm') && $id('serv-sens-confirm').checked;
-        var sensRes     = $val('serv-sens-resultado');
-        if (!sensRes || !sensConfirm) {
-          showAlert('Para inyecciones IM/IV debes seleccionar el resultado y confirmar la prueba de sensibilidad, o marcar que el medicamento no la necesita.', 'error');
+    var atendidoPor = cmgAuth.currentUser.displayName || cmgAuth.currentUser.email;
+    var atendidoEmail = cmgAuth.currentUser.email;
+    var updateData = {
+      signosVitales: algunaVital ? vitales : null,
+      enfermeriaPor: atendidoPor,
+      enfermeriaEmail: atendidoEmail,
+      notasEnfermeria: $val('enf-notas')
+    };
+
+    if (!esServicio) {
+      var sensRadio = document.querySelector('input[name="enf-sens"]:checked');
+      var pruebaSensibilidad = null;
+      if (sensRadio && sensRadio.value === 'si') {
+        var sensMed = $val('enf-sens-med');
+        var sensRes = $val('enf-sens-resultado');
+        if (!sensMed || !sensRes) {
+          showAlert('Completa el medicamento probado y el resultado de la prueba de sensibilidad.', 'error');
           return;
         }
-        pruebaSensibilidadServicio = {
-          requerida    : true,
-          confirmada   : true,
-          resultado    : sensRes,
-          confirmadaPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
-          cajaConfirmada: false
+        pruebaSensibilidad = {
+          realizada: true, medicamento: sensMed, resultado: sensRes,
+          observaciones: $val('enf-sens-obs')
         };
       }
+      updateData.status = 'preclinica';
+      updateData.fechaPreclinica = firebase.firestore.FieldValue.serverTimestamp();
+      updateData.preclinicaPor = atendidoPor;
+      updateData.preclinicaEmail = atendidoEmail;
+      updateData.pruebaSensibilidad = pruebaSensibilidad;
+      updateData.notasPreclinica = $val('enf-notas');
+    } else {
+      var pruebaSensibilidadServicio = null;
+      if (esInyeccion) {
+        var sensNoRequiere = $id('enf-sens-norequiere') && $id('enf-sens-norequiere').checked;
+        if (sensNoRequiere) {
+          pruebaSensibilidadServicio = {
+            requerida: false, noRequiere: true, confirmadaPor: atendidoPor
+          };
+        } else {
+          var sensConfirm = $id('enf-sens-confirm') && $id('enf-sens-confirm').checked;
+          var sensResServ = $val('enf-sens-resultado-serv');
+          if (!sensResServ || !sensConfirm) {
+            showAlert('Para inyecciones IM/IV debes seleccionar el resultado y confirmar la prueba de sensibilidad, o marcar que el medicamento no la necesita.', 'error');
+            return;
+          }
+          pruebaSensibilidadServicio = {
+            requerida: true, confirmada: true, resultado: sensResServ,
+            confirmadaPor: atendidoPor, cajaConfirmada: false
+          };
+        }
+      }
+      updateData.status = 'servicio';
+      updateData.fechaServicio = firebase.firestore.FieldValue.serverTimestamp();
+      updateData.servicioPor = atendidoPor;
+      updateData.servicioEmail = atendidoEmail;
+      updateData.pruebaSensibilidadServicio = pruebaSensibilidadServicio;
     }
 
-    /* Signos vitales (sueroterapias): opcional, solo si se llenó al menos uno.
-       Nota: Toma de presión / Glucometría / Control de peso / Electrocardiograma NO
-       capturan resultados aquí — enfermería solo registra qué servicio se realizará.
-       El médico toma esos datos al darle "Continuar" (renderCompletarServicioForm). */
-    var vitalesServicio = {
-      ta: $val('servvit-ta'), fc: $val('servvit-fc'), fr: $val('servvit-fr'),
-      temp: $val('servvit-temp'), peso: $val('servvit-peso'), talla: $val('servvit-talla'),
-      imc: $val('servvit-imc'), spo2: $val('servvit-spo2'), glucosa: $val('servvit-glucosa')
-    };
-    var tieneVitalesServicio = Object.keys(vitalesServicio).some(function (k) { return vitalesServicio[k]; });
-
-    var dg = pacienteActual.datosGenerales || {};
-    var docData = {
-      codigoPaciente: pacienteActual.codigoPaciente,
-      pacienteNombre: dg.nombreCompleto || '',
-      status: 'servicio',
-      servicioNombre: servicioNombre,
-      servicioNotas: $val('serv-notas'),
-      pruebaSensibilidadServicio: pruebaSensibilidadServicio,
-      signosVitales: tieneVitalesServicio ? vitalesServicio : null,
-      salaEmergencia: collectEmergenciaData('servreg'),
-      fechaServicio: firebase.firestore.FieldValue.serverTimestamp(),
-      servicioPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
-      servicioEmail: cmgAuth.currentUser.email
-    };
-
-    showOverlay('Registrando servicio...');
-    cmgDb.collection('consultas').add(docData)
+    showOverlay('Guardando...');
+    cmgDb.collection('consultas').doc(it._id).update(updateData)
       .then(function () {
         hideOverlay();
-        showAlert('✓ Servicio registrado. Aparece en la lista de pendientes.', 'success');
+        showAlert('✓ Enviado a la siguiente etapa (Médico).', 'success');
+        consultaPendienteCargada = null;
         renderConsultaTab();
       })
       .catch(function (err) {
@@ -3750,7 +3800,9 @@ button.ed-consulta-link {
             pacienteActual = Object.assign({ _id: psnap.id }, psnap.data());
             consultaPendienteCargada = Object.assign({ _id: snap.id }, data);
             hideOverlay();
-            if (data.status === 'servicio') {
+            if (data.status === 'listo_enfermeria') {
+              renderAtenderEnfermeriaForm();
+            } else if (data.status === 'servicio') {
               renderCompletarServicioForm();
             } else {
               renderConsultaForm();

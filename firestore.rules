@@ -155,18 +155,24 @@ service cloud.firestore {
           )
         );
 
-      // Caja puede crear entradas standalone (prueba-rapida y lab) para liquidación.
-      // Pre clínica (vitales) y registro de un Servicio los crea el personal clínico
-      // (médico o enfermería), vía isDoctor().
+      // Caja puede crear entradas standalone (prueba-rapida y lab) para liquidación,
+      // y el registro inicial de visita (Etapa 1: Consulta o Servicio), que queda
+      // 'listo_enfermeria' sin datos clínicos todavía.
+      // Pre clínica (vitales) y registro de un Servicio ya con datos clínicos los
+      // crea el personal clínico (médico o enfermería), vía isDoctor().
       allow create: if isDoctor()
         || (isCaja()
             && request.resource.data.status == 'pendiente_caja'
-            && request.resource.data.tipoRegistro in ['lab-standalone', 'prueba-standalone']);
+            && request.resource.data.tipoRegistro in ['lab-standalone', 'prueba-standalone'])
+        || (isCaja() && request.resource.data.status == 'listo_enfermeria');
       allow delete: if isDoctor();
 
       // Update:
       //   - Médico tratante: siempre, incluida la finalización de la Consulta médica
       //     (preclinica → pendiente_caja).
+      //   - Enfermería: atiende un registro 'listo_enfermeria' (toma signos vitales
+      //     y, si aplica, prueba de sensibilidad) y lo pasa a 'preclinica' (Consulta)
+      //     o 'servicio' (Servicio), listo para la siguiente etapa.
       //   - Caja o Enfermería: SOLO pueden continuar/completar un Servicio
       //     (status 'servicio' → 'servicio-completo' o 'pendiente_caja'). Nunca una
       //     Consulta médica.
@@ -174,6 +180,11 @@ service cloud.firestore {
       //     mismo batch los servicios hijos vinculados, que llegan con status
       //     'servicio-completo' (DRM v3 #6), por eso se incluye ese estado también.
       allow update: if isMedicoTratante()
+        || (
+          isEnfermeria()
+          && resource.data.status == 'listo_enfermeria'
+          && request.resource.data.status in ['preclinica', 'servicio']
+        )
         || (
           (isCaja() || isEnfermeria())
           && resource.data.status == 'servicio'

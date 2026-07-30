@@ -170,7 +170,9 @@ service cloud.firestore {
       //   - Caja o Enfermería: SOLO pueden continuar/completar un Servicio
       //     (status 'servicio' → 'servicio-completo' o 'pendiente_caja'). Nunca una
       //     Consulta médica.
-      //   - Caja: liquidar el pago (pendiente_caja → completa).
+      //   - Caja: liquidar el pago (pendiente_caja → completa). También liquida en el
+      //     mismo batch los servicios hijos vinculados, que llegan con status
+      //     'servicio-completo' (DRM v3 #6), por eso se incluye ese estado también.
       allow update: if isMedicoTratante()
         || (
           (isCaja() || isEnfermeria())
@@ -178,7 +180,7 @@ service cloud.firestore {
           && request.resource.data.status in ['servicio-completo', 'pendiente_caja']
         )
         || (isCaja()
-            && resource.data.status == 'pendiente_caja'
+            && resource.data.status in ['pendiente_caja', 'servicio-completo']
             && request.resource.data.status == 'completa');
     }
 

@@ -1061,7 +1061,8 @@
       .then(function (snap) {
         $id('mh-loading').style.display = 'none';
         if (!snap.exists) {
-          toast('No se encontró el expediente ' + codigo);
+          toast('El expediente ' + codigo + ' ya no existe. Quitándolo de tu lista...');
+          desvincularCodigoInexistente(codigo);
           return;
         }
         var exp = snap.data();
@@ -1075,6 +1076,25 @@
         console.error('[CMG] Error expediente:', err);
         toast('Error al cargar el expediente');
       });
+  }
+
+  /* Un doctor puede eliminar un expediente por completo (Expediente-Doctor.html),
+     pero las reglas de Firestore solo permiten a cada usuario escribir su propio
+     documento en /users, así que esa referencia queda huérfana en el perfil del
+     paciente. Al detectarla aquí (único lugar donde el propio usuario la lee),
+     se limpia de inmediato para que no vuelva a aparecer en el selector. */
+  function desvincularCodigoInexistente(codigo) {
+    if (!currentUser || !userProfile) return;
+    var esPropio = userProfile.codigoExpediente === codigo;
+    var codigosCompartidos = (userProfile.codigosCompartidos || []).filter(function (c) { return c !== codigo; });
+    cmgDb.collection('users').doc(currentUser.uid).set({
+      email: currentUser.email,
+      codigoExpediente: esPropio ? null : (userProfile.codigoExpediente || null),
+      codigosCompartidos: codigosCompartidos,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true })
+      .then(function () { cargarPerfilUsuario(); })
+      .catch(function (err) { console.error('[CMG] Error al desvincular expediente inexistente:', err); });
   }
 
   function renderExpediente(codigo, exp) {

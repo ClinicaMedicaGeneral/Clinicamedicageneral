@@ -2941,9 +2941,39 @@ button.ed-consulta-link {
     '</tr>';
   }
 
+  /* ─── Resultado del servicio, capturado por el médico al completar (Etapa 2), nunca
+     al registrar el servicio: enfermería solo indica qué servicio se realizará. ─── */
+  function buildServicioResultadoSectionHtml(servicioNombre) {
+    if (servicioNombre === 'Toma de presión') {
+      return '<div class="ed-section">' +
+        '<div class="ed-section-title">🩺 Resultado del servicio</div>' +
+        '<div class="ed-fgroup full"><label class="ed-label">Presión arterial (mmHg) *</label>' +
+          '<input type="text" class="ed-input" id="serv-resultado-ta" placeholder="120/80"></div>' +
+      '</div>';
+    }
+    if (servicioNombre === 'Glucometría') {
+      return '<div class="ed-section">' +
+        '<div class="ed-section-title">🩸 Resultado del servicio</div>' +
+        '<div class="ed-fgroup full"><label class="ed-label">Glucosa (mg/dL) *</label>' +
+          '<input type="text" class="ed-input" id="serv-resultado-glucosa" placeholder="90"></div>' +
+      '</div>';
+    }
+    if (servicioNombre === 'Control de peso') {
+      return '<div class="ed-section">' +
+        '<div class="ed-section-title">⚖️ Resultado del servicio</div>' +
+        '<div class="ed-fgroup full"><label class="ed-label">Peso (kg) *</label>' +
+          '<input type="text" class="ed-input" id="serv-resultado-peso" placeholder="70"></div>' +
+      '</div>';
+    }
+    if (servicioNombre === 'Electrocardiograma') {
+      return buildEkgSectionHtml();
+    }
+    return '';
+  }
+
   /* ─── Electrocardiograma: sección completa con los campos del formato "Informe Electrocardiograma" ─── */
   function buildEkgSectionHtml() {
-    return '<div class="ed-section" id="serv-ekg-section" style="display:none">' +
+    return '<div class="ed-section" id="serv-ekg-section">' +
       '<div class="ed-section-title">📈 Informe de electrocardiograma</div>' +
       '<div class="ed-grid ed-grid-2">' +
         '<div class="ed-fgroup"><label class="ed-label">Frecuencia cardíaca</label><input type="text" class="ed-input" id="ekg-fc" placeholder="Ej. 78 lpm"></div>' +
@@ -3013,21 +3043,6 @@ button.ed-consulta-link {
           '<label class="ed-label">Especifica el servicio *</label>' +
           '<input type="text" class="ed-input" id="serv-otro" placeholder="Describe el servicio a realizar">' +
         '</div>' +
-        '<div class="ed-fgroup full" id="serv-ta-grupo" style="display:none">' +
-          '<label class="ed-label">Presión arterial (mmHg)</label>' +
-          '<input type="text" class="ed-input" id="serv-ta-valor" placeholder="120/80">' +
-        '</div>' +
-        '<div class="ed-fgroup full" id="serv-glucosa-grupo" style="display:none">' +
-          '<label class="ed-label">Glucosa (mg/dL)</label>' +
-          '<input type="text" class="ed-input" id="serv-glucosa-valor" placeholder="90">' +
-        '</div>' +
-        '<div class="ed-fgroup full" id="serv-peso-grupo" style="display:none">' +
-          '<label class="ed-label">Peso (kg)</label>' +
-          '<input type="text" class="ed-input" id="serv-peso-valor" placeholder="70">' +
-        '</div>' +
-      '</div>' +
-      buildEkgSectionHtml() +
-      '<div class="ed-section" id="serv-notas-section">' +
         '<div class="ed-fgroup full">' +
           '<label class="ed-label">Notas (opcional)</label>' +
           '<textarea class="ed-textarea" id="serv-notas" rows="2" placeholder="Indicaciones, cantidad, detalles para el personal"></textarea>' +
@@ -3071,10 +3086,6 @@ button.ed-consulta-link {
       $id('serv-otro-grupo').style.display = this.value === '__otro__' ? 'block' : 'none';
       $id('serv-sens-section').style.display = /\((IM|IV)\)/.test(this.value) ? 'block' : 'none';
       $id('serv-vitales-section').style.display = /^Sueroterapia/i.test(this.value) ? 'block' : 'none';
-      $id('serv-ta-grupo').style.display = this.value === 'Toma de presión' ? 'block' : 'none';
-      $id('serv-glucosa-grupo').style.display = this.value === 'Glucometría' ? 'block' : 'none';
-      $id('serv-peso-grupo').style.display = this.value === 'Control de peso' ? 'block' : 'none';
-      $id('serv-ekg-section').style.display = this.value === 'Electrocardiograma' ? 'block' : 'none';
     });
     $id('serv-sens-norequiere').addEventListener('change', function () {
       $id('serv-sens-detalle').style.display = this.checked ? 'none' : 'block';
@@ -3133,39 +3144,16 @@ button.ed-consulta-link {
       }
     }
 
-    /* Signos vitales (sueroterapias): opcional, solo si se llenó al menos uno */
+    /* Signos vitales (sueroterapias): opcional, solo si se llenó al menos uno.
+       Nota: Toma de presión / Glucometría / Control de peso / Electrocardiograma NO
+       capturan resultados aquí — enfermería solo registra qué servicio se realizará.
+       El médico toma esos datos al darle "Continuar" (renderCompletarServicioForm). */
     var vitalesServicio = {
       ta: $val('servvit-ta'), fc: $val('servvit-fc'), fr: $val('servvit-fr'),
       temp: $val('servvit-temp'), peso: $val('servvit-peso'), talla: $val('servvit-talla'),
       imc: $val('servvit-imc'), spo2: $val('servvit-spo2'), glucosa: $val('servvit-glucosa')
     };
-
-    /* Toma de presión / Glucometría / Control de peso: el valor capturado al registrar el
-       servicio se guarda como signo vital, así se ve igual que el resto en "Completar servicio" */
-    if (servicioNombre === 'Toma de presión') {
-      var taValor = $val('serv-ta-valor');
-      if (!taValor) { showAlert('Ingresa la presión arterial.', 'error'); return; }
-      vitalesServicio.ta = taValor;
-    }
-    if (servicioNombre === 'Glucometría') {
-      var glucosaValor = $val('serv-glucosa-valor');
-      if (!glucosaValor) { showAlert('Ingresa el valor de glucosa.', 'error'); return; }
-      vitalesServicio.glucosa = glucosaValor;
-    }
-    if (servicioNombre === 'Control de peso') {
-      var pesoValor = $val('serv-peso-valor');
-      if (!pesoValor) { showAlert('Ingresa el peso.', 'error'); return; }
-      vitalesServicio.peso = pesoValor;
-    }
     var tieneVitalesServicio = Object.keys(vitalesServicio).some(function (k) { return vitalesServicio[k]; });
-
-    /* Electrocardiograma: campos del informe + hoja de resultados imprimible */
-    var esEkg = servicioNombre === 'Electrocardiograma';
-    var ekgMedico = '';
-    if (esEkg) {
-      ekgMedico = $val('ekg-medico');
-      if (!ekgMedico) { showAlert('Escribe el nombre del médico que interpreta el electrocardiograma.', 'error'); return; }
-    }
 
     var dg = pacienteActual.datosGenerales || {};
     var docData = {
@@ -3182,72 +3170,15 @@ button.ed-consulta-link {
     };
 
     showOverlay('Registrando servicio...');
-
-    if (!esEkg) {
-      cmgDb.collection('consultas').add(docData)
-        .then(function () {
-          hideOverlay();
-          showAlert('✓ Servicio registrado. Aparece en la lista de pendientes.', 'success');
-          renderConsultaTab();
-        })
-        .catch(function (err) {
-          hideOverlay();
-          showAlert('Error: ' + err.message, 'error');
-        });
-      return;
-    }
-
-    /* ─── Electrocardiograma: subir foto opcional del trazo, guardar el informe
-       en /electrocardiogramas y abrir la hoja de resultados en otra pestaña ─── */
-    var ekgData = {
-      codigoPaciente: pacienteActual.codigoPaciente,
-      pacienteNombre: dg.nombreCompleto || '',
-      pacienteFechaNacimiento: dg.fechaNacimiento || null,
-      fc: $val('ekg-fc'), ritmo: $val('ekg-ritmo'), eje: $val('ekg-eje'),
-      aondap: $val('ekg-aondap'), dondap: $val('ekg-dondap'),
-      aintpr: $val('ekg-aintpr'), dintpr: $val('ekg-dintpr'),
-      acompqrs: $val('ekg-acompqrs'), dcompqrs: $val('ekg-dcompqrs'),
-      aondar: $val('ekg-aondar'), dondaqrs: $val('ekg-dondaqrs'),
-      aintqt: $val('ekg-aintqt'), dintqt: $val('ekg-dintqt'),
-      aondat: $val('ekg-aondat'), dondat: $val('ekg-dondat'),
-      observaciones: $val('ekg-observaciones'),
-      medico: ekgMedico,
-      imagenUrl: null,
-      emitidoPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
-      emitidoEn: firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-    var fi = $id('ekg-imagen');
-    var file = fi && fi.files && fi.files[0] ? fi.files[0] : null;
-    var subirImagen = Promise.resolve();
-    if (file) {
-      var safe = (file.name || 'ekg').replace(/[^a-zA-Z0-9.-]/g, '_').slice(0, 60);
-      var path = 'expedientes/' + pacienteActual.codigoPaciente + '/electrocardiogramas/' + Date.now() + '-' + safe;
-      subirImagen = firebase.storage().ref(path).put(file)
-        .then(function (snap) { return snap.ref.getDownloadURL(); })
-        .then(function (url) { ekgData.imagenUrl = url; });
-    }
-
-    var ekgRef = cmgDb.collection('electrocardiogramas').doc();
-    var consultaRef = cmgDb.collection('consultas').doc();
-    docData.electrocardiogramaId = ekgRef.id;
-
-    subirImagen
-      .then(function () {
-        var batch = cmgDb.batch();
-        batch.set(consultaRef, docData);
-        batch.set(ekgRef, ekgData);
-        return batch.commit();
-      })
+    cmgDb.collection('consultas').add(docData)
       .then(function () {
         hideOverlay();
-        showAlert('✓ Servicio registrado. Abriendo hoja de resultados…', 'success');
-        window.open('Resultado-EKG.html?id=' + encodeURIComponent(ekgRef.id), '_blank', 'noopener');
+        showAlert('✓ Servicio registrado. Aparece en la lista de pendientes.', 'success');
         renderConsultaTab();
       })
       .catch(function (err) {
         hideOverlay();
-        showAlert('Error al subir el electrocardiograma: ' + err.message, 'error');
+        showAlert('Error: ' + err.message, 'error');
       });
   }
 
@@ -3461,6 +3392,7 @@ button.ed-consulta-link {
         (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.noRequiere ? '<div style="margin-top:8px;font-size:12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px;color:#166534"><strong>🧪 Prueba de sensibilidad:</strong> no necesaria para este medicamento.</div>' : '') +
         (srv.signosVitales && buildVitalsChipsHtml(srv.signosVitales) ? '<div style="margin-top:8px"><div style="font-size:12px;font-weight:700;color:#213C7D;margin-bottom:4px">📊 Signos vitales</div><div class="ed-vitals-chips">' + buildVitalsChipsHtml(srv.signosVitales) + '</div></div>' : '') +
       '</div>' +
+      buildServicioResultadoSectionHtml(srv.servicioNombre) +
       '<div class="ed-section">' +
         '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="serv-convertido-consulta"> ❌ Este servicio no se realizó (se convirtió en consulta médica)</label>' +
       '</div>' +
@@ -3506,7 +3438,10 @@ button.ed-consulta-link {
     wireIncapToggle('serv');
   }
 
-  /* ─── Marcar servicio como completado (status:'servicio-completo') ─── */
+  /* ─── Marcar servicio como completado (status:'servicio-completo') ───
+     Aquí (Etapa 2, cuando el médico da "Continuar") es donde se capturan los
+     resultados de Toma de presión / Glucometría / Control de peso / Electrocardiograma.
+     Enfermería solo registró en Etapa 1 qué servicio se iba a realizar. */
   function completarServicio() {
     if (!pacienteActual || !consultaPendienteCargada) return;
     /* DRM v3 #6: si el servicio está vinculado a una consulta padre, va al mismo grupo;
@@ -3517,6 +3452,27 @@ button.ed-consulta-link {
     var faltantes = [];
     if (!medico) faltantes.push('Médico tratante');
     var incap = collectIncapData('serv', faltantes);
+
+    var servicioNombre = consultaPendienteCargada.servicioNombre;
+    var esEkg = servicioNombre === 'Electrocardiograma';
+    var resultadoServicio = null;
+    var ekgMedico = '';
+    if (!convertidoConsulta) {
+      if (servicioNombre === 'Toma de presión') {
+        resultadoServicio = { ta: $val('serv-resultado-ta') };
+        if (!resultadoServicio.ta) faltantes.push('Presión arterial');
+      } else if (servicioNombre === 'Glucometría') {
+        resultadoServicio = { glucosa: $val('serv-resultado-glucosa') };
+        if (!resultadoServicio.glucosa) faltantes.push('Glucosa');
+      } else if (servicioNombre === 'Control de peso') {
+        resultadoServicio = { peso: $val('serv-resultado-peso') };
+        if (!resultadoServicio.peso) faltantes.push('Peso');
+      } else if (esEkg) {
+        ekgMedico = $val('ekg-medico');
+        if (!ekgMedico) faltantes.push('Médico que interpreta el electrocardiograma');
+      }
+    }
+
     if (faltantes.length) {
       showAlert('Faltan campos obligatorios: ' + faltantes.join(', '), 'error');
       return;
@@ -3541,30 +3497,93 @@ button.ed-consulta-link {
       tieneConstancia: incap.necesita,
       constanciaId: constanciaPrep ? constanciaPrep.ref.id : null
     };
+    if (resultadoServicio) {
+      updateData.signosVitales = Object.assign({}, consultaPendienteCargada.signosVitales || {}, resultadoServicio);
+    }
     if (medsVisitaServ.indexOf('Prueba de sensibilidad') !== -1) {
       updateData.resultadoPruebaSensibilidad = $val('serv-sens-resultado');
     }
+
     showOverlay('Completando servicio...');
-    var batch = cmgDb.batch();
-    batch.update(cmgDb.collection('consultas').doc(servicioId), updateData);
-    if (constanciaPrep) batch.set(constanciaPrep.ref, constanciaPrep.data);
-    batch.commit()
+
+    if (!esEkg || convertidoConsulta) {
+      var batch = cmgDb.batch();
+      batch.update(cmgDb.collection('consultas').doc(servicioId), updateData);
+      if (constanciaPrep) batch.set(constanciaPrep.ref, constanciaPrep.data);
+      batch.commit()
+        .then(function () {
+          hideOverlay();
+          if (constanciaPrep) {
+            showAlert('✓ Servicio completado. Abriendo constancia médica en otra pestaña…', 'success');
+            window.open('Constancia-Medica.html?id=' + encodeURIComponent(constanciaPrep.ref.id), '_blank', 'noopener');
+          } else if (esVinculado) {
+            showAlert('✓ Servicio completado y vinculado al pago de la consulta padre.', 'success');
+          } else {
+            showAlert('✓ Servicio completado. Generó pendiente de pago en Caja.', 'success');
+          }
+          consultaPendienteCargada = null;
+          renderConsultaTab();
+        })
+        .catch(function (err) {
+          hideOverlay();
+          showAlert('Error: ' + err.message, 'error');
+        });
+      return;
+    }
+
+    /* ─── Electrocardiograma: subir foto opcional del trazo, guardar el informe
+       en /electrocardiogramas y abrir la hoja de resultados en otra pestaña ─── */
+    var dg = pacienteActual.datosGenerales || {};
+    var ekgData = {
+      codigoPaciente: pacienteActual.codigoPaciente,
+      pacienteNombre: dg.nombreCompleto || '',
+      pacienteFechaNacimiento: dg.fechaNacimiento || null,
+      fc: $val('ekg-fc'), ritmo: $val('ekg-ritmo'), eje: $val('ekg-eje'),
+      aondap: $val('ekg-aondap'), dondap: $val('ekg-dondap'),
+      aintpr: $val('ekg-aintpr'), dintpr: $val('ekg-dintpr'),
+      acompqrs: $val('ekg-acompqrs'), dcompqrs: $val('ekg-dcompqrs'),
+      aondar: $val('ekg-aondar'), dondaqrs: $val('ekg-dondaqrs'),
+      aintqt: $val('ekg-aintqt'), dintqt: $val('ekg-dintqt'),
+      aondat: $val('ekg-aondat'), dondat: $val('ekg-dondat'),
+      observaciones: $val('ekg-observaciones'),
+      medico: ekgMedico,
+      imagenUrl: null,
+      emitidoPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
+      emitidoEn: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    var fi = $id('ekg-imagen');
+    var file = fi && fi.files && fi.files[0] ? fi.files[0] : null;
+    var subirImagen = Promise.resolve();
+    if (file) {
+      var safe = (file.name || 'ekg').replace(/[^a-zA-Z0-9.-]/g, '_').slice(0, 60);
+      var path = 'expedientes/' + pacienteActual.codigoPaciente + '/electrocardiogramas/' + Date.now() + '-' + safe;
+      subirImagen = firebase.storage().ref(path).put(file)
+        .then(function (snap) { return snap.ref.getDownloadURL(); })
+        .then(function (url) { ekgData.imagenUrl = url; });
+    }
+
+    var ekgRef = cmgDb.collection('electrocardiogramas').doc();
+    updateData.electrocardiogramaId = ekgRef.id;
+
+    subirImagen
+      .then(function () {
+        var batch = cmgDb.batch();
+        batch.update(cmgDb.collection('consultas').doc(servicioId), updateData);
+        batch.set(ekgRef, ekgData);
+        if (constanciaPrep) batch.set(constanciaPrep.ref, constanciaPrep.data);
+        return batch.commit();
+      })
       .then(function () {
         hideOverlay();
-        if (constanciaPrep) {
-          showAlert('✓ Servicio completado. Abriendo constancia médica en otra pestaña…', 'success');
-          window.open('Constancia-Medica.html?id=' + encodeURIComponent(constanciaPrep.ref.id), '_blank', 'noopener');
-        } else if (esVinculado) {
-          showAlert('✓ Servicio completado y vinculado al pago de la consulta padre.', 'success');
-        } else {
-          showAlert('✓ Servicio completado. Generó pendiente de pago en Caja.', 'success');
-        }
+        showAlert('✓ Servicio completado. Abriendo hoja de resultados…', 'success');
+        window.open('Resultado-EKG.html?id=' + encodeURIComponent(ekgRef.id), '_blank', 'noopener');
         consultaPendienteCargada = null;
         renderConsultaTab();
       })
       .catch(function (err) {
         hideOverlay();
-        showAlert('Error: ' + err.message, 'error');
+        showAlert('Error al subir el electrocardiograma: ' + err.message, 'error');
       });
   }
 

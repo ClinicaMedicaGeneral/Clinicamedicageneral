@@ -4965,7 +4965,8 @@ button.ed-consulta-link {
       nuevaLink.href = 'Pruebas-Rapidas.html' + (p
         ? '?dni=' + encodeURIComponent(dg.numeroIdentidad || '') +
           '&nombre=' + encodeURIComponent(dg.nombreCompleto || '') +
-          '&fechanac=' + encodeURIComponent(dg.fechaNacimiento || '')
+          '&fechanac=' + encodeURIComponent(dg.fechaNacimiento || '') +
+          '&codigo=' + encodeURIComponent(p.codigoPaciente || '')
         : '');
     }
 

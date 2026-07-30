@@ -926,10 +926,14 @@
     $id('f-edad').value = age !== '' ? age + ' años' : '';
   });
 
-  /* DRM v3 #3: pre-llenar desde query params si vienen desde Expediente-Doctor */
+  /* DRM v3 #3: pre-llenar desde query params si vienen desde Expediente-Doctor.
+     qCodigoPaciente identifica al paciente ya seleccionado en el expediente,
+     para vincular la prueba directamente a él sin depender de DNI o nombre. */
+  var qCodigoPaciente = '';
   (function(){
     function getQP(n){ var m = new RegExp('[?&]' + n + '=([^&]+)').exec(location.search); return m ? decodeURIComponent(m[1]) : ''; }
     var qDni = getQP('dni'), qNombre = getQP('nombre'), qFecha = getQP('fechanac');
+    qCodigoPaciente = getQP('codigo');
     if (qDni)    $id('f-dni').value = qDni;
     if (qNombre) $id('f-nombre').value = qNombre;
     if (qFecha)  { $id('f-fechanac').value = qFecha; $id('f-edad').value = (calcAge(qFecha) + ' años'); }
@@ -1021,6 +1025,35 @@
     });
   }
 
+  /* DRM: fallback para expedientes sin número de identidad — empareja por nombre completo */
+  function normalizarNombre(v) { return (v || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+  function buscarExpedientePorNombre(nombreRaw) {
+    var nombreNorm = normalizarNombre(nombreRaw);
+    if (!nombreNorm) return Promise.resolve(null);
+    return cmgDb.collection('expedientes').get().then(function (snap) {
+      var match = null;
+      snap.forEach(function (doc) {
+        if (match) return;
+        var dg = (doc.data() || {}).datosGenerales || {};
+        if (normalizarNombre(dg.nombreCompleto) === nombreNorm) {
+          match = { codigoPaciente: doc.id, nombrePaciente: dg.nombreCompleto || '' };
+        }
+      });
+      return match;
+    });
+  }
+
+  /* DRM: si la prueba se abrió desde el expediente de un paciente ya seleccionado,
+     se vincula directamente a él (prioridad máxima, no depende de DNI ni nombre). */
+  function obtenerExpedientePorCodigo(codigo) {
+    if (!codigo) return Promise.resolve(null);
+    return cmgDb.collection('expedientes').doc(codigo).get().then(function (doc) {
+      if (!doc.exists) return null;
+      var dg = (doc.data() || {}).datosGenerales || {};
+      return { codigoPaciente: doc.id, nombrePaciente: dg.nombreCompleto || '' };
+    });
+  }
+
   /* DRM Fun-6: handler unificado, soporta confirmar e imprimir o dejar pendiente */
   function guardarPrueba(modo /* 'confirmado' | 'pendiente' */) {
     var btn = (modo === 'pendiente') ? $id('btn-pendiente') : $id('btn-guardar');
@@ -1056,8 +1089,17 @@
       data.correlativo = $id('f-correlativo').value.trim();
     }
 
-    /* Paso 1: Buscar expediente por DNI */
-    buscarExpedientePorDNI(dniRaw)
+    /* Paso 1: Vincular al expediente. Prioridad: paciente ya seleccionado en el
+       expediente (codigo en la URL) > coincidencia por DNI > coincidencia por nombre completo. */
+    obtenerExpedientePorCodigo(qCodigoPaciente)
+      .then(function (match) {
+        if (match) return match;
+        return buscarExpedientePorDNI(dniRaw);
+      })
+      .then(function (match) {
+        if (match) return match;
+        return buscarExpedientePorNombre($id('f-nombre').value.trim());
+      })
       .then(function (match) {
         if (match) {
           data.codigoPaciente = match.codigoPaciente;
@@ -1155,16 +1197,10 @@
       if (!snap.exists) { toast('No se encontró la prueba'); return; }
       var d = snap.data();
       d._id = snap.id;
-      /* Cambiar a estado confirmado al imprimir */
-      d.status = 'confirmado';
-      d.horaImpresion = nowTime();
-      cmgDb.collection('resultadosPruebas').doc(id).update({
-        status: 'confirmado',
-        horaImpresion: d.horaImpresion
-      }).then(function(){
-        renderResultSheet(d);
-        toast('Prueba reanudada. Confirma y haz clic en Imprimir.');
-      });
+      /* DRM: la prueba sigue "pendiente_resultado" hasta que se confirme con Imprimir,
+         así se puede salir de esta pantalla sin perder el pendiente. */
+      renderResultSheet(d);
+      toast('Prueba reanudada. Confirma y haz clic en Imprimir.');
     });
   }
   /* Cargar pendientes al inicio */
@@ -1303,7 +1339,23 @@
      TOOLBAR ACTIONS
      ════════════════════════════════════════════════════════════ */
   $id('btn-print').addEventListener('click', function () {
-    window.print();
+    /* DRM: una prueba reanudada (aún "pendiente_resultado") solo se confirma
+       hasta este momento — así queda en pendientes si el usuario sale sin imprimir. */
+    if (currentResultDoc && currentResultDoc._id && currentResultDoc.status === 'pendiente_resultado') {
+      var horaImpresion = nowTime();
+      cmgDb.collection('resultadosPruebas').doc(currentResultDoc._id).update({
+        status: 'confirmado',
+        horaImpresion: horaImpresion
+      }).then(function () {
+        currentResultDoc.status = 'confirmado';
+        currentResultDoc.horaImpresion = horaImpresion;
+        window.print();
+      }).catch(function (err) {
+        toast('Error al confirmar la prueba: ' + err.message);
+      });
+    } else {
+      window.print();
+    }
   });
 
   $id('btn-new-test').addEventListener('click', function () {

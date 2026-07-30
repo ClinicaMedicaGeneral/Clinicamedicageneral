@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informe Electrocardiograma · CMG</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; }
+
+/* ── Toolbar ── */
+.ek-toolbar {
+  max-width: 850px;
+  margin: 28px auto 16px;
+  padding: 0 28px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.ek-back {
+  color: #213C7D;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+.ek-back:hover { text-decoration: underline; }
+.ek-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.ek-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity .15s, transform .1s;
+}
+.ek-btn:hover { opacity: .9; }
+.ek-btn:active { transform: scale(.98); }
+.ek-btn-print { background: #059669; color: #fff; }
+
+/* ── Loading / Error ── */
+.ek-message {
+  max-width: 850px;
+  margin: 60px auto;
+  padding: 40px;
+  background: #fff;
+  border-radius: 12px;
+  text-align: center;
+  color: #4B5563;
+}
+.ek-spinner {
+  width: 28px; height: 28px;
+  border: 3px solid #E5E7EB;
+  border-top-color: #213C7D;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══ HOJA DE RESULTADOS ═══ */
+.ek-container {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 0 28px 40px;
+}
+.ek-sheet {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #213C7D;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0,0,0,.06);
+}
+.ek-watermark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: .06;
+  z-index: 0;
+}
+.ek-watermark img { width: 60%; max-width: 480px; }
+
+/* Header */
+.ek-header {
+  position: relative; z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 32px;
+  border-bottom: 3px solid #FDD22C;
+  background: linear-gradient(180deg,#fafbff 0%,#fff 100%);
+}
+.ek-header img { width: 56px; height: auto; }
+.ek-header .ek-h-name {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: .3px;
+  margin: 0;
+}
+.ek-header .ek-h-sub {
+  font-size: 12px;
+  color: #6B7280;
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+/* Body */
+.ek-body { position: relative; z-index: 1; padding: 28px 32px; }
+.ek-title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin: 4px 0 22px;
+  color: #213C7D;
+  border-top: 1px solid #E5E7EB;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 12px 0;
+  background: #F9FAFB;
+}
+
+.ek-section-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: #213C7D;
+  margin: 22px 0 8px;
+}
+
+.ek-details {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 4px 18px;
+  font-size: 14px;
+  color: #1F2937;
+}
+.ek-details-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed #E5E7EB;
+  padding: 8px 0;
+  gap: 12px;
+}
+.ek-details-row:last-child { border-bottom: 0; }
+.ek-details-row b { color: #213C7D; min-width: 160px; }
+
+.ek-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  margin-top: 4px;
+}
+.ek-table th {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 2px solid #213C7D;
+  color: #213C7D;
+  background: #F9FAFB;
+}
+.ek-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #E5E7EB;
+  color: #1F2937;
+}
+.ek-table tr td:first-child { font-weight: 700; color: #374151; width: 40%; }
+
+.ek-obs {
+  background: #FFFBEB;
+  border-left: 4px solid #FDD22C;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #1F2937;
+  margin-top: 6px;
+}
+
+/* Espacio del trazo impreso */
+.ek-strip {
+  margin-top: 10px;
+  border: 1.5px solid #9CA3AF;
+  border-radius: 6px;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FAFBFF;
+  overflow: hidden;
+}
+.ek-strip img { width: 100%; height: auto; display: block; }
+.ek-strip .ek-strip-empty { color: #9CA3AF; font-size: 13px; text-align: center; padding: 20px; }
+
+/* Firma */
+.ek-firma {
+  margin-top: 50px;
+  display: flex;
+  justify-content: flex-end;
+}
+.ek-firma-box {
+  width: 280px;
+  text-align: center;
+  border-top: 1px solid #213C7D;
+  padding-top: 6px;
+  font-size: 13px;
+  color: #213C7D;
+}
+.ek-firma-box small {
+  display: block;
+  color: #6B7280;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+/* Pie de página */
+.ek-foot {
+  position: relative; z-index: 1;
+  padding: 16px 32px 24px;
+  border-top: 1px solid #E5E7EB;
+  background: #F9FAFB;
+  text-align: center;
+  font-size: 11px;
+  color: #6B7280;
+  line-height: 1.6;
+}
+.ek-foot b { color: #213C7D; }
+
+/* Print */
+@media print {
+  body { background: #fff; }
+  .no-print { display: none !important; }
+  .ek-toolbar { display: none; }
+  .ek-container { padding: 0; max-width: none; }
+  .ek-sheet { border: none; box-shadow: none; }
+  .ek-strip { break-inside: avoid; }
+  @page { size: letter; margin: 14mm; }
+}
+</style>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9WM5N0QETS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9WM5N0QETS');
+</script>
+</head>
+<body>
+
+<!-- Toolbar -->
+<div class="ek-toolbar no-print">
+  <a href="Expediente-Doctor.html" class="ek-back">← Volver al expediente</a>
+  <div class="ek-actions">
+    <button class="ek-btn ek-btn-print" id="ek-btn-print">🖨️ Imprimir</button>
+  </div>
+</div>
+
+<!-- Loading / Error placeholder -->
+<div id="ek-loading" class="ek-message">
+  <div class="ek-spinner"></div>
+  Cargando informe...
+</div>
+
+<!-- Informe -->
+<div id="ek-container" class="ek-container" style="display:none">
+  <div class="ek-sheet" id="ek-sheet">
+    <div class="ek-watermark"><img src="assets/isotipo-color.png" alt=""></div>
+
+    <!-- Header -->
+    <div class="ek-header">
+      <img src="assets/isotipo-color.png" alt="CMG">
+      <div>
+        <p class="ek-h-name">CLÍNICA MÉDICA GENERAL CMG, S. DE R.L.</p>
+        <p class="ek-h-sub">Boulevard Económica Europea · City Mall LC-214, Tegucigalpa · +504 3155-5162</p>
+      </div>
+    </div>
+
+    <div class="ek-body">
+      <h2 class="ek-title">INFORME ELECTROCARDIOGRAMA</h2>
+
+      <div class="ek-section-label">I. Generales del paciente</div>
+      <div class="ek-details">
+        <div class="ek-details-row"><b>Nombre:</b> <span id="ek-paciente-nombre">—</span></div>
+        <div class="ek-details-row"><b>Edad:</b> <span id="ek-paciente-edad">—</span></div>
+        <div class="ek-details-row"><b>Fecha:</b> <span id="ek-fecha">—</span></div>
+      </div>
+
+      <div class="ek-section-label">II. Impresión diagnóstica</div>
+      <div class="ek-details" style="margin-bottom:10px">
+        <div class="ek-details-row"><b>Frecuencia cardíaca:</b> <span id="ek-fc">—</span></div>
+        <div class="ek-details-row"><b>Ritmo:</b> <span id="ek-ritmo">—</span></div>
+        <div class="ek-details-row"><b>Eje eléctrico:</b> <span id="ek-eje">—</span></div>
+      </div>
+
+      <table class="ek-table">
+        <thead><tr><th></th><th>Amplitud (mV)</th><th>Duración (Seg)</th></tr></thead>
+        <tbody id="ek-tabla-ondas"></tbody>
+      </table>
+
+      <div class="ek-section-label">Observaciones</div>
+      <p class="ek-obs" id="ek-observaciones">—</p>
+
+      <div class="ek-section-label">Electrocardiograma impreso</div>
+      <div class="ek-strip" id="ek-strip">
+        <div class="ek-strip-empty">Sin imagen adjunta. Espacio reservado para el trazo del electrocardiograma.</div>
+      </div>
+
+      <!-- Firma -->
+      <div class="ek-firma">
+        <div class="ek-firma-box">
+          <b id="ek-medico-nombre">—</b>
+          <small>Médico General · Clínica Médica General CMG</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie -->
+    <div class="ek-foot">
+      <p>
+        <b>Clínica Médica General CMG, S. de R.L.</b> · clinicamedicacmg@gmail.com · clinicamedicacmg.net
+      </p>
+      <p style="margin-top:4px">
+        Local E-214, Sótano No. 2, City Mall · Comayagüela, Francisco Morazán, M.D.C. · Tel. (+504) 3155-5162 / 2262-6764
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase + lógica -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script>
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return (s||'').toString().replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  function fmtFechaHora(ts){
+    if (!ts) return '—';
+    try {
+      var d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleString('es-HN', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    } catch(e){ return '—'; }
+  }
+  function calcEdad(fechaNac){
+    if (!fechaNac) return '';
+    try {
+      var d = new Date(fechaNac);
+      var hoy = new Date();
+      var e = hoy.getFullYear() - d.getFullYear();
+      var m = hoy.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && hoy.getDate() < d.getDate())) e--;
+      return e + ' años';
+    } catch(err){ return ''; }
+  }
+
+  function getParam(name){
+    var m = new RegExp('[?&]' + name + '=([^&]+)').exec(window.location.search);
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+
+  function ondaRow(label, amp, dur){
+    return '<tr><td>' + esc(label) + '</td><td>' + esc(amp || '—') + '</td><td>' + esc(dur || '—') + '</td></tr>';
+  }
+
+  function render(data){
+    $('ek-paciente-nombre').textContent = data.pacienteNombre || '—';
+    $('ek-paciente-edad').textContent = calcEdad(data.pacienteFechaNacimiento) || '—';
+    $('ek-fecha').textContent = fmtFechaHora(data.emitidoEn);
+    $('ek-fc').textContent = data.fc || '—';
+    $('ek-ritmo').textContent = data.ritmo || '—';
+    $('ek-eje').textContent = data.eje || '—';
+    $('ek-tabla-ondas').innerHTML =
+      ondaRow('Onda P', data.aondap, data.dondap) +
+      ondaRow('Intervalo P.R', data.aintpr, data.dintpr) +
+      ondaRow('Complejo QRS', data.acompqrs, data.dcompqrs) +
+      ondaRow('Onda R', data.aondar, data.dondaqrs) +
+      ondaRow('Intervalo Q – T', data.aintqt, data.dintqt) +
+      ondaRow('Onda T', data.aondat, data.dondat);
+    $('ek-observaciones').textContent = data.observaciones || '— sin observaciones —';
+    if (data.imagenUrl) {
+      $('ek-strip').innerHTML = '<img src="' + esc(data.imagenUrl) + '" alt="Electrocardiograma">';
+    }
+    $('ek-medico-nombre').textContent = data.medico || '—';
+
+    $('ek-loading').style.display = 'none';
+    $('ek-container').style.display = '';
+    document.title = 'EKG ' + (data.pacienteNombre || '') + ' · CMG';
+  }
+
+  function showError(msg){
+    $('ek-loading').innerHTML = '<div style="color:#b91c1c;font-weight:700">❌ ' + esc(msg) + '</div><div style="margin-top:8px;font-size:13px">' +
+      '<a href="Expediente-Doctor.html" class="ek-back">← Volver al expediente</a></div>';
+  }
+
+  /* Imprimir */
+  $('ek-btn-print').addEventListener('click', function(){ window.print(); });
+
+  /* Inicializar */
+  var id = getParam('id');
+  if (!id) { showError('No se especificó el electrocardiograma (parámetro ?id= ausente).'); return; }
+
+  firebase.auth().onAuthStateChanged(function(user){
+    if (!user) { showError('Sesión requerida. Inicia sesión.'); return; }
+    firebase.firestore().collection('electrocardiogramas').doc(id).get()
+      .then(function(snap){
+        if (!snap.exists) { showError('El electrocardiograma no existe o fue eliminado.'); return; }
+        var d = snap.data();
+        d._id = snap.id;
+        render(d);
+      })
+      .catch(function(err){
+        showError('Error al cargar el electrocardiograma: ' + err.message);
+      });
+  });
+})();
+</script>
+
+</body>
+</html>

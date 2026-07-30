@@ -313,6 +313,28 @@ service cloud.firestore {
       allow create, update, delete: if isDoctor();
     }
 
+    // ═══ /electrocardiogramas/{id} ═══════════════════════════════
+    // Hoja de resultados del servicio "Electrocardiograma" (informe + foto del trazo).
+    //   - Staff: lectura/escritura total.
+    //   - Caja: solo lectura.
+    //   - Paciente: puede leer los electrocardiogramas ligados a su expediente.
+    match /electrocardiogramas/{ekgId} {
+      allow read: if isDoctor() || isCaja()
+        || (
+          isAuth()
+          && resource.data.codigoPaciente != null
+          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
+          && (
+            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
+            || (
+              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
+              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
+            )
+          )
+        );
+      allow create, update, delete: if isDoctor();
+    }
+
     // ═══ /catalogoConfig/{itemKey} ════════════════════════════
     // Overrides de precio público, % de descuento Doctor 365 y
     // exclusiones por ítem, gestionados desde Admin-Precios.html.

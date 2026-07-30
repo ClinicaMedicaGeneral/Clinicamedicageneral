@@ -70,8 +70,22 @@ service cloud.firestore {
       );
     }
     // isEnfermeria: personal de enfermería. Rol Firestore: enf | admin.
+    // Incluye las cuentas reales de "Caja · Enfermería" como respaldo (igual que
+    // isCaja()/isDoctor()), porque antes solo dependía del doc en /usuarios y
+    // dejaba bloqueadas esas cuentas si el doc no existía o no tenía rol/estado
+    // correctos, aunque isCaja()/isDoctor() sí las reconocieran.
     function isEnfermeria() {
-      return isAuth() && userActivo() && userRole() in ['enf', 'admin'];
+      return isAuth() && (
+        request.auth.token.email in [
+          'rubenwainwrightba@gmail.com',
+          'skarleth.admoncmg@gmail.com',
+          'administracion@clinicamedicacmg.net',
+          'luzidaliaortiz2021@gmail.com',
+          'ruizterann83@gmail.com',
+          'caja.clinicacmg@gmail.com'
+        ]
+        || (userActivo() && userRole() in ['enf', 'admin'])
+      );
     }
     // isMedicoTratante: SOLO médico (rol medico | admin, o correos de doctores).
     // A diferencia de isDoctor(), NO incluye enfermería: se usa para la finalización

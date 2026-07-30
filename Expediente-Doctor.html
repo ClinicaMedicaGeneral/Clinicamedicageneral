@@ -1036,29 +1036,41 @@ button.ed-consulta-link {
           </div>
         </div>
 
-        <!-- DRM Fun-10: Cliente especial (discapacidades) -->
+        <!-- DRM Fun-10: Cliente especial (Discapacidad / Pensionado / Jubilado) -->
         <div class="ed-section">
           <div class="ed-section-title">♿ Cliente especial</div>
           <div class="ed-grid ed-grid-2">
             <div class="ed-fgroup">
-              <label class="ed-label">¿Presenta alguna discapacidad?</label>
+              <label class="ed-label">¿Es cliente especial?</label>
               <select class="ed-input" id="nuevo-discapacidad-flag">
                 <option value="no">No</option>
                 <option value="si">Sí</option>
               </select>
             </div>
-            <div class="ed-fgroup">
-              <label class="ed-label">Tipo de discapacidad</label>
-              <input type="text" class="ed-input" id="nuevo-discapacidad-tipo" placeholder="Visual, auditiva, motora, intelectual…">
-            </div>
-            <div class="ed-fgroup full">
-              <label class="ed-label">Notas / Consideraciones especiales</label>
-              <textarea class="ed-textarea" id="nuevo-discapacidad-notas" rows="2" placeholder="Apoyos requeridos, acompañante, accesibilidad…"></textarea>
-            </div>
-            <div class="ed-fgroup full">
-              <label class="ed-label">Documento de respaldo (PDF / imagen)</label>
-              <input type="file" class="ed-input" id="nuevo-discapacidad-doc" accept=".pdf,image/*">
-              <small style="color:#6B7280">Carné de discapacidad u otro documento oficial.</small>
+          </div>
+          <div id="nuevo-discapacidad-detalle" style="display:none;margin-top:10px">
+            <div class="ed-grid ed-grid-2">
+              <div class="ed-fgroup full">
+                <label class="ed-label">Categoría *</label>
+                <div style="display:flex;gap:14px;flex-wrap:wrap">
+                  <label class="ed-meds-opt"><input type="radio" name="nuevo-discapacidad-categoria" value="discapacidad" checked> Discapacidad</label>
+                  <label class="ed-meds-opt"><input type="radio" name="nuevo-discapacidad-categoria" value="pensionado"> Pensionado</label>
+                  <label class="ed-meds-opt"><input type="radio" name="nuevo-discapacidad-categoria" value="jubilado"> Jubilado</label>
+                </div>
+              </div>
+              <div class="ed-fgroup full" id="nuevo-discapacidad-tipo-grupo">
+                <label class="ed-label">Tipo de discapacidad</label>
+                <input type="text" class="ed-input" id="nuevo-discapacidad-tipo" placeholder="Visual, auditiva, motora, intelectual…">
+              </div>
+              <div class="ed-fgroup full">
+                <label class="ed-label">Notas / Consideraciones especiales</label>
+                <textarea class="ed-textarea" id="nuevo-discapacidad-notas" rows="2" placeholder="Apoyos requeridos, acompañante, accesibilidad…"></textarea>
+              </div>
+              <div class="ed-fgroup full">
+                <label class="ed-label">Documento de respaldo (PDF / imagen)</label>
+                <input type="file" class="ed-input" id="nuevo-discapacidad-doc" accept=".pdf,image/*">
+                <small style="color:#6B7280">Carné de discapacidad, de jubilación o de pensión, u otro documento oficial.</small>
+              </div>
             </div>
           </div>
         </div>
@@ -1485,6 +1497,12 @@ button.ed-consulta-link {
   /* Quita acentos y normaliza a minúsculas, así "maria" encuentra "María" al filtrar por nombre */
   function normalizarTexto(s) {
     return (s == null ? '' : String(s)).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  }
+
+  /* DRM Fun-10: lee el radio marcado de un grupo (usado por la categoría de Cliente especial) */
+  function categoriaChecked(name) {
+    var r = document.querySelector('input[name="' + name + '"]:checked');
+    return r ? r.value : null;
   }
 
   function fmtDate(ts) {
@@ -2070,10 +2088,25 @@ button.ed-consulta-link {
     $id('nuevo-identidad').placeholder = PLACEHOLDERS_ID[this.value] || '0801-1990-12345';
   });
 
+  /* DRM Fun-10: Cliente especial — mostrar categoría solo al elegir "Sí",
+     y el tipo de discapacidad solo si la categoría elegida es "Discapacidad" */
+  $id('nuevo-discapacidad-flag').addEventListener('change', function () {
+    $id('nuevo-discapacidad-detalle').style.display = this.value === 'si' ? 'block' : 'none';
+  });
+  document.querySelectorAll('input[name="nuevo-discapacidad-categoria"]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      $id('nuevo-discapacidad-tipo-grupo').style.display = this.value === 'discapacidad' ? '' : 'none';
+    });
+  });
+
   $id('btn-nuevo-limpiar').addEventListener('click', function () {
     document.querySelectorAll('#tab-nuevo .ed-input, #tab-nuevo .ed-select, #tab-nuevo .ed-textarea')
       .forEach(function (el) { el.value = ''; });
     $id('nuevo-identidad').placeholder = '0801-1990-12345';
+    $id('nuevo-discapacidad-detalle').style.display = 'none';
+    var catDiscapacidad = document.querySelector('input[name="nuevo-discapacidad-categoria"][value="discapacidad"]');
+    if (catDiscapacidad) catDiscapacidad.checked = true;
+    $id('nuevo-discapacidad-tipo-grupo').style.display = '';
     renderAntecedentes('nuevo-pat-container', ANTECEDENTES_PATOLOGICOS, 'nvopat');
     renderAntecedentes('nuevo-nopat-container', ANTECEDENTES_NO_PATOLOGICOS, 'nvonopat');
     $id('nuevo-resultado').style.display = 'none';
@@ -2116,9 +2149,10 @@ button.ed-consulta-link {
       antecedentesPatologicos: collectAntecedentes('nuevo-pat-container'),
       antecedentesNoPatologicos: collectAntecedentes('nuevo-nopat-container'),
       antecedentesFamiliares: $val('nuevo-familiares'),
-      /* DRM Fun-10: Cliente especial */
+      /* DRM Fun-10: Cliente especial (Discapacidad / Pensionado / Jubilado) */
       clienteEspecial: {
         tieneDiscapacidad: $val('nuevo-discapacidad-flag') === 'si',
+        categoria        : $val('nuevo-discapacidad-flag') === 'si' ? categoriaChecked('nuevo-discapacidad-categoria') : null,
         tipoDiscapacidad : $val('nuevo-discapacidad-tipo'),
         notas            : $val('nuevo-discapacidad-notas'),
         documentoUrl     : null
@@ -2483,6 +2517,16 @@ button.ed-consulta-link {
     setAntecedentes('edit-pat-container', p.antecedentesPatologicos);
     setAntecedentes('edit-nopat-container', p.antecedentesNoPatologicos);
 
+    /* DRM Fun-10: Cliente especial — mismo toggle que en "Nuevo expediente" */
+    $id('edit-discapacidad-flag').addEventListener('change', function () {
+      $id('edit-discapacidad-detalle').style.display = this.value === 'si' ? 'block' : 'none';
+    });
+    document.querySelectorAll('input[name="edit-discapacidad-categoria"]').forEach(function (r) {
+      r.addEventListener('change', function () {
+        $id('edit-discapacidad-tipo-grupo').style.display = this.value === 'discapacidad' ? '' : 'none';
+      });
+    });
+
     $id('btn-editar-guardar').addEventListener('click', guardarEdicion);
     $id('btn-eliminar-expediente').addEventListener('click', abrirEliminarExpedienteModal);
   }
@@ -2533,22 +2577,35 @@ button.ed-consulta-link {
           '</div>' +
         '</div>' +
       '</div>' +
-      /* DRM Fun-10: Cliente especial, editable también sobre un expediente ya creado */
+      /* DRM Fun-10: Cliente especial (Discapacidad / Pensionado / Jubilado), editable también sobre un expediente ya creado */
       '<div class="ed-section"><div class="ed-section-title">♿ Cliente especial</div>' +
         '<div class="ed-grid ed-grid-2">' +
-          '<div class="ed-fgroup"><label class="ed-label">¿Presenta alguna discapacidad?</label>' +
+          '<div class="ed-fgroup"><label class="ed-label">¿Es cliente especial?</label>' +
             sel('edit-discapacidad-flag', ce.tieneDiscapacidad ? 'si' : 'no', [{v:'no',l:'No'},{v:'si',l:'Sí'}]) +
           '</div>' +
-          '<div class="ed-fgroup"><label class="ed-label">Tipo de discapacidad</label>' +
-            '<input type="text" class="ed-input" id="edit-discapacidad-tipo" value="' + esc(ce.tipoDiscapacidad || '') + '" placeholder="Visual, auditiva, motora, intelectual…">' +
-          '</div>' +
-          '<div class="ed-fgroup full"><label class="ed-label">Notas / Consideraciones especiales</label>' +
-            '<textarea class="ed-textarea" id="edit-discapacidad-notas" rows="2" placeholder="Apoyos requeridos, acompañante, accesibilidad…">' + esc(ce.notas || '') + '</textarea>' +
-          '</div>' +
-          '<div class="ed-fgroup full"><label class="ed-label">Documento de respaldo (PDF / imagen)</label>' +
-            (ce.documentoUrl ? '<div style="margin-bottom:6px;font-size:12px"><a href="' + esc(ce.documentoUrl) + '" target="_blank">📎 Ver documento actual</a></div>' : '') +
-            '<input type="file" class="ed-input" id="edit-discapacidad-doc" accept=".pdf,image/*">' +
-            '<small style="color:#6B7280">Carné de discapacidad u otro documento oficial. Sube uno nuevo solo si quieres reemplazar el actual.</small>' +
+        '</div>' +
+        '<div id="edit-discapacidad-detalle" style="display:' + (ce.tieneDiscapacidad ? 'block' : 'none') + ';margin-top:10px">' +
+          '<div class="ed-grid ed-grid-2">' +
+            '<div class="ed-fgroup full"><label class="ed-label">Categoría *</label>' +
+              '<div style="display:flex;gap:14px;flex-wrap:wrap">' +
+                ['discapacidad','pensionado','jubilado'].map(function (v) {
+                  var lbl = v === 'discapacidad' ? 'Discapacidad' : (v === 'pensionado' ? 'Pensionado' : 'Jubilado');
+                  var checked = (ce.categoria || 'discapacidad') === v ? ' checked' : '';
+                  return '<label class="ed-meds-opt"><input type="radio" name="edit-discapacidad-categoria" value="' + v + '"' + checked + '> ' + lbl + '</label>';
+                }).join('') +
+              '</div>' +
+            '</div>' +
+            '<div class="ed-fgroup full" id="edit-discapacidad-tipo-grupo" style="display:' + ((ce.categoria || 'discapacidad') === 'discapacidad' ? '' : 'none') + '"><label class="ed-label">Tipo de discapacidad</label>' +
+              '<input type="text" class="ed-input" id="edit-discapacidad-tipo" value="' + esc(ce.tipoDiscapacidad || '') + '" placeholder="Visual, auditiva, motora, intelectual…">' +
+            '</div>' +
+            '<div class="ed-fgroup full"><label class="ed-label">Notas / Consideraciones especiales</label>' +
+              '<textarea class="ed-textarea" id="edit-discapacidad-notas" rows="2" placeholder="Apoyos requeridos, acompañante, accesibilidad…">' + esc(ce.notas || '') + '</textarea>' +
+            '</div>' +
+            '<div class="ed-fgroup full"><label class="ed-label">Documento de respaldo (PDF / imagen)</label>' +
+              (ce.documentoUrl ? '<div style="margin-bottom:6px;font-size:12px"><a href="' + esc(ce.documentoUrl) + '" target="_blank">📎 Ver documento actual</a></div>' : '') +
+              '<input type="file" class="ed-input" id="edit-discapacidad-doc" accept=".pdf,image/*">' +
+              '<small style="color:#6B7280">Carné de discapacidad, de jubilación o de pensión, u otro documento oficial. Sube uno nuevo solo si quieres reemplazar el actual.</small>' +
+            '</div>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -2585,9 +2642,10 @@ button.ed-consulta-link {
       antecedentesNoPatologicos: collectAntecedentes('edit-nopat-container'),
       antecedentesFamiliares: $val('edit-familiares'),
       esD365: $val('edit-es-d365') === 'si',
-      /* DRM Fun-10: Cliente especial, editable sobre un expediente ya creado */
+      /* DRM Fun-10: Cliente especial (Discapacidad / Pensionado / Jubilado), editable sobre un expediente ya creado */
       clienteEspecial: {
         tieneDiscapacidad: $val('edit-discapacidad-flag') === 'si',
+        categoria        : $val('edit-discapacidad-flag') === 'si' ? categoriaChecked('edit-discapacidad-categoria') : null,
         tipoDiscapacidad : $val('edit-discapacidad-tipo'),
         notas            : $val('edit-discapacidad-notas'),
         documentoUrl     : ceExistente.documentoUrl || null

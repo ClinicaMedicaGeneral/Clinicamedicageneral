@@ -2871,7 +2871,10 @@ button.ed-consulta-link {
               '<p class="ed-pending-meta">📅 ' + fmtDate(it.fechaRegistro) + ' · Registrado por ' + esc(it.registradoPor || '—') + '</p>' +
               infoExtra +
             '</div>' +
-            '<button class="ed-btn ed-btn-yellow" data-atender="' + esc(it._id) + '">Atender →</button>' +
+            '<div style="display:flex;flex-direction:column;gap:6px;align-items:stretch">' +
+              '<button class="ed-btn ed-btn-yellow" data-atender="' + esc(it._id) + '">Atender →</button>' +
+              '<button class="ed-consulta-link ed-link-red" data-borrar-pendiente="' + esc(it._id) + '" style="font-size:11px;text-align:center">🗑️ Quitar</button>' +
+            '</div>' +
           '</div>';
         }).join('');
         lista.querySelectorAll('[data-atender]').forEach(function (b) {
@@ -2879,9 +2882,30 @@ button.ed-consulta-link {
             continuarConsulta(b.getAttribute('data-atender'));
           });
         });
+        lista.querySelectorAll('[data-borrar-pendiente]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            borrarConsultaPendiente(b.getAttribute('data-borrar-pendiente'), cargarPendientesEnfermeria);
+          });
+        });
       })
       .catch(function (err) {
         lista.innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error: ' + esc(err.message) + '</div>';
+      });
+  }
+
+  /* ─── Quitar un registro pendiente (duplicado o de prueba) que ya no corresponde ─── */
+  function borrarConsultaPendiente(id, onDone) {
+    if (!confirm('¿Quitar este registro pendiente? Esta acción no se puede deshacer.')) return;
+    showOverlay('Quitando registro...');
+    cmgDb.collection('consultas').doc(id).delete()
+      .then(function () {
+        hideOverlay();
+        showAlert('✓ Registro eliminado.', 'success');
+        if (onDone) onDone();
+      })
+      .catch(function (err) {
+        hideOverlay();
+        showAlert('Error: ' + err.message, 'error');
       });
   }
 
@@ -2933,12 +2957,20 @@ button.ed-consulta-link {
               '<p class="ed-pending-meta">📅 ' + fmtDate(fechaMostrar) + ' · Registrado por ' + esc(registradoPor) + '</p>' +
               infoExtra +
             '</div>' +
-            '<button class="ed-btn ed-btn-yellow" data-continuar="' + esc(it._id) + '">' + btnLabel + '</button>' +
+            '<div style="display:flex;flex-direction:column;gap:6px;align-items:stretch">' +
+              '<button class="ed-btn ed-btn-yellow" data-continuar="' + esc(it._id) + '">' + btnLabel + '</button>' +
+              '<button class="ed-consulta-link ed-link-red" data-borrar-pendiente="' + esc(it._id) + '" style="font-size:11px;text-align:center">🗑️ Quitar</button>' +
+            '</div>' +
           '</div>';
         }).join('');
         lista.querySelectorAll('[data-continuar]').forEach(function (b) {
           b.addEventListener('click', function () {
             continuarConsulta(b.getAttribute('data-continuar'));
+          });
+        });
+        lista.querySelectorAll('[data-borrar-pendiente]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            borrarConsultaPendiente(b.getAttribute('data-borrar-pendiente'), cargarPendientesMedico);
           });
         });
       })

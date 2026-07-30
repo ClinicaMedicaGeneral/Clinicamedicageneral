@@ -1119,11 +1119,12 @@ button.ed-consulta-link {
     <section id="tab-buscar" class="ed-tab-content" style="display:none">
       <div class="ed-card">
         <h2 class="ed-card-title">🔍 Buscar paciente</h2>
-        <p class="ed-card-subtitle">Busca por código de expediente, número de identidad o fecha de nacimiento.</p>
+        <p class="ed-card-subtitle">Busca por nombre, código de expediente, número de identidad o fecha de nacimiento.</p>
 
         <div class="ed-search-types">
           <button class="ed-search-type-btn is-active" data-tipo="codigo">📋 Código CMG</button>
           <button class="ed-search-type-btn" data-tipo="identidad">🪪 N° Identidad</button>
+          <button class="ed-search-type-btn" data-tipo="nombre">👤 Nombre</button>
           <button class="ed-search-type-btn" data-tipo="fecha">📅 Fecha nacimiento</button>
         </div>
 
@@ -1479,6 +1480,11 @@ button.ed-consulta-link {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
+  }
+
+  /* Quita acentos y normaliza a minúsculas, así "maria" encuentra "María" al filtrar por nombre */
+  function normalizarTexto(s) {
+    return (s == null ? '' : String(s)).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
   }
 
   function fmtDate(ts) {
@@ -2209,14 +2215,18 @@ button.ed-consulta-link {
   }
 
   function renderTablaFiltrada(filtro) {
-    var f = (filtro || '').toLowerCase().trim();
+    /* Los 3 criterios (nombre, identidad, código) son globales aquí; fecha de
+       nacimiento queda exclusivo de la pestaña Buscar. normalizarTexto() ignora
+       acentos y mayúsculas, así "maria" encuentra "María". */
+    var f = normalizarTexto(filtro);
+    var fDigits = (filtro || '').replace(/\D/g, '');
     var lista = f ? _todosLosPacientes.filter(function (p) {
       var dg = p.datosGenerales || {};
-      return (dg.nombreCompleto || '').toLowerCase().includes(f)
-        || (p.codigoPaciente || '').toLowerCase().includes(f)
-        || (dg.numeroIdentidad || '').replace(/\D/g,'').includes(f.replace(/\D/g,''))
-        || (dg.numeroIdentidad || '').toLowerCase().includes(f)
-        || (dg.telefono || '').includes(f);
+      return normalizarTexto(dg.nombreCompleto).includes(f)
+        || normalizarTexto(p.codigoPaciente).includes(f)
+        || normalizarTexto(dg.numeroIdentidad).includes(f)
+        || (!!fDigits && (dg.numeroIdentidad || '').replace(/\D/g,'').includes(fDigits))
+        || (!!fDigits && (dg.telefono || '').replace(/\D/g,'').includes(fDigits));
     }) : _todosLosPacientes;
 
     $id('pt-count').innerHTML = '<strong>' + lista.length + '</strong> paciente' + (lista.length !== 1 ? 's' : '');
@@ -2298,6 +2308,10 @@ button.ed-consulta-link {
         inp.placeholder = '0801-1990-12345';
         inp.type = 'text';
         inp.maxLength = 30;
+      } else if (_tipoBusqueda === 'nombre') {
+        inp.placeholder = 'Nombre o parte del nombre';
+        inp.type = 'text';
+        inp.maxLength = 80;
       } else {
         inp.placeholder = 'YYYY-MM-DD';
         inp.type = 'date';
@@ -2338,6 +2352,21 @@ button.ed-consulta-link {
         .then(function (snap) {
           var r = [];
           snap.forEach(function (doc) { r.push(Object.assign({ codigoPaciente: doc.id }, doc.data())); });
+          return r;
+        });
+    } else if (_tipoBusqueda === 'nombre') {
+      /* Nombre: sin campo indexado para substring, se filtra en el cliente
+         sobre todos los expedientes (mismo criterio que la pestaña Pacientes). */
+      var nombreBuscado = normalizarTexto(valor);
+      promise = cmgDb.collection('expedientes').get()
+        .then(function (snap) {
+          var r = [];
+          snap.forEach(function (doc) {
+            var dg = doc.data().datosGenerales || {};
+            if (normalizarTexto(dg.nombreCompleto).includes(nombreBuscado)) {
+              r.push(Object.assign({ codigoPaciente: doc.id }, doc.data()));
+            }
+          });
           return r;
         });
     } else {
@@ -3077,6 +3106,7 @@ button.ed-consulta-link {
           '<label class="ed-meds-opt" style="margin-top:8px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="serv-sens-confirm"> Confirmo que se realizó la prueba de sensibilidad al paciente</label>' +
         '</div>' +
       '</div>' +
+      buildEmergenciaSectionHtml('servreg') +
       '<div class="ed-actions">' +
         '<button class="ed-btn ed-btn-primary" id="btn-guardar-servicio">💾 Registrar servicio (queda pendiente)</button>' +
       '</div>';
@@ -3090,6 +3120,7 @@ button.ed-consulta-link {
     $id('serv-sens-norequiere').addEventListener('change', function () {
       $id('serv-sens-detalle').style.display = this.checked ? 'none' : 'block';
     });
+    wireEmergenciaToggle('servreg');
     /* Auto-calcular IMC al cambiar peso o talla */
     function calcularIMCServicio() {
       var peso  = parseFloat($val('servvit-peso'));
@@ -3164,6 +3195,7 @@ button.ed-consulta-link {
       servicioNotas: $val('serv-notas'),
       pruebaSensibilidadServicio: pruebaSensibilidadServicio,
       signosVitales: tieneVitalesServicio ? vitalesServicio : null,
+      salaEmergencia: collectEmergenciaData('servreg'),
       fechaServicio: firebase.firestore.FieldValue.serverTimestamp(),
       servicioPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
       servicioEmail: cmgAuth.currentUser.email
@@ -3336,6 +3368,44 @@ button.ed-consulta-link {
     }
     return { necesita: necesita, datos: datos };
   }
+  /* ─── Área de Estabilización: reutilizable en Consulta y en los formularios de
+     Servicio (registro y completar) — una emergencia puede surgir en cualquier etapa. ─── */
+  function buildEmergenciaSectionHtml(prefix) {
+    return '<div class="ed-section" id="' + prefix + '-emergencia-section">' +
+      '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-emergencia-check"> 🚨 Área de Estabilización</label>' +
+      '<div id="' + prefix + '-emergencia-form" style="display:none;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:12px;margin-top:8px">' +
+        '<div class="ed-grid ed-grid-2">' +
+          '<div class="ed-fgroup"><label class="ed-label">Uso de área de estabilización (horas)</label>' +
+            '<input type="text" class="ed-input" id="' + prefix + '-emerg-sala-horas" placeholder="Ej. 2 horas"></div>' +
+          '<div class="ed-fgroup"><label class="ed-label">Utilización del monitor de signos vitales (horas)</label>' +
+            '<input type="text" class="ed-input" id="' + prefix + '-emerg-monitor-horas" placeholder="Ej. 1.5 horas"></div>' +
+          '<div class="ed-fgroup"><label class="ed-label">Utilización de tanque de oxígeno (litros)</label>' +
+            '<input type="text" class="ed-input" id="' + prefix + '-emerg-oxigeno-litros" placeholder="Ej. 3 litros"></div>' +
+          '<div class="ed-fgroup" style="align-self:end"><label class="ed-meds-opt" style="background:#fff"><input type="checkbox" id="' + prefix + '-emerg-bomba-check"> Utilización de bomba de infusión</label></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+  function wireEmergenciaToggle(prefix) {
+    var chk = $id(prefix + '-emergencia-check');
+    if (!chk) return;
+    chk.addEventListener('change', function () {
+      var form = $id(prefix + '-emergencia-form');
+      if (form) form.style.display = this.checked ? 'block' : 'none';
+    });
+  }
+  /* Devuelve el objeto salaEmergencia si el checkbox está marcado, o null si no aplica */
+  function collectEmergenciaData(prefix) {
+    var chk = $id(prefix + '-emergencia-check');
+    if (!chk || !chk.checked) return null;
+    return {
+      activa       : true,
+      salaHoras    : $val(prefix + '-emerg-sala-horas'),
+      monitorHoras : $val(prefix + '-emerg-monitor-horas'),
+      oxigenoLitros: $val(prefix + '-emerg-oxigeno-litros'),
+      bombaInfusion: !!($id(prefix + '-emerg-bomba-check') && $id(prefix + '-emerg-bomba-check').checked)
+    };
+  }
   /* Arma un ref nuevo (id conocido de antemano) + los datos de la constancia, sin escribir todavía.
      Así el caller puede incluir constanciaId en la MISMA escritura que guarda la consulta/servicio
      (batch atómico) en vez de depender de un update() de seguimiento que Caja/Enfermería no
@@ -3426,6 +3496,7 @@ button.ed-consulta-link {
             '</select></div>' +
         '</div>' +
       '</div>' +
+      buildEmergenciaSectionHtml('servfin') +
       '<div class="ed-actions">' +
         '<button class="ed-btn ed-btn-primary" id="btn-completar-servicio">✅ Marcar servicio como completado</button>' +
       '</div>';
@@ -3436,6 +3507,7 @@ button.ed-consulta-link {
     wireSensToggle('serv-meds-visita-list', 'serv-sens-wrap');
     ['serv-meds-visita-list', 'serv-meds-despacho-list'].forEach(wireMedsGroupNinguno);
     wireIncapToggle('serv');
+    wireEmergenciaToggle('servfin');
   }
 
   /* ─── Marcar servicio como completado (status:'servicio-completo') ───
@@ -3503,6 +3575,9 @@ button.ed-consulta-link {
     if (medsVisitaServ.indexOf('Prueba de sensibilidad') !== -1) {
       updateData.resultadoPruebaSensibilidad = $val('serv-sens-resultado');
     }
+    /* Área de Estabilización: si ya se había marcado al registrar el servicio, se conserva;
+       si el médico también la marca aquí al completar, ese valor manda (más completo). */
+    updateData.salaEmergencia = collectEmergenciaData('servfin') || consultaPendienteCargada.salaEmergencia || null;
 
     showOverlay('Completando servicio...');
 
@@ -3697,20 +3772,7 @@ button.ed-consulta-link {
       /* DRM Fun-11: pregunta de incapacidad */
       buildIncapSectionHtml('cons') +
       /* Área de Estabilización: sección habilitada por checkbox con elementos de uso en horas */
-      '<div class="ed-section" id="cons-emergencia-section">' +
-        '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="cons-emergencia-check"> 🚨 Área de Estabilización</label>' +
-        '<div id="cons-emergencia-form" style="display:none;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:12px;margin-top:8px">' +
-          '<div class="ed-grid ed-grid-2">' +
-            '<div class="ed-fgroup"><label class="ed-label">Uso de área de estabilización (horas)</label>' +
-              '<input type="text" class="ed-input" id="emerg-sala-horas" placeholder="Ej. 2 horas"></div>' +
-            '<div class="ed-fgroup"><label class="ed-label">Utilización del monitor de signos vitales (horas)</label>' +
-              '<input type="text" class="ed-input" id="emerg-monitor-horas" placeholder="Ej. 1.5 horas"></div>' +
-            '<div class="ed-fgroup"><label class="ed-label">Utilización de tanque de oxígeno (litros)</label>' +
-              '<input type="text" class="ed-input" id="emerg-oxigeno-litros" placeholder="Ej. 3 litros"></div>' +
-            '<div class="ed-fgroup" style="align-self:end"><label class="ed-meds-opt" style="background:#fff"><input type="checkbox" id="emerg-bomba-check"> Utilización de bomba de infusión</label></div>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
+      buildEmergenciaSectionHtml('cons') +
       /* DRM v3 #3: acciones rápidas desde la consulta */
       '<div class="ed-section">' +
         '<div class="ed-section-title">⚡ Acciones rápidas durante la consulta</div>' +
@@ -3751,9 +3813,7 @@ button.ed-consulta-link {
     wireIncapToggle('cons');
 
     /* Toggle del formulario de Área de Estabilización */
-    $id('cons-emergencia-check').addEventListener('change', function(){
-      $id('cons-emergencia-form').style.display = this.checked ? 'block' : 'none';
-    });
+    wireEmergenciaToggle('cons');
 
     /* Toggle del campo de resultado de prueba de sensibilidad cuando se marca ese medicamento */
     wireSensToggle('cons-meds-visita-list', 'cons-sens-wrap');
@@ -4074,17 +4134,7 @@ button.ed-consulta-link {
     if (sensAplicada && !sensResultado) faltantes.push('Resultado de la prueba de sensibilidad');
 
     /* Área de Estabilización (opcional, habilitada por checkbox) */
-    var emergenciaCheck = $id('cons-emergencia-check');
-    var salaEmergencia = null;
-    if (emergenciaCheck && emergenciaCheck.checked) {
-      salaEmergencia = {
-        activa       : true,
-        salaHoras    : $val('emerg-sala-horas'),
-        monitorHoras : $val('emerg-monitor-horas'),
-        oxigenoLitros : $val('emerg-oxigeno-litros'),
-        bombaInfusion : !!($id('emerg-bomba-check') && $id('emerg-bomba-check').checked)
-      };
-    }
+    var salaEmergencia = collectEmergenciaData('cons');
 
     /* DRM Fun-11 v2: incapacidad → constancia como documento HTML aparte */
     var incap = collectIncapData('cons', faltantes);

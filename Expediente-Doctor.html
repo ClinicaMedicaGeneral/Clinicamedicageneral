@@ -911,8 +911,7 @@ button.ed-consulta-link {
       <button class="ed-tab" data-tab="buscar">🔍 Buscar</button>
       <button class="ed-tab" data-tab="editar">✏️ Editar</button>
       <button class="ed-tab" data-tab="consulta">📝 Consulta</button>
-      <button class="ed-tab" data-tab="pruebas">🧪 Pruebas</button>
-      <button class="ed-tab" data-tab="laboratorio">🔬 Laboratorio</button>
+      <button class="ed-tab" data-tab="pruebas">🧪🔬 Pruebas Rápidas / Laboratorio</button>
       <button class="ed-tab" data-tab="historial">📂 Historial</button>
       <!-- DRM Fun-9: Caja -->
       <button class="ed-tab" data-tab="caja">💰 Caja</button>
@@ -1210,11 +1209,8 @@ button.ed-consulta-link {
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- ─── TAB: LABORATORIO ─── -->
-    <section id="tab-laboratorio" class="ed-tab-content" style="display:none">
-      <div class="ed-card">
+      <div class="ed-card" style="margin-top:18px">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px">
           <div>
             <h2 class="ed-card-title" style="margin-bottom:4px">🔬 Exámenes de laboratorio</h2>
@@ -1638,8 +1634,7 @@ button.ed-consulta-link {
     if (name === 'pacientes') cargarListaPacientes();
     if (name === 'editar') renderEditarTab();
     if (name === 'consulta') renderConsultaTab();
-    if (name === 'pruebas') renderPruebasTab();
-    if (name === 'laboratorio') renderLaboratorioTab();
+    if (name === 'pruebas') { renderPruebasTab(); renderLaboratorioTab(); }
     if (name === 'historial') renderHistorialTab();
     if (name === 'caja') renderCajaTab();
     if (name === 'unificar') renderUnificarTab();

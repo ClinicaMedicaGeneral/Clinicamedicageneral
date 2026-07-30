@@ -3665,7 +3665,12 @@ button.ed-consulta-link {
           '<div class="ed-fgroup full"><label class="ed-label">Notas de finalización (opcional)</label>' +
             '<textarea class="ed-textarea" id="serv-notas-fin" rows="2" placeholder="Observaciones al completar el servicio"></textarea></div>' +
           '<div class="ed-fgroup"><label class="ed-label">Médico tratante *</label>' +
-            '<input type="text" class="ed-input" id="serv-realizado-por" placeholder="Nombre de quien completa" value="' + esc(cmgAuth.currentUser.displayName || cmgAuth.currentUser.email || '') + '"></div>' +
+            '<select class="ed-input" id="serv-realizado-por">' +
+              '<option value="">— Seleccionar —</option>' +
+              '<option value="Doctor Rojas">Doctor Rojas</option>' +
+              '<option value="Doctor Hermes">Doctor Hermes</option>' +
+              '<option value="Doctor Álvarez">Doctor Álvarez</option>' +
+            '</select></div>' +
         '</div>' +
       '</div>' +
       buildEmergenciaSectionHtml('servfin') +
@@ -3940,10 +3945,14 @@ button.ed-consulta-link {
             '<textarea class="ed-textarea" id="cons-indicaciones" rows="2" placeholder="Recomendaciones generales, dieta, reposo, signos de alarma" required></textarea></div>' +
           '<div class="ed-fgroup"><label class="ed-label">Próxima cita</label>' +
             '<input type="date" class="ed-input" id="cons-proxcita"></div>' +
-          /* DRM Fun-2: médico tratante, precargado con el usuario actual (solo médico/admin
-             llegan a este formulario) pero editable como texto libre por si aplica otro nombre */
+          /* DRM Fun-2: dropdown de médico tratante */
           '<div class="ed-fgroup"><label class="ed-label">Médico tratante *</label>' +
-            '<input type="text" class="ed-input" id="cons-medico" required placeholder="Nombre del médico tratante" value="' + esc(cmgAuth.currentUser.displayName || cmgAuth.currentUser.email || '') + '"></div>' +
+            '<select class="ed-input" id="cons-medico" required>' +
+              '<option value="">— Seleccionar —</option>' +
+              '<option value="Doctor Rojas">Doctor Rojas</option>' +
+              '<option value="Doctor Hermes">Doctor Hermes</option>' +
+              '<option value="Doctor Álvarez">Doctor Álvarez</option>' +
+            '</select></div>' +
         '</div>' +
       '</div>' +
       /* DRM Fun-11: pregunta de incapacidad */

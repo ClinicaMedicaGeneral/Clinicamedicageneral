@@ -3230,10 +3230,7 @@ button.ed-consulta-link {
       '</div>' +
       '<div class="ed-fgroup full" style="margin-top:10px"><label class="ed-label">Observaciones</label>' +
         '<textarea class="ed-textarea" id="ekg-observaciones" rows="2" placeholder="Ej. EKG necesita valoración por cardiología"></textarea></div>' +
-      '<div class="ed-grid ed-grid-2">' +
-        '<div class="ed-fgroup"><label class="ed-label">Médico que interpreta</label><input type="text" class="ed-input" id="ekg-medico" placeholder="Nombre del médico"></div>' +
-        '<div class="ed-fgroup"><label class="ed-label">Foto del electrocardiograma impreso (opcional)</label><input type="file" class="ed-input" id="ekg-imagen" accept="image/*"></div>' +
-      '</div>' +
+      '<div class="ed-fgroup full"><label class="ed-label">Foto del electrocardiograma impreso (opcional)</label><input type="file" class="ed-input" id="ekg-imagen" accept="image/*"></div>' +
       '<p style="font-size:12px;color:#6B7280;margin:6px 0 0">Al guardar se genera la hoja de resultados del electrocardiograma, lista para imprimir o compartir.</p>' +
     '</div>';
   }
@@ -3771,7 +3768,6 @@ button.ed-consulta-link {
     var servicioNombre = consultaPendienteCargada.servicioNombre;
     var esEkg = servicioNombre === 'Electrocardiograma';
     var resultadoServicio = null;
-    var ekgMedico = '';
     if (!convertidoConsulta) {
       if (servicioNombre === 'Toma de presión') {
         resultadoServicio = { ta: $val('serv-resultado-ta') };
@@ -3782,9 +3778,6 @@ button.ed-consulta-link {
       } else if (servicioNombre === 'Control de peso') {
         resultadoServicio = { peso: $val('serv-resultado-peso') };
         if (!resultadoServicio.peso) faltantes.push('Peso');
-      } else if (esEkg) {
-        ekgMedico = $val('ekg-medico');
-        if (!ekgMedico) faltantes.push('Médico que interpreta el electrocardiograma');
       }
     }
 
@@ -3864,7 +3857,6 @@ button.ed-consulta-link {
       aintqt: $val('ekg-aintqt'), dintqt: $val('ekg-dintqt'),
       aondat: $val('ekg-aondat'), dondat: $val('ekg-dondat'),
       observaciones: $val('ekg-observaciones'),
-      medico: ekgMedico,
       imagenUrl: null,
       emitidoPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
       emitidoEn: firebase.firestore.FieldValue.serverTimestamp()

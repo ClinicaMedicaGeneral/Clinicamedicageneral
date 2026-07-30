@@ -157,25 +157,31 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 .ek-details-row:last-child { border-bottom: 0; }
 .ek-details-row b { color: #213C7D; min-width: 140px; }
 
-.ek-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
+/* Ondas del EKG: grid compacto de "chips" en vez de tabla alta, para dejar
+   más espacio vertical al trazo impreso. */
+.ek-ondas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 6px;
   margin-top: 2px;
 }
-.ek-table th {
-  text-align: left;
-  padding: 4px 8px;
-  border-bottom: 2px solid #213C7D;
-  color: #213C7D;
+.ek-onda-chip {
   background: #F9FAFB;
-}
-.ek-table td {
-  padding: 4px 8px;
-  border-bottom: 1px solid #E5E7EB;
+  border: 1px solid #E5E7EB;
+  border-radius: 5px;
+  padding: 3px 7px;
+  font-size: 10.5px;
   color: #1F2937;
+  line-height: 1.35;
 }
-.ek-table tr td:first-child { font-weight: 700; color: #374151; width: 40%; }
+.ek-onda-chip b {
+  display: block;
+  color: #213C7D;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  text-transform: uppercase;
+}
 
 .ek-obs {
   background: #FFFBEB;
@@ -191,15 +197,15 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   margin-top: 4px;
   border: 1.5px solid #9CA3AF;
   border-radius: 6px;
-  min-height: 110px;
-  max-height: 220px;
+  min-height: 220px;
+  max-height: 440px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #FAFBFF;
   overflow: hidden;
 }
-.ek-strip img { width: 100%; height: auto; max-height: 220px; object-fit: contain; display: block; }
+.ek-strip img { width: 100%; height: auto; max-height: 440px; object-fit: contain; display: block; }
 .ek-strip .ek-strip-empty { color: #9CA3AF; font-size: 12px; text-align: center; padding: 10px; }
 
 /* Firma */
@@ -303,10 +309,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
         <div class="ek-details-row"><b>Eje eléctrico:</b> <span id="ek-eje">—</span></div>
       </div>
 
-      <table class="ek-table">
-        <thead><tr><th></th><th>Amplitud (mV)</th><th>Duración (Seg)</th></tr></thead>
-        <tbody id="ek-tabla-ondas"></tbody>
-      </table>
+      <div class="ek-ondas-grid" id="ek-tabla-ondas"></div>
 
       <div class="ek-section-label">Observaciones</div>
       <p class="ek-obs" id="ek-observaciones">—</p>
@@ -316,10 +319,10 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
         <div class="ek-strip-empty">Sin imagen adjunta. Espacio reservado para el trazo del electrocardiograma.</div>
       </div>
 
-      <!-- Firma -->
+      <!-- Firma: no se interpreta el trazo, se muestra la firma genérica de los médicos de la clínica -->
       <div class="ek-firma">
         <div class="ek-firma-box">
-          <b id="ek-medico-nombre">—</b>
+          <b>Doctor Rojas/Hermes/Alvarez</b>
           <small>Médico General · Clínica Médica General CMG</small>
         </div>
       </div>
@@ -371,7 +374,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   }
 
   function ondaRow(label, amp, dur){
-    return '<tr><td>' + esc(label) + '</td><td>' + esc(amp || '—') + '</td><td>' + esc(dur || '—') + '</td></tr>';
+    return '<div class="ek-onda-chip"><b>' + esc(label) + '</b>Amp: ' + esc(amp || '—') + ' mV · Dur: ' + esc(dur || '—') + ' s</div>';
   }
 
   function render(data){
@@ -392,8 +395,6 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     if (data.imagenUrl) {
       $('ek-strip').innerHTML = '<img src="' + esc(data.imagenUrl) + '" alt="Electrocardiograma">';
     }
-    $('ek-medico-nombre').textContent = data.medico || '—';
-
     $('ek-loading').style.display = 'none';
     $('ek-container').style.display = '';
     document.title = 'EKG ' + (data.pacienteNombre || '') + ' · CMG';

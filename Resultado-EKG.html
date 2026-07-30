@@ -96,82 +96,82 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   position: relative; z-index: 1;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 22px 32px;
+  gap: 12px;
+  padding: 12px 24px;
   border-bottom: 3px solid #FDD22C;
   background: linear-gradient(180deg,#fafbff 0%,#fff 100%);
 }
-.ek-header img { width: 56px; height: auto; }
+.ek-header img { width: 40px; height: auto; }
 .ek-header .ek-h-name {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 900;
   letter-spacing: .3px;
   margin: 0;
 }
 .ek-header .ek-h-sub {
-  font-size: 12px;
+  font-size: 10.5px;
   color: #6B7280;
-  margin: 2px 0 0;
+  margin: 1px 0 0;
   font-weight: 600;
 }
 
 /* Body */
-.ek-body { position: relative; z-index: 1; padding: 28px 32px; }
+.ek-body { position: relative; z-index: 1; padding: 14px 24px; }
 .ek-title {
   text-align: center;
-  font-size: 22px;
+  font-size: 17px;
   font-weight: 900;
-  letter-spacing: 2px;
-  margin: 4px 0 22px;
+  letter-spacing: 1.5px;
+  margin: 0 0 10px;
   color: #213C7D;
   border-top: 1px solid #E5E7EB;
   border-bottom: 1px solid #E5E7EB;
-  padding: 12px 0;
+  padding: 6px 0;
   background: #F9FAFB;
 }
 
 .ek-section-label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: .4px;
   text-transform: uppercase;
   color: #213C7D;
-  margin: 22px 0 8px;
+  margin: 10px 0 4px;
 }
 
 .ek-details {
   background: #F9FAFB;
   border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  padding: 4px 18px;
-  font-size: 14px;
+  border-radius: 6px;
+  padding: 0 14px;
+  font-size: 12.5px;
   color: #1F2937;
 }
 .ek-details-row {
   display: flex;
   justify-content: space-between;
   border-bottom: 1px dashed #E5E7EB;
-  padding: 8px 0;
+  padding: 4px 0;
   gap: 12px;
 }
 .ek-details-row:last-child { border-bottom: 0; }
-.ek-details-row b { color: #213C7D; min-width: 160px; }
+.ek-details-row b { color: #213C7D; min-width: 140px; }
 
 .ek-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13.5px;
-  margin-top: 4px;
+  font-size: 12px;
+  margin-top: 2px;
 }
 .ek-table th {
   text-align: left;
-  padding: 8px 10px;
+  padding: 4px 8px;
   border-bottom: 2px solid #213C7D;
   color: #213C7D;
   background: #F9FAFB;
 }
 .ek-table td {
-  padding: 8px 10px;
+  padding: 4px 8px;
   border-bottom: 1px solid #E5E7EB;
   color: #1F2937;
 }
@@ -180,58 +180,59 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 .ek-obs {
   background: #FFFBEB;
   border-left: 4px solid #FDD22C;
-  padding: 10px 14px;
-  font-size: 14px;
+  padding: 6px 12px;
+  font-size: 12.5px;
   color: #1F2937;
-  margin-top: 6px;
+  margin-top: 2px;
 }
 
 /* Espacio del trazo impreso */
 .ek-strip {
-  margin-top: 10px;
+  margin-top: 4px;
   border: 1.5px solid #9CA3AF;
   border-radius: 6px;
-  min-height: 260px;
+  min-height: 110px;
+  max-height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #FAFBFF;
   overflow: hidden;
 }
-.ek-strip img { width: 100%; height: auto; display: block; }
-.ek-strip .ek-strip-empty { color: #9CA3AF; font-size: 13px; text-align: center; padding: 20px; }
+.ek-strip img { width: 100%; height: auto; max-height: 220px; object-fit: contain; display: block; }
+.ek-strip .ek-strip-empty { color: #9CA3AF; font-size: 12px; text-align: center; padding: 10px; }
 
 /* Firma */
 .ek-firma {
-  margin-top: 50px;
+  margin-top: 16px;
   display: flex;
   justify-content: flex-end;
 }
 .ek-firma-box {
-  width: 280px;
+  width: 260px;
   text-align: center;
   border-top: 1px solid #213C7D;
-  padding-top: 6px;
-  font-size: 13px;
+  padding-top: 4px;
+  font-size: 12px;
   color: #213C7D;
 }
 .ek-firma-box small {
   display: block;
   color: #6B7280;
-  font-size: 11px;
-  margin-top: 2px;
+  font-size: 10px;
+  margin-top: 1px;
 }
 
 /* Pie de página */
 .ek-foot {
   position: relative; z-index: 1;
-  padding: 16px 32px 24px;
+  padding: 8px 24px 12px;
   border-top: 1px solid #E5E7EB;
   background: #F9FAFB;
   text-align: center;
-  font-size: 11px;
+  font-size: 10px;
   color: #6B7280;
-  line-height: 1.6;
+  line-height: 1.4;
 }
 .ek-foot b { color: #213C7D; }
 
@@ -243,7 +244,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   .ek-container { padding: 0; max-width: none; }
   .ek-sheet { border: none; box-shadow: none; }
   .ek-strip { break-inside: avoid; }
-  @page { size: letter; margin: 14mm; }
+  @page { size: A4; margin: 10mm; }
 }
 </style>
 <!-- Google tag (gtag.js) -->

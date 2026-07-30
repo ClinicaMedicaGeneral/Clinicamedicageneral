@@ -2831,6 +2831,36 @@ button.ed-consulta-link {
       '</div>' +
       '<div id="pendientes-medico-lista">' +
         '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
+      '</div>' +
+      /* DRM: Pruebas Rápidas / Laboratorio también visibles aquí, debajo de los pendientes de médico/enfermería */
+      '<div class="ed-section-title" style="margin-top:28px">🧪🔬 Pruebas Rápidas / Laboratorio</div>' +
+      '<div class="ed-card" style="margin-top:10px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px">' +
+          '<div>' +
+            '<h2 class="ed-card-title" style="margin-bottom:4px">🧪 Pruebas rápidas del paciente</h2>' +
+            '<p class="ed-card-subtitle" style="margin:0">Resultados vinculados automáticamente por número de identidad.</p>' +
+          '</div>' +
+          '<a class="ed-btn ed-btn-yellow" id="pruebas-nueva-link-consulta" href="Pruebas-Rapidas.html" target="_blank" rel="noopener">' +
+            '🧪 Registrar nueva prueba ↗' +
+          '</a>' +
+        '</div>' +
+        '<div id="pruebas-contenido-consulta" style="margin-top:18px">' +
+          '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ed-card" style="margin-top:18px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:6px">' +
+          '<div>' +
+            '<h2 class="ed-card-title" style="margin-bottom:4px">🔬 Exámenes de laboratorio</h2>' +
+            '<p class="ed-card-subtitle" style="margin:0">PDFs subidos del laboratorio proveedor, vinculados por número de identidad.</p>' +
+          '</div>' +
+          '<a class="ed-btn ed-btn-yellow" id="btn-subir-examen-consulta" href="Examenes-Laboratorio.html" target="_blank" rel="noopener">' +
+            '📤 Subir nuevo examen ↗' +
+          '</a>' +
+        '</div>' +
+        '<div id="laboratorio-contenido-consulta" style="margin-top:18px">' +
+          '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
+        '</div>' +
       '</div>';
 
     cont.innerHTML = html;
@@ -2844,6 +2874,10 @@ button.ed-consulta-link {
 
     cargarPendientesEnfermeria();
     cargarPendientesMedico();
+
+    /* DRM: instancia embebida de Pruebas Rápidas / Laboratorio dentro de Consulta */
+    renderPruebasTab('-consulta');
+    renderLaboratorioTab('-consulta');
   }
 
   /* ─── Cargar pendientes para Enfermería (recién registrados por Caja) ─── */
@@ -4907,8 +4941,18 @@ button.ed-consulta-link {
   /* ════════════════════════════════════════════════════════════
      PRUEBAS RÁPIDAS DEL PACIENTE
      ════════════════════════════════════════════════════════════ */
-  function renderPruebasTab() {
-    var cont = $id('pruebas-contenido');
+  /* DRM: esta sección se renderiza tanto en su propia pestaña (sufijo '')
+     como embebida al final de la pestaña Consulta (sufijo '-consulta').
+     Sin argumento, refresca todas las instancias presentes en el DOM. */
+  var PYL_SUFIJOS = ['', '-consulta'];
+
+  function renderPruebasTab(sufijo) {
+    if (typeof sufijo === 'undefined') {
+      PYL_SUFIJOS.forEach(function (s) { if ($id('pruebas-contenido' + s)) renderPruebasTab(s); });
+      return;
+    }
+    var cont = $id('pruebas-contenido' + sufijo);
+    if (!cont) return;
     /* DRM v3.4 (mismo criterio que Laboratorio): pendientes son GLOBALES
        (no requieren paciente seleccionado). Confirmadas sí son por paciente. */
     var p = pacienteActual;
@@ -4916,7 +4960,7 @@ button.ed-consulta-link {
     var dniNormalizado = (dg.numeroIdentidad || '').replace(/\D/g, '');
 
     /* DRM v3 #3: pre-llenar Pruebas-Rapidas con los datos del paciente ya seleccionado */
-    var nuevaLink = $id('pruebas-nueva-link');
+    var nuevaLink = $id('pruebas-nueva-link' + sufijo);
     if (nuevaLink) {
       nuevaLink.href = 'Pruebas-Rapidas.html' + (p
         ? '?dni=' + encodeURIComponent(dg.numeroIdentidad || '') +
@@ -4939,14 +4983,14 @@ button.ed-consulta-link {
       patientHeader +
       /* Sección GLOBAL de pendientes de resultado */
       '<div class="ed-section-title">⏳ Pruebas pendientes de resultado (todos los pacientes)</div>' +
-      '<div id="pruebas-pendientes"><div style="font-size:13px;color:#9CA3AF;padding:8px 0">Cargando…</div></div>' +
+      '<div id="pruebas-pendientes' + sufijo + '"><div style="font-size:13px;color:#9CA3AF;padding:8px 0">Cargando…</div></div>' +
       (p
         ? '<div class="ed-section-title" style="margin-top:18px">🧪 Pruebas de ' + esc(dg.nombreCompleto || '—') + '</div>' +
-          '<div id="pruebas-lista"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>'
+          '<div id="pruebas-lista' + sufijo + '"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>'
         : '');
 
     /* Cargar pendientes GLOBALES (todos los pacientes) */
-    cargarPruebasPendientesGlobal();
+    cargarPruebasPendientesGlobal(sufijo);
 
     /* Si hay paciente, cargar también sus pruebas (traemos todas y filtramos por DNI client-side;
        el doctor tiene read total en resultadosPruebas, regla isDoctor). */
@@ -4986,10 +5030,10 @@ button.ed-consulta-link {
             var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
             return tb - ta;
           });
-          renderPruebasLista(arr, pendientesVincular.length);
+          renderPruebasLista(arr, pendientesVincular.length, sufijo);
         })
         .catch(function (err) {
-          $id('pruebas-lista').innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar pruebas: ' + esc(err.message) + '</div>';
+          $id('pruebas-lista' + sufijo).innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar pruebas: ' + esc(err.message) + '</div>';
         });
     }
   }
@@ -4997,8 +5041,12 @@ button.ed-consulta-link {
   /* DRM v3.4 (mismo criterio que Laboratorio): pendientes/procesando GLOBALES,
      ordenadas por createdAt (fecha en que se abrió la prueba), NO por cuándo
      se dejó pendiente — ese momento no se registra por separado. */
-  function cargarPruebasPendientesGlobal(){
-    var box = $id('pruebas-pendientes');
+  function cargarPruebasPendientesGlobal(sufijo){
+    if (typeof sufijo === 'undefined') {
+      PYL_SUFIJOS.forEach(function (s) { if ($id('pruebas-pendientes' + s)) cargarPruebasPendientesGlobal(s); });
+      return;
+    }
+    var box = $id('pruebas-pendientes' + sufijo);
     if (!box) return;
     cmgDb.collection('resultadosPruebas')
       .where('status', '==', 'pendiente_resultado')
@@ -5039,8 +5087,10 @@ button.ed-consulta-link {
       });
   }
 
-  function renderPruebasLista(pruebas, vinculadasAhora) {
-    var lista = $id('pruebas-lista');
+  function renderPruebasLista(pruebas, vinculadasAhora, sufijo) {
+    sufijo = sufijo || '';
+    var lista = $id('pruebas-lista' + sufijo);
+    if (!lista) return;
     if (!pruebas.length) {
       lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🧪</div><p>Este paciente aún no tiene pruebas rápidas registradas.</p><p style="font-size:13px;color:#9CA3AF;margin-top:6px">Las pruebas se vinculan automáticamente cuando el DNI coincide.</p></div>';
       return;
@@ -5089,8 +5139,13 @@ button.ed-consulta-link {
   /* ════════════════════════════════════════════════════════════
      EXÁMENES DE LABORATORIO DEL PACIENTE
      ════════════════════════════════════════════════════════════ */
-  function renderLaboratorioTab() {
-    var cont = $id('laboratorio-contenido');
+  function renderLaboratorioTab(sufijo) {
+    if (typeof sufijo === 'undefined') {
+      PYL_SUFIJOS.forEach(function (s) { if ($id('laboratorio-contenido' + s)) renderLaboratorioTab(s); });
+      return;
+    }
+    var cont = $id('laboratorio-contenido' + sufijo);
+    if (!cont) return;
     /* DRM v3.4: pendientes son GLOBALES (no requieren paciente seleccionado).
        Confirmados sí son por paciente. */
     var p = pacienteActual;
@@ -5100,7 +5155,8 @@ button.ed-consulta-link {
     /* Actualizar link de subida para pre-llenar DNI y nombre si hay paciente */
     var url = 'Examenes-Laboratorio.html' +
       (p ? '?dni=' + encodeURIComponent(dg.numeroIdentidad || '') + '&nombre=' + encodeURIComponent(dg.nombreCompleto || '') : '');
-    $id('btn-subir-examen').setAttribute('href', url);
+    var btnSubirExamen = $id('btn-subir-examen' + sufijo);
+    if (btnSubirExamen) btnSubirExamen.setAttribute('href', url);
 
     var patientHeader = p
       ? '<div class="ed-patient-summary">' +
@@ -5117,25 +5173,25 @@ button.ed-consulta-link {
       /* DRM v3 #1: botón para crear orden de laboratorio (requiere paciente) */
       (p
         ? '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">' +
-            '<button class="ed-btn ed-btn-yellow" id="btn-crear-orden-lab">📝 Crear orden de laboratorio</button>' +
+            '<button class="ed-btn ed-btn-yellow" id="btn-crear-orden-lab' + sufijo + '">📝 Crear orden de laboratorio</button>' +
           '</div>'
         : '') +
       /* DRM v3 #2 + v3.4: sección GLOBAL de pendientes/procesando */
       '<div class="ed-section-title">⏳ Órdenes pendientes / procesando (todos los pacientes)</div>' +
-      '<div id="laboratorio-pendientes"><div style="font-size:13px;color:#9CA3AF;padding:8px 0">Cargando…</div></div>' +
+      '<div id="laboratorio-pendientes' + sufijo + '"><div style="font-size:13px;color:#9CA3AF;padding:8px 0">Cargando…</div></div>' +
       (p
         ? '<div class="ed-section-title" style="margin-top:18px">📄 Exámenes confirmados de ' + esc(dg.nombreCompleto || '—') + '</div>' +
-          '<div id="laboratorio-lista"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>'
+          '<div id="laboratorio-lista' + sufijo + '"><div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div></div>'
         : '');
 
-    if ($id('btn-crear-orden-lab')) {
-      $id('btn-crear-orden-lab').addEventListener('click', function(){
+    if ($id('btn-crear-orden-lab' + sufijo)) {
+      $id('btn-crear-orden-lab' + sufijo).addEventListener('click', function(){
         abrirSolicitudExamenesModal(null);
       });
     }
 
     /* DRM v3.4: cargar pendientes/procesando GLOBALES */
-    cargarLaboratorioPendientesGlobal();
+    cargarLaboratorioPendientesGlobal(sufijo);
 
     /* Si hay paciente, cargar también sus confirmados */
     if (p) {
@@ -5176,17 +5232,21 @@ button.ed-consulta-link {
           /* Solo render de CONFIRMADOS del paciente (los pendientes se cargan globalmente) */
           renderLaboratorioConfirmadosDelPaciente(arr.filter(function(ex){
             return !ex.status || ex.status === 'confirmado';
-          }), pendientesVincular.length);
+          }), pendientesVincular.length, sufijo);
         })
         .catch(function (err) {
-          $id('laboratorio-lista').innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar exámenes: ' + esc(err.message) + '</div>';
+          $id('laboratorio-lista' + sufijo).innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar exámenes: ' + esc(err.message) + '</div>';
         });
     }
   }
 
   /* DRM v3.4: pendientes/procesando GLOBALES, todos los pacientes */
-  function cargarLaboratorioPendientesGlobal(){
-    var box = $id('laboratorio-pendientes');
+  function cargarLaboratorioPendientesGlobal(sufijo){
+    if (typeof sufijo === 'undefined') {
+      PYL_SUFIJOS.forEach(function (s) { if ($id('laboratorio-pendientes' + s)) cargarLaboratorioPendientesGlobal(s); });
+      return;
+    }
+    var box = $id('laboratorio-pendientes' + sufijo);
     if (!box) return;
     cmgDb.collection('examenesLaboratorio')
       .where('status', 'in', ['pendiente', 'procesando'])
@@ -5251,8 +5311,9 @@ button.ed-consulta-link {
   }
 
   /* DRM v3.4: ahora solo renderiza confirmados del paciente, pendientes son globales */
-  function renderLaboratorioConfirmadosDelPaciente(confirmados, vinculadasAhora) {
-    var lista = $id('laboratorio-lista');
+  function renderLaboratorioConfirmadosDelPaciente(confirmados, vinculadasAhora, sufijo) {
+    sufijo = sufijo || '';
+    var lista = $id('laboratorio-lista' + sufijo);
     if (!lista) return;
     if (!confirmados.length) {
       lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔬</div><p>Este paciente aún no tiene exámenes confirmados.</p><p style="font-size:13px;color:#9CA3AF;margin-top:6px">Crea una orden o sube un PDF de resultado para empezar.</p></div>';

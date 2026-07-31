@@ -568,18 +568,24 @@ button.ed-consulta-link {
 
 /* ── DRM Fun-8/10/11: listas de medicamentos y opciones ── */
 .ed-meds-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   background: #F9FAFB;
   border: 1px solid #E5E7EB;
   border-radius: 8px;
   padding: 10px 12px;
 }
+/* Categorías desplegables (details/summary) con buscador */
+.ed-meds-cat-group {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  overflow: hidden;
+}
 .ed-meds-cat {
-  grid-column: 1 / -1;
-  margin: 6px 0 2px;
-  padding: 4px 8px;
+  margin: 0;
+  padding: 6px 10px;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .04em;
@@ -588,8 +594,15 @@ button.ed-consulta-link {
   background: #EEF2FB;
   border-left: 3px solid #213C7D;
   border-radius: 4px;
+  cursor: pointer;
 }
-.ed-meds-cat:first-child { margin-top: 0; }
+summary.ed-meds-cat { list-style: revert; }
+.ed-meds-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+  padding: 8px 10px;
+}
 .ed-meds-opt {
   display: flex;
   align-items: center;
@@ -3542,22 +3555,44 @@ button.ed-consulta-link {
       'Otan', 'Budoxigen'
     ] }
   ];
+  /* Cada categoría es un <details> desplegable (colapsado por defecto); el buscador
+     asociado (wireMedsBuscador) las abre automáticamente cuando hay coincidencias. */
   function buildMedsCatsHtml(cats, extraAfterTitle) {
     return cats.map(function (c) {
-      var html = '<div class="ed-meds-cat">' + c.titulo + '</div>' +
-        c.items.map(function (m) {
-          /* La prueba de sensibilidad es un chequeo, no una unidad aplicada: sin cantidad */
-          if (m === 'Prueba de sensibilidad') {
-            return '<label class="ed-meds-opt"><input type="checkbox" value="' + esc(m) + '"> ' + esc(m) + '</label>';
-          }
-          return '<label class="ed-meds-opt" style="display:flex;align-items:center;gap:8px;justify-content:space-between">' +
-            '<span><input type="checkbox" value="' + esc(m) + '" class="ed-meds-chk"> ' + esc(m) + '</span>' +
-            '<input type="number" min="1" step="1" value="1" class="ed-input ed-meds-cantidad" style="width:56px;text-align:center;padding:2px 4px" disabled>' +
-          '</label>';
-        }).join('');
-      if (extraAfterTitle && c.titulo === extraAfterTitle.titulo) html += extraAfterTitle.html;
-      return html;
+      var itemsHtml = c.items.map(function (m) {
+        var dataName = ' data-name="' + esc(normalizarBusqueda(m)) + '"';
+        /* La prueba de sensibilidad es un chequeo, no una unidad aplicada: sin cantidad */
+        if (m === 'Prueba de sensibilidad') {
+          return '<label class="ed-meds-opt"' + dataName + '><input type="checkbox" value="' + esc(m) + '"> ' + esc(m) + '</label>';
+        }
+        return '<label class="ed-meds-opt"' + dataName + ' style="display:flex;align-items:center;gap:8px;justify-content:space-between">' +
+          '<span><input type="checkbox" value="' + esc(m) + '" class="ed-meds-chk"> ' + esc(m) + '</span>' +
+          '<input type="number" min="1" step="1" value="1" class="ed-input ed-meds-cantidad" style="width:56px;text-align:center;padding:2px 4px" disabled>' +
+        '</label>';
+      }).join('');
+      if (extraAfterTitle && c.titulo === extraAfterTitle.titulo) itemsHtml += extraAfterTitle.html;
+      return '<details class="ed-meds-cat-group"><summary class="ed-meds-cat">' + c.titulo + '</summary>' +
+        '<div class="ed-meds-items">' + itemsHtml + '</div></details>';
     }).join('');
+  }
+  /* Filtra medicamentos por nombre (ignora tildes) y abre automáticamente las
+     categorías con coincidencias; al limpiar el buscador vuelven a colapsarse. */
+  function wireMedsBuscador(listId, buscarId) {
+    var list = $id(listId);
+    var buscar = $id(buscarId);
+    if (!list || !buscar) return;
+    buscar.addEventListener('input', function () {
+      var q = normalizarBusqueda(buscar.value || '');
+      list.querySelectorAll('.ed-meds-opt[data-name]').forEach(function (lbl) {
+        var visible = !q || lbl.dataset.name.indexOf(q) !== -1;
+        lbl.style.display = visible ? '' : 'none';
+      });
+      list.querySelectorAll('.ed-meds-cat-group').forEach(function (det) {
+        var visibles = det.querySelectorAll('.ed-meds-opt[data-name]:not([style*="display: none"])').length;
+        det.style.display = (!q || visibles) ? '' : 'none';
+        det.open = q ? visibles > 0 : false;
+      });
+    });
   }
   /* Habilita/deshabilita la cantidad de cada medicamento al marcar/desmarcar su checkbox */
   function wireMedsCantidad(listId) {
@@ -3792,14 +3827,16 @@ button.ed-consulta-link {
       '<div class="ed-section" id="serv-meds-section">' +
         '<div class="ed-grid ed-grid-2">' +
           '<div class="ed-fgroup full"><label class="ed-label">💊 Medicamentos aplicados en consulta</label>' +
+            '<input type="text" id="serv-meds-visita-buscar" class="ed-input" placeholder="🔍 Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="serv-meds-visita-list" class="ed-meds-list" data-meds-group="visita">' +
               buildMedsCatsHtml(MEDS_VISITA_CATS, { titulo: '🧪 Prueba de sensibilidad', html: buildSensResultadoHtml('serv') }) +
-              '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se aplicó ningún medicamento)</label>' +
+              '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se aplicó ningún medicamento)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">📦 Medicamentos de despacho</label>' +
+            '<input type="text" id="serv-meds-despacho-buscar" class="ed-input" placeholder="🔍 Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="serv-meds-despacho-list" class="ed-meds-list" data-meds-group="despacho">' +
               buildMedsCatsHtml(MEDS_DESPACHO_CATS) +
-              '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se despachan medicamentos)</label>' +
+              '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se despachan medicamentos)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">🏥 Receta externa (medicamentos a comprar en farmacia)</label>' +
             '<textarea class="ed-textarea" id="serv-receta-externa" rows="3" placeholder="Medicamentos que el paciente debe comprar en una farmacia externa (no los vendemos). Indica nombre, dosis, vía y frecuencia."></textarea></div>' +
@@ -3833,6 +3870,8 @@ button.ed-consulta-link {
     wireSensToggle('serv-meds-visita-list', 'serv-sens-wrap');
     ['serv-meds-visita-list', 'serv-meds-despacho-list'].forEach(wireMedsGroupNinguno);
     ['serv-meds-visita-list', 'serv-meds-despacho-list'].forEach(wireMedsCantidad);
+    wireMedsBuscador('serv-meds-visita-list', 'serv-meds-visita-buscar');
+    wireMedsBuscador('serv-meds-despacho-list', 'serv-meds-despacho-buscar');
     wireIncapToggle('serv');
     wireEmergenciaToggle('servfin');
   }
@@ -4091,14 +4130,16 @@ button.ed-consulta-link {
             '<textarea class="ed-textarea" id="cons-diagnostico" rows="2" placeholder="Diagnóstico principal y diferenciales" required></textarea></div>' +
           /* DRM Fun-8 + v3.6: Plan/Tratamiento dividido + opción explícita "Ninguno" */
           '<div class="ed-fgroup full"><label class="ed-label">💊 Medicamentos aplicados en la visita *</label>' +
+            '<input type="text" id="cons-meds-visita-buscar" class="ed-input" placeholder="🔍 Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="cons-meds-visita-list" class="ed-meds-list" data-meds-group="visita">' +
               buildMedsCatsHtml(MEDS_VISITA_CATS, { titulo: '🧪 Prueba de sensibilidad', html: buildSensResultadoHtml('cons') }) +
-              '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se aplicó ningún medicamento en la visita)</label>' +
+              '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se aplicó ningún medicamento en la visita)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">📦 Medicamentos de despacho *</label>' +
+            '<input type="text" id="cons-meds-despacho-buscar" class="ed-input" placeholder="🔍 Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="cons-meds-despacho-list" class="ed-meds-list" data-meds-group="despacho">' +
               buildMedsCatsHtml(MEDS_DESPACHO_CATS) +
-              '<label class="ed-meds-opt" style="grid-column:1/-1;background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se despachan medicamentos)</label>' +
+              '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se despachan medicamentos)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">🏥 Receta externa (medicamentos a comprar en farmacia)</label>' +
             '<textarea class="ed-textarea" id="cons-receta-externa" rows="3" placeholder="Medicamentos que el paciente debe comprar en una farmacia externa (no los vendemos). Indica nombre, dosis, vía y frecuencia. Ej: Omeprazol 20 mg, 1 cápsula en ayunas por 14 días"></textarea>' +
@@ -4169,6 +4210,8 @@ button.ed-consulta-link {
     /* DRM v3.6: exclusión mutua "Ninguno" vs medicamentos reales en cada grupo */
     ['cons-meds-visita-list', 'cons-meds-despacho-list'].forEach(wireMedsGroupNinguno);
     ['cons-meds-visita-list', 'cons-meds-despacho-list'].forEach(wireMedsCantidad);
+    wireMedsBuscador('cons-meds-visita-list', 'cons-meds-visita-buscar');
+    wireMedsBuscador('cons-meds-despacho-list', 'cons-meds-despacho-buscar');
   }
 
   /* DRM v3 #3 + v3.1 + v3.3: modal para solicitar exámenes, 141 ítems agrupados + buscador */

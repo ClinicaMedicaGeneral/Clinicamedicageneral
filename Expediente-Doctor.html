@@ -100,7 +100,12 @@
   cursor: pointer;
   transition: all .18s;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+/* DRM: etiquetas más largas que el min-width no deben achicarse (se
+   superponían con la pestaña vecina) — que el contenedor scrollee en su lugar */
+.ed-tab-wide { flex: 0 0 auto; min-width: 260px; }
 .ed-tab:hover { background: #F4F6FB; color: #213C7D; }
 .ed-tab.is-active {
   background: #213C7D;
@@ -911,7 +916,7 @@ button.ed-consulta-link {
       <button class="ed-tab" data-tab="buscar">🔍 Buscar</button>
       <button class="ed-tab" data-tab="editar">✏️ Editar</button>
       <button class="ed-tab" data-tab="consulta">📝 Consulta</button>
-      <button class="ed-tab" data-tab="pruebas">🧪🔬 Pruebas Rápidas / Laboratorio</button>
+      <button class="ed-tab ed-tab-wide" data-tab="pruebas">🧪🔬 Pruebas Rápidas / Laboratorio</button>
       <button class="ed-tab" data-tab="historial">📂 Historial</button>
       <!-- DRM Fun-9: Caja -->
       <button class="ed-tab" data-tab="caja">💰 Caja</button>

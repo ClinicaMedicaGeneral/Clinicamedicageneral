@@ -179,7 +179,9 @@ service cloud.firestore {
             && request.resource.data.status == 'pendiente_caja'
             && request.resource.data.tipoRegistro in ['lab-standalone', 'prueba-standalone'])
         || (isCaja() && request.resource.data.status == 'listo_enfermeria');
-      allow delete: if isDoctor();
+      // Borrar consultas/servicios del historial es solo para Administración
+      // (limpieza de registros de prueba/errores en un expediente real).
+      allow delete: if isAdmin();
 
       // Update:
       //   - Médico tratante: siempre, incluida la finalización de la Consulta médica
@@ -335,7 +337,9 @@ service cloud.firestore {
             )
           )
         );
-      allow create, update, delete: if isDoctor();
+      allow create, update: if isDoctor();
+      // Borrar una constancia es solo para Administración.
+      allow delete: if isAdmin();
     }
 
     // ═══ /electrocardiogramas/{id} ═══════════════════════════════

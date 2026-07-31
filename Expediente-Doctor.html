@@ -4854,7 +4854,8 @@ button.ed-consulta-link {
         (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Ver PDF</a>' : '') +
         (c.constanciaId ? '<a class="ed-consulta-link" href="Constancia-Medica.html?id=' + esc(c.constanciaId) + '" target="_blank">📄 Ver constancia</a>' : '') +
         (puedeEditarConstancia ? '<button class="ed-consulta-link ed-link-blue" data-editar-constancia="' + esc(c.constanciaId) + '">✏️ Editar constancia</button>' : '') +
-        '<button class="ed-consulta-link ed-link-red" data-borrar-consulta="' + esc(c._id) + '" data-constancia-id="' + esc(c.constanciaId || '') + '">🗑️ Borrar</button>' +
+        /* DRM: borrar registros del historial es solo para Administración */
+        (esAdminUnif() ? '<button class="ed-consulta-link ed-link-red" data-borrar-consulta="' + esc(c._id) + '" data-constancia-id="' + esc(c.constanciaId || '') + '">🗑️ Borrar</button>' : '') +
       '</div>' +
     '</div>';
   }

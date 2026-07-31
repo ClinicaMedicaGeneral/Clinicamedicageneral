@@ -938,7 +938,7 @@ button.ed-consulta-link {
         <div class="ed-grid ed-grid-2">
           <div class="ed-fgroup full">
             <label class="ed-label">Nombre completo *</label>
-            <input type="text" class="ed-input" id="nuevo-nombre" placeholder="Ej. Juan Pérez González">
+            <input type="text" class="ed-input" id="nuevo-nombre">
           </div>
           <div class="ed-fgroup">
             <label class="ed-label">Tipo de identificación</label>
@@ -1029,7 +1029,7 @@ button.ed-consulta-link {
           </div>
           <div class="ed-fgroup full">
             <label class="ed-label">Obra social / Seguro médico</label>
-            <input type="text" class="ed-input" id="nuevo-obra-social" placeholder="Ej. IHSS, Seguros Atlántida, BANHCAFE...">
+            <input type="text" class="ed-input" id="nuevo-obra-social">
           </div>
         </div>
 
@@ -1050,7 +1050,7 @@ button.ed-consulta-link {
           <div class="ed-section-title">👨‍👩‍👧 Antecedentes Familiares</div>
           <div class="ed-fgroup">
             <label class="ed-label">Detalle (padre, madre, hermanos, abuelos)</label>
-            <textarea class="ed-textarea" id="nuevo-familiares" rows="4" placeholder="Ej. Padre: diabetes tipo 2. Madre: hipertensión. Abuelo paterno: cáncer de próstata..."></textarea>
+            <textarea class="ed-textarea" id="nuevo-familiares" rows="4"></textarea>
           </div>
         </div>
 
@@ -1278,7 +1278,7 @@ button.ed-consulta-link {
         </div>
         <div class="ed-fgroup full" style="margin-top:14px">
           <label class="ed-label">Motivo de la unificación *</label>
-          <textarea class="ed-textarea" id="unif-motivo" rows="2" placeholder="Ej. Expediente B se creó por error con DNI invertido, el paciente es el mismo de A."></textarea>
+          <textarea class="ed-textarea" id="unif-motivo" rows="2"></textarea>
         </div>
         <div id="unif-comparador" style="margin-top:18px"></div>
         <div class="ed-actions" style="margin-top:14px">
@@ -3250,9 +3250,9 @@ button.ed-consulta-link {
     return '<div class="ed-section" id="serv-ekg-section">' +
       '<div class="ed-section-title">📈 Informe de electrocardiograma</div>' +
       '<div class="ed-grid ed-grid-2">' +
-        '<div class="ed-fgroup"><label class="ed-label">Frecuencia cardíaca</label><input type="text" class="ed-input" id="ekg-fc" placeholder="Ej. 78 lpm"></div>' +
-        '<div class="ed-fgroup"><label class="ed-label">Ritmo</label><input type="text" class="ed-input" id="ekg-ritmo" placeholder="Ej. Sinusal"></div>' +
-        '<div class="ed-fgroup full"><label class="ed-label">Eje eléctrico</label><input type="text" class="ed-input" id="ekg-eje" placeholder="Ej. Normal"></div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Frecuencia cardíaca</label><input type="text" class="ed-input" id="ekg-fc"></div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Ritmo</label><input type="text" class="ed-input" id="ekg-ritmo"></div>' +
+        '<div class="ed-fgroup full"><label class="ed-label">Eje eléctrico</label><input type="text" class="ed-input" id="ekg-eje"></div>' +
       '</div>' +
       '<div style="overflow-x:auto;margin-top:6px">' +
         '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
@@ -3333,7 +3333,7 @@ button.ed-consulta-link {
             '<div id="enf-sens-form" style="display:none;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:12px;margin-top:8px">' +
               '<div class="ed-grid ed-grid-2">' +
                 '<div class="ed-fgroup"><label class="ed-label">Medicamento probado *</label>' +
-                  '<input type="text" class="ed-input" id="enf-sens-med" placeholder="Ej. Penicilina 1.2 millones (puede ser comprado fuera)"></div>' +
+                  '<input type="text" class="ed-input" id="enf-sens-med"></div>' +
                 '<div class="ed-fgroup"><label class="ed-label">Resultado *</label>' +
                   '<select class="ed-input" id="enf-sens-resultado">' +
                     '<option value="">— Seleccionar —</option>' +
@@ -3555,7 +3555,7 @@ button.ed-consulta-link {
   function buildSensResultadoHtml(prefix) {
     return '<div class="ed-fgroup full" id="' + prefix + '-sens-wrap" style="display:none;grid-column:1/-1;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:12px;margin:2px 0 6px">' +
         '<label class="ed-label">🧪 Resultado de la prueba de sensibilidad *</label>' +
-        '<input type="text" class="ed-input" id="' + prefix + '-sens-resultado" placeholder="Ej. Reactiva / No reactiva">' +
+        '<input type="text" class="ed-input" id="' + prefix + '-sens-resultado">' +
       '</div>';
   }
   /* Recolecta checkboxes marcados de una lista de medicamentos (excluye la opción "Ninguno") */
@@ -3613,7 +3613,7 @@ button.ed-consulta-link {
       '<div id="' + prefix + '-incap-form" style="display:none;background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:12px;margin-top:8px">' +
         '<div class="ed-grid ed-grid-2">' +
           '<div class="ed-fgroup"><label class="ed-label">Días de incapacidad *</label>' +
-            '<input type="number" min="1" class="ed-input" id="' + prefix + '-incap-dias" placeholder="Ej. 3"></div>' +
+            '<input type="number" min="1" class="ed-input" id="' + prefix + '-incap-dias"></div>' +
           '<div class="ed-fgroup"><label class="ed-label">Desde *</label>' +
             '<input type="date" class="ed-input" id="' + prefix + '-incap-desde"></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">Motivo / Diagnóstico para la constancia *</label>' +
@@ -3657,11 +3657,11 @@ button.ed-consulta-link {
       '<div id="' + prefix + '-emergencia-form" style="display:none;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:12px;margin-top:8px">' +
         '<div class="ed-grid ed-grid-2">' +
           '<div class="ed-fgroup"><label class="ed-label">Uso de área de estabilización (horas)</label>' +
-            '<input type="text" class="ed-input" id="' + prefix + '-emerg-sala-horas" placeholder="Ej. 2 horas"></div>' +
+            '<input type="text" class="ed-input" id="' + prefix + '-emerg-sala-horas"></div>' +
           '<div class="ed-fgroup"><label class="ed-label">Utilización del monitor de signos vitales (horas)</label>' +
-            '<input type="text" class="ed-input" id="' + prefix + '-emerg-monitor-horas" placeholder="Ej. 1.5 horas"></div>' +
+            '<input type="text" class="ed-input" id="' + prefix + '-emerg-monitor-horas"></div>' +
           '<div class="ed-fgroup"><label class="ed-label">Utilización de tanque de oxígeno (litros)</label>' +
-            '<input type="text" class="ed-input" id="' + prefix + '-emerg-oxigeno-litros" placeholder="Ej. 3 litros"></div>' +
+            '<input type="text" class="ed-input" id="' + prefix + '-emerg-oxigeno-litros"></div>' +
           '<div class="ed-fgroup" style="align-self:end"><label class="ed-meds-opt" style="background:#fff"><input type="checkbox" id="' + prefix + '-emerg-bomba-check"> Utilización de bomba de infusión</label></div>' +
         '</div>' +
       '</div>' +
@@ -4185,7 +4185,7 @@ button.ed-consulta-link {
               '<select class="ed-input" id="qm-lab-prioridad"><option value="rutina">Rutina</option><option value="urgente">Urgente</option></select></div>' +
           '</div>' +
           '<div class="ed-fgroup full" style="margin-top:8px"><label class="ed-label">Notas / Indicaciones</label>' +
-            '<textarea class="ed-textarea" id="qm-lab-notas" rows="2" placeholder="Ej. Ayuno de 8 horas. Resultados al WhatsApp."></textarea></div>' +
+            '<textarea class="ed-textarea" id="qm-lab-notas" rows="2"></textarea></div>' +
           '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
             '<button class="ed-btn ed-btn-ghost" id="qm-cancelar">Cancelar</button>' +
             '<button class="ed-btn ed-btn-primary" id="qm-guardar">📤 Crear orden</button>' +

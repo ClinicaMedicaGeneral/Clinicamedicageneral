@@ -3228,9 +3228,7 @@ button.ed-consulta-link {
           '</tbody>' +
         '</table>' +
       '</div>' +
-      '<div class="ed-fgroup full" style="margin-top:10px"><label class="ed-label">Observaciones</label>' +
-        '<textarea class="ed-textarea" id="ekg-observaciones" rows="2" placeholder="Ej. EKG necesita valoración por cardiología"></textarea></div>' +
-      '<div class="ed-fgroup full"><label class="ed-label">Foto del electrocardiograma impreso (opcional)</label><input type="file" class="ed-input" id="ekg-imagen" accept="image/*"></div>' +
+      '<div class="ed-fgroup full" style="margin-top:10px"><label class="ed-label">Foto del electrocardiograma impreso (opcional)</label><input type="file" class="ed-input" id="ekg-imagen" accept="image/*"></div>' +
       '<p style="font-size:12px;color:#6B7280;margin:6px 0 0">Al guardar se genera la hoja de resultados del electrocardiograma, lista para imprimir o compartir.</p>' +
     '</div>';
   }
@@ -3856,7 +3854,6 @@ button.ed-consulta-link {
       aondar: $val('ekg-aondar'), dondaqrs: $val('ekg-dondaqrs'),
       aintqt: $val('ekg-aintqt'), dintqt: $val('ekg-dintqt'),
       aondat: $val('ekg-aondat'), dondat: $val('ekg-dondat'),
-      observaciones: $val('ekg-observaciones'),
       medico: medico,
       imagenUrl: null,
       emitidoPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,

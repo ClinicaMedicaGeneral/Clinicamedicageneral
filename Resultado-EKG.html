@@ -183,15 +183,6 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   text-transform: uppercase;
 }
 
-.ek-obs {
-  background: #FFFBEB;
-  border-left: 4px solid #FDD22C;
-  padding: 6px 12px;
-  font-size: 12.5px;
-  color: #1F2937;
-  margin-top: 2px;
-}
-
 /* Espacio del trazo impreso */
 .ek-strip {
   margin-top: 4px;
@@ -321,9 +312,6 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 
       <div class="ek-ondas-grid" id="ek-tabla-ondas"></div>
 
-      <div class="ek-section-label">Observaciones</div>
-      <p class="ek-obs" id="ek-observaciones">—</p>
-
       <div class="ek-section-label">Electrocardiograma impreso</div>
       <div class="ek-strip" id="ek-strip">
         <div class="ek-strip-empty">Sin imagen adjunta. Espacio reservado para el trazo del electrocardiograma.</div>
@@ -401,7 +389,6 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       ondaRow('Onda R', data.aondar, data.dondaqrs) +
       ondaRow('Intervalo Q – T', data.aintqt, data.dintqt) +
       ondaRow('Onda T', data.aondat, data.dondat);
-    $('ek-observaciones').textContent = data.observaciones || '— sin observaciones —';
     if (data.imagenUrl) {
       $('ek-strip').innerHTML = '<img src="' + esc(data.imagenUrl) + '" alt="Electrocardiograma">';
     }

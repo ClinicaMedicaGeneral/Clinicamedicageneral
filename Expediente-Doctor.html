@@ -1528,6 +1528,16 @@ button.ed-consulta-link {
            ' · ' + d.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
   }
 
+  /* DRM: fecha local de hoy en "YYYY-MM-DD". new Date().toISOString() convierte a
+     UTC, así que de 6pm en adelante (Honduras, UTC-6) ya cae en el día siguiente —
+     esto causaba que constancias emitidas en la tarde/noche mostraran la fecha
+     de mañana. Usar los getters locales (getFullYear/getMonth/getDate) lo evita. */
+  function fechaHoyLocal() {
+    var d = new Date();
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+
   /* DRM: milisegundos para ordenar por fecha. Soporta Timestamp de Firestore,
      Date, string/millis, y el caso de un serverTimestamp() recién escrito que
      aún no resolvió en el cache local (llega como null) — ese caso se trata
@@ -3655,8 +3665,8 @@ button.ed-consulta-link {
      siempre tienen permiso de hacer una vez que el status del registro ya cambió. */
   function prepararConstancia(consultaId, paciente, datosIncap, emitidaPor) {
     var dg2 = (paciente && paciente.datosGenerales) || {};
-    var nowIso = new Date().toISOString();
-    var numero = 'CONS-' + nowIso.slice(0, 10).replace(/-/g, '') + '-' + Math.floor(Math.random() * 9000 + 1000);
+    var hoyLocal = fechaHoyLocal();
+    var numero = 'CONS-' + hoyLocal.replace(/-/g, '') + '-' + Math.floor(Math.random() * 9000 + 1000);
     var ref = cmgDb.collection('constancias').doc();
     var data = {
       numero: numero,
@@ -3670,14 +3680,14 @@ button.ed-consulta-link {
         if (!f) return '';
         try { var d = new Date(f), h = new Date(), e = h.getFullYear() - d.getFullYear(), m = h.getMonth() - d.getMonth(); if (m < 0 || (m === 0 && h.getDate() < d.getDate())) e--; return e + ' años'; } catch (_) { return ''; }
       })(dg2.fechaNacimiento),
-      fechaConsulta: nowIso.slice(0, 10),
+      fechaConsulta: hoyLocal,
       dias: datosIncap.dias,
       desde: datosIncap.desde,
       motivo: datosIncap.motivo,
       observaciones: datosIncap.observaciones,
       emitidaPor: emitidaPor,
       emitidaPorEmail: cmgAuth.currentUser.email,
-      emitidaEn: nowIso,
+      emitidaEn: hoyLocal + 'T00:00:00',
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     return { ref: ref, data: data };

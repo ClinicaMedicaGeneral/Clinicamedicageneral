@@ -330,6 +330,11 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
       return d.toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' });
     } catch(e){ return s; }
   }
+  function fechaHoyLocal(){
+    var d = new Date();
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
   function addDays(fechaStr, dias){
     if (!fechaStr || !dias) return null;
     try {
@@ -365,7 +370,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
 
   function render(data){
     $('cm-num').textContent = data.numero || data._id || '—';
-    $('cm-fecha-emision').textContent = fmtFecha((data.emitidaEn || new Date().toISOString()).slice(0,10));
+    $('cm-fecha-emision').textContent = fmtFecha((data.emitidaEn || fechaHoyLocal()).slice(0,10));
     $('cm-paciente-nombre').textContent = data.pacienteNombre || '—';
     $('cm-paciente-tipoid').textContent = tipoIdLabel(data.pacienteTipoId);
     $('cm-paciente-dni').textContent = data.pacienteDNI || '—';

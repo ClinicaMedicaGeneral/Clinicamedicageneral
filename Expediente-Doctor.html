@@ -4268,10 +4268,13 @@ button.ed-consulta-link {
   }
 
   /* DRM v3 #3+#6 + v3.2: modal para crear servicio, MULTI-SELECT con catálogo + "Otro" */
+  /* Cada servicio se marca con un checkbox y trae su propia cantidad (default 1),
+     para que caja sepa exactamente cuántas unidades de cada servicio se realizaron. */
   function abrirRealizarServicioModal(consultaPadreId){
     if (!pacienteActual) return;
     var dg = pacienteActual.datosGenerales || {};
-    /* Construir checkboxes agrupados por categoría */
+
+    /* Construir checkboxes + cantidad, agrupados por categoría */
     var checkboxesHtml = '';
     CATALOGO_SERVICIOS.forEach(function(grp){
       checkboxesHtml +=
@@ -4279,7 +4282,10 @@ button.ed-consulta-link {
           '<div style="font-size:11px;font-weight:800;color:#6B7280;letter-spacing:.4px;text-transform:uppercase;margin-bottom:4px">' + esc(grp.label) + '</div>' +
           '<div class="ed-meds-list">' +
             grp.items.map(function(s){
-              return '<label class="ed-meds-opt"><input type="checkbox" value="' + esc(s) + '" class="qm-srv-chk"> ' + esc(s) + '</label>';
+              return '<label class="ed-meds-opt" style="display:flex;align-items:center;gap:8px;justify-content:space-between">' +
+                '<span><input type="checkbox" value="' + esc(s) + '" class="qm-srv-chk"> ' + esc(s) + '</span>' +
+                '<input type="number" min="1" step="1" value="1" class="ed-input qm-srv-cantidad" style="width:60px;text-align:center;padding:2px 4px" disabled>' +
+              '</label>';
             }).join('') +
           '</div>' +
         '</div>';
@@ -4316,28 +4322,38 @@ button.ed-consulta-link {
     $id('qm-srv-otro-chk').addEventListener('change', function(){
       $id('qm-srv-otro-grupo').style.display = this.checked ? '' : 'none';
     });
+    document.querySelectorAll('.qm-srv-chk').forEach(function(chk){
+      chk.addEventListener('change', function(){
+        var cantidadInput = this.closest('.ed-meds-opt').querySelector('.qm-srv-cantidad');
+        cantidadInput.disabled = !this.checked;
+        if (this.checked) cantidadInput.focus();
+      });
+    });
     $id('qm-cancelar').onclick = function(){ document.getElementById('ed-quick-modal').remove(); };
     $id('qm-guardar').onclick = function(){
       var seleccionados = [];
       document.querySelectorAll('.qm-srv-chk:checked').forEach(function(c){
-        seleccionados.push({ nombre: c.value, delCatalogo: true });
+        var cantidadInput = c.closest('.ed-meds-opt').querySelector('.qm-srv-cantidad');
+        var cantidad = parseInt(cantidadInput.value, 10) || 1;
+        seleccionados.push({ nombre: c.value, delCatalogo: true, cantidad: cantidad });
       });
       if ($id('qm-srv-otro-chk').checked) {
         var nombreOtro = $val('qm-srv-otro');
         if (!nombreOtro) { showAlert('Especifica el procedimiento del campo "Otro"', 'error'); return; }
-        seleccionados.push({ nombre: '[OTRO] ' + nombreOtro, delCatalogo: false });
+        seleccionados.push({ nombre: '[OTRO] ' + nombreOtro, delCatalogo: false, cantidad: 1 });
       }
       if (!seleccionados.length) { showAlert('Marca al menos un servicio', 'error'); return; }
 
       showOverlay('Creando ' + seleccionados.length + ' servicio' + (seleccionados.length>1?'s':'') + '…');
       var notas = $val('qm-srv-notas');
-      /* Un doc de Firestore por cada servicio, todos vinculados a la misma consulta padre */
+      /* Un doc de Firestore por cada servicio (con su cantidad), todos vinculados a la misma consulta padre */
       var promesas = seleccionados.map(function(srv){
         return cmgDb.collection('consultas').add({
           codigoPaciente : pacienteActual.codigoPaciente,
           pacienteNombre : dg.nombreCompleto || '',
           status         : 'servicio',
           servicioNombre : srv.nombre,
+          servicioCantidad: srv.cantidad,
           servicioDelCatalogo: srv.delCatalogo,
           servicioNotas  : notas,
           fechaServicio  : firebase.firestore.FieldValue.serverTimestamp(),

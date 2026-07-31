@@ -1314,7 +1314,7 @@
             '</div>' +
             '<div class="mh-consulta-doctor">CMG</div>' +
           '</div>' +
-          '<div class="mh-consulta-motivo"><strong>Servicio:</strong> ' + esc(c.servicioNombre || '—') + '</div>' +
+          '<div class="mh-consulta-motivo"><strong>Servicio:</strong> ' + esc(c.servicioNombre || '—') + (c.servicioCantidad > 1 ? ' <span style="color:#6B7280">x' + c.servicioCantidad + '</span>' : '') + '</div>' +
           (c.servicioNotas ? '<div class="mh-consulta-motivo" style="font-size:12px;color:#6B7280;margin-top:4px"><strong>Notas:</strong> ' + esc(c.servicioNotas) + '</div>' : '') +
           (c.servicioNotasFin ? '<div class="mh-consulta-dx"><strong>Observaciones:</strong> ' + esc(c.servicioNotasFin) + '</div>' : '') +
           '<div class="mh-consulta-actions"></div>' +

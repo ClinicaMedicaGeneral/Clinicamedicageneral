@@ -708,7 +708,7 @@ summary.ed-meds-cat { list-style: revert; }
   vertical-align: middle;
 }
 .ed-pt-table tr:last-child td { border-bottom: none; }
-.ed-pt-table tr:hover td { background: #F9FAFB; cursor: pointer; }
+.ed-pt-table tr:hover td { background: #F9FAFB; }
 .ed-pt-table tr.is-selected td { background: #FFF9E0; }
 .ed-pt-table tr.is-selected td:first-child { border-left: 3px solid #FDD22C; }
 .ed-pt-table tr.is-selected:hover td { background: #FFF3C4; }
@@ -2408,15 +2408,6 @@ summary.ed-meds-cat { list-style: revert; }
           switchTab('buscar');
           renderBuscarResultado();
         }
-      });
-    });
-    /* Clic en fila también selecciona */
-    $id('pt-tabla-wrap').querySelectorAll('tr[data-codigo]').forEach(function (tr) {
-      tr.addEventListener('click', function (e) {
-        if (e.target.tagName === 'BUTTON') return;
-        var codigo = tr.dataset.codigo;
-        var p = _todosLosPacientes.find(function (x) { return x.codigoPaciente === codigo; });
-        if (p) { pacienteActual = p; switchTab('buscar'); renderBuscarResultado(); }
       });
     });
   }

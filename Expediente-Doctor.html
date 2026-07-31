@@ -1391,6 +1391,23 @@ button.ed-consulta-link {
     { key: 'parpadoCara',label: 'Párpado / Cara' },
     { key: 'lesionGrande', label: 'Lesión Grande' }
   ];
+  /* Texto "Normal x2, Lesión Grande x1" a partir de servicioCauterizacionDetalle */
+  function formatCauterizacionDetalle(detalle) {
+    if (!detalle) return '';
+    return CAUTERIZACION_SUBTIPOS.map(function(c){
+      var n = detalle[c.key] || 0;
+      return n > 0 ? (c.label + ' x' + n) : null;
+    }).filter(Boolean).join(', ');
+  }
+  /* Nombre del servicio + cantidad global + desglose de cauterización, para
+     que Historial y Liquidación en Caja siempre muestren cuántas unidades se hicieron. */
+  function servicioLabelConCantidad(d) {
+    var base = d.servicioNombre || '—';
+    if (d.servicioCantidad > 1) base += ' x' + d.servicioCantidad;
+    var detalle = formatCauterizacionDetalle(d.servicioCauterizacionDetalle);
+    if (detalle) base += ' (' + detalle + ')';
+    return base;
+  }
 
   /* Catálogo ESTRICTO de exámenes de laboratorio, 141 ítems agrupados, sincronizado con Cotizador.html */
   var CATALOGO_LABORATORIO = [
@@ -1720,7 +1737,7 @@ button.ed-consulta-link {
           var esLabStandalone      = d.tipoRegistro === 'lab-standalone';
           var esPruebaStandalone   = d.tipoRegistro === 'prueba-standalone';
           var esServicioStandalone = d.tipoRegistro === 'servicio-standalone' || (!d.diagnostico && d.servicioNombre && !esLabStandalone && !esPruebaStandalone);
-          var servicios = (d.serviciosBrindados||[]).join(', ') || (esLabStandalone || esPruebaStandalone || esServicioStandalone ? d.servicioNombre : (d.diagnostico ? 'Consulta médica' : '—'));
+          var servicios = (d.serviciosBrindados||[]).join(', ') || (esLabStandalone || esPruebaStandalone || esServicioStandalone ? servicioLabelConCantidad(d) : (d.diagnostico ? 'Consulta médica' : '—'));
           /* DRM v3 #4: badge de constancia emitida */
           var badgeConstancia = (d.tieneConstancia || d.constanciaId)
             ? '<span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">📄 Constancia emitida</span>'
@@ -1811,7 +1828,7 @@ button.ed-consulta-link {
             var lines = ['<div style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:6px;padding:8px 10px;font-size:12px"><b style="color:#213C7D">🔗 Servicios vinculados (mismo pago):</b><ul style="margin:4px 0 0 18px;padding:0">'];
             hijos.forEach(function(h){
               var hd = h.data();
-              lines.push('<li>' + esc(hd.servicioNombre || '—') + (hd.servicioRealizadoPor ? ' <span style="color:#6B7280">· ' + esc(hd.servicioRealizadoPor) + '</span>' : '') + '</li>');
+              lines.push('<li>' + esc(servicioLabelConCantidad(hd)) + (hd.servicioRealizadoPor ? ' <span style="color:#6B7280">· ' + esc(hd.servicioRealizadoPor) + '</span>' : '') + '</li>');
             });
             lines.push('</ul></div>');
             slot.innerHTML = lines.join('');
@@ -4916,7 +4933,7 @@ button.ed-consulta-link {
     if (c.convertidoConsulta) badge = ' <span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">❌ Servicio NO realizado · convertido en consulta</span>';
 
     var titulo = esServicio
-      ? esc(c.servicioNombre || 'Servicio')
+      ? esc(servicioLabelConCantidad(c))
       : esc(c.motivoConsulta || '').slice(0, 120) + (c.motivoConsulta && c.motivoConsulta.length > 120 ? '...' : '');
 
     var medsVisita   = (c.medicamentosVisita || []).filter(Boolean);

@@ -1368,8 +1368,7 @@ button.ed-consulta-link {
     ]},
     { label: 'Procedimientos', items: [
       'Lavado de oído', 'Lavado ocular',
-      'Cauterización lunar/verruga', 'Cauterización de lesión grande',
-      'Cauterización en párpado',
+      'Cauterización lunar/verruga',
       'Cirugía menor · pequeña', 'Cirugía menor · media', 'Cirugía menor · grande',
       'Curación pequeña', 'Curación mediana', 'Curación grande',
       'Retiro de puntos', 'Extracción de uña'
@@ -1382,6 +1381,15 @@ button.ed-consulta-link {
       'Colocación de sonda vesical', 'Colocación de sonda + insumos',
       'Retiro de sonda vesical'
     ]}
+  ];
+
+  /* 'Cauterización lunar/verruga' es el único servicio de cauterización en el catálogo:
+     lesión grande y párpado/cara se derivan de este mismo servicio, distinguidas por
+     cantidad numérica en cada subtipo (no por servicios separados). */
+  var CAUTERIZACION_SUBTIPOS = [
+    { key: 'normal',     label: 'Normal' },
+    { key: 'parpadoCara',label: 'Párpado / Cara' },
+    { key: 'lesionGrande', label: 'Lesión Grande' }
   ];
 
   /* Catálogo ESTRICTO de exámenes de laboratorio, 141 ítems agrupados, sincronizado con Cotizador.html */
@@ -3718,10 +3726,22 @@ button.ed-consulta-link {
       buildServicioResultadoSectionHtml(srv.servicioNombre) +
       '<div class="ed-section">' +
         '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="serv-convertido-consulta"> ❌ Este servicio no se realizó (se convirtió en consulta médica)</label>' +
-        '<div class="ed-fgroup" id="serv-cantidad-grupo" style="margin-top:10px;max-width:180px">' +
-          '<label class="ed-label">Cantidad realizada</label>' +
-          '<input type="number" min="1" step="1" value="1" class="ed-input" id="serv-cantidad">' +
-        '</div>' +
+        (srv.servicioNombre === 'Cauterización lunar/verruga' ?
+          '<div class="ed-fgroup full" id="serv-cantidad-grupo" style="margin-top:10px">' +
+            '<label class="ed-label">🔥 Cauterización · cantidad por subtipo</label>' +
+            '<div style="display:flex;gap:12px;flex-wrap:wrap;background:#FFF7ED;border:1px solid #FDBA74;border-radius:8px;padding:8px 10px">' +
+              CAUTERIZACION_SUBTIPOS.map(function(c){
+                return '<div style="display:flex;flex-direction:column;gap:2px">' +
+                  '<label class="ed-label" style="font-size:11px;margin:0">' + esc(c.label) + '</label>' +
+                  '<input type="number" min="0" step="1" value="0" class="ed-input serv-caut-input" data-subtipo="' + esc(c.key) + '" style="width:70px;text-align:center;padding:2px 4px">' +
+                '</div>';
+              }).join('') +
+            '</div>' +
+          '</div>' :
+          '<div class="ed-fgroup" id="serv-cantidad-grupo" style="margin-top:10px;max-width:180px">' +
+            '<label class="ed-label">Cantidad realizada</label>' +
+            '<input type="number" min="1" step="1" value="1" class="ed-input" id="serv-cantidad">' +
+          '</div>') +
       '</div>' +
       '<div class="ed-section" id="serv-meds-section">' +
         '<div class="ed-grid ed-grid-2">' +
@@ -3787,7 +3807,10 @@ button.ed-consulta-link {
 
     var servicioNombre = consultaPendienteCargada.servicioNombre;
     var esEkg = servicioNombre === 'Electrocardiograma';
+    var esCauterizacion = servicioNombre === 'Cauterización lunar/verruga';
     var resultadoServicio = null;
+    var cauterizacionDetalle = null;
+    var servicioCantidad = 1;
     if (!convertidoConsulta) {
       if (servicioNombre === 'Toma de presión') {
         resultadoServicio = { ta: $val('serv-resultado-ta') };
@@ -3798,6 +3821,18 @@ button.ed-consulta-link {
       } else if (servicioNombre === 'Control de peso') {
         resultadoServicio = { peso: $val('serv-resultado-peso') };
         if (!resultadoServicio.peso) faltantes.push('Peso');
+      }
+      if (esCauterizacion) {
+        cauterizacionDetalle = {};
+        servicioCantidad = 0;
+        document.querySelectorAll('.serv-caut-input').forEach(function(inp){
+          var n = parseInt(inp.value, 10) || 0;
+          cauterizacionDetalle[inp.getAttribute('data-subtipo')] = n;
+          servicioCantidad += n;
+        });
+        if (servicioCantidad <= 0) faltantes.push('Cantidad de cauterización (al menos un subtipo)');
+      } else {
+        servicioCantidad = parseInt($val('serv-cantidad'), 10) || 1;
       }
     }
 
@@ -3819,7 +3854,8 @@ button.ed-consulta-link {
       doctorNombre: medico,
       doctorEmail: cmgAuth.currentUser.email,
       convertidoConsulta: convertidoConsulta,
-      servicioCantidad: convertidoConsulta ? null : (parseInt($val('serv-cantidad'), 10) || 1),
+      servicioCantidad: convertidoConsulta ? null : servicioCantidad,
+      servicioCauterizacionDetalle: cauterizacionDetalle,
       medicamentosVisita: medsVisitaServ,
       medicamentosDespacho: collectChecked('serv-meds-despacho-list'),
       recetaExterna: $val('serv-receta-externa'),
@@ -4282,7 +4318,9 @@ button.ed-consulta-link {
     if (!pacienteActual) return;
     var dg = pacienteActual.datosGenerales || {};
 
-    /* Construir checkboxes + cantidad, agrupados por categoría */
+    /* Construir checkboxes + cantidad, agrupados por categoría.
+       'Cauterización lunar/verruga' es un caso especial: en vez de una sola
+       cantidad, muestra cantidad numérica por subtipo (Normal / Párpado-Cara / Lesión Grande). */
     var checkboxesHtml = '';
     CATALOGO_SERVICIOS.forEach(function(grp){
       checkboxesHtml +=
@@ -4290,6 +4328,19 @@ button.ed-consulta-link {
           '<div style="font-size:11px;font-weight:800;color:#6B7280;letter-spacing:.4px;text-transform:uppercase;margin-bottom:4px">' + esc(grp.label) + '</div>' +
           '<div class="ed-meds-list">' +
             grp.items.map(function(s){
+              if (s === 'Cauterización lunar/verruga') {
+                return '<label class="ed-meds-opt" style="display:flex;flex-direction:column;align-items:stretch;gap:6px;grid-column:1/-1">' +
+                  '<span><input type="checkbox" value="' + esc(s) + '" class="qm-srv-chk" id="qm-caut-chk"> 🔥 ' + esc(s) + '</span>' +
+                  '<div class="qm-caut-box" style="display:none;flex-wrap:wrap;gap:12px;background:#FFF7ED;border:1px solid #FDBA74;border-radius:8px;padding:8px 10px">' +
+                    CAUTERIZACION_SUBTIPOS.map(function(c){
+                      return '<div style="display:flex;flex-direction:column;gap:2px">' +
+                        '<label class="ed-label" style="font-size:11px;margin:0">' + esc(c.label) + '</label>' +
+                        '<input type="number" min="0" step="1" value="0" class="ed-input qm-caut-input" data-subtipo="' + esc(c.key) + '" style="width:70px;text-align:center;padding:2px 4px">' +
+                      '</div>';
+                    }).join('') +
+                  '</div>' +
+                '</label>';
+              }
               return '<label class="ed-meds-opt" style="display:flex;align-items:center;gap:8px;justify-content:space-between">' +
                 '<span><input type="checkbox" value="' + esc(s) + '" class="qm-srv-chk"> ' + esc(s) + '</span>' +
                 '<input type="number" min="1" step="1" value="1" class="ed-input qm-srv-cantidad" style="width:60px;text-align:center;padding:2px 4px" disabled>' +
@@ -4331,6 +4382,12 @@ button.ed-consulta-link {
       $id('qm-srv-otro-grupo').style.display = this.checked ? '' : 'none';
     });
     document.querySelectorAll('.qm-srv-chk').forEach(function(chk){
+      if (chk.id === 'qm-caut-chk') {
+        chk.addEventListener('change', function(){
+          this.closest('.ed-meds-opt').querySelector('.qm-caut-box').style.display = this.checked ? 'flex' : 'none';
+        });
+        return;
+      }
       chk.addEventListener('change', function(){
         var cantidadInput = this.closest('.ed-meds-opt').querySelector('.qm-srv-cantidad');
         cantidadInput.disabled = !this.checked;
@@ -4340,11 +4397,25 @@ button.ed-consulta-link {
     $id('qm-cancelar').onclick = function(){ document.getElementById('ed-quick-modal').remove(); };
     $id('qm-guardar').onclick = function(){
       var seleccionados = [];
+      var errorCauterizacion = false;
       document.querySelectorAll('.qm-srv-chk:checked').forEach(function(c){
+        if (c.id === 'qm-caut-chk') {
+          var detalle = {};
+          var total = 0;
+          document.querySelectorAll('.qm-caut-input').forEach(function(inp){
+            var n = parseInt(inp.value, 10) || 0;
+            detalle[inp.getAttribute('data-subtipo')] = n;
+            total += n;
+          });
+          if (total <= 0) { errorCauterizacion = true; return; }
+          seleccionados.push({ nombre: c.value, delCatalogo: true, cantidad: total, cauterizacionDetalle: detalle });
+          return;
+        }
         var cantidadInput = c.closest('.ed-meds-opt').querySelector('.qm-srv-cantidad');
         var cantidad = parseInt(cantidadInput.value, 10) || 1;
         seleccionados.push({ nombre: c.value, delCatalogo: true, cantidad: cantidad });
       });
+      if (errorCauterizacion) { showAlert('Indica la cantidad de al menos un subtipo de cauterización', 'error'); return; }
       if ($id('qm-srv-otro-chk').checked) {
         var nombreOtro = $val('qm-srv-otro');
         if (!nombreOtro) { showAlert('Especifica el procedimiento del campo "Otro"', 'error'); return; }
@@ -4362,6 +4433,7 @@ button.ed-consulta-link {
           status         : 'servicio',
           servicioNombre : srv.nombre,
           servicioCantidad: srv.cantidad,
+          servicioCauterizacionDetalle: srv.cauterizacionDetalle || null,
           servicioDelCatalogo: srv.delCatalogo,
           servicioNotas  : notas,
           fechaServicio  : firebase.firestore.FieldValue.serverTimestamp(),

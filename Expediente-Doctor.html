@@ -3546,11 +3546,31 @@ button.ed-consulta-link {
     return cats.map(function (c) {
       var html = '<div class="ed-meds-cat">' + c.titulo + '</div>' +
         c.items.map(function (m) {
-          return '<label class="ed-meds-opt"><input type="checkbox" value="' + esc(m) + '"> ' + esc(m) + '</label>';
+          /* La prueba de sensibilidad es un chequeo, no una unidad aplicada: sin cantidad */
+          if (m === 'Prueba de sensibilidad') {
+            return '<label class="ed-meds-opt"><input type="checkbox" value="' + esc(m) + '"> ' + esc(m) + '</label>';
+          }
+          return '<label class="ed-meds-opt" style="display:flex;align-items:center;gap:8px;justify-content:space-between">' +
+            '<span><input type="checkbox" value="' + esc(m) + '" class="ed-meds-chk"> ' + esc(m) + '</span>' +
+            '<input type="number" min="1" step="1" value="1" class="ed-input ed-meds-cantidad" style="width:56px;text-align:center;padding:2px 4px" disabled>' +
+          '</label>';
         }).join('');
       if (extraAfterTitle && c.titulo === extraAfterTitle.titulo) html += extraAfterTitle.html;
       return html;
     }).join('');
+  }
+  /* Habilita/deshabilita la cantidad de cada medicamento al marcar/desmarcar su checkbox */
+  function wireMedsCantidad(listId) {
+    var list = $id(listId);
+    if (!list) return;
+    list.querySelectorAll('.ed-meds-chk').forEach(function (chk) {
+      chk.addEventListener('change', function () {
+        var cantidadInput = this.closest('.ed-meds-opt').querySelector('.ed-meds-cantidad');
+        if (!cantidadInput) return;
+        cantidadInput.disabled = !this.checked;
+        if (this.checked) cantidadInput.focus();
+      });
+    });
   }
   function buildSensResultadoHtml(prefix) {
     return '<div class="ed-fgroup full" id="' + prefix + '-sens-wrap" style="display:none;grid-column:1/-1;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:12px;margin:2px 0 6px">' +
@@ -3562,7 +3582,10 @@ button.ed-consulta-link {
   function collectChecked(listId) {
     var out = [];
     document.querySelectorAll('#' + listId + ' input[type=checkbox]:checked').forEach(function(c){
-      if (c.dataset.medsNinguno !== '1') out.push(c.value);
+      if (c.dataset.medsNinguno === '1') return;
+      var cantidadInput = c.closest('.ed-meds-opt') && c.closest('.ed-meds-opt').querySelector('.ed-meds-cantidad');
+      var cantidad = cantidadInput ? (parseInt(cantidadInput.value, 10) || 1) : 1;
+      out.push(cantidad > 1 ? (c.value + ' x' + cantidad) : c.value);
     });
     return out;
   }
@@ -3582,7 +3605,10 @@ button.ed-consulta-link {
       if (!t || t.tagName !== 'INPUT') return;
       if (t.dataset.medsNinguno === '1' && t.checked) {
         list.querySelectorAll('input[type=checkbox]').forEach(function(c){
-          if (c !== t) c.checked = false;
+          if (c === t) return;
+          c.checked = false;
+          var cantidadInput = c.closest('.ed-meds-opt') && c.closest('.ed-meds-opt').querySelector('.ed-meds-cantidad');
+          if (cantidadInput) cantidadInput.disabled = true;
         });
       } else if (t.checked && t.dataset.medsNinguno !== '1') {
         var ninguno = list.querySelector('input[data-meds-ninguno="1"]');
@@ -3806,6 +3832,7 @@ button.ed-consulta-link {
 
     wireSensToggle('serv-meds-visita-list', 'serv-sens-wrap');
     ['serv-meds-visita-list', 'serv-meds-despacho-list'].forEach(wireMedsGroupNinguno);
+    ['serv-meds-visita-list', 'serv-meds-despacho-list'].forEach(wireMedsCantidad);
     wireIncapToggle('serv');
     wireEmergenciaToggle('servfin');
   }
@@ -4141,6 +4168,7 @@ button.ed-consulta-link {
 
     /* DRM v3.6: exclusión mutua "Ninguno" vs medicamentos reales en cada grupo */
     ['cons-meds-visita-list', 'cons-meds-despacho-list'].forEach(wireMedsGroupNinguno);
+    ['cons-meds-visita-list', 'cons-meds-despacho-list'].forEach(wireMedsCantidad);
   }
 
   /* DRM v3 #3 + v3.1 + v3.3: modal para solicitar exámenes, 141 ítems agrupados + buscador */

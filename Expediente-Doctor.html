@@ -4782,6 +4782,27 @@ button.ed-consulta-link {
         abrirEditarConstanciaModal(this.getAttribute('data-editar-constancia'));
       });
     });
+    lista.querySelectorAll('[data-borrar-consulta]').forEach(function(b){
+      b.addEventListener('click', function(){
+        borrarConsultaHistorial(this.getAttribute('data-borrar-consulta'), this.getAttribute('data-constancia-id'));
+      });
+    });
+  }
+
+  /* Borra un registro de consulta/servicio del historial (y su constancia vinculada, si tiene) */
+  function borrarConsultaHistorial(id, constanciaId) {
+    if (!confirm('¿Borrar este registro del historial' + (constanciaId ? ' y su constancia vinculada' : '') + '? Esta acción no se puede deshacer.')) return;
+    showOverlay('Borrando registro...');
+    var batch = cmgDb.batch();
+    batch.delete(cmgDb.collection('consultas').doc(id));
+    if (constanciaId) batch.delete(cmgDb.collection('constancias').doc(constanciaId));
+    batch.commit()
+      .then(function () {
+        hideOverlay();
+        showAlert('✓ Registro borrado', 'success');
+        renderHistorialTab();
+      })
+      .catch(function (err) { hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
   }
 
   /* ─── Item: Consulta médica o Servicio/Procedimiento (colección consultas) ─── */
@@ -4833,6 +4854,7 @@ button.ed-consulta-link {
         (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Ver PDF</a>' : '') +
         (c.constanciaId ? '<a class="ed-consulta-link" href="Constancia-Medica.html?id=' + esc(c.constanciaId) + '" target="_blank">📄 Ver constancia</a>' : '') +
         (puedeEditarConstancia ? '<button class="ed-consulta-link ed-link-blue" data-editar-constancia="' + esc(c.constanciaId) + '">✏️ Editar constancia</button>' : '') +
+        '<button class="ed-consulta-link ed-link-red" data-borrar-consulta="' + esc(c._id) + '" data-constancia-id="' + esc(c.constanciaId || '') + '">🗑️ Borrar</button>' +
       '</div>' +
     '</div>';
   }

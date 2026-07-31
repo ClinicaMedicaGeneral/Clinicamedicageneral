@@ -1391,6 +1391,11 @@ button.ed-consulta-link {
     { key: 'parpadoCara',label: 'Párpado / Cara' },
     { key: 'lesionGrande', label: 'Lesión Grande' }
   ];
+  /* Quita tildes/diacríticos y pasa a minúsculas, para que buscar "Acido Urico"
+     encuentre "Ácido Úrico" en el catálogo de laboratorio. */
+  function normalizarBusqueda(s) {
+    return (s || '').toString().trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
   /* Texto "Normal x2, Lesión Grande x1" a partir de servicioCauterizacionDetalle */
   function formatCauterizacionDetalle(detalle) {
     if (!detalle) return '';
@@ -4151,7 +4156,7 @@ button.ed-consulta-link {
         '<div style="font-size:11px;font-weight:800;color:#6B7280;letter-spacing:.4px;text-transform:uppercase;margin-bottom:4px">' + esc(grp.label) + ' <span style="color:#9CA3AF;font-weight:400">(' + grp.items.length + ')</span></div>' +
         '<div class="ed-meds-list">' +
           grp.items.map(function(ex){
-            return '<label class="ed-meds-opt qm-lab-item" data-name="' + esc(ex.toLowerCase()) + '"><input type="checkbox" value="' + esc(ex) + '" class="qm-lab-chk"> ' + esc(ex) + '</label>';
+            return '<label class="ed-meds-opt qm-lab-item" data-name="' + esc(normalizarBusqueda(ex)) + '"><input type="checkbox" value="' + esc(ex) + '" class="qm-lab-chk"> ' + esc(ex) + '</label>';
           }).join('') +
         '</div>' +
       '</div>';
@@ -4174,7 +4179,10 @@ button.ed-consulta-link {
           '</div>' +
           '<div class="ed-grid ed-grid-2" style="gap:10px;margin-top:10px">' +
             '<div class="ed-fgroup"><label class="ed-label">Proveedor (laboratorio)</label>' +
-              '<input type="text" class="ed-input" id="qm-lab-proveedor" placeholder="Lab. CMG / externo"></div>' +
+              '<select class="ed-input" id="qm-lab-proveedor" style="appearance:auto;-webkit-appearance:menulist">' +
+                '<option value="Labex">Labex</option>' +
+                '<option value="Masterlab">Masterlab</option>' +
+              '</select></div>' +
             '<div class="ed-fgroup"><label class="ed-label">Prioridad</label>' +
               '<select class="ed-input" id="qm-lab-prioridad"><option value="rutina">Rutina</option><option value="urgente">Urgente</option></select></div>' +
           '</div>' +
@@ -4194,7 +4202,7 @@ button.ed-consulta-link {
       var el = $id('qm-lab-count'); if (el) el.textContent = n;
     }
     function aplicarFiltro(modo){
-      var q = ($id('qm-lab-buscar').value || '').trim().toLowerCase();
+      var q = normalizarBusqueda($id('qm-lab-buscar').value || '');
       document.querySelectorAll('.qm-lab-item').forEach(function(lbl){
         var visible = true;
         if (q) visible = lbl.dataset.name.indexOf(q) !== -1;
@@ -5510,10 +5518,11 @@ button.ed-consulta-link {
               '</div>' +
               '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:start">' +
                 (ex.status === 'pendiente'
-                  ? '<button class="ed-btn ed-btn-ghost" data-procesar="' + esc(ex._id) + '">▶ Marcar procesando</button>'
+                  ? '<button class="ed-btn ed-btn-ghost" data-procesar="' + esc(ex._id) + '">▶ Retirado por Laboratorio</button>'
                   : '') +
                 /* DRM v3.5: la confirmación solo ocurre al subir el PDF (auditable y operativamente seguro) */
                 '<button class="ed-btn ed-btn-primary" data-subir-orden="' + esc(ex._id) + '">📤 Subir resultado y confirmar</button>' +
+                '<button class="ed-btn ed-btn-ghost" data-eliminar-orden="' + esc(ex._id) + '" style="color:#B91C1C;border-color:#FCA5A5">🗑️ Eliminar</button>' +
               '</div>' +
             '</div>' +
           '</div>';
@@ -5527,6 +5536,15 @@ button.ed-consulta-link {
         });
         box.querySelectorAll('[data-subir-orden]').forEach(function(b){
           b.addEventListener('click', function(){ abrirSubirResultadoModal(this.getAttribute('data-subir-orden')); });
+        });
+        box.querySelectorAll('[data-eliminar-orden]').forEach(function(b){
+          b.addEventListener('click', function(){
+            var id = this.getAttribute('data-eliminar-orden');
+            if (!confirm('¿Eliminar esta orden pendiente? Esta acción no se puede deshacer (útil si se repitió por accidente).')) return;
+            cmgDb.collection('examenesLaboratorio').doc(id).delete()
+              .then(function(){ showAlert('✓ Orden eliminada', 'success'); cargarLaboratorioPendientesGlobal(); })
+              .catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
+          });
         });
         }); /* fin completarDatos.then */
       })

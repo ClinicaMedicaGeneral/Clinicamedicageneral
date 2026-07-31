@@ -1177,7 +1177,10 @@
           var d = doc.data();
           html += '<div style="display:flex;justify-content:space-between;align-items:center;background:#FFFBEB;border:1px solid #FCD34D;border-radius:8px;padding:10px 12px">' +
             '<div><b>' + esc(d.nombre || '—') + '</b><br><small style="color:#6B7280">' + esc(d.tipo) + ' · ' + esc(d.fecha) + (d.horaToma ? ' · Toma: ' + esc(d.horaToma) : '') + '</small></div>' +
-            '<button class="pr-btn pr-btn-primary" data-pending-id="' + doc.id + '">▶ Reanudar</button>' +
+            '<div style="display:flex;gap:8px">' +
+              '<button class="pr-btn pr-btn-primary" data-pending-id="' + doc.id + '">▶ Reanudar</button>' +
+              '<button class="pr-btn pr-btn-ghost" data-eliminar-id="' + doc.id + '" style="color:#B91C1C;border-color:#FCA5A5">🗑️ Eliminar</button>' +
+            '</div>' +
           '</div>';
         });
         html += '</div>';
@@ -1185,6 +1188,15 @@
         box.querySelectorAll('[data-pending-id]').forEach(function(btn){
           btn.addEventListener('click', function(){
             reanudarPendiente(this.getAttribute('data-pending-id'));
+          });
+        });
+        box.querySelectorAll('[data-eliminar-id]').forEach(function(btn){
+          btn.addEventListener('click', function(){
+            var id = this.getAttribute('data-eliminar-id');
+            if (!confirm('¿Eliminar esta prueba pendiente? Esta acción no se puede deshacer (útil si se repitió por accidente).')) return;
+            cmgDb.collection('resultadosPruebas').doc(id).delete()
+              .then(function(){ toast('✓ Prueba pendiente eliminada'); cargarPendientes(); })
+              .catch(function(err){ toast('Error: ' + err.message); });
           });
         });
       })

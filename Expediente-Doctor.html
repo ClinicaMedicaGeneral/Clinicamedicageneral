@@ -3718,6 +3718,10 @@ button.ed-consulta-link {
       buildServicioResultadoSectionHtml(srv.servicioNombre) +
       '<div class="ed-section">' +
         '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="serv-convertido-consulta"> ❌ Este servicio no se realizó (se convirtió en consulta médica)</label>' +
+        '<div class="ed-fgroup" id="serv-cantidad-grupo" style="margin-top:10px;max-width:180px">' +
+          '<label class="ed-label">Cantidad realizada</label>' +
+          '<input type="number" min="1" step="1" value="1" class="ed-input" id="serv-cantidad">' +
+        '</div>' +
       '</div>' +
       '<div class="ed-section" id="serv-meds-section">' +
         '<div class="ed-grid ed-grid-2">' +
@@ -3756,6 +3760,9 @@ button.ed-consulta-link {
 
     $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
     $id('btn-completar-servicio').addEventListener('click', completarServicio);
+    $id('serv-convertido-consulta').addEventListener('change', function () {
+      $id('serv-cantidad-grupo').style.display = this.checked ? 'none' : '';
+    });
 
     wireSensToggle('serv-meds-visita-list', 'serv-sens-wrap');
     ['serv-meds-visita-list', 'serv-meds-despacho-list'].forEach(wireMedsGroupNinguno);
@@ -3812,6 +3819,7 @@ button.ed-consulta-link {
       doctorNombre: medico,
       doctorEmail: cmgAuth.currentUser.email,
       convertidoConsulta: convertidoConsulta,
+      servicioCantidad: convertidoConsulta ? null : (parseInt($val('serv-cantidad'), 10) || 1),
       medicamentosVisita: medsVisitaServ,
       medicamentosDespacho: collectChecked('serv-meds-despacho-list'),
       recetaExterna: $val('serv-receta-externa'),

@@ -4943,6 +4943,8 @@ button.ed-consulta-link {
               '</div>' +
               '<div class="ed-fgroup"><label class="ed-label">Fecha emitida *</label>' +
                 '<input type="date" class="ed-input" id="qm-cm-emitida" value="' + esc((d.emitidaEn || '').slice(0, 10)) + '"></div>' +
+              '<div class="ed-fgroup"><label class="ed-label">Fecha de consulta *</label>' +
+                '<input type="date" class="ed-input" id="qm-cm-fechaconsulta" value="' + esc(d.fechaConsulta || '') + '"></div>' +
               '<div class="ed-fgroup"><label class="ed-label">Días *</label>' +
                 '<input type="number" min="1" class="ed-input" id="qm-cm-dias" value="' + esc(d.dias || '') + '"></div>' +
               '<div class="ed-fgroup"><label class="ed-label">Desde *</label>' +
@@ -4962,13 +4964,14 @@ button.ed-consulta-link {
       $id('qm-cancelar').onclick = function(){ document.getElementById('ed-quick-modal').remove(); };
       $id('qm-guardar').onclick = function(){
         var emitida = $val('qm-cm-emitida');
+        var fechaConsulta = $val('qm-cm-fechaconsulta');
         var dias = $val('qm-cm-dias'), desde = $val('qm-cm-desde'), motivo = $val('qm-cm-motivo');
         /* DRM v3.7: datos del paciente también editables */
         var nuevoNombre  = $val('qm-cm-nombre');
         var nuevoTipoId  = $val('qm-cm-tipoid');
         var nuevoDNI     = $val('qm-cm-dni');
         var nuevoFecNac  = $val('qm-cm-fechanac');
-        if (!emitida || !dias || !desde || !motivo) { showAlert('Fecha emitida, días, desde y motivo son obligatorios', 'error'); return; }
+        if (!emitida || !fechaConsulta || !dias || !desde || !motivo) { showAlert('Fecha emitida, fecha de consulta, días, desde y motivo son obligatorios', 'error'); return; }
         if (!nuevoNombre || !nuevoDNI)  { showAlert('Nombre y número de identidad del paciente son obligatorios', 'error'); return; }
 
         /* Recalcular edad si cambia la fecha de nacimiento */
@@ -4982,7 +4985,7 @@ button.ed-consulta-link {
           editadoPor : cmgAuth.currentUser.email,
           editadoEn  : new Date().toISOString(),
           previo     : {
-            emitidaEn: d.emitidaEn, dias: d.dias, desde: d.desde, motivo: d.motivo, observaciones: d.observaciones,
+            emitidaEn: d.emitidaEn, fechaConsulta: d.fechaConsulta, dias: d.dias, desde: d.desde, motivo: d.motivo, observaciones: d.observaciones,
             pacienteNombre: d.pacienteNombre, pacienteTipoId: d.pacienteTipoId,
             pacienteDNI: d.pacienteDNI, pacienteFechaNacimiento: d.pacienteFechaNacimiento,
             pacienteEdad: d.pacienteEdad
@@ -4990,6 +4993,7 @@ button.ed-consulta-link {
         });
         cmgDb.collection('constancias').doc(constanciaId).update({
           emitidaEn: emitida + 'T00:00:00',
+          fechaConsulta: fechaConsulta,
           dias: dias, desde: desde, motivo: motivo, observaciones: $val('qm-cm-obs'),
           pacienteNombre          : nuevoNombre,
           pacienteTipoId          : nuevoTipoId,

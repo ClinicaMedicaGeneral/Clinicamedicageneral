@@ -197,15 +197,15 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
   margin-top: 4px;
   border: 1.5px solid #9CA3AF;
   border-radius: 6px;
-  min-height: 598px;
-  max-height: 818px;
+  min-height: 220px;
+  max-height: 440px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #FAFBFF;
   overflow: hidden;
 }
-.ek-strip img { width: 100%; height: auto; max-height: 818px; object-fit: contain; display: block; }
+.ek-strip img { width: 100%; height: auto; max-height: 440px; object-fit: contain; display: block; }
 .ek-strip .ek-strip-empty { color: #9CA3AF; font-size: 12px; text-align: center; padding: 10px; }
 
 /* Firma */
@@ -255,7 +255,10 @@ body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-seri
     flex-direction: column;
   }
   .ek-body { flex: 1 0 auto; display: flex; flex-direction: column; }
-  .ek-strip { flex: 1 0 auto; break-inside: avoid; }
+  /* Sin tope: crece para llenar el espacio sobrante de la hoja (acotado por
+     el min-height fijo de .ek-sheet, así nunca desborda a una segunda hoja) */
+  .ek-strip { flex: 1 0 auto; max-height: none; break-inside: avoid; }
+  .ek-strip img { max-height: none; }
   .ek-foot { margin-top: auto; }
   @page { size: A4; margin: 10mm; }
 }

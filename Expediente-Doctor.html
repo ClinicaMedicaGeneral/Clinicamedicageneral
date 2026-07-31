@@ -1773,6 +1773,7 @@ button.ed-consulta-link {
                 '<div><b>📦 Despacho:</b><br>' + esc(meds2) + '</div>' +
                 '<div><b>🩺 Servicios:</b><br>' + esc(servicios) + '</div>' +
               '</div>' +
+              (d.servicioNotasFin ? '<div style="margin-top:10px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:8px;padding:10px;font-size:13px"><b>📝 Notas de finalización:</b><br>' + esc(d.servicioNotasFin) + '</div>' : '') +
               (recetaExt ? '<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px;font-size:13px"><b>🏥 Receta externa (comprar en farmacia):</b><br>' + esc(recetaExt) + '</div>' : '') +
               (resultadoSensConsulta ? '<div style="margin-top:10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px;font-size:13px"><b>🧪 Resultado prueba de sensibilidad:</b> ' + esc(resultadoSensConsulta) + '</div>' : '') +
               (tieneEmergencia ? '<div style="margin-top:10px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:10px;font-size:13px"><b style="color:#991B1B">🚨 Área de Estabilización:</b>' + (emergenciaItems ? '<ul style="margin:6px 0 0 18px;padding:0">' + emergenciaItems + '</ul>' : ' se utilizó (sin horas detalladas)') + '</div>' : '') +
@@ -1833,7 +1834,8 @@ button.ed-consulta-link {
             var lines = ['<div style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:6px;padding:8px 10px;font-size:12px"><b style="color:#213C7D">🔗 Servicios vinculados (mismo pago):</b><ul style="margin:4px 0 0 18px;padding:0">'];
             hijos.forEach(function(h){
               var hd = h.data();
-              lines.push('<li>' + esc(servicioLabelConCantidad(hd)) + (hd.servicioRealizadoPor ? ' <span style="color:#6B7280">· ' + esc(hd.servicioRealizadoPor) + '</span>' : '') + '</li>');
+              lines.push('<li>' + esc(servicioLabelConCantidad(hd)) + (hd.servicioRealizadoPor ? ' <span style="color:#6B7280">· ' + esc(hd.servicioRealizadoPor) + '</span>' : '') +
+                (hd.servicioNotasFin ? '<br><span style="color:#0369A1">📝 ' + esc(hd.servicioNotasFin) + '</span>' : '') + '</li>');
             });
             lines.push('</ul></div>');
             slot.innerHTML = lines.join('');

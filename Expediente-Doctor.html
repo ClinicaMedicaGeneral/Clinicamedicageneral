@@ -3096,6 +3096,18 @@ summary.ed-meds-cat { list-style: revert; }
           var infoExtra = esServicio
             ? '<div class="ed-pending-vitals">🛎️ ' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>'
             : (chips.length ? '<div class="ed-pending-vitals">' + chips.join(' · ') + '</div>' : '');
+          /* Visualización: alguien ya abrió el formulario (Consulta o Servicio) y no lo
+             ha terminado. Pasados 20 min sin completar, se marca como demorado. */
+          var enAtencionHtml = '';
+          if (it.enAtencionPor) {
+            var elapsedMin = it.enAtencionDesde ? Math.max(0, Math.floor((Date.now() - tsMillis(it.enAtencionDesde)) / 60000)) : 0;
+            var demorado = elapsedMin >= 20;
+            var enAtencionTexto = demorado
+              ? '⏱️ Demorado / Sin Completar · ' + esc(it.enAtencionPor) + ' · hace ' + elapsedMin + ' min'
+              : '🩺 En consulta con ' + esc(it.enAtencionPor) + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : ' · recién');
+            enAtencionHtml = '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:' +
+              (demorado ? '#92400E' : '#1D4ED8') + ';background:' + (demorado ? '#FEF3C7' : '#DBEAFE') + '">' + enAtencionTexto + '</div>';
+          }
           var fechaMostrar = it.fechaPreclinica || it.fechaServicio;
           var registradoPor = it.preclinicaPor || it.servicioPor || '—';
           var btnLabel = esServicio ? 'Completar →' : 'Continuar →';
@@ -3111,6 +3123,7 @@ summary.ed-meds-cat { list-style: revert; }
                 ' <span style="font-weight:500;color:#6B7280">· ' + esc(it.codigoPaciente) + '</span></p>' +
               '<p class="ed-pending-meta">📅 ' + fmtDate(fechaMostrar) + ' · Registrado por ' + esc(registradoPor) + '</p>' +
               infoExtra +
+              enAtencionHtml +
             '</div>' +
             '<div style="display:flex;flex-direction:column;gap:6px;align-items:stretch">' +
               btnHtml +
@@ -3889,7 +3902,10 @@ summary.ed-meds-cat { list-style: revert; }
         '<button class="ed-btn ed-btn-primary" id="btn-completar-servicio">✅ Marcar servicio como completado</button>' +
       '</div>';
 
-    $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
+    $id('btn-volver-modo').addEventListener('click', function () {
+      liberarEnAtencion(consultaPendienteCargada && consultaPendienteCargada._id);
+      renderConsultaTab();
+    });
     $id('btn-completar-servicio').addEventListener('click', completarServicio);
     $id('serv-convertido-consulta').addEventListener('change', function () {
       $id('serv-cantidad-grupo').style.display = this.checked ? 'none' : '';
@@ -4069,6 +4085,15 @@ summary.ed-meds-cat { list-style: revert; }
   }
 
   /* ─── Continuar / completar a partir de un registro pendiente ─── */
+  /* Limpia la marca "en atención" al salir sin terminar (Volver), para que no
+     quede pegada mostrando que alguien sigue trabajando en ella. */
+  function liberarEnAtencion(consultaId) {
+    if (!consultaId) return;
+    cmgDb.collection('consultas').doc(consultaId).update({
+      enAtencionPor: firebase.firestore.FieldValue.delete(),
+      enAtencionDesde: firebase.firestore.FieldValue.delete()
+    }).catch(function(){});
+  }
   function continuarConsulta(consultaId) {
     showOverlay('Cargando registro...');
     cmgDb.collection('consultas').doc(consultaId).get()
@@ -4089,6 +4114,12 @@ summary.ed-meds-cat { list-style: revert; }
             pacienteActual = Object.assign({ _id: psnap.id }, psnap.data());
             consultaPendienteCargada = Object.assign({ _id: snap.id }, data);
             hideOverlay();
+            /* Marca "en atención" para que el resto vea que ya se está trabajando en
+               esta consulta/servicio (Pendiente para médico). No bloqueante. */
+            cmgDb.collection('consultas').doc(consultaId).update({
+              enAtencionPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
+              enAtencionDesde: firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(function(){});
             if (data.status === 'listo_enfermeria') {
               renderAtenderEnfermeriaForm();
             } else if (data.status === 'servicio') {
@@ -4204,7 +4235,10 @@ summary.ed-meds-cat { list-style: revert; }
         '<button class="ed-btn ed-btn-primary" id="btn-cons-guardar">💾 Finalizar consulta + Generar PDF</button>' +
       '</div>';
 
-    $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
+    $id('btn-volver-modo').addEventListener('click', function () {
+      liberarEnAtencion(consultaPendienteCargada && consultaPendienteCargada._id);
+      renderConsultaTab();
+    });
     $id('btn-cons-guardar').addEventListener('click', guardarConsulta);
 
     /* DRM v3 #3: handlers de acciones rápidas */

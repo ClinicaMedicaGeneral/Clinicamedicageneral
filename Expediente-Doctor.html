@@ -1392,6 +1392,10 @@ summary.ed-meds-cat { list-style: revert; }
     ]}
   ];
 
+  /* Servicios que no requieren preclínica: al registrarlos en Caja pasan directo
+     a 'servicio' (Pendiente para Médico), sin pasar por Enfermería. */
+  var SERVICIOS_SIN_PRECLINICA = ['Extracción de uña', 'Lavado de oído', 'Retiro de puntos'];
+
   /* 'Cauterización lunar/verruga' es el único servicio de cauterización en el catálogo:
      lesión grande y párpado/cara se derivan de este mismo servicio, distinguidas por
      cantidad numérica en cada subtipo (no por servicios separados). */
@@ -3209,7 +3213,20 @@ summary.ed-meds-cat { list-style: revert; }
     });
     $id('reg-serv-selector').addEventListener('change', function () {
       $id('reg-serv-otro-grupo').style.display = this.value === '__otro__' ? 'block' : 'none';
+      actualizarBotonRegistro();
     });
+    document.querySelectorAll('input[name="reg-tipo"]').forEach(function (r) {
+      r.addEventListener('change', actualizarBotonRegistro);
+    });
+    function actualizarBotonRegistro() {
+      var tipoRadio = document.querySelector('input[name="reg-tipo"]:checked');
+      var esServ = tipoRadio && tipoRadio.value === 'servicio';
+      var selVal = esServ ? $id('reg-serv-selector').value : '';
+      var sinPreclinica = esServ && SERVICIOS_SIN_PRECLINICA.indexOf(selVal) !== -1;
+      $id('btn-guardar-registro').textContent = sinPreclinica
+        ? '💾 Registrar (directo a médico, sin preclínica)'
+        : '💾 Registrar (queda listo para enfermería)';
+    }
     wireEmergenciaToggle('reg');
     $id('btn-guardar-registro').addEventListener('click', guardarRegistroVisita);
   }
@@ -3233,6 +3250,7 @@ summary.ed-meds-cat { list-style: revert; }
       registradoEmail: cmgAuth.currentUser.email
     };
 
+    var saltaPreclinica = false;
     if (tipo === 'servicio') {
       var selVal = $id('reg-serv-selector').value;
       if (!selVal) { showAlert('Selecciona un servicio.', 'error'); return; }
@@ -3245,13 +3263,24 @@ summary.ed-meds-cat { list-style: revert; }
       }
       docData.servicioNombre = servicioNombre;
       docData.servicioNotas = $val('reg-notas');
+
+      /* Servicios sin preclínica: van directo a 'servicio' (Pendiente para Médico),
+         sin pasar por Enfermería. */
+      if (SERVICIOS_SIN_PRECLINICA.indexOf(servicioNombre) !== -1) {
+        saltaPreclinica = true;
+        var registradoPor = cmgAuth.currentUser.displayName || cmgAuth.currentUser.email;
+        docData.status = 'servicio';
+        docData.fechaServicio = firebase.firestore.FieldValue.serverTimestamp();
+        docData.servicioPor = registradoPor;
+        docData.servicioEmail = cmgAuth.currentUser.email;
+      }
     }
 
     showOverlay('Registrando...');
     cmgDb.collection('consultas').add(docData)
       .then(function () {
         hideOverlay();
-        showAlert('✓ Registrado. Queda listo para enfermería.', 'success');
+        showAlert(saltaPreclinica ? '✓ Registrado. Directo a médico (sin preclínica).' : '✓ Registrado. Queda listo para enfermería.', 'success');
         renderConsultaTab();
       })
       .catch(function (err) {

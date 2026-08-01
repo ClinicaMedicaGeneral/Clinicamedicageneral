@@ -174,11 +174,18 @@ service cloud.firestore {
       // 'listo_enfermeria' sin datos clínicos todavía.
       // Pre clínica (vitales) y registro de un Servicio ya con datos clínicos los
       // crea el personal clínico (médico o enfermería), vía isDoctor().
+      // Excepción: servicios sin preclínica (Extracción de uña, Lavado de oído,
+      // Retiro de puntos) que Caja registra directo en 'servicio' (Pendiente para
+      // Médico), sin pasar por Enfermería.
       allow create: if isDoctor()
         || (isCaja()
             && request.resource.data.status == 'pendiente_caja'
             && request.resource.data.tipoRegistro in ['lab-standalone', 'prueba-standalone'])
-        || (isCaja() && request.resource.data.status == 'listo_enfermeria');
+        || (isCaja() && request.resource.data.status == 'listo_enfermeria')
+        || (isCaja()
+            && request.resource.data.status == 'servicio'
+            && request.resource.data.tipo == 'servicio'
+            && request.resource.data.servicioNombre in ['Extracción de uña', 'Lavado de oído', 'Retiro de puntos']);
       // Borrar consultas/servicios del historial es solo para Administración
       // (limpieza de registros de prueba/errores en un expediente real).
       allow delete: if isAdmin();

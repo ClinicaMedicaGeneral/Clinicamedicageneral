@@ -3103,8 +3103,8 @@ summary.ed-meds-cat { list-style: revert; }
             var elapsedMin = it.enAtencionDesde ? Math.max(0, Math.floor((Date.now() - tsMillis(it.enAtencionDesde)) / 60000)) : 0;
             var demorado = elapsedMin >= 20;
             var enAtencionTexto = demorado
-              ? '⏱️ Demorado / Sin Completar · ' + esc(it.enAtencionPor) + ' · hace ' + elapsedMin + ' min'
-              : '🩺 En consulta con ' + esc(it.enAtencionPor) + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : ' · recién');
+              ? '⏱️ Demorado / Sin Completar' + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : '')
+              : '🩺 En consulta' + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : ' · recién');
             enAtencionHtml = '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:' +
               (demorado ? '#92400E' : '#1D4ED8') + ';background:' + (demorado ? '#FEF3C7' : '#DBEAFE') + '">' + enAtencionTexto + '</div>';
           }

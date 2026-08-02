@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Importar Clientes desde Excel · CMG</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-serif; color: #1F2937; }
+
+.ic-top {
+  background: #213C7D; color: #fff; padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 20;
+}
+.ic-top-left { display: flex; align-items: center; gap: 12px; }
+.ic-top-left img { width: 34px; }
+.ic-top-title { font-size: 16px; font-weight: 900; letter-spacing: .3px; }
+.ic-top-title small { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6); letter-spacing: .5px; }
+.ic-email { color: rgba(255,255,255,.7); font-size: 13px; }
+.ic-logout {
+  background: transparent; border: 1px solid rgba(255,255,255,.25); color: rgba(255,255,255,.8);
+  padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: background .15s;
+}
+.ic-logout:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+.ic-wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
+
+.ic-card { background: #fff; border-radius: 14px; padding: 22px 24px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(33,60,125,.07); }
+.ic-card h2 { font-size: 18px; text-transform: none; letter-spacing: 0; margin: 0 0 6px; color: #213C7D; }
+.ic-card p.ic-sub { color: #6B7280; font-size: 13px; margin: 0 0 16px; }
+
+.ic-alert {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: #FFF7ED; border: 1px solid #FED7AA; color: #9A3412;
+  border-radius: 10px; padding: 12px 16px; font-size: 13px; line-height: 1.6; margin-bottom: 20px;
+}
+.ic-alert b { color: #7C2D12; }
+
+.ic-file-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+input[type=file] {
+  font-family: inherit; font-size: 13px; border: 1.5px dashed #C8CEE0; border-radius: 10px;
+  padding: 14px; background: #F9FAFC; flex: 1; min-width: 260px;
+}
+.ic-btn {
+  height: 44px; padding: 0 22px; border-radius: 10px; border: none; cursor: pointer;
+  font-family: inherit; font-size: 14px; font-weight: 700; transition: filter .15s, transform .1s;
+}
+.ic-btn:active { transform: translateY(1px); }
+.ic-btn:disabled { opacity: .45; cursor: not-allowed; }
+.ic-btn-primary { background: #213C7D; color: #fff; }
+.ic-btn-primary:hover:not(:disabled) { filter: brightness(1.12); }
+.ic-btn-yellow { background: #FDD22C; color: #213C7D; }
+.ic-btn-yellow:hover:not(:disabled) { filter: brightness(.96); }
+.ic-btn-danger { background: #DC2626; color: #fff; }
+.ic-btn-danger:hover:not(:disabled) { filter: brightness(1.1); }
+.ic-btn-outline { background: #fff; color: #213C7D; border: 1.5px solid #C8CEE0; }
+
+.ic-stats { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.ic-stat { background: #F9FAFC; border: 1px solid #E6E9F2; border-radius: 12px; padding: 14px 18px; flex: 1; min-width: 140px; }
+.ic-stat-num { font-size: 26px; font-weight: 900; color: #213C7D; line-height: 1; }
+.ic-stat-lbl { font-size: 12px; color: #6B7280; margin-top: 4px; }
+.ic-stat.warn .ic-stat-num { color: #B45309; }
+.ic-stat.ok .ic-stat-num { color: #15803D; }
+.ic-stat.skip .ic-stat-num { color: #9CA3AF; }
+
+.ic-table-wrap { max-height: 420px; overflow: auto; border: 1px solid #E6E9F2; border-radius: 10px; }
+table.ic-tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+table.ic-tbl th { position: sticky; top: 0; background: #F4F6FB; text-align: left; padding: 8px 10px; border-bottom: 1px solid #E6E9F2; color: #374151; }
+table.ic-tbl td { padding: 7px 10px; border-bottom: 1px solid #F1F2F6; color: #374151; }
+table.ic-tbl tr:nth-child(even) { background: #FAFBFD; }
+
+.ic-confirm-row { display: flex; align-items: center; gap: 10px; margin: 16px 0; font-size: 13.5px; }
+.ic-progress { font-size: 13px; color: #374151; margin-top: 10px; }
+.ic-hidden { display: none; }
+.ic-muted { color: #9CA3AF; font-size: 12px; }
+.ic-link-btn { background: none; border: none; color: #213C7D; text-decoration: underline; cursor: pointer; font-family: inherit; font-size: 13px; padding: 0; }
+</style>
+</head>
+<body>
+
+<div class="ic-top">
+  <div class="ic-top-left">
+    <img src="assets/isotipo-color.png" alt="CMG">
+    <div class="ic-top-title">Importar Clientes desde Excel<small>PANEL ADMINISTRATIVO · CMG</small></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px;">
+    <span class="ic-email" id="ic-email"></span>
+    <button class="ic-logout" id="ic-logout">Salir</button>
+  </div>
+</div>
+
+<div class="ic-wrap">
+
+  <div class="ic-alert">
+    <div>⚠️ <b>Herramienta de uso interno, un solo uso por lote.</b> Sube los Excel, revisa el reporte de la simulación
+    con calma, y solo confirma la creación cuando estés seguro. Los expedientes se crean <b>sin cuenta de usuario</b>
+    (solo el registro clínico); el cliente lo reclama después con su código cuando cree su cuenta.</div>
+  </div>
+
+  <div class="ic-card">
+    <h2>1 · Selecciona los archivos Excel</h2>
+    <p class="ic-sub">Puedes subir uno o varios a la vez (ej. el de consultas/servicios y el de laboratorio/pruebas rápidas). Se analizan juntos.</p>
+    <div class="ic-file-row">
+      <input type="file" id="ic-files" accept=".xlsx,.xls" multiple>
+      <button class="ic-btn ic-btn-primary" id="ic-btn-analizar">Analizar archivos</button>
+    </div>
+    <div id="ic-analizando" class="ic-muted ic-hidden">Leyendo archivos y consultando expedientes existentes en Firestore…</div>
+  </div>
+
+  <div class="ic-card ic-hidden" id="ic-reporte-card">
+    <h2>2 · Reporte de la simulación (todavía no se ha escrito nada)</h2>
+    <p class="ic-sub">Nadie ha sido creado aún. Revisa los números y la vista previa antes de confirmar.</p>
+
+    <div class="ic-stats">
+      <div class="ic-stat"><div class="ic-stat-num" id="st-total">0</div><div class="ic-stat-lbl">Filas leídas</div></div>
+      <div class="ic-stat"><div class="ic-stat-num" id="st-validas">0</div><div class="ic-stat-lbl">Personas únicas verificables</div></div>
+      <div class="ic-stat skip"><div class="ic-stat-num" id="st-existentes">0</div><div class="ic-stat-lbl">Ya existen (se omiten)</div></div>
+      <div class="ic-stat ok"><div class="ic-stat-num" id="st-nuevos">0</div><div class="ic-stat-lbl">Nuevos a crear</div></div>
+      <div class="ic-stat warn"><div class="ic-stat-num" id="st-excluidos">0</div><div class="ic-stat-lbl">Excluidas (no verificables)</div></div>
+    </div>
+
+    <p class="ic-muted" id="ic-excluidos-detalle" style="margin-bottom:14px;"></p>
+    <button class="ic-link-btn" id="ic-btn-descargar-excluidos">⬇ Descargar CSV de filas excluidas (para revisión manual)</button>
+
+    <h2 style="font-size:15px;margin-top:22px;">Vista previa — primeros 50 expedientes nuevos</h2>
+    <div class="ic-table-wrap">
+      <table class="ic-tbl">
+        <thead><tr><th>Nombre</th><th>Identidad</th><th>Nac.</th><th>Sexo</th><th>Teléfono</th><th>Correo</th><th>Fuente</th></tr></thead>
+        <tbody id="ic-tbody-preview"></tbody>
+      </table>
+    </div>
+
+    <div class="ic-confirm-row">
+      <input type="checkbox" id="ic-check-confirmar">
+      <label for="ic-check-confirmar">Entiendo que esto escribirá permanentemente <b id="ic-check-count">0</b> expedientes nuevos en la base de datos de producción.</label>
+    </div>
+    <button class="ic-btn ic-btn-danger" id="ic-btn-confirmar" disabled>Crear expedientes nuevos</button>
+    <div class="ic-progress ic-hidden" id="ic-progreso"></div>
+  </div>
+
+  <div class="ic-card ic-hidden" id="ic-final-card">
+    <h2>✅ Importación completada</h2>
+    <p id="ic-final-texto"></p>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  function $(id) { return document.getElementById(id); }
+
+  /* ════════════ Guard ════════════ */
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = 'Auth.html?returnTo=Admin-Importar-Clientes.html'; return; }
+    cmgStaff.checkAdmin(user, function (ok) {
+      if (!ok) { window.location.href = 'Inicio.html'; return; }
+      $('ic-email').textContent = user.email;
+    });
+  });
+  $('ic-logout').addEventListener('click', function () { cmgAuth.signOut().then(function () { window.location.href = 'Auth.html'; }); });
+
+  /* ════════════ Normalización ════════════ */
+  function normTxt(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).normalize('NFKD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
+  }
+  function soloDigitos(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/\D/g, '');
+  }
+  function esNombreValido(nombre) {
+    if (!nombre) return false;
+    var n = String(nombre).trim();
+    if (n.length < 4) return false;
+    return /[a-zA-ZÀ-ÿ]{2,}/.test(n);
+  }
+  var PATRONES_PRUEBA = [
+    /\bprueba(s)?\b/i, /\btest\b/i, /funcionamiento correcto/i,
+    /\bejemplo\b/i, /\bpaciente de prueba\b/i, /\bborrar\b/i, /\bno usar\b/i
+  ];
+  function esNombreDePrueba(nombre) {
+    var n = normTxt(nombre);
+    return PATRONES_PRUEBA.some(function (re) { return re.test(n); });
+  }
+  function normalizarSexo(s) {
+    var n = normTxt(s);
+    if (n.indexOf('f') === 0) return 'F';
+    if (n.indexOf('m') === 0) return 'M';
+    return '';
+  }
+  function normalizarTelefono(s) {
+    var d = soloDigitos(s);
+    return d.length >= 8 ? d : '';
+  }
+  function normalizarEmail(s) {
+    var e = (s || '').toString().trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) ? e : '';
+  }
+  function formatearIdentidad13(digitos) {
+    return digitos.slice(0, 4) + '-' + digitos.slice(4, 8) + '-' + digitos.slice(8, 13);
+  }
+
+  /* Intenta parsear una fecha de forma NO ambigua. Devuelve {fecha:'YYYY-MM-DD', anio} o null. */
+  function parseFechaEstricta(raw) {
+    if (raw === null || raw === undefined || raw === '') return null;
+    var y, m, d;
+    if (raw instanceof Date) {
+      y = raw.getFullYear(); m = raw.getMonth() + 1; d = raw.getDate();
+    } else if (typeof raw === 'number') {
+      // Excel serial date
+      var epoch = new Date(Date.UTC(1899, 11, 30));
+      var dt = new Date(epoch.getTime() + raw * 86400000);
+      y = dt.getUTCFullYear(); m = dt.getUTCMonth() + 1; d = dt.getUTCDate();
+    } else {
+      var s = String(raw).trim();
+      var mm;
+      if ((mm = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/))) { y = +mm[1]; m = +mm[2]; d = +mm[3]; }
+      else if ((mm = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/))) { d = +mm[1]; m = +mm[2]; y = +mm[3]; }
+      else if ((mm = s.match(/^(\d{1,2})\s+(\d{1,2})\s+(\d{4})$/))) { d = +mm[1]; m = +mm[2]; y = +mm[3]; }
+      else return null;
+    }
+    if (!y || !m || !d) return null;
+    if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+    var yNow = new Date().getFullYear();
+    if (y < 1900 || y > yNow) return null;
+    var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
+    return { fecha: y + '-' + pad(m) + '-' + pad(d), anio: y };
+  }
+
+  function generarCodigo() {
+    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var s = '';
+    for (var i = 0; i < 6; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
+    return 'CMG-' + s;
+  }
+  function generarCodigoUnico(usados) {
+    var codigo;
+    do { codigo = generarCodigo(); } while (usados[codigo]);
+    return codigo;
+  }
+
+  /* ════════════ Detección de columnas por hoja ════════════ */
+  var CANDIDATOS = {
+    nombre: ['nombre completo', 'nombre'],
+    identidad: ['identidad', 'dni'],
+    fecha: ['fecha de nac'],
+    telefono: ['telefonico', 'celular', 'telefono'],
+    sexo: ['sexo'],
+    edad: ['edad'],
+    email: ['correo']
+  };
+  function detectarColumnas(headers) {
+    var hn = headers.map(normTxt);
+    function buscar(keywords) {
+      for (var k = 0; k < keywords.length; k++) {
+        for (var i = 0; i < hn.length; i++) {
+          if (hn[i].indexOf(keywords[k]) >= 0) return i;
+        }
+      }
+      return -1;
+    }
+    return {
+      nombre: buscar(CANDIDATOS.nombre),
+      identidad: buscar(CANDIDATOS.identidad),
+      fecha: buscar(CANDIDATOS.fecha),
+      telefono: buscar(CANDIDATOS.telefono),
+      sexo: buscar(CANDIDATOS.sexo),
+      edad: buscar(CANDIDATOS.edad),
+      email: buscar(CANDIDATOS.email)
+    };
+  }
+
+  /* ════════════ Estado global tras análisis ════════════ */
+  var REGISTROS = null;   // { digitos13 : {...merged} }
+  var EXCLUIDOS = [];     // filas descartadas, para CSV
+  var EXISTENTES = null;  // { ident:{digitos:true}, codigos:{codigo:true} }
+
+  $('ic-btn-analizar').addEventListener('click', function () {
+    var files = $('ic-files').files;
+    if (!files || !files.length) { alert('Selecciona al menos un archivo Excel.'); return; }
+    $('ic-analizando').classList.remove('ic-hidden');
+    $('ic-btn-analizar').disabled = true;
+
+    var lecturas = Array.prototype.map.call(files, function (file) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          try {
+            var wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array', cellDates: true });
+            resolve({ nombreArchivo: file.name, wb: wb });
+          } catch (err) { reject(err); }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    });
+
+    Promise.all(lecturas).then(function (libros) {
+      var registros = {};
+      var excluidos = [];
+      var totalFilas = 0;
+
+      libros.forEach(function (libro) {
+        libro.wb.SheetNames.forEach(function (sheetName) {
+          var ws = libro.wb.Sheets[sheetName];
+          var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null, raw: true });
+          if (!rows.length) return;
+          var cols = detectarColumnas(rows[0]);
+          if (cols.nombre === -1 || cols.identidad === -1) return; // hoja sin columnas reconocibles
+
+          for (var r = 1; r < rows.length; r++) {
+            var row = rows[r];
+            if (!row) continue;
+            var nombreRaw = cols.nombre >= 0 ? row[cols.nombre] : null;
+            var identRaw = cols.identidad >= 0 ? row[cols.identidad] : null;
+            if (nombreRaw === null && identRaw === null) continue;
+            totalFilas++;
+
+            var digitos = soloDigitos(identRaw);
+            var nombreOk = esNombreValido(nombreRaw);
+            var fuente = libro.nombreArchivo + ' / ' + sheetName;
+
+            if (!identRaw || digitos.length !== 13) {
+              excluidos.push({ motivo: !identRaw ? 'sin_identidad' : 'identidad_no_verificable', nombre: nombreRaw, identidad: identRaw, fuente: fuente });
+              continue;
+            }
+            if (!nombreOk) {
+              excluidos.push({ motivo: 'nombre_invalido', nombre: nombreRaw, identidad: identRaw, fuente: fuente });
+              continue;
+            }
+            if (esNombreDePrueba(nombreRaw)) {
+              excluidos.push({ motivo: 'nombre_de_prueba', nombre: nombreRaw, identidad: identRaw, fuente: fuente });
+              continue;
+            }
+
+            var edadRaw = cols.edad >= 0 ? row[cols.edad] : null;
+            var fechaParsed = cols.fecha >= 0 ? parseFechaEstricta(row[cols.fecha]) : null;
+            var fechaVerificada = '';
+            if (fechaParsed) {
+              if (typeof edadRaw === 'number') {
+                var edadCalc = new Date().getFullYear() - fechaParsed.anio;
+                if (Math.abs(edadCalc - edadRaw) <= 2) fechaVerificada = fechaParsed.fecha;
+                // si no coincide con la edad reportada, se descarta por no verificable (se deja en blanco)
+              } else {
+                fechaVerificada = fechaParsed.fecha; // sin edad para contrastar, se acepta el formato válido
+              }
+            }
+
+            if (!registros[digitos]) {
+              registros[digitos] = { digitos: digitos, nombre: '', fecha: '', sexo: '', telefono: '', email: '', fuentes: [] };
+            }
+            var reg = registros[digitos];
+            if (!reg.nombre && nombreOk) reg.nombre = String(nombreRaw).trim().replace(/\s+/g, ' ');
+            if (!reg.fecha && fechaVerificada) reg.fecha = fechaVerificada;
+            if (!reg.sexo && cols.sexo >= 0) { var sx = normalizarSexo(row[cols.sexo]); if (sx) reg.sexo = sx; }
+            if (!reg.telefono && cols.telefono >= 0) { var tl = normalizarTelefono(row[cols.telefono]); if (tl) reg.telefono = tl; }
+            if (!reg.email && cols.email >= 0) { var em = normalizarEmail(row[cols.email]); if (em) reg.email = em; }
+            if (reg.fuentes.indexOf(fuente) === -1) reg.fuentes.push(fuente);
+          }
+        });
+      });
+
+      REGISTROS = registros;
+      EXCLUIDOS = excluidos;
+
+      return cmgDb.collection('expedientes').get().then(function (snap) {
+        var ident = {}, codigos = {};
+        snap.forEach(function (doc) {
+          codigos[doc.id] = true;
+          var d = doc.data();
+          if (d._searchIdentidad) ident[d._searchIdentidad] = doc.id;
+        });
+        EXISTENTES = { ident: ident, codigos: codigos };
+        mostrarReporte(totalFilas);
+      });
+    }).catch(function (err) {
+      console.error(err);
+      alert('Error al analizar: ' + (err && err.message ? err.message : err));
+    }).finally(function () {
+      $('ic-analizando').classList.add('ic-hidden');
+      $('ic-btn-analizar').disabled = false;
+    });
+  });
+
+  function mostrarReporte(totalFilas) {
+    var keys = Object.keys(REGISTROS);
+    var nuevos = [], existentes = [];
+    keys.forEach(function (k) {
+      if (EXISTENTES.ident[k]) existentes.push(REGISTROS[k]); else nuevos.push(REGISTROS[k]);
+    });
+
+    $('st-total').textContent = totalFilas.toLocaleString('es-HN');
+    $('st-validas').textContent = keys.length.toLocaleString('es-HN');
+    $('st-existentes').textContent = existentes.length.toLocaleString('es-HN');
+    $('st-nuevos').textContent = nuevos.length.toLocaleString('es-HN');
+    $('st-excluidos').textContent = EXCLUIDOS.length.toLocaleString('es-HN');
+    $('ic-check-count').textContent = nuevos.length.toLocaleString('es-HN');
+
+    var porMotivo = {};
+    EXCLUIDOS.forEach(function (e) { porMotivo[e.motivo] = (porMotivo[e.motivo] || 0) + 1; });
+    $('ic-excluidos-detalle').textContent =
+      'Sin identidad: ' + (porMotivo.sin_identidad || 0) +
+      ' · Identidad no verificable (≠13 dígitos): ' + (porMotivo.identidad_no_verificable || 0) +
+      ' · Nombre inválido: ' + (porMotivo.nombre_invalido || 0) +
+      ' · Registros de prueba/IT (ej. "PRUEBA IT", "FUNCIONAMIENTO CORRECTO"): ' + (porMotivo.nombre_de_prueba || 0);
+
+    var tbody = $('ic-tbody-preview');
+    tbody.innerHTML = '';
+    nuevos.slice(0, 50).forEach(function (r) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + esc(r.nombre) + '</td><td>' + esc(formatearIdentidad13(r.digitos)) + '</td>' +
+        '<td>' + esc(r.fecha || '—') + '</td><td>' + esc(r.sexo || '—') + '</td>' +
+        '<td>' + esc(r.telefono || '—') + '</td><td>' + esc(r.email || '—') + '</td>' +
+        '<td class="ic-muted">' + esc(r.fuentes.join(', ')) + '</td>';
+      tbody.appendChild(tr);
+    });
+
+    $('ic-reporte-card').classList.remove('ic-hidden');
+    $('ic-btn-confirmar').onclick = function () { confirmarCreacion(nuevos); };
+    window._icNuevos = nuevos;
+  }
+
+  function esc(s) {
+    return (s === null || s === undefined ? '' : String(s)).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  $('ic-check-confirmar').addEventListener('change', function () {
+    $('ic-btn-confirmar').disabled = !this.checked;
+  });
+
+  $('ic-btn-descargar-excluidos').addEventListener('click', function () {
+    var rows = [['motivo', 'nombre', 'identidad', 'fuente']];
+    EXCLUIDOS.forEach(function (e) { rows.push([e.motivo, e.nombre || '', e.identidad || '', e.fuente]); });
+    var csv = rows.map(function (r) {
+      return r.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(',');
+    }).join('\r\n');
+    var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'excluidos-importacion-cmg.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  function confirmarCreacion(nuevos) {
+    if (!nuevos.length) { alert('No hay expedientes nuevos que crear.'); return; }
+    if (!confirm('Se crearán ' + nuevos.length + ' expedientes nuevos en Firestore. Esta acción escribe directamente en producción. ¿Continuar?')) return;
+
+    $('ic-btn-confirmar').disabled = true;
+    $('ic-check-confirmar').disabled = true;
+    var progreso = $('ic-progreso');
+    progreso.classList.remove('ic-hidden');
+
+    var LOTE = 400;
+    var i = 0;
+    var creados = 0;
+
+    function siguienteLote() {
+      if (i >= nuevos.length) { finalizar(); return; }
+      var batch = cmgDb.batch();
+      var lote = nuevos.slice(i, i + LOTE);
+      lote.forEach(function (reg) {
+        var codigo = generarCodigoUnico(EXISTENTES.codigos);
+        EXISTENTES.codigos[codigo] = true;
+        var ref = cmgDb.collection('expedientes').doc(codigo);
+        batch.set(ref, {
+          codigoPaciente: codigo,
+          ownerUid: null,
+          ownerVinculado: false,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          createdByEmail: cmgAuth.currentUser.email,
+          _searchIdentidad: reg.digitos,
+          _searchFechaNac: reg.fecha || '',
+          datosGenerales: {
+            nombreCompleto: reg.nombre,
+            tipoIdentidad: 'dni',
+            numeroIdentidad: formatearIdentidad13(reg.digitos),
+            fechaNacimiento: reg.fecha || '',
+            sexo: reg.sexo || '',
+            tipoSangre: '',
+            telefono: reg.telefono || '',
+            email: reg.email || '',
+            estadoCivil: '', ocupacion: '', escolaridad: '', religion: '',
+            lugarNacimiento: '', direccion: '', contactoEmergencia: '',
+            telefonoEmergencia: '', alergias: '', obraSocial: ''
+          },
+          antecedentesPatologicos: {},
+          antecedentesNoPatologicos: {},
+          antecedentesFamiliares: '',
+          clienteEspecial: { tieneDiscapacidad: false, categoria: null, tipoDiscapacidad: '', notas: '', documentoUrl: null },
+          esD365: false,
+          importadoDeExcel: true,
+          fuenteImportacion: reg.fuentes
+        });
+      });
+      batch.commit().then(function () {
+        creados += lote.length;
+        i += LOTE;
+        progreso.textContent = 'Creados ' + creados + ' de ' + nuevos.length + '…';
+        siguienteLote();
+      }).catch(function (err) {
+        console.error(err);
+        progreso.textContent = 'Error tras crear ' + creados + ' de ' + nuevos.length + ': ' + err.message;
+      });
+    }
+
+    function finalizar() {
+      $('ic-final-card').classList.remove('ic-hidden');
+      $('ic-final-texto').textContent = 'Se crearon ' + creados + ' expedientes nuevos. Puedes buscarlos por nombre o número de identidad en Expediente-Doctor.html.';
+      $('ic-final-card').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    siguienteLote();
+  }
+})();
+</script>
+</body>
+</html>

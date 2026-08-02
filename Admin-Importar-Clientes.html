@@ -147,6 +147,15 @@ table.ic-tbl tr:nth-child(even) { background: #FAFBFD; }
     <p id="ic-final-texto"></p>
   </div>
 
+  <div class="ic-card">
+    <h2>🔧 Mantenimiento (una sola vez): índice de búsqueda por nombre</h2>
+    <p class="ic-sub">Rellena el campo <code>_searchNombreTokens</code> en los expedientes que no lo tengan (los creados
+    antes de este cambio), para que "Buscar por nombre" en Expediente-Doctor.html sea rápido. Es seguro correrlo
+    varias veces — solo actualiza los que les falte.</p>
+    <button class="ic-btn ic-btn-primary" id="ic-btn-reindexar">Reindexar nombres existentes</button>
+    <div class="ic-progress" id="ic-reindex-progreso"></div>
+  </div>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -209,6 +218,19 @@ table.ic-tbl tr:nth-child(even) { background: #FAFBFD; }
   }
   function formatearIdentidad13(digitos) {
     return digitos.slice(0, 4) + '-' + digitos.slice(4, 8) + '-' + digitos.slice(8, 13);
+  }
+
+  /* Igual que generarPrefijosNombre en Expediente-Doctor.html: todos los
+     prefijos (≥2 letras) de cada palabra del nombre, para permitir búsqueda
+     por nombre indexada (array-contains) en vez de descargar toda la colección. */
+  function generarPrefijosNombre(nombre) {
+    var norm = normTxt(nombre).replace(/[^a-z0-9\s]/g, ' ');
+    var tokens = norm.split(/\s+/).filter(function (t) { return t.length >= 2; });
+    var prefijos = {};
+    tokens.forEach(function (tok) {
+      for (var i = 2; i <= tok.length; i++) prefijos[tok.slice(0, i)] = true;
+    });
+    return Object.keys(prefijos);
   }
 
   /* Intenta parsear una fecha de forma NO ambigua. Devuelve {fecha:'YYYY-MM-DD', anio} o null. */
@@ -485,6 +507,7 @@ table.ic-tbl tr:nth-child(even) { background: #FAFBFD; }
           createdByEmail: cmgAuth.currentUser.email,
           _searchIdentidad: reg.digitos,
           _searchFechaNac: reg.fecha || '',
+          _searchNombreTokens: generarPrefijosNombre(reg.nombre),
           datosGenerales: {
             nombreCompleto: reg.nombre,
             tipoIdentidad: 'dni',
@@ -526,6 +549,63 @@ table.ic-tbl tr:nth-child(even) { background: #FAFBFD; }
 
     siguienteLote();
   }
+
+  /* ════════════ Mantenimiento: reindexar _searchNombreTokens ════════════ */
+  $('ic-btn-reindexar').addEventListener('click', function () {
+    var btn = this;
+    var progreso = $('ic-reindex-progreso');
+    btn.disabled = true;
+    progreso.textContent = 'Leyendo expedientes…';
+
+    cmgDb.collection('expedientes').get().then(function (snap) {
+      var pendientes = [];
+      snap.forEach(function (doc) {
+        var d = doc.data();
+        if (!d._searchNombreTokens || !d._searchNombreTokens.length) {
+          var nombre = (d.datosGenerales || {}).nombreCompleto || '';
+          pendientes.push({ ref: doc.ref, tokens: generarPrefijosNombre(nombre) });
+        }
+      });
+
+      if (!pendientes.length) {
+        progreso.textContent = 'Todos los expedientes ya tienen índice de nombre. Nada que hacer.';
+        btn.disabled = false;
+        return;
+      }
+
+      var LOTE = 400;
+      var i = 0;
+      var actualizados = 0;
+      function siguienteLote() {
+        if (i >= pendientes.length) {
+          progreso.textContent = 'Listo — se actualizaron ' + actualizados + ' expedientes con índice de nombre.';
+          btn.disabled = false;
+          return;
+        }
+        var batch = cmgDb.batch();
+        var lote = pendientes.slice(i, i + LOTE);
+        lote.forEach(function (item) {
+          batch.update(item.ref, { _searchNombreTokens: item.tokens });
+        });
+        batch.commit().then(function () {
+          actualizados += lote.length;
+          i += LOTE;
+          progreso.textContent = 'Actualizados ' + actualizados + ' de ' + pendientes.length + '…';
+          siguienteLote();
+        }).catch(function (err) {
+          console.error(err);
+          progreso.textContent = 'Error tras actualizar ' + actualizados + ' de ' + pendientes.length + ': ' + err.message;
+          btn.disabled = false;
+        });
+      }
+      progreso.textContent = 'Encontrados ' + pendientes.length + ' expedientes sin índice. Actualizando…';
+      siguienteLote();
+    }).catch(function (err) {
+      console.error(err);
+      progreso.textContent = 'Error: ' + err.message;
+      btn.disabled = false;
+    });
+  });
 })();
 </script>
 </body>

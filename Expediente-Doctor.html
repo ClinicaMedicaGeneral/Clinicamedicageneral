@@ -1148,13 +1148,14 @@ summary.ed-meds-cat { list-style: revert; }
     <section id="tab-pacientes" class="ed-tab-content" style="display:none">
       <div class="ed-card">
         <h2 class="ed-card-title">👥 Lista de pacientes</h2>
-        <p class="ed-card-subtitle">Todos los expedientes registrados en el sistema. Haz clic en un paciente para seleccionarlo.</p>
+        <p class="ed-card-subtitle">Los expedientes más recientes. El filtro busca solo entre los ya cargados abajo — para localizar cualquier expediente del sistema por nombre, código o identidad, usa la pestaña "Buscar".</p>
         <div class="ed-pt-filter">
-          <input type="text" class="ed-pt-filter-input" id="pt-filtro" placeholder="🔍 Filtrar por nombre, identidad o código...">
+          <input type="text" class="ed-pt-filter-input" id="pt-filtro" placeholder="🔍 Filtrar por nombre, identidad o código (entre los cargados)...">
           <button class="ed-btn ed-btn-primary" id="btn-pt-recargar">↺ Recargar</button>
         </div>
         <div class="ed-pt-count" id="pt-count"></div>
         <div id="pt-tabla-wrap"></div>
+        <div style="text-align:center;margin-top:14px" id="pt-cargar-mas-wrap"></div>
       </div>
     </section>
 
@@ -1556,6 +1557,20 @@ summary.ed-meds-cat { list-style: revert; }
   /* Quita acentos y normaliza a minúsculas, así "maria" encuentra "María" al filtrar por nombre */
   function normalizarTexto(s) {
     return (s == null ? '' : String(s)).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  }
+
+  /* Genera todos los prefijos (≥2 letras) de cada palabra del nombre, para
+     poder buscar por nombre con una consulta indexada (array-contains) en vez
+     de descargar toda la colección de expedientes y filtrar en el cliente.
+     Ej: "Juan Lopez" -> ['ju','jua','juan','lo','lop','lope','lopez'] */
+  function generarPrefijosNombre(nombre) {
+    var norm = normalizarTexto(nombre).replace(/[^a-z0-9\s]/g, ' ');
+    var tokens = norm.split(/\s+/).filter(function (t) { return t.length >= 2; });
+    var prefijos = {};
+    tokens.forEach(function (tok) {
+      for (var i = 2; i <= tok.length; i++) prefijos[tok.slice(0, i)] = true;
+    });
+    return Object.keys(prefijos);
   }
 
   /* DRM Fun-10: lee el radio marcado de un grupo (usado por la categoría de Cliente especial) */
@@ -2277,6 +2292,7 @@ summary.ed-meds-cat { list-style: revert; }
       /* Campos de búsqueda indexados al nivel raíz para queries eficientes */
       _searchIdentidad: $val('nuevo-identidad').replace(/\D/g, ''),
       _searchFechaNac: $val('nuevo-fecnac'),
+      _searchNombreTokens: generarPrefijosNombre(nombre),
       datosGenerales: {
         nombreCompleto: nombre,
         tipoIdentidad: $val('nuevo-tipoid'),
@@ -2381,21 +2397,44 @@ summary.ed-meds-cat { list-style: revert; }
      LISTA DE PACIENTES
      ════════════════════════════════════════════════════════════ */
   var _todosLosPacientes = [];
+  var _pacientesUltimoDoc = null;
+  var _pacientesHayMas = true;
+  var _pacientesCargando = false;
+  var PACIENTES_PAGINA = 100;
 
-  function cargarListaPacientes() {
+  /* Por defecto reutiliza lo ya cargado (evita re-descargar toda la colección
+     cada vez que se visita la pestaña); pasar forzarRecarga=true para reiniciar
+     desde cero (botón "Recargar"). */
+  function cargarListaPacientes(forzarRecarga) {
+    if (!forzarRecarga && _todosLosPacientes.length) {
+      renderTablaFiltrada($val('pt-filtro') || '');
+      return;
+    }
+    _todosLosPacientes = [];
+    _pacientesUltimoDoc = null;
+    _pacientesHayMas = true;
     $id('pt-tabla-wrap').innerHTML = '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto 10px"></div><p>Cargando pacientes...</p></div>';
     $id('pt-count').textContent = '';
-    cmgDb.collection('expedientes')
-      .orderBy('createdAt', 'desc')
-      .get()
+    cargarSiguientePaginaPacientes();
+  }
+
+  function cargarSiguientePaginaPacientes() {
+    if (_pacientesCargando || !_pacientesHayMas) return;
+    _pacientesCargando = true;
+    var q = cmgDb.collection('expedientes').orderBy('createdAt', 'desc').limit(PACIENTES_PAGINA);
+    if (_pacientesUltimoDoc) q = q.startAfter(_pacientesUltimoDoc);
+    q.get()
       .then(function (snap) {
-        _todosLosPacientes = [];
+        _pacientesHayMas = snap.docs.length === PACIENTES_PAGINA;
+        if (snap.docs.length) _pacientesUltimoDoc = snap.docs[snap.docs.length - 1];
         snap.forEach(function (doc) {
           _todosLosPacientes.push(Object.assign({ codigoPaciente: doc.id }, doc.data()));
         });
+        _pacientesCargando = false;
         renderTablaFiltrada($val('pt-filtro') || '');
       })
       .catch(function (err) {
+        _pacientesCargando = false;
         $id('pt-tabla-wrap').innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error al cargar: ' + esc(err.message) + '</div>';
       });
   }
@@ -2415,10 +2454,13 @@ summary.ed-meds-cat { list-style: revert; }
         || (!!fDigits && (dg.telefono || '').replace(/\D/g,'').includes(fDigits));
     }) : _todosLosPacientes;
 
-    $id('pt-count').innerHTML = '<strong>' + lista.length + '</strong> paciente' + (lista.length !== 1 ? 's' : '');
+    $id('pt-count').innerHTML = '<strong>' + lista.length + '</strong> paciente' + (lista.length !== 1 ? 's' : '') +
+      (!f && _todosLosPacientes.length ? ' <span style="color:#9CA3AF;font-weight:400">(de ' + _todosLosPacientes.length + ' cargados' + (_pacientesHayMas ? ', hay más' : '') + ')</span>' : '');
+
+    renderBotonCargarMas();
 
     if (!lista.length) {
-      $id('pt-tabla-wrap').innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">👥</div><p>' + (f ? 'Sin resultados para "' + esc(f) + '"' : 'Aún no hay expedientes registrados') + '</p></div>';
+      $id('pt-tabla-wrap').innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">👥</div><p>' + (f ? 'Sin resultados para "' + esc(f) + '" entre los pacientes cargados — prueba la pestaña "Buscar" para buscar en todo el sistema.' : 'Aún no hay expedientes registrados') + '</p></div>';
       return;
     }
 
@@ -2462,10 +2504,21 @@ summary.ed-meds-cat { list-style: revert; }
     });
   }
 
+  function renderBotonCargarMas() {
+    var wrap = $id('pt-cargar-mas-wrap');
+    if (!_pacientesHayMas) { wrap.innerHTML = _todosLosPacientes.length ? '<span style="color:#9CA3AF;font-size:12px">— no hay más pacientes que cargar —</span>' : ''; return; }
+    wrap.innerHTML = '<button class="ed-btn ed-btn-ghost" id="btn-pt-cargar-mas">Cargar ' + PACIENTES_PAGINA + ' más ↓</button>';
+    $id('btn-pt-cargar-mas').addEventListener('click', function () {
+      this.disabled = true;
+      this.textContent = 'Cargando...';
+      cargarSiguientePaginaPacientes();
+    });
+  }
+
   $id('pt-filtro').addEventListener('input', function () {
     renderTablaFiltrada(this.value);
   });
-  $id('btn-pt-recargar').addEventListener('click', cargarListaPacientes);
+  $id('btn-pt-recargar').addEventListener('click', function () { cargarListaPacientes(true); });
 
   /* ════════════════════════════════════════════════════════════
      BUSCAR PACIENTE (multi-criterio)
@@ -2534,20 +2587,34 @@ summary.ed-meds-cat { list-style: revert; }
           return r;
         });
     } else if (_tipoBusqueda === 'nombre') {
-      /* Nombre: sin campo indexado para substring, se filtra en el cliente
-         sobre todos los expedientes (mismo criterio que la pestaña Pacientes). */
-      var nombreBuscado = normalizarTexto(valor);
-      promise = cmgDb.collection('expedientes').get()
-        .then(function (snap) {
-          var r = [];
-          snap.forEach(function (doc) {
-            var dg = doc.data().datosGenerales || {};
-            if (normalizarTexto(dg.nombreCompleto).includes(nombreBuscado)) {
-              r.push(Object.assign({ codigoPaciente: doc.id }, doc.data()));
-            }
+      /* Búsqueda indexada por prefijo: cada expediente guarda _searchNombreTokens
+         con todos los prefijos (≥2 letras) de cada palabra del nombre (ver
+         generarPrefijosNombre). Se ancla la consulta en la primera palabra
+         escrita (array-contains, indexado) y si el usuario escribió más de una
+         palabra se refina en el cliente sobre ese subconjunto ya acotado — así
+         se evita descargar toda la colección en cada búsqueda. */
+      var textoBuscado = normalizarTexto(valor).replace(/[^a-z0-9\s]/g, ' ').trim();
+      var tokensBuscados = textoBuscado.split(/\s+/).filter(Boolean);
+      var anclaje = tokensBuscados[0] || '';
+      if (anclaje.length < 2) {
+        promise = Promise.reject(new Error('Escribe al menos 2 letras del nombre para buscar.'));
+      } else {
+        promise = cmgDb.collection('expedientes')
+          .where('_searchNombreTokens', 'array-contains', anclaje)
+          .limit(300)
+          .get()
+          .then(function (snap) {
+            var r = [];
+            snap.forEach(function (doc) {
+              var d = doc.data();
+              var dg = d.datosGenerales || {};
+              var nombreNorm = normalizarTexto(dg.nombreCompleto);
+              var coincideTodo = tokensBuscados.every(function (t) { return nombreNorm.indexOf(t) >= 0; });
+              if (coincideTodo) r.push(Object.assign({ codigoPaciente: doc.id }, d));
+            });
+            return r;
           });
-          return r;
-        });
+      }
     } else {
       /* fecha de nacimiento */
       promise = cmgDb.collection('expedientes')
@@ -2763,6 +2830,7 @@ summary.ed-meds-cat { list-style: revert; }
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       _searchIdentidad: $val('edit-identidad').replace(/\D/g, ''),
       _searchFechaNac: $val('edit-fecnac'),
+      _searchNombreTokens: generarPrefijosNombre($val('edit-nombre')),
       datosGenerales: {
         nombreCompleto: $val('edit-nombre'),
         tipoIdentidad: $val('edit-tipoid'),

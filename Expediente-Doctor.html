@@ -1148,9 +1148,9 @@ summary.ed-meds-cat { list-style: revert; }
     <section id="tab-pacientes" class="ed-tab-content" style="display:none">
       <div class="ed-card">
         <h2 class="ed-card-title">👥 Lista de pacientes</h2>
-        <p class="ed-card-subtitle">Los expedientes más recientes. El filtro busca solo entre los ya cargados abajo — para localizar cualquier expediente del sistema por nombre, código o identidad, usa la pestaña "Buscar".</p>
+        <p class="ed-card-subtitle">Sin buscar, muestra los expedientes más recientes. Al escribir, busca en <b>todo el sistema</b> por nombre, código o identidad (no solo entre los recientes).</p>
         <div class="ed-pt-filter">
-          <input type="text" class="ed-pt-filter-input" id="pt-filtro" placeholder="🔍 Filtrar por nombre, identidad o código (entre los cargados)...">
+          <input type="text" class="ed-pt-filter-input" id="pt-filtro" placeholder="🔍 Buscar por nombre, identidad o código en todo el sistema...">
           <button class="ed-btn ed-btn-primary" id="btn-pt-recargar">↺ Recargar</button>
         </div>
         <div class="ed-pt-count" id="pt-count"></div>
@@ -2405,9 +2405,17 @@ summary.ed-meds-cat { list-style: revert; }
   /* Por defecto reutiliza lo ya cargado (evita re-descargar toda la colección
      cada vez que se visita la pestaña); pasar forzarRecarga=true para reiniciar
      desde cero (botón "Recargar"). */
+  /* Muestra la vista de navegación o, si hay texto en el filtro, dispara la
+     búsqueda global — usado tras cargar/recargar y al reabrir la pestaña. */
+  function refrescarVistaPacientes() {
+    var valor = $val('pt-filtro') || '';
+    if (valor.trim()) buscarPacientesGlobal(valor);
+    else renderTablaFiltrada();
+  }
+
   function cargarListaPacientes(forzarRecarga) {
     if (!forzarRecarga && _todosLosPacientes.length) {
-      renderTablaFiltrada($val('pt-filtro') || '');
+      refrescarVistaPacientes();
       return;
     }
     _todosLosPacientes = [];
@@ -2431,7 +2439,7 @@ summary.ed-meds-cat { list-style: revert; }
           _todosLosPacientes.push(Object.assign({ codigoPaciente: doc.id }, doc.data()));
         });
         _pacientesCargando = false;
-        renderTablaFiltrada($val('pt-filtro') || '');
+        refrescarVistaPacientes();
       })
       .catch(function (err) {
         _pacientesCargando = false;
@@ -2439,28 +2447,26 @@ summary.ed-meds-cat { list-style: revert; }
       });
   }
 
-  function renderTablaFiltrada(filtro) {
-    /* Los 3 criterios (nombre, identidad, código) son globales aquí; fecha de
-       nacimiento queda exclusivo de la pestaña Buscar. normalizarTexto() ignora
-       acentos y mayúsculas, así "maria" encuentra "María". */
-    var f = normalizarTexto(filtro);
-    var fDigits = (filtro || '').replace(/\D/g, '');
-    var lista = f ? _todosLosPacientes.filter(function (p) {
-      var dg = p.datosGenerales || {};
-      return normalizarTexto(dg.nombreCompleto).includes(f)
-        || normalizarTexto(p.codigoPaciente).includes(f)
-        || normalizarTexto(dg.numeroIdentidad).includes(f)
-        || (!!fDigits && (dg.numeroIdentidad || '').replace(/\D/g,'').includes(fDigits))
-        || (!!fDigits && (dg.telefono || '').replace(/\D/g,'').includes(fDigits));
-    }) : _todosLosPacientes;
-
+  /* Vista de navegación (sin filtro): los pacientes ya cargados/paginados. */
+  function renderTablaFiltrada() {
+    var lista = _todosLosPacientes;
     $id('pt-count').innerHTML = '<strong>' + lista.length + '</strong> paciente' + (lista.length !== 1 ? 's' : '') +
-      (!f && _todosLosPacientes.length ? ' <span style="color:#9CA3AF;font-weight:400">(de ' + _todosLosPacientes.length + ' cargados' + (_pacientesHayMas ? ', hay más' : '') + ')</span>' : '');
-
+      (lista.length ? ' <span style="color:#9CA3AF;font-weight:400">(recientes' + (_pacientesHayMas ? ', hay más' : '') + ')</span>' : '');
     renderBotonCargarMas();
+    pintarTablaPacientes(lista, lista, !lista.length ? 'Aún no hay expedientes registrados' : '');
+  }
 
+  /* Resultados de una búsqueda global (índices de Firestore, no limitada a lo cargado). */
+  function renderResultadosGlobales(lista, filtro) {
+    $id('pt-count').innerHTML = '<strong>' + lista.length + '</strong> resultado' + (lista.length !== 1 ? 's' : '') +
+      ' <span style="color:#9CA3AF;font-weight:400">(buscando en todo el sistema)</span>';
+    $id('pt-cargar-mas-wrap').innerHTML = '';
+    pintarTablaPacientes(lista, lista, 'Sin resultados para "' + esc(filtro) + '" en todo el sistema.');
+  }
+
+  function pintarTablaPacientes(lista, listaBusquedaSeleccion, mensajeVacio) {
     if (!lista.length) {
-      $id('pt-tabla-wrap').innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">👥</div><p>' + (f ? 'Sin resultados para "' + esc(f) + '" entre los pacientes cargados — prueba la pestaña "Buscar" para buscar en todo el sistema.' : 'Aún no hay expedientes registrados') + '</p></div>';
+      $id('pt-tabla-wrap').innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">👥</div><p>' + mensajeVacio + '</p></div>';
       return;
     }
 
@@ -2494,13 +2500,85 @@ summary.ed-meds-cat { list-style: revert; }
     $id('pt-tabla-wrap').querySelectorAll('[data-sel]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var codigo = btn.dataset.sel;
-        var p = _todosLosPacientes.find(function (x) { return x.codigoPaciente === codigo; });
+        var p = listaBusquedaSeleccion.find(function (x) { return x.codigoPaciente === codigo; });
         if (p) {
           pacienteActual = p;
           switchTab('buscar');
           renderBuscarResultado();
         }
       });
+    });
+  }
+
+  /* Búsqueda global (no limitada a los pacientes ya cargados): reutiliza los
+     mismos campos indexados que la pestaña "Buscar" (código exacto, identidad
+     exacta, nombre por prefijo con _searchNombreTokens). */
+  var _filtroPacientesToken = 0;
+
+  function buscarPacientesGlobal(valor) {
+    var miToken = ++_filtroPacientesToken;
+    var fDigits = valor.replace(/\D/g, '');
+    var promesas = [];
+
+    /* Solo se trata como candidato a código si el texto empieza con "cmg"
+       (ej. "CMG-A7K9M2" o "cmga7k9m2") — así un nombre en mayúsculas como
+       "RUBEN" no dispara una búsqueda de código inútil. */
+    var soloValor = valor.trim().toUpperCase();
+    if (/^CMG-?[A-Z0-9]+$/.test(soloValor)) {
+      var codigoCandidato = 'CMG-' + soloValor.replace(/^CMG-?/, '');
+      promesas.push(
+        cmgDb.collection('expedientes').doc(codigoCandidato).get().then(function (snap) {
+          return snap.exists ? [Object.assign({ codigoPaciente: codigoCandidato }, snap.data())] : [];
+        }).catch(function () { return []; })
+      );
+    }
+
+    if (fDigits.length >= 6) {
+      promesas.push(
+        cmgDb.collection('expedientes').where('_searchIdentidad', '==', fDigits).get().then(function (snap) {
+          var r = [];
+          snap.forEach(function (doc) { r.push(Object.assign({ codigoPaciente: doc.id }, doc.data())); });
+          return r;
+        }).catch(function () { return []; })
+      );
+    }
+
+    var textoBuscado = normalizarTexto(valor).replace(/[^a-z0-9\s]/g, ' ').trim();
+    var tokensBuscados = textoBuscado.split(/\s+/).filter(Boolean);
+    var anclaje = tokensBuscados[0] || '';
+    if (anclaje.length >= 2) {
+      promesas.push(
+        cmgDb.collection('expedientes').where('_searchNombreTokens', 'array-contains', anclaje).limit(300).get()
+          .then(function (snap) {
+            var r = [];
+            snap.forEach(function (doc) {
+              var d = doc.data();
+              var dg = d.datosGenerales || {};
+              var nombreNorm = normalizarTexto(dg.nombreCompleto);
+              var coincideTodo = tokensBuscados.every(function (t) { return nombreNorm.indexOf(t) >= 0; });
+              if (coincideTodo) r.push(Object.assign({ codigoPaciente: doc.id }, d));
+            });
+            return r;
+          }).catch(function () { return []; })
+      );
+    }
+
+    if (!promesas.length) {
+      $id('pt-tabla-wrap').innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">🔍</div><p>Escribe al menos 2 letras del nombre, o parte del código/identidad.</p></div>';
+      $id('pt-count').textContent = '';
+      return;
+    }
+
+    Promise.all(promesas).then(function (listas) {
+      if (miToken !== _filtroPacientesToken) return; // el usuario ya escribió algo distinto mientras tanto
+      var vistos = {};
+      var combinados = [];
+      listas.forEach(function (lista) {
+        lista.forEach(function (p) {
+          if (!vistos[p.codigoPaciente]) { vistos[p.codigoPaciente] = true; combinados.push(p); }
+        });
+      });
+      renderResultadosGlobales(combinados, valor);
     });
   }
 
@@ -2515,8 +2593,14 @@ summary.ed-meds-cat { list-style: revert; }
     });
   }
 
+  var _pacientesFiltroDebounce = null;
   $id('pt-filtro').addEventListener('input', function () {
-    renderTablaFiltrada(this.value);
+    var valor = this.value;
+    clearTimeout(_pacientesFiltroDebounce);
+    if (!valor.trim()) { renderTablaFiltrada(); return; }
+    $id('pt-tabla-wrap').innerHTML = '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto 10px"></div><p>Buscando en todo el sistema...</p></div>';
+    $id('pt-count').textContent = '';
+    _pacientesFiltroDebounce = setTimeout(function () { buscarPacientesGlobal(valor); }, 300);
   });
   $id('btn-pt-recargar').addEventListener('click', function () { cargarListaPacientes(true); });
 

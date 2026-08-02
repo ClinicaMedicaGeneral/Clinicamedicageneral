@@ -150,8 +150,8 @@ table.ic-tbl tr:nth-child(even) { background: #FAFBFD; }
   <div class="ic-card">
     <h2>🔧 Mantenimiento (una sola vez): índice de búsqueda por nombre</h2>
     <p class="ic-sub">Rellena el campo <code>_searchNombreTokens</code> en los expedientes que no lo tengan (los creados
-    antes de este cambio), para que "Buscar por nombre" en Expediente-Doctor.html sea rápido. Es seguro correrlo
-    varias veces — solo actualiza los que les falte.</p>
+    antes de este cambio), para que "Buscar por nombre" en Expediente-Doctor.html sea rápido, y de paso corrige el
+    contador de "pacientes atendidos en total" con el valor real. Es seguro correrlo varias veces.</p>
     <button class="ic-btn ic-btn-primary" id="ic-btn-reindexar">Reindexar nombres existentes</button>
     <div class="ic-progress" id="ic-reindex-progreso"></div>
   </div>
@@ -542,6 +542,11 @@ table.ic-tbl tr:nth-child(even) { background: #FAFBFD; }
     }
 
     function finalizar() {
+      if (creados > 0) {
+        cmgDb.collection('estadisticas').doc('expedientes').set({
+          total: firebase.firestore.FieldValue.increment(creados)
+        }, { merge: true }).catch(function (err) { console.warn('No se pudo actualizar el contador de expedientes:', err); });
+      }
       $('ic-final-card').classList.remove('ic-hidden');
       $('ic-final-texto').textContent = 'Se crearon ' + creados + ' expedientes nuevos. Puedes buscarlos por nombre o número de identidad en Expediente-Doctor.html.';
       $('ic-final-card').scrollIntoView({ behavior: 'smooth' });
@@ -567,8 +572,13 @@ table.ic-tbl tr:nth-child(even) { background: #FAFBFD; }
         }
       });
 
+      /* Aprovecha esta lectura completa (ya pagada) para corregir el contador
+         agregado de "pacientes atendidos en total" con el valor real. */
+      cmgDb.collection('estadisticas').doc('expedientes').set({ total: snap.size })
+        .catch(function (err) { console.warn('No se pudo corregir el contador de expedientes:', err); });
+
       if (!pendientes.length) {
-        progreso.textContent = 'Todos los expedientes ya tienen índice de nombre. Nada que hacer.';
+        progreso.textContent = 'Todos los expedientes ya tienen índice de nombre. Contador total corregido a ' + snap.size + '.';
         btn.disabled = false;
         return;
       }
@@ -578,7 +588,7 @@ table.ic-tbl tr:nth-child(even) { background: #FAFBFD; }
       var actualizados = 0;
       function siguienteLote() {
         if (i >= pendientes.length) {
-          progreso.textContent = 'Listo — se actualizaron ' + actualizados + ' expedientes con índice de nombre.';
+          progreso.textContent = 'Listo — se actualizaron ' + actualizados + ' expedientes con índice de nombre. Contador total corregido a ' + snap.size + '.';
           btn.disabled = false;
           return;
         }

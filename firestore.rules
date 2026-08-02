@@ -398,6 +398,18 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ═══ /estadisticas/{id} ═══════════════════════════════════════
+    // Contadores agregados (ej. total de expedientes creados) para mostrar
+    // en el panel sin tener que leer toda la colección de expedientes — el
+    // SDK de Firestore que usa el sitio no soporta consultas count().
+    // Doctor/Caja: leen (para mostrar el total en el panel).
+    // Doctor: escribe (incrementa al crear un expediente).
+    // Admin: puede corregir el valor (herramienta de reindexado/mantenimiento).
+    match /estadisticas/{id} {
+      allow read: if isDoctor() || isCaja();
+      allow write: if isDoctor() || isAdmin();
+    }
+
     // ═══ Bloqueo por defecto ═══════════════════════════════════
     // Cualquier otra colección queda bloqueada.
     match /{document=**} {

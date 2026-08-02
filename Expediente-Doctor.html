@@ -3121,10 +3121,13 @@ summary.ed-meds-cat { list-style: revert; }
             enAtencionHtml = '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:' +
               (demorado ? '#92400E' : '#1D4ED8') + ';background:' + (demorado ? '#FEF3C7' : '#DBEAFE') + '">' + enAtencionTexto + '</div>';
           }
-          /* Ya se escribió al menos un campo de la consulta y quedó autoguardado:
-             si cierran por accidente, el progreso no se pierde al volver a entrar. */
-          var iniciadaHtml = (!esServicio && it.consultaIniciada)
-            ? '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:#166534;background:#DCFCE7;margin-left:4px">📝 Iniciada' + (it.borradorPor ? ' · por ' + esc(it.borradorPor) : '') + '</div>'
+          /* Ya se escribió al menos un campo (de la consulta o del servicio) y
+             quedó autoguardado: si cierran por accidente, el progreso no se
+             pierde al volver a entrar. */
+          var yaIniciada = esServicio ? it.servicioIniciado : it.consultaIniciada;
+          var iniciadaPor = esServicio ? it.borradorServicioPor : it.borradorPor;
+          var iniciadaHtml = yaIniciada
+            ? '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:#166534;background:#DCFCE7;margin-left:4px">📝 Iniciada' + (iniciadaPor ? ' · por ' + esc(iniciadaPor) : '') + '</div>'
             : '';
           var fechaMostrar = it.fechaPreclinica || it.fechaServicio;
           var registradoPor = it.preclinicaPor || it.servicioPor || '—';
@@ -3869,6 +3872,10 @@ summary.ed-meds-cat { list-style: revert; }
 
   /* ─── Formulario para completar un servicio pendiente ─── */
   function renderCompletarServicioForm() {
+    /* Cancela cualquier autoguardado pendiente de un formulario anterior, para
+       que no se guarde por accidente en el servicio equivocado. */
+    if (_servicioAutosaveTimer) { clearTimeout(_servicioAutosaveTimer); _servicioAutosaveTimer = null; }
+
     var cont = $id('consulta-contenido');
     var p = pacienteActual;
     var dg = p.datosGenerales || {};
@@ -3876,6 +3883,9 @@ summary.ed-meds-cat { list-style: revert; }
 
     cont.innerHTML =
       '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
+      (srv.servicioIniciado ?
+        '<div class="ed-alert ed-alert-success is-visible" id="serv-borrador-aviso" style="margin-bottom:12px">📝 Se recuperó el progreso guardado automáticamente' + (srv.borradorServicioPor ? ' (' + esc(srv.borradorServicioPor) + ')' : '') + '. Revisa los campos antes de finalizar.</div>'
+        : '') +
       '<div class="ed-patient-summary">' +
         '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
         '<p class="ed-patient-meta">Completar servicio pendiente</p></div>' +
@@ -3942,11 +3952,13 @@ summary.ed-meds-cat { list-style: revert; }
         '</div>' +
       '</div>' +
       buildEmergenciaSectionHtml('servfin') +
+      '<div id="serv-autoguardado-estado" style="font-size:12px;color:#6B7280;margin:0 0 8px;text-align:right"></div>' +
       '<div class="ed-actions">' +
         '<button class="ed-btn ed-btn-primary" id="btn-completar-servicio">✅ Marcar servicio como completado</button>' +
       '</div>';
 
     $id('btn-volver-modo').addEventListener('click', function () {
+      if (_servicioAutosaveTimer) { clearTimeout(_servicioAutosaveTimer); _servicioAutosaveTimer = null; }
       liberarEnAtencion(consultaPendienteCargada && consultaPendienteCargada._id);
       renderConsultaTab();
     });
@@ -3962,6 +3974,149 @@ summary.ed-meds-cat { list-style: revert; }
     wireMedsBuscador('serv-meds-despacho-list', 'serv-meds-despacho-buscar');
     wireIncapToggle('serv');
     wireEmergenciaToggle('servfin');
+
+    /* Progreso guardado automáticamente (igual que en Consulta médica): se
+       restaura primero lo ya escrito y recién después se conecta el
+       autoguardado, para no autoguardar la restauración como cambio nuevo. */
+    if (srv.borradorServicio) restaurarBorradorServicio(srv.borradorServicio);
+    if (_servicioAutosaveHandler) {
+      cont.removeEventListener('input', _servicioAutosaveHandler);
+      cont.removeEventListener('change', _servicioAutosaveHandler);
+    }
+    _servicioAutosaveHandler = programarAutoguardadoServicio;
+    cont.addEventListener('input', _servicioAutosaveHandler);
+    cont.addEventListener('change', _servicioAutosaveHandler);
+  }
+
+  /* ─── Autoguardado del progreso al completar un Servicio (misma idea que en
+     Consulta médica): en cuanto hay contenido en algún campo, se guarda como
+     'borradorServicio' en el mismo documento (status sigue 'servicio', no se
+     toca el flujo) y se marca servicioIniciado:true para la lista de
+     Pendiente para médico. ─── */
+  var _servicioAutosaveTimer = null;
+  var _servicioAutosaveHandler = null;
+  var SERV_BORRADOR_CAMPOS = [
+    'serv-cantidad', 'serv-receta-externa', 'serv-notas-fin', 'serv-realizado-por', 'serv-sens-resultado',
+    'serv-incap-dias', 'serv-incap-desde', 'serv-incap-motivo', 'serv-incap-obs',
+    'servfin-emerg-sala-horas', 'servfin-emerg-monitor-horas', 'servfin-emerg-oxigeno-litros',
+    'serv-resultado-ta', 'serv-resultado-glucosa', 'serv-resultado-peso',
+    'ekg-fc', 'ekg-ritmo', 'ekg-eje',
+    'ekg-aondap', 'ekg-dondap', 'ekg-aintpr', 'ekg-dintpr', 'ekg-acompqrs', 'ekg-dcompqrs',
+    'ekg-aondar', 'ekg-dondaqrs', 'ekg-aintqt', 'ekg-dintqt', 'ekg-aondat', 'ekg-dondat'
+  ];
+  function programarAutoguardadoServicio() {
+    if (_servicioAutosaveTimer) clearTimeout(_servicioAutosaveTimer);
+    _servicioAutosaveTimer = setTimeout(autoguardarServicio, 1500);
+  }
+  function recolectarBorradorServicio() {
+    var campos = {};
+    SERV_BORRADOR_CAMPOS.forEach(function (id) {
+      var el = $id(id);
+      if (el) campos[id] = el.value;
+    });
+    var cauterizacion = null;
+    var cautInputs = document.querySelectorAll('.serv-caut-input');
+    if (cautInputs.length) {
+      cauterizacion = {};
+      cautInputs.forEach(function (inp) { cauterizacion[inp.getAttribute('data-subtipo')] = inp.value; });
+    }
+    var incap = collectIncapData('serv', []);
+    return {
+      campos: campos,
+      convertidoConsulta: !!($id('serv-convertido-consulta') && $id('serv-convertido-consulta').checked),
+      cauterizacion: cauterizacion,
+      medicamentosVisita: collectChecked('serv-meds-visita-list'),
+      medicamentosDespacho: collectChecked('serv-meds-despacho-list'),
+      medsVisitaNinguno: grupoEsNinguno('serv-meds-visita-list'),
+      medsDespachoNinguno: grupoEsNinguno('serv-meds-despacho-list'),
+      necesitaIncap: incap.necesita,
+      datosIncap: incap.datos,
+      salaEmergencia: collectEmergenciaData('servfin')
+    };
+  }
+  function borradorServicioTieneContenido(b) {
+    /* 'serv-cantidad' siempre trae "1" por defecto: no cuenta como progreso
+       salvo que el médico la haya cambiado a otro valor. */
+    var camposConValor = Object.keys(b.campos).some(function (k) {
+      if (k === 'serv-cantidad') return b.campos[k] && b.campos[k] !== '1';
+      return !!b.campos[k];
+    });
+    var cautConValor = b.cauterizacion && Object.keys(b.cauterizacion).some(function (k) {
+      return parseInt(b.cauterizacion[k], 10) > 0;
+    });
+    return !!(camposConValor || cautConValor || b.convertidoConsulta ||
+      (b.medicamentosVisita && b.medicamentosVisita.length) ||
+      (b.medicamentosDespacho && b.medicamentosDespacho.length) ||
+      b.medsVisitaNinguno || b.medsDespachoNinguno ||
+      b.necesitaIncap || b.salaEmergencia);
+  }
+  function autoguardarServicio() {
+    if (!$id('serv-notas-fin') || !consultaPendienteCargada || !consultaPendienteCargada._id) return;
+    var borrador = recolectarBorradorServicio();
+    if (!borradorServicioTieneContenido(borrador)) return;
+    var id = consultaPendienteCargada._id;
+    cmgDb.collection('consultas').doc(id).update({
+      borradorServicio: borrador,
+      borradorServicioEn: firebase.firestore.FieldValue.serverTimestamp(),
+      borradorServicioPor: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
+      servicioIniciado: true
+    }).then(function () {
+      consultaPendienteCargada.borradorServicio = borrador;
+      consultaPendienteCargada.servicioIniciado = true;
+      var estado = $id('serv-autoguardado-estado');
+      if (estado) estado.textContent = '✓ Progreso guardado automáticamente · ' + new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' });
+    }).catch(function (err) {
+      console.error('[CMG] Error autoguardando borrador de servicio:', err);
+    });
+  }
+  function restaurarBorradorServicio(b) {
+    if (!b) return;
+    Object.keys(b.campos || {}).forEach(function (id) {
+      var el = $id(id);
+      if (el && b.campos[id]) el.value = b.campos[id];
+    });
+    if (b.cauterizacion) {
+      document.querySelectorAll('.serv-caut-input').forEach(function (inp) {
+        var key = inp.getAttribute('data-subtipo');
+        if (b.cauterizacion[key] != null && b.cauterizacion[key] !== '') inp.value = b.cauterizacion[key];
+      });
+    }
+    if (b.convertidoConsulta) {
+      var conv = $id('serv-convertido-consulta');
+      if (conv) {
+        conv.checked = true;
+        var grp = $id('serv-cantidad-grupo');
+        if (grp) grp.style.display = 'none';
+      }
+    }
+
+    restaurarChecklistMeds('serv-meds-visita-list', b.medicamentosVisita, b.medsVisitaNinguno);
+    restaurarChecklistMeds('serv-meds-despacho-list', b.medicamentosDespacho, b.medsDespachoNinguno);
+
+    var sensWrap = $id('serv-sens-wrap');
+    if (sensWrap) {
+      document.querySelectorAll('#serv-meds-visita-list input[type=checkbox]').forEach(function (c) {
+        if (c.value === 'Prueba de sensibilidad' && c.checked) sensWrap.style.display = 'block';
+      });
+    }
+
+    if (b.necesitaIncap && b.datosIncap) {
+      var siRadio = document.querySelector('input[name="serv-incap"][value="si"]');
+      if (siRadio) siRadio.checked = true;
+      var incapForm = $id('serv-incap-form');
+      if (incapForm) incapForm.style.display = 'block';
+    }
+
+    if (b.salaEmergencia && b.salaEmergencia.activa) {
+      var emergChk = $id('servfin-emergencia-check');
+      if (emergChk) emergChk.checked = true;
+      var emergForm = $id('servfin-emergencia-form');
+      if (emergForm) emergForm.style.display = 'block';
+      if (b.salaEmergencia.bombaInfusion) {
+        var bombaChk = $id('servfin-emerg-bomba-check');
+        if (bombaChk) bombaChk.checked = true;
+      }
+    }
   }
 
   /* ─── Marcar servicio como completado (status:'servicio-completo') ───
@@ -4034,7 +4189,12 @@ summary.ed-meds-cat { list-style: revert; }
       medicamentosDespacho: collectChecked('serv-meds-despacho-list'),
       recetaExterna: $val('serv-receta-externa'),
       tieneConstancia: incap.necesita,
-      constanciaId: constanciaPrep ? constanciaPrep.ref.id : null
+      constanciaId: constanciaPrep ? constanciaPrep.ref.id : null,
+      /* El servicio ya se completó: el borrador de autoguardado no sirve más. */
+      borradorServicio: firebase.firestore.FieldValue.delete(),
+      borradorServicioEn: firebase.firestore.FieldValue.delete(),
+      borradorServicioPor: firebase.firestore.FieldValue.delete(),
+      servicioIniciado: firebase.firestore.FieldValue.delete()
     };
     if (resultadoServicio) {
       updateData.signosVitales = Object.assign({}, consultaPendienteCargada.signosVitales || {}, resultadoServicio);

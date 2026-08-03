@@ -186,9 +186,18 @@ service cloud.firestore {
             && request.resource.data.status == 'servicio'
             && request.resource.data.tipo == 'servicio'
             && request.resource.data.servicioNombre in ['Extracción de uña', 'Lavado de oído', 'Retiro de puntos']);
-      // Borrar consultas/servicios del historial es solo para Administración
+      // Borrar consultas/servicios del historial completo es solo para Administración
       // (limpieza de registros de prueba/errores en un expediente real).
-      allow delete: if isAdmin();
+      // Excepción: médico o enfermería pueden cancelar, desde su propio formulario
+      // de atención, un registro que nunca se realizó — pero SOLO mientras siga en
+      // una etapa temprana (antes de pasar a Caja/liquidación), para no arriesgar
+      // un registro ya facturado o pagado. Caja NO puede borrar (isCaja() != isDoctor()
+      // salvo que la cuenta también tenga rol 'enf').
+      allow delete: if isAdmin()
+        || (
+          isDoctor()
+          && resource.data.status in ['listo_enfermeria', 'preclinica', 'servicio']
+        );
 
       // Update:
       //   - Médico tratante: siempre, incluida la finalización de la Consulta médica

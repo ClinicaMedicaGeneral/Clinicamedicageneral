@@ -976,7 +976,6 @@ summary.ed-meds-cat { list-style: revert; }
               <option value="">— Seleccionar —</option>
               <option value="M">Masculino</option>
               <option value="F">Femenino</option>
-              <option value="O">Otro</option>
             </select>
           </div>
           <div class="ed-fgroup">
@@ -1749,6 +1748,58 @@ summary.ed-meds-cat { list-style: revert; }
   /* ════════════════════════════════════════════════════════════
      DRM Fun-9: CAJA (Pago Liquidado)
      ════════════════════════════════════════════════════════════ */
+  /* Panel de ajuste: solo aparece mientras el registro sigue en 'pendiente_caja'
+     (antes de liquidar). Una vez liquidado, el registro sale de esta lista y ya
+     no se puede editar desde aquí. */
+  function buildCajaEditPanelHtml(id, d) {
+    var prefix = 'cajaedit-' + id;
+    var esServicioConNombre = !!d.servicioNombre;
+    return '<div id="' + prefix + '-panel" style="display:none;margin-top:12px;background:#F8FAFC;border:1px dashed #93A5C7;border-radius:8px;padding:12px">' +
+      '<div style="font-size:12px;font-weight:800;color:#213C7D;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">✏️ Ajustar antes de liquidar</div>' +
+      '<div class="ed-grid ed-grid-2">' +
+        (esServicioConNombre ?
+          '<div class="ed-fgroup"><label class="ed-label">Servicio</label><input type="text" class="ed-input" id="' + prefix + '-servicio" value="' + esc(d.servicioNombre || '') + '"></div>' +
+          '<div class="ed-fgroup" style="align-self:end"><label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-convertido"' + (d.convertidoConsulta ? ' checked' : '') + '> ❌ Este servicio no se realizó (se convirtió en consulta médica)</label></div>'
+        : '') +
+        '<div class="ed-fgroup"><label class="ed-label">Medicamentos aplicados en consulta</label><input type="text" class="ed-input" id="' + prefix + '-medsvisita" value="' + esc((d.medicamentosVisita || []).join(', ')) + '" placeholder="separados por coma"></div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Despacho</label><input type="text" class="ed-input" id="' + prefix + '-medsdespacho" value="' + esc((d.medicamentosDespacho || []).join(', ')) + '" placeholder="separados por coma"></div>' +
+        '<div class="ed-fgroup full"><label class="ed-label">Receta externa</label><textarea class="ed-textarea" id="' + prefix + '-recetaext" rows="2">' + esc(d.recetaExterna || '') + '</textarea></div>' +
+      '</div>' +
+      buildEmergenciaSectionHtml(prefix) +
+      '<div style="display:flex;gap:8px;margin-top:10px">' +
+        '<button class="ed-btn ed-btn-primary" data-caja-guardar-ajuste="' + id + '">💾 Guardar ajuste</button>' +
+        '<button class="ed-btn ed-btn-ghost" data-caja-cancelar-ajuste="' + id + '">Cancelar</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function guardarAjusteCaja(id) {
+    var prefix = 'cajaedit-' + id;
+    var update = {
+      medicamentosVisita: $val(prefix + '-medsvisita').split(',').map(function(s){ return s.trim(); }).filter(Boolean),
+      medicamentosDespacho: $val(prefix + '-medsdespacho').split(',').map(function(s){ return s.trim(); }).filter(Boolean),
+      recetaExterna: $val(prefix + '-recetaext'),
+      salaEmergencia: collectEmergenciaData(prefix),
+      ajustadoEnCaja: {
+        por: cmgAuth.currentUser.email,
+        en: firebase.firestore.FieldValue.serverTimestamp()
+      }
+    };
+    var servicioInput = $id(prefix + '-servicio');
+    if (servicioInput) update.servicioNombre = servicioInput.value.trim();
+    var convertidoChk = $id(prefix + '-convertido');
+    if (convertidoChk) update.convertidoConsulta = convertidoChk.checked;
+
+    showOverlay('Guardando ajuste...');
+    cmgDb.collection('consultas').doc(id).update(update)
+      .then(function(){
+        hideOverlay();
+        showAlert('✓ Ajuste guardado', 'success');
+        renderCajaTab();
+      })
+      .catch(function(err){ hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
+  }
+
   function renderCajaTab() {
     var box = $id('caja-lista');
     if (!box) return;
@@ -1840,7 +1891,10 @@ summary.ed-meds-cat { list-style: revert; }
                   '<b style="color:#213C7D;font-size:16px">' + esc(nombrePaciente) + '</b>' + tipoLabel + badgeConstancia + badgeConvertido + '<br>' +
                   '<small style="color:#6B7280">Expediente: <code style="background:#F3F4F6;padding:1px 6px;border-radius:4px">' + esc(d.codigoPaciente || '—') + '</code> · Médico: ' + esc(d.doctorNombre || d.servicioRealizadoPor || '—') + ' · ' + esc(d.fechaLocal ? d.fechaLocal.slice(0,16).replace('T',' ') : '') + '</small>' +
                 '</div>' +
-                '<button class="ed-btn ed-btn-primary" data-caja-id="' + doc.id + '">✅ Pago Liquidado en Caja</button>' +
+                '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+                  '<button class="ed-btn ed-btn-ghost" data-caja-editar="' + doc.id + '">✏️ Editar</button>' +
+                  '<button class="ed-btn ed-btn-primary" data-caja-id="' + doc.id + '">✅ Pago Liquidado en Caja</button>' +
+                '</div>' +
               '</div>' +
               datosYaloHtml +
               '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;font-size:13px;margin-top:10px">' +
@@ -1859,6 +1913,7 @@ summary.ed-meds-cat { list-style: revert; }
               (ps && ps.noRequiere ? '<div style="margin-top:10px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 10px;font-size:12px;color:#166534">🧪 Inyección IM/IV, el médico indicó que <b>este medicamento no necesita prueba de sensibilidad</b>.</div>' : '') +
               /* DRM v3 #6: servicios hijos vinculados a esta consulta */
               '<div data-servicios-hijos="' + doc.id + '" style="margin-top:10px"></div>' +
+              buildCajaEditPanelHtml(doc.id, d) +
             '</div>';
         });
         html += '</div>';
@@ -1899,6 +1954,40 @@ summary.ed-meds-cat { list-style: revert; }
             }).then(function(){ showAlert('Pago liquidado ✓', 'success'); renderCajaTab(); })
               .catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
           });
+        });
+        /* Editar antes de liquidar: abrir/cerrar el panel de ajuste */
+        box.querySelectorAll('[data-caja-editar]').forEach(function(b){
+          b.addEventListener('click', function(){
+            var panel = $id('cajaedit-' + this.getAttribute('data-caja-editar') + '-panel');
+            if (panel) panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
+          });
+        });
+        box.querySelectorAll('[data-caja-cancelar-ajuste]').forEach(function(b){
+          b.addEventListener('click', function(){
+            var panel = $id('cajaedit-' + this.getAttribute('data-caja-cancelar-ajuste') + '-panel');
+            if (panel) panel.style.display = 'none';
+          });
+        });
+        box.querySelectorAll('[data-caja-guardar-ajuste]').forEach(function(b){
+          b.addEventListener('click', function(){
+            guardarAjusteCaja(this.getAttribute('data-caja-guardar-ajuste'));
+          });
+        });
+        /* Prellenar y cablear el toggle de Área de Estabilización de cada panel de ajuste */
+        snap.forEach(function(doc){
+          var d = doc.data();
+          var prefix = 'cajaedit-' + doc.id;
+          wireEmergenciaToggle(prefix);
+          if (d.salaEmergencia && d.salaEmergencia.activa) {
+            var chk = $id(prefix + '-emergencia-check');
+            var form = $id(prefix + '-emergencia-form');
+            if (chk) chk.checked = true;
+            if (form) form.style.display = 'block';
+            if (d.salaEmergencia.salaHoras && $id(prefix + '-emerg-sala-horas')) $id(prefix + '-emerg-sala-horas').value = d.salaEmergencia.salaHoras;
+            if (d.salaEmergencia.monitorHoras && $id(prefix + '-emerg-monitor-horas')) $id(prefix + '-emerg-monitor-horas').value = d.salaEmergencia.monitorHoras;
+            if (d.salaEmergencia.oxigenoLitros && $id(prefix + '-emerg-oxigeno-litros')) $id(prefix + '-emerg-oxigeno-litros').value = d.salaEmergencia.oxigenoLitros;
+            if (d.salaEmergencia.bombaInfusion && $id(prefix + '-emerg-bomba-check')) $id(prefix + '-emerg-bomba-check').checked = true;
+          }
         });
         /* DRM v3 #6: cargar servicios hijos para cada consulta de caja */
         snap.forEach(function(doc){
@@ -4134,6 +4223,8 @@ summary.ed-meds-cat { list-style: revert; }
               '<option value="Doctor Rojas">Doctor Rojas</option>' +
               '<option value="Doctor Hermes">Doctor Hermes</option>' +
               '<option value="Doctor Álvarez">Doctor Álvarez</option>' +
+              '<option value="Enfermería (Ana)">Enfermería (Ana)</option>' +
+              '<option value="Enfermería (Luz)">Enfermería (Luz)</option>' +
             '</select></div>' +
         '</div>' +
       '</div>' +
@@ -4611,6 +4702,8 @@ summary.ed-meds-cat { list-style: revert; }
               '<option value="Doctor Rojas">Doctor Rojas</option>' +
               '<option value="Doctor Hermes">Doctor Hermes</option>' +
               '<option value="Doctor Álvarez">Doctor Álvarez</option>' +
+              '<option value="Enfermería (Ana)">Enfermería (Ana)</option>' +
+              '<option value="Enfermería (Luz)">Enfermería (Luz)</option>' +
             '</select></div>' +
         '</div>' +
       '</div>' +
@@ -5644,6 +5737,11 @@ summary.ed-meds-cat { list-style: revert; }
       }
     }
 
+    /* DRM: si caja ajustó este registro antes de liquidar, dejarlo visible en el historial */
+    var ajusteLinea = (c.ajustadoEnCaja && c.ajustadoEnCaja.por)
+      ? '<div class="ed-consulta-motivo" style="color:#7C3AED"><strong>✏️ Ajustado en caja por:</strong> ' + esc(c.ajustadoEnCaja.por) + ' · ' + fmtDate(c.ajustadoEnCaja.en) + '</div>'
+      : '';
+
     return '<div class="ed-consulta-item">' +
       '<div>' +
         '<div class="ed-consulta-fecha">📅 ' + fmtDate(getFechaDisplay(c)) + badge + constanciaBadge + '</div>' +
@@ -5654,6 +5752,7 @@ summary.ed-meds-cat { list-style: revert; }
         (c.recetaExterna && c.recetaExterna.trim() ? '<div class="ed-consulta-motivo" style="color:#9A3412"><strong>🏥 Receta externa:</strong> ' + esc(c.recetaExterna).slice(0, 120) + (c.recetaExterna.length > 120 ? '...' : '') + '</div>' : '') +
         (esServicio && c.servicioNotas ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas:</strong> ' + esc(c.servicioNotas).slice(0, 100) + '</div>' : '') +
         (esServicio && c.servicioNotasFin ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas de finalización:</strong> ' + esc(c.servicioNotasFin).slice(0, 100) + '</div>' : '') +
+        ajusteLinea +
         (esServicio ? '<div class="ed-consulta-motivo" style="color:#9CA3AF;font-size:11px;font-family:monospace">id: ' + esc(c._id) + ' · status: ' + esc(c.status) + ' · tipoRegistro: ' + esc(c.tipoRegistro || '—') + ' · convertidoConsulta: ' + String(!!c.convertidoConsulta) + '</div>' : '') +
       '</div>' +
       '<div class="ed-consulta-actions">' +

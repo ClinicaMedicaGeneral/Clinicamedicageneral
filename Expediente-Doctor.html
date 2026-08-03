@@ -954,7 +954,7 @@ summary.ed-meds-cat { list-style: revert; }
             <input type="text" class="ed-input" id="nuevo-nombre">
           </div>
           <div class="ed-fgroup">
-            <label class="ed-label">Tipo de identificación</label>
+            <label class="ed-label">Tipo de identificación *</label>
             <select class="ed-select" id="nuevo-tipoid">
               <option value="">— Seleccionar —</option>
               <option value="dni">🪪 DNI (Hondureños)</option>
@@ -963,11 +963,11 @@ summary.ed-meds-cat { list-style: revert; }
             </select>
           </div>
           <div class="ed-fgroup">
-            <label class="ed-label">Número de identificación</label>
+            <label class="ed-label">Número de identificación *</label>
             <input type="text" class="ed-input" id="nuevo-identidad" placeholder="0801-1990-12345">
           </div>
           <div class="ed-fgroup">
-            <label class="ed-label">Fecha de nacimiento</label>
+            <label class="ed-label">Fecha de nacimiento *</label>
             <input type="date" class="ed-input" id="nuevo-fecnac">
           </div>
           <div class="ed-fgroup">
@@ -990,7 +990,7 @@ summary.ed-meds-cat { list-style: revert; }
             </select>
           </div>
           <div class="ed-fgroup">
-            <label class="ed-label">Teléfono</label>
+            <label class="ed-label">Teléfono *</label>
             <input type="tel" class="ed-input" id="nuevo-tel" placeholder="9999-9999">
           </div>
           <div class="ed-fgroup">
@@ -2292,6 +2292,10 @@ summary.ed-meds-cat { list-style: revert; }
   $id('btn-nuevo-guardar').addEventListener('click', function () {
     var nombre = $val('nuevo-nombre');
     if (!nombre) { showAlert('El nombre del paciente es obligatorio.', 'error'); return; }
+    if (!$val('nuevo-tipoid')) { showAlert('El tipo de identificación es obligatorio.', 'error'); return; }
+    if (!$val('nuevo-identidad')) { showAlert('El número de identificación es obligatorio.', 'error'); return; }
+    if (!$val('nuevo-fecnac')) { showAlert('La fecha de nacimiento es obligatoria.', 'error'); return; }
+    if (!$val('nuevo-tel')) { showAlert('El número de teléfono es obligatorio.', 'error'); return; }
 
     var expediente = {
       codigoPaciente: '',

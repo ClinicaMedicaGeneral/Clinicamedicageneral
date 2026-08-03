@@ -1199,7 +1199,7 @@
 
     /* Datos generales grid */
     var items = [
-      ['Fecha nacimiento', dg.fechaNacimiento ? new Date(dg.fechaNacimiento).toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' }) : null],
+      ['Fecha nacimiento', dg.fechaNacimiento ? new Date(dg.fechaNacimiento + 'T00:00:00').toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' }) : null],
       ['Teléfono', dg.telefono],
       ['Correo', dg.email],
       ['Estado civil', dg.estadoCivil],

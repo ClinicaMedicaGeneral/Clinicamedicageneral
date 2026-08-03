@@ -2760,7 +2760,7 @@ summary.ed-meds-cat { list-style: revert; }
           html += '<div style="background:#F9FAFB;border:1.5px solid #E5E7EB;border-radius:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px">' +
             '<div><strong>' + esc(dg.nombreCompleto || '—') + '</strong>' +
             '<div style="font-size:12px;color:#6B7280">' + esc(p.codigoPaciente) +
-            (dg.fechaNacimiento ? ' · ' + new Date(dg.fechaNacimiento).toLocaleDateString('es-HN') : '') +
+            (dg.fechaNacimiento ? ' · ' + new Date(dg.fechaNacimiento + 'T00:00:00').toLocaleDateString('es-HN') : '') +
             (dg.numeroIdentidad ? ' · ' + esc(dg.numeroIdentidad) : '') + '</div></div>' +
             '<button class="ed-btn ed-btn-primary" style="height:34px;font-size:12px" data-sel="' + esc(p.codigoPaciente) + '">Seleccionar</button></div>';
         });

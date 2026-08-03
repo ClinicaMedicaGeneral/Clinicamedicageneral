@@ -3347,6 +3347,17 @@ summary.ed-meds-cat { list-style: revert; }
       });
   }
 
+  /* Borra desde DENTRO del formulario de atención (enfermería o médico) el registro
+     que se está completando: para cuando el servicio/consulta nunca se realizó y no
+     tiene sentido guardarlo, sin tener que volver a la lista de pendientes. */
+  function cancelarRegistroPendienteDesdeForm() {
+    if (!consultaPendienteCargada) return;
+    borrarConsultaPendiente(consultaPendienteCargada._id, function () {
+      consultaPendienteCargada = null;
+      renderConsultaTab();
+    });
+  }
+
   /* ─── Cargar pendientes para Médico (pre clínica lista + servicios por completar) ─── */
   function cargarPendientesMedico() {
     var lista = $id('pendientes-medico-lista');
@@ -3743,10 +3754,12 @@ summary.ed-meds-cat { list-style: revert; }
       '</div>' +
       '<div class="ed-actions">' +
         '<button class="ed-btn ed-btn-primary" id="btn-completar-enfermeria">✅ Completar y enviar a médico</button>' +
+        '<button class="ed-btn ed-btn-danger" id="btn-cancelar-registro">🗑️ Cancelar este registro</button>' +
       '</div>';
 
     $id('btn-volver-modo').addEventListener('click', renderConsultaTab);
     $id('btn-completar-enfermeria').addEventListener('click', guardarAtencionEnfermeria);
+    $id('btn-cancelar-registro').addEventListener('click', cancelarRegistroPendienteDesdeForm);
 
     /* Auto-calcular IMC al cambiar peso o talla */
     function calcularIMC() {
@@ -4232,6 +4245,7 @@ summary.ed-meds-cat { list-style: revert; }
       '<div id="serv-autoguardado-estado" style="font-size:12px;color:#6B7280;margin:0 0 8px;text-align:right"></div>' +
       '<div class="ed-actions">' +
         '<button class="ed-btn ed-btn-primary" id="btn-completar-servicio">✅ Marcar servicio como completado</button>' +
+        '<button class="ed-btn ed-btn-danger" id="btn-cancelar-registro">🗑️ Cancelar este registro</button>' +
       '</div>';
 
     $id('btn-volver-modo').addEventListener('click', function () {
@@ -4240,6 +4254,10 @@ summary.ed-meds-cat { list-style: revert; }
       renderConsultaTab();
     });
     $id('btn-completar-servicio').addEventListener('click', completarServicio);
+    $id('btn-cancelar-registro').addEventListener('click', function () {
+      if (_servicioAutosaveTimer) { clearTimeout(_servicioAutosaveTimer); _servicioAutosaveTimer = null; }
+      cancelarRegistroPendienteDesdeForm();
+    });
     $id('serv-convertido-consulta').addEventListener('change', function () {
       $id('serv-cantidad-grupo').style.display = this.checked ? 'none' : '';
     });
@@ -4724,6 +4742,7 @@ summary.ed-meds-cat { list-style: revert; }
       '<div id="cons-autoguardado-estado" style="font-size:12px;color:#6B7280;margin:0 0 8px;text-align:right"></div>' +
       '<div class="ed-actions">' +
         '<button class="ed-btn ed-btn-primary" id="btn-cons-guardar">💾 Finalizar consulta + Generar PDF</button>' +
+        '<button class="ed-btn ed-btn-danger" id="btn-cancelar-registro">🗑️ Cancelar este registro</button>' +
       '</div>';
 
     $id('btn-volver-modo').addEventListener('click', function () {
@@ -4732,6 +4751,10 @@ summary.ed-meds-cat { list-style: revert; }
       renderConsultaTab();
     });
     $id('btn-cons-guardar').addEventListener('click', guardarConsulta);
+    $id('btn-cancelar-registro').addEventListener('click', function () {
+      if (_consultaAutosaveTimer) { clearTimeout(_consultaAutosaveTimer); _consultaAutosaveTimer = null; }
+      cancelarRegistroPendienteDesdeForm();
+    });
 
     /* DRM v3 #3: handlers de acciones rápidas */
     var consultaActualId = consultaPendienteCargada && consultaPendienteCargada._id;

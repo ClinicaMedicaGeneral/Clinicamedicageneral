@@ -2472,6 +2472,14 @@ summary.ed-meds-cat { list-style: revert; }
           .then(function () {
             hideOverlay();
             pacienteActual = Object.assign({}, expediente, { codigoPaciente: codigo });
+            /* La pestaña "Pacientes" cachea _todosLosPacientes y no vuelve a
+               consultar Firestore al reabrirla (ver cargarListaPacientes) —
+               sin esto el expediente recién creado no aparecía en la lista
+               hasta presionar "Recargar" o refrescar la página. */
+            _todosLosPacientes.unshift(Object.assign({}, expediente, {
+              codigoPaciente: codigo,
+              createdAt: new Date()
+            }));
             limpiarFormularioNuevoExpediente();
             $id('nuevo-codigo-generado').textContent = codigo;
             $id('nuevo-resultado').style.display = '';

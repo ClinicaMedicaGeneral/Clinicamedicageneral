@@ -232,6 +232,12 @@ service cloud.firestore {
       //   - Caja: liquidar el pago (pendiente_caja → completa). También liquida en el
       //     mismo batch los servicios hijos vinculados, que llegan con status
       //     'servicio-completo' (DRM v3 #6), por eso se incluye ese estado también.
+      //   - Caja: además puede AJUSTAR un registro antes de liquidar (panel "Ajustar
+      //     antes de liquidar" en Caja: medicamentos, receta externa, sala de
+      //     emergencia, nombre del servicio, convertidoConsulta/convertidoServicio)
+      //     sin cambiar el status todavía — status se mantiene en 'pendiente_caja' o
+      //     'servicio-completo'. Antes esta rama no existía y el ajuste solo lo podía
+      //     guardar médico/admin (isMedicoTratante), no Caja.
       allow update: if isMedicoTratante()
         || (
           isEnfermeria()
@@ -246,7 +252,7 @@ service cloud.firestore {
         )
         || (isCaja()
             && resource.data.status in ['pendiente_caja', 'servicio-completo']
-            && request.resource.data.status == 'completa');
+            && request.resource.data.status in ['pendiente_caja', 'servicio-completo', 'completa']);
     }
 
     // ═══ /quotations/{id} ══════════════════════════════════════

@@ -103,6 +103,23 @@ service cloud.firestore {
         || (userActivo() && userRole() in ['medico', 'admin'])
       );
     }
+    // esServicioEnfermeria: servicios (status 'servicio') que Caja/Enfermería pueden
+    // completar sin médico. Todo lo demás del catálogo (Procedimientos como
+    // Cauterización/Extracción de uña/Lavado de oído, Cuidado de la mujer, vías
+    // urinarias, y el resto de "Servicios generales") requiere isMedicoTratante().
+    // MANTENER EN SYNC con SERVICIOS_ENFERMERIA en Expediente-Doctor.html.
+    function esServicioEnfermeria(nombre) {
+      return nombre in [
+        'Toma de presión', 'Glucometría', 'Nebulización (ciclo)',
+        'Inyección intramuscular (IM)', 'Inyección intravenosa (IV)',
+        'Aplicación de Suero',
+        'Sueroterapia Complejo B', 'Sueroterapia Oxigenador Cerebral',
+        'Sueroterapia Vitamina C', 'Sueroterapia Vitamina D',
+        'Sueroterapia Hígado Detox', 'Sueroterapia Boost (Complejo B + Oxigenador)',
+        'Sueroterapia Colágeno', 'Sueroterapia Glutatión', 'Sueroterapia Ácido Ascórbico (Vit C)',
+        'Sueroterapia Glutatión + Vit C (media dosis)', 'Sueroterapia Glutatión + Vit C (completo)'
+      ];
+    }
 
     // ═══ /users/{uid} ══════════════════════════════════════════
     // Perfil del usuario (códigos de expediente vinculados/compartidos).
@@ -205,10 +222,13 @@ service cloud.firestore {
       //   - Enfermería: atiende un registro 'listo_enfermeria' (toma signos vitales
       //     y, si aplica, prueba de sensibilidad) y lo pasa a 'preclinica' (Consulta)
       //     o 'servicio' (Servicio), listo para la siguiente etapa.
-      //   - Caja o Enfermería: SOLO pueden continuar/completar un Servicio
-      //     (status 'servicio' → 'servicio-completo' o 'pendiente_caja'). Nunca una
-      //     Consulta médica. También pueden autoguardar el progreso mientras lo
-      //     completan (status 'servicio' se mantiene igual, no es una transición).
+      //   - Caja o Enfermería: SOLO pueden continuar/completar un Servicio de
+      //     esServicioEnfermeria() (status 'servicio' → 'servicio-completo' o
+      //     'pendiente_caja'). Nunca una Consulta médica, ni un Servicio fuera de
+      //     esa lista (esos, como Cauterización o Extracción de uña, requieren
+      //     isMedicoTratante(), cubierto por la primera condición de este allow).
+      //     También pueden autoguardar el progreso mientras completan uno permitido
+      //     (status 'servicio' se mantiene igual, no es una transición).
       //   - Caja: liquidar el pago (pendiente_caja → completa). También liquida en el
       //     mismo batch los servicios hijos vinculados, que llegan con status
       //     'servicio-completo' (DRM v3 #6), por eso se incluye ese estado también.
@@ -221,6 +241,7 @@ service cloud.firestore {
         || (
           (isCaja() || isEnfermeria())
           && resource.data.status == 'servicio'
+          && esServicioEnfermeria(resource.data.servicioNombre)
           && request.resource.data.status in ['servicio', 'servicio-completo', 'pendiente_caja']
         )
         || (isCaja()

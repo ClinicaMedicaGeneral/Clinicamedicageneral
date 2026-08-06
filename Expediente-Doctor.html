@@ -1373,7 +1373,8 @@ summary.ed-meds-cat { list-style: revert; }
       'Sueroterapia Complejo B', 'Sueroterapia Oxigenador Cerebral',
       'Sueroterapia Vitamina C', 'Sueroterapia Vitamina D',
       'Sueroterapia Hígado Detox', 'Sueroterapia Boost (Complejo B + Oxigenador)',
-      'Sueroterapia Colágeno', 'Sueroterapia Glutatión', 'Sueroterapia Ácido Ascórbico (Vit C)'
+      'Sueroterapia Colágeno', 'Sueroterapia Glutatión', 'Sueroterapia Ácido Ascórbico (Vit C)',
+      'Sueroterapia Glutatión + Vit C (media dosis)', 'Sueroterapia Glutatión + Vit C (completo)'
     ]},
     { label: 'Procedimientos', items: [
       'Lavado de oído', 'Lavado ocular',
@@ -1395,6 +1396,20 @@ summary.ed-meds-cat { list-style: revert; }
   /* Servicios que no requieren preclínica: al registrarlos en Caja pasan directo
      a 'servicio' (Pendiente para Médico), sin pasar por Enfermería. */
   var SERVICIOS_SIN_PRECLINICA = ['Extracción de uña', 'Lavado de oído', 'Retiro de puntos'];
+
+  /* Servicios que Enfermería puede completar sin intervención médica: Sueroterapias
+     (grupo completo del catálogo) + estos generales. Todo lo demás del catálogo
+     (Procedimientos, Cuidado de la mujer, Cuidado de vías urinarias, y el resto de
+     "Servicios generales") requiere médico/admin — ver continuarConsulta() y
+     cargarPendientesMedico(). MANTENER EN SYNC con la función esServicioEnfermeria()
+     de firestore.rules, que aplica la misma regla del lado del servidor. */
+  var SERVICIOS_ENFERMERIA = [
+    'Toma de presión', 'Glucometría', 'Nebulización (ciclo)',
+    'Inyección intramuscular (IM)', 'Inyección intravenosa (IV)'
+  ].concat(CATALOGO_SERVICIOS.filter(function (g) { return g.label === 'Sueroterapias'; })[0].items);
+  function puedeEnfermeriaCompletarServicio(servicioNombre) {
+    return SERVICIOS_ENFERMERIA.indexOf(servicioNombre) !== -1;
+  }
 
   /* 'Cauterización lunar/verruga' es el único servicio de cauterización en el catálogo:
      lesión grande y párpado/cara se derivan de este mismo servicio, distinguidas por
@@ -2025,7 +2040,8 @@ summary.ed-meds-cat { list-style: revert; }
   /* Resuelto de forma async en el AUTH GUARD (cmgStaff.checkMedico) y cacheado
      aquí para uso síncrono al renderizar la pestaña Consulta: enfermería no
      debe poder ni abrir el formulario de Consulta médica (Etapa 3), solo
-     médico/admin. Un Servicio sí lo puede cerrar enfermería, sin restricción. */
+     médico/admin. Un Servicio sí lo puede cerrar enfermería, pero solo si
+     está en SERVICIOS_ENFERMERIA — ver puedeEnfermeriaCompletarServicio(). */
   var _isMedicoTratanteCache = false;
   function esMedicoTratanteClient() {
     return !!(cmgAuth.currentUser && _isMedicoTratanteCache);
@@ -3235,6 +3251,13 @@ summary.ed-meds-cat { list-style: revert; }
         '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
       '</div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:22px">' +
+        '<div class="ed-section-title" style="margin:0">🧴 En Proceso Sueroterapia / estabilización</div>' +
+        '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-en-proceso-suero" type="button" style="padding:6px 12px;font-size:12px">🔄 Refrescar</button>' +
+      '</div>' +
+      '<div id="en-proceso-suero-lista">' +
+        '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:22px">' +
         '<div class="ed-section-title" style="margin:0">⏳ Pendiente para Médico</div>' +
         '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-pendientes-med" type="button" style="padding:6px 12px;font-size:12px">🔄 Refrescar</button>' +
       '</div>' +
@@ -3280,10 +3303,12 @@ summary.ed-meds-cat { list-style: revert; }
 
     $id('btn-refrescar-pendientes-enf').addEventListener('click', cargarPendientesEnfermeria);
     $id('btn-refrescar-pendientes-completar-enf').addEventListener('click', cargarListoCompletarEnfermeria);
+    $id('btn-refrescar-en-proceso-suero').addEventListener('click', cargarEnProcesoSueroterapia);
     $id('btn-refrescar-pendientes-med').addEventListener('click', cargarPendientesMedico);
 
     cargarPendientesEnfermeria();
     cargarListoCompletarEnfermeria();
+    cargarEnProcesoSueroterapia();
     cargarPendientesMedico();
 
     /* DRM: instancia embebida de Pruebas Rápidas / Laboratorio dentro de Consulta */
@@ -3375,19 +3400,25 @@ summary.ed-meds-cat { list-style: revert; }
     });
   }
 
-  /* ─── Cargar pendientes para Médico (solo pre clínica de Consulta médica; los
-     servicios que no requieren médico se completan desde "Listo para completar
-     Enfermería", ver cargarListoCompletarEnfermeria) ─── */
+  /* ─── Cargar pendientes para Médico: pre clínica de Consulta médica + los
+     Servicios que requieren médico/admin (Procedimientos, Cuidado de la mujer,
+     vías urinarias, etc. — todo lo que NO está en SERVICIOS_ENFERMERIA). Los
+     servicios que sí puede completar enfermería se muestran en "Listo para
+     completar Enfermería" / "En Proceso Sueroterapia", ver
+     cargarListoCompletarEnfermeria / cargarEnProcesoSueroterapia. ─── */
   function cargarPendientesMedico() {
     var lista = $id('pendientes-medico-lista');
     if (!lista) return;
     lista.innerHTML = '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>';
     cmgDb.collection('consultas')
-      .where('status', '==', 'preclinica')
+      .where('status', 'in', ['preclinica', 'servicio'])
       .get()
       .then(function (snap) {
         var items = [];
-        snap.forEach(function (d) { items.push(Object.assign({ _id: d.id }, d.data())); });
+        snap.forEach(function (d) {
+          var it = Object.assign({ _id: d.id }, d.data());
+          if (it.status === 'preclinica' || !puedeEnfermeriaCompletarServicio(it.servicioNombre)) items.push(it);
+        });
         items.sort(function (a, b) {
           var getFecha = function (it) {
             return tsMillis(it.fechaPreclinica || it.fechaServicio);
@@ -3437,12 +3468,13 @@ summary.ed-meds-cat { list-style: revert; }
           var fechaMostrar = it.fechaPreclinica || it.fechaServicio;
           var registradoPor = it.preclinicaPor || it.servicioPor || '—';
           var btnLabel = esServicio ? 'Completar →' : 'Continuar →';
-          /* Consulta (no Servicio) es exclusiva de médico/admin: enfermería ni
-             siquiera puede abrir el formulario, solo ver que está pendiente. */
-          var puedeEntrar = esServicio || esMedicoTratanteClient();
+          /* Todo lo que llega a esta lista (Consulta o Servicio médico-exclusivo)
+             requiere médico/admin: enfermería ni siquiera puede abrir el formulario,
+             solo ver que está pendiente. */
+          var puedeEntrar = esMedicoTratanteClient();
           var btnHtml = puedeEntrar
             ? '<button class="ed-btn ed-btn-yellow" data-continuar="' + esc(it._id) + '">' + btnLabel + '</button>'
-            : '<span class="ed-btn" style="background:#E5E7EB;color:#6B7280;cursor:not-allowed" title="Solo médico o admin puede completar una Consulta">🔒 Solo médico</span>';
+            : '<span class="ed-btn" style="background:#E5E7EB;color:#6B7280;cursor:not-allowed" title="Solo médico o admin puede completar esta Consulta/Servicio">🔒 Solo médico</span>';
           return '<div class="ed-pending-item">' +
             '<div class="ed-pending-info">' +
               '<p class="ed-pending-name">' + esc(it.pacienteNombre || it.codigoPaciente) + badge +
@@ -3474,10 +3506,46 @@ summary.ed-meds-cat { list-style: revert; }
       });
   }
 
-  /* ─── Cargar servicios listos para que Enfermería los complete (status:'servicio').
-     Son servicios que no requieren intervención médica (ej. Sueroterapias, Toma de
-     presión, etc.) — enfermería toma la preclínica y el mismo registro queda aquí
-     para que enfermería lo complete; de ahí pasa directo a Caja para liquidar. ─── */
+  /* ─── HTML de una fila de servicio pendiente de completar por Enfermería,
+     compartido entre "Listo para completar Enfermería" y "En Proceso Sueroterapia
+     / estabilización" (mismo tipo de registro, status:'servicio'). ─── */
+  function buildServicioPendienteItemHtml(it) {
+    var infoExtra = '<div class="ed-pending-vitals">🛎️ ' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>';
+    var enAtencionHtml = '';
+    if (it.enAtencionPor) {
+      var elapsedMin = it.enAtencionDesde ? Math.max(0, Math.floor((Date.now() - tsMillis(it.enAtencionDesde)) / 60000)) : 0;
+      var demorado = elapsedMin >= 20;
+      var enAtencionTexto = demorado
+        ? '⏱️ Demorado / Sin Completar' + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : '')
+        : '🩺 En atención' + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : ' · recién');
+      enAtencionHtml = '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:' +
+        (demorado ? '#92400E' : '#1D4ED8') + ';background:' + (demorado ? '#FEF3C7' : '#DBEAFE') + '">' + enAtencionTexto + '</div>';
+    }
+    var iniciadaHtml = it.servicioIniciado
+      ? '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:#166534;background:#DCFCE7;margin-left:4px">📝 Iniciada' + (it.borradorServicioPor ? ' · por ' + esc(it.borradorServicioPor) : '') + '</div>'
+      : '';
+    return '<div class="ed-pending-item">' +
+      '<div class="ed-pending-info">' +
+        '<p class="ed-pending-name">' + esc(it.pacienteNombre || it.codigoPaciente) +
+          ' <span style="font-weight:500;color:#6B7280">· ' + esc(it.codigoPaciente) + '</span></p>' +
+        '<p class="ed-pending-meta">📅 ' + fmtDate(it.fechaServicio) + ' · Registrado por ' + esc(it.servicioPor || '—') + '</p>' +
+        infoExtra +
+        enAtencionHtml +
+        iniciadaHtml +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:6px;align-items:stretch">' +
+        '<button class="ed-btn ed-btn-yellow" data-completar-enf="' + esc(it._id) + '">Completar →</button>' +
+        '<button class="ed-consulta-link ed-link-red" data-borrar-pendiente="' + esc(it._id) + '" style="font-size:11px;text-align:center">🗑️ Quitar</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ─── Cargar servicios listos para que Enfermería los complete (status:'servicio',
+     excluye Sueroterapias — esas tienen su propia sección "En Proceso Sueroterapia
+     / estabilización" porque toman tiempo de infusión/observación). Son servicios
+     que no requieren intervención médica (Toma de presión, Glucometría, etc.) —
+     enfermería toma la preclínica y el mismo registro queda aquí para que
+     enfermería lo complete; de ahí pasa directo a Caja para liquidar. ─── */
   function cargarListoCompletarEnfermeria() {
     var lista = $id('pendientes-completar-enf-lista');
     if (!lista) return;
@@ -3487,42 +3555,16 @@ summary.ed-meds-cat { list-style: revert; }
       .get()
       .then(function (snap) {
         var items = [];
-        snap.forEach(function (d) { items.push(Object.assign({ _id: d.id }, d.data())); });
+        snap.forEach(function (d) {
+          var it = Object.assign({ _id: d.id }, d.data());
+          if (!esServicioSuero(it.servicioNombre) && puedeEnfermeriaCompletarServicio(it.servicioNombre)) items.push(it);
+        });
         items.sort(function (a, b) { return tsMillis(b.fechaServicio) - tsMillis(a.fechaServicio); });
         if (!items.length) {
           lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">✅</div><p>No hay servicios listos para completar.</p></div>';
           return;
         }
-        lista.innerHTML = items.map(function (it) {
-          var infoExtra = '<div class="ed-pending-vitals">🛎️ ' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>';
-          var enAtencionHtml = '';
-          if (it.enAtencionPor) {
-            var elapsedMin = it.enAtencionDesde ? Math.max(0, Math.floor((Date.now() - tsMillis(it.enAtencionDesde)) / 60000)) : 0;
-            var demorado = elapsedMin >= 20;
-            var enAtencionTexto = demorado
-              ? '⏱️ Demorado / Sin Completar' + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : '')
-              : '🩺 En atención' + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : ' · recién');
-            enAtencionHtml = '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:' +
-              (demorado ? '#92400E' : '#1D4ED8') + ';background:' + (demorado ? '#FEF3C7' : '#DBEAFE') + '">' + enAtencionTexto + '</div>';
-          }
-          var iniciadaHtml = it.servicioIniciado
-            ? '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:#166534;background:#DCFCE7;margin-left:4px">📝 Iniciada' + (it.borradorServicioPor ? ' · por ' + esc(it.borradorServicioPor) : '') + '</div>'
-            : '';
-          return '<div class="ed-pending-item">' +
-            '<div class="ed-pending-info">' +
-              '<p class="ed-pending-name">' + esc(it.pacienteNombre || it.codigoPaciente) +
-                ' <span style="font-weight:500;color:#6B7280">· ' + esc(it.codigoPaciente) + '</span></p>' +
-              '<p class="ed-pending-meta">📅 ' + fmtDate(it.fechaServicio) + ' · Registrado por ' + esc(it.servicioPor || '—') + '</p>' +
-              infoExtra +
-              enAtencionHtml +
-              iniciadaHtml +
-            '</div>' +
-            '<div style="display:flex;flex-direction:column;gap:6px;align-items:stretch">' +
-              '<button class="ed-btn ed-btn-yellow" data-completar-enf="' + esc(it._id) + '">Completar →</button>' +
-              '<button class="ed-consulta-link ed-link-red" data-borrar-pendiente="' + esc(it._id) + '" style="font-size:11px;text-align:center">🗑️ Quitar</button>' +
-            '</div>' +
-          '</div>';
-        }).join('');
+        lista.innerHTML = items.map(buildServicioPendienteItemHtml).join('');
         lista.querySelectorAll('[data-completar-enf]').forEach(function (b) {
           b.addEventListener('click', function () {
             continuarConsulta(b.getAttribute('data-completar-enf'));
@@ -3531,6 +3573,45 @@ summary.ed-meds-cat { list-style: revert; }
         lista.querySelectorAll('[data-borrar-pendiente]').forEach(function (b) {
           b.addEventListener('click', function () {
             borrarConsultaPendiente(b.getAttribute('data-borrar-pendiente'), cargarListoCompletarEnfermeria);
+          });
+        });
+      })
+      .catch(function (err) {
+        lista.innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error: ' + esc(err.message) + '</div>';
+      });
+  }
+
+  /* ─── Cargar Sueroterapias en curso (status:'servicio', esServicioSuero) en su
+     propia sección "En Proceso Sueroterapia / estabilización": a diferencia de un
+     servicio rápido (Toma de presión, etc.), una sueroterapia mantiene al paciente
+     en observación/infusión un rato antes de que enfermería pueda completarla. ─── */
+  function cargarEnProcesoSueroterapia() {
+    var lista = $id('en-proceso-suero-lista');
+    if (!lista) return;
+    lista.innerHTML = '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>';
+    cmgDb.collection('consultas')
+      .where('status', '==', 'servicio')
+      .get()
+      .then(function (snap) {
+        var items = [];
+        snap.forEach(function (d) {
+          var it = Object.assign({ _id: d.id }, d.data());
+          if (esServicioSuero(it.servicioNombre)) items.push(it);
+        });
+        items.sort(function (a, b) { return tsMillis(b.fechaServicio) - tsMillis(a.fechaServicio); });
+        if (!items.length) {
+          lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">✅</div><p>No hay sueroterapias en proceso.</p></div>';
+          return;
+        }
+        lista.innerHTML = items.map(buildServicioPendienteItemHtml).join('');
+        lista.querySelectorAll('[data-completar-enf]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            continuarConsulta(b.getAttribute('data-completar-enf'));
+          });
+        });
+        lista.querySelectorAll('[data-borrar-pendiente]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            borrarConsultaPendiente(b.getAttribute('data-borrar-pendiente'), cargarEnProcesoSueroterapia);
           });
         });
       })
@@ -4688,6 +4769,15 @@ summary.ed-meds-cat { list-style: revert; }
         if (data.status !== 'listo_enfermeria' && data.status !== 'servicio' && !esMedicoTratanteClient()) {
           hideOverlay();
           showAlert('Esta Consulta médica solo puede completarla un médico o admin.', 'error');
+          return;
+        }
+        /* Dentro de los Servicios, solo los de SERVICIOS_ENFERMERIA (Sueroterapias +
+           unos generales) los puede completar enfermería; el resto (Procedimientos,
+           Cuidado de la mujer, vías urinarias, etc.) requiere médico/admin, igual que
+           una Consulta. Ver comentario en SERVICIOS_ENFERMERIA. */
+        if (data.status === 'servicio' && !puedeEnfermeriaCompletarServicio(data.servicioNombre) && !esMedicoTratanteClient()) {
+          hideOverlay();
+          showAlert('Este servicio solo puede completarlo un médico o admin.', 'error');
           return;
         }
         /* Cargar paciente */

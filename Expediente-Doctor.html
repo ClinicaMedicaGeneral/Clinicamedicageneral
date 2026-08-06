@@ -5200,13 +5200,22 @@ summary.ed-meds-cat { list-style: revert; }
             '<small style="color:#6B7280;display:block;margin-top:6px">El catálogo es estricto y coincide con el cotizador. Si necesitás agregar un examen nuevo, pedile al admin que lo incluya en la lista del sistema.</small>' +
           '</div>' +
           '<div class="ed-grid ed-grid-2" style="gap:10px;margin-top:10px">' +
-            '<div class="ed-fgroup"><label class="ed-label">Proveedor (laboratorio)</label>' +
+            '<div class="ed-fgroup"><label class="ed-label">Proveedor (laboratorio) *</label>' +
               '<select class="ed-input" id="qm-lab-proveedor" style="appearance:auto;-webkit-appearance:menulist">' +
+                '<option value="">— Seleccionar —</option>' +
                 '<option value="Labex">Labex</option>' +
                 '<option value="Masterlab">Masterlab</option>' +
               '</select></div>' +
             '<div class="ed-fgroup"><label class="ed-label">Prioridad</label>' +
               '<select class="ed-input" id="qm-lab-prioridad"><option value="rutina">Rutina</option><option value="urgente">Urgente</option></select></div>' +
+            '<div class="ed-fgroup full"><label class="ed-label">Solicitado por *</label>' +
+              '<select class="ed-input" id="qm-lab-solicitadopor" style="appearance:auto;-webkit-appearance:menulist">' +
+                '<option value="">— Seleccionar —</option>' +
+                '<option value="Dr. Brian Rojas">Dr. Brian Rojas</option>' +
+                '<option value="Dr. Hermes Molina">Dr. Hermes Molina</option>' +
+                '<option value="Dr. Adony Álvarez">Dr. Adony Álvarez</option>' +
+                '<option value="Orden externa">Orden externa</option>' +
+              '</select></div>' +
           '</div>' +
           '<div class="ed-fgroup full" style="margin-top:8px"><label class="ed-label">Notas / Indicaciones</label>' +
             '<textarea class="ed-textarea" id="qm-lab-notas" rows="2"></textarea></div>' +
@@ -5254,6 +5263,10 @@ summary.ed-meds-cat { list-style: revert; }
       var seleccionados = [];
       document.querySelectorAll('.qm-lab-chk:checked').forEach(function(c){ seleccionados.push(c.value); });
       if (!seleccionados.length) { showAlert('Marca al menos un examen del catálogo', 'error'); return; }
+      var proveedorSel = $val('qm-lab-proveedor');
+      if (!proveedorSel) { showAlert('Selecciona el laboratorio al que se envía la orden.', 'error'); return; }
+      var medicoSolicitante = $val('qm-lab-solicitadopor');
+      if (!medicoSolicitante) { showAlert('Selecciona quién solicita el examen (médico u Orden externa).', 'error'); return; }
       var nombreOrden = seleccionados.length === 1
         ? seleccionados[0]
         : 'Conjunto: ' + seleccionados.join(', ');
@@ -5269,7 +5282,8 @@ summary.ed-meds-cat { list-style: revert; }
         tipoNombre     : nombreOrden,
         examenesSolicitados: nombreOrden,
         examenesArray  : seleccionados,
-        proveedor      : $val('qm-lab-proveedor'),
+        proveedor      : proveedorSel,
+        medicoSolicitante: medicoSolicitante,
         prioridad      : $val('qm-lab-prioridad'),
         notas          : $val('qm-lab-notas'),
         status         : 'pendiente_muestra',
@@ -6551,7 +6565,8 @@ summary.ed-meds-cat { list-style: revert; }
                 '</div>' +
                 '<div style="font-weight:600;color:#374151;margin-top:4px">🔬 ' + esc(ex.examenesSolicitados || ex.tipoNombre || '—') + ' <span style="background:' + col + ';color:#fff;font-size:10px;padding:2px 8px;border-radius:100px;margin-left:6px">' + st + '</span></div>' +
                 '<div style="font-size:12px;color:#6B7280;margin-top:2px">🏥 Enviado a: <b>' + esc(ex.proveedor || 'Sin especificar') + '</b></div>' +
-                '<div style="font-size:12px;color:#6B7280;margin-top:2px">Solicitado por: ' + esc(ex.solicitadoPorNombre || ex.solicitadoPor || '—') + ' · ' + esc(fecha) + (ex.prioridad === 'urgente' ? ' · 🚨 URGENTE' : '') + '</div>' +
+                (ex.medicoSolicitante ? '<div style="font-size:12px;color:#6B7280;margin-top:2px">🩺 Médico solicitante: <b>' + esc(ex.medicoSolicitante) + '</b></div>' : '') +
+                '<div style="font-size:12px;color:#6B7280;margin-top:2px">Registrado por: ' + esc(ex.solicitadoPorNombre || ex.solicitadoPor || '—') + ' · ' + esc(fecha) + (ex.prioridad === 'urgente' ? ' · 🚨 URGENTE' : '') + '</div>' +
                 (ex.notas ? '<div style="font-size:12px;color:#374151;margin-top:4px"><b>Notas:</b> ' + esc(ex.notas) + '</div>' : '') +
               '</div>' +
               '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:start">' +

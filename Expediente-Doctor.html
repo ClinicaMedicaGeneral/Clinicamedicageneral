@@ -3206,14 +3206,14 @@ summary.ed-meds-cat { list-style: revert; }
           '<div class="ed-mode-icon">🩺</div>' +
           '<div>' +
             '<p class="ed-mode-title">Etapa 2 · Enfermería</p>' +
-            '<p class="ed-mode-desc">Selecciona un registro en "Pendiente para Enfermería" para tomar signos vitales.</p>' +
+            '<p class="ed-mode-desc">Selecciona un registro en "Pendiente para Enfermería" para tomar signos vitales. Los servicios que no requieren médico (ej. Sueroterapias) pasan luego a "Listo para completar Enfermería".</p>' +
           '</div>' +
         '</div>' +
         '<div class="ed-mode-card is-yellow" style="cursor:default">' +
           '<div class="ed-mode-icon">📝</div>' +
           '<div>' +
             '<p class="ed-mode-title">Etapa 3 · Médico / Completar</p>' +
-            '<p class="ed-mode-desc">Selecciona un registro en "Pendiente para Médico" para continuar o completar.</p>' +
+            '<p class="ed-mode-desc">Selecciona un registro en "Pendiente para Médico" para continuar o completar la consulta médica.</p>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -3225,6 +3225,13 @@ summary.ed-meds-cat { list-style: revert; }
         '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-pendientes-enf" type="button" style="padding:6px 12px;font-size:12px">🔄 Refrescar</button>' +
       '</div>' +
       '<div id="pendientes-enfermeria-lista">' +
+        '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:22px">' +
+        '<div class="ed-section-title" style="margin:0">✅ Listo para completar Enfermería</div>' +
+        '<button class="ed-btn ed-btn-ghost" id="btn-refrescar-pendientes-completar-enf" type="button" style="padding:6px 12px;font-size:12px">🔄 Refrescar</button>' +
+      '</div>' +
+      '<div id="pendientes-completar-enf-lista">' +
         '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>' +
       '</div>' +
       '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:22px">' +
@@ -3272,9 +3279,11 @@ summary.ed-meds-cat { list-style: revert; }
     }
 
     $id('btn-refrescar-pendientes-enf').addEventListener('click', cargarPendientesEnfermeria);
+    $id('btn-refrescar-pendientes-completar-enf').addEventListener('click', cargarListoCompletarEnfermeria);
     $id('btn-refrescar-pendientes-med').addEventListener('click', cargarPendientesMedico);
 
     cargarPendientesEnfermeria();
+    cargarListoCompletarEnfermeria();
     cargarPendientesMedico();
 
     /* DRM: instancia embebida de Pruebas Rápidas / Laboratorio dentro de Consulta */
@@ -3366,13 +3375,15 @@ summary.ed-meds-cat { list-style: revert; }
     });
   }
 
-  /* ─── Cargar pendientes para Médico (pre clínica lista + servicios por completar) ─── */
+  /* ─── Cargar pendientes para Médico (solo pre clínica de Consulta médica; los
+     servicios que no requieren médico se completan desde "Listo para completar
+     Enfermería", ver cargarListoCompletarEnfermeria) ─── */
   function cargarPendientesMedico() {
     var lista = $id('pendientes-medico-lista');
     if (!lista) return;
     lista.innerHTML = '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>';
     cmgDb.collection('consultas')
-      .where('status', 'in', ['preclinica', 'servicio'])
+      .where('status', '==', 'preclinica')
       .get()
       .then(function (snap) {
         var items = [];
@@ -3463,6 +3474,71 @@ summary.ed-meds-cat { list-style: revert; }
       });
   }
 
+  /* ─── Cargar servicios listos para que Enfermería los complete (status:'servicio').
+     Son servicios que no requieren intervención médica (ej. Sueroterapias, Toma de
+     presión, etc.) — enfermería toma la preclínica y el mismo registro queda aquí
+     para que enfermería lo complete; de ahí pasa directo a Caja para liquidar. ─── */
+  function cargarListoCompletarEnfermeria() {
+    var lista = $id('pendientes-completar-enf-lista');
+    if (!lista) return;
+    lista.innerHTML = '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>';
+    cmgDb.collection('consultas')
+      .where('status', '==', 'servicio')
+      .get()
+      .then(function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ _id: d.id }, d.data())); });
+        items.sort(function (a, b) { return tsMillis(b.fechaServicio) - tsMillis(a.fechaServicio); });
+        if (!items.length) {
+          lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">✅</div><p>No hay servicios listos para completar.</p></div>';
+          return;
+        }
+        lista.innerHTML = items.map(function (it) {
+          var infoExtra = '<div class="ed-pending-vitals">🛎️ ' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>';
+          var enAtencionHtml = '';
+          if (it.enAtencionPor) {
+            var elapsedMin = it.enAtencionDesde ? Math.max(0, Math.floor((Date.now() - tsMillis(it.enAtencionDesde)) / 60000)) : 0;
+            var demorado = elapsedMin >= 20;
+            var enAtencionTexto = demorado
+              ? '⏱️ Demorado / Sin Completar' + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : '')
+              : '🩺 En atención' + (elapsedMin > 0 ? ' · hace ' + elapsedMin + ' min' : ' · recién');
+            enAtencionHtml = '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:' +
+              (demorado ? '#92400E' : '#1D4ED8') + ';background:' + (demorado ? '#FEF3C7' : '#DBEAFE') + '">' + enAtencionTexto + '</div>';
+          }
+          var iniciadaHtml = it.servicioIniciado
+            ? '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:#166534;background:#DCFCE7;margin-left:4px">📝 Iniciada' + (it.borradorServicioPor ? ' · por ' + esc(it.borradorServicioPor) : '') + '</div>'
+            : '';
+          return '<div class="ed-pending-item">' +
+            '<div class="ed-pending-info">' +
+              '<p class="ed-pending-name">' + esc(it.pacienteNombre || it.codigoPaciente) +
+                ' <span style="font-weight:500;color:#6B7280">· ' + esc(it.codigoPaciente) + '</span></p>' +
+              '<p class="ed-pending-meta">📅 ' + fmtDate(it.fechaServicio) + ' · Registrado por ' + esc(it.servicioPor || '—') + '</p>' +
+              infoExtra +
+              enAtencionHtml +
+              iniciadaHtml +
+            '</div>' +
+            '<div style="display:flex;flex-direction:column;gap:6px;align-items:stretch">' +
+              '<button class="ed-btn ed-btn-yellow" data-completar-enf="' + esc(it._id) + '">Completar →</button>' +
+              '<button class="ed-consulta-link ed-link-red" data-borrar-pendiente="' + esc(it._id) + '" style="font-size:11px;text-align:center">🗑️ Quitar</button>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+        lista.querySelectorAll('[data-completar-enf]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            continuarConsulta(b.getAttribute('data-completar-enf'));
+          });
+        });
+        lista.querySelectorAll('[data-borrar-pendiente]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            borrarConsultaPendiente(b.getAttribute('data-borrar-pendiente'), cargarListoCompletarEnfermeria);
+          });
+        });
+      })
+      .catch(function (err) {
+        lista.innerHTML = '<div class="ed-alert ed-alert-error is-visible">Error: ' + esc(err.message) + '</div>';
+      });
+  }
+
   /* ─── Formulario solo signos vitales (Etapa 1) ─── */
   /* ─── Formulario de registro de visita (Etapa 1 · Caja) ───
      Caja solo indica qué necesita el paciente (Consulta o Servicio), sin datos
@@ -3536,7 +3612,7 @@ summary.ed-meds-cat { list-style: revert; }
       var selVal = esServ ? $id('reg-serv-selector').value : '';
       var sinPreclinica = esServ && SERVICIOS_SIN_PRECLINICA.indexOf(selVal) !== -1;
       $id('btn-guardar-registro').textContent = sinPreclinica
-        ? '💾 Registrar (directo a médico, sin preclínica)'
+        ? '💾 Registrar (listo para completar, sin preclínica)'
         : '💾 Registrar (queda listo para enfermería)';
     }
     wireEmergenciaToggle('reg');
@@ -3576,8 +3652,8 @@ summary.ed-meds-cat { list-style: revert; }
       docData.servicioNombre = servicioNombre;
       docData.servicioNotas = $val('reg-notas');
 
-      /* Servicios sin preclínica: van directo a 'servicio' (Pendiente para Médico),
-         sin pasar por Enfermería. */
+      /* Servicios sin preclínica: van directo a 'servicio' (Listo para completar
+         Enfermería), sin pasar por la toma de signos vitales. */
       if (SERVICIOS_SIN_PRECLINICA.indexOf(servicioNombre) !== -1) {
         saltaPreclinica = true;
         var registradoPor = cmgAuth.currentUser.displayName || cmgAuth.currentUser.email;
@@ -3592,7 +3668,7 @@ summary.ed-meds-cat { list-style: revert; }
     cmgDb.collection('consultas').add(docData)
       .then(function () {
         hideOverlay();
-        showAlert(saltaPreclinica ? '✓ Registrado. Directo a médico (sin preclínica).' : '✓ Registrado. Queda listo para enfermería.', 'success');
+        showAlert(saltaPreclinica ? '✓ Registrado. Listo para completar por enfermería (sin preclínica).' : '✓ Registrado. Queda listo para enfermería.', 'success');
         renderConsultaTab();
       })
       .catch(function (err) {
@@ -3761,7 +3837,7 @@ summary.ed-meds-cat { list-style: revert; }
           '<textarea class="ed-textarea" id="enf-notas" rows="2" placeholder="Observaciones relevantes"></textarea></div>' +
       '</div>' +
       '<div class="ed-actions">' +
-        '<button class="ed-btn ed-btn-primary" id="btn-completar-enfermeria">✅ Completar y enviar a médico</button>' +
+        '<button class="ed-btn ed-btn-primary" id="btn-completar-enfermeria">' + (esServicio ? '✅ Continuar (listo para completar por Enfermería)' : '✅ Completar y enviar a médico') + '</button>' +
         '<button class="ed-btn ed-btn-danger" id="btn-cancelar-registro">🗑️ Cancelar este registro</button>' +
       '</div>';
 
@@ -3882,7 +3958,7 @@ summary.ed-meds-cat { list-style: revert; }
     cmgDb.collection('consultas').doc(it._id).update(updateData)
       .then(function () {
         hideOverlay();
-        showAlert('✓ Enviado a la siguiente etapa (Médico).', 'success');
+        showAlert(esServicio ? '✓ Listo para completar por Enfermería.' : '✓ Enviado a la siguiente etapa (Médico).', 'success');
         consultaPendienteCargada = null;
         renderConsultaTab();
       })

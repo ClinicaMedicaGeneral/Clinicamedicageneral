@@ -5130,7 +5130,7 @@ summary.ed-meds-cat { list-style: revert; }
         proveedor      : $val('qm-lab-proveedor'),
         prioridad      : $val('qm-lab-prioridad'),
         notas          : $val('qm-lab-notas'),
-        status         : 'pendiente',
+        status         : 'pendiente_muestra',
         consultaPadreId: consultaPadreId || null,
         solicitadoPor  : cmgAuth.currentUser.email,
         solicitadoPorNombre: cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
@@ -6337,7 +6337,7 @@ summary.ed-meds-cat { list-style: revert; }
     var box = $id('laboratorio-pendientes' + sufijo);
     if (!box) return;
     cmgDb.collection('examenesLaboratorio')
-      .where('status', 'in', ['pendiente', 'procesando'])
+      .where('status', 'in', ['pendiente_muestra', 'pendiente', 'procesando'])
       .get()
       .then(function(snap){
         if (snap.empty) {
@@ -6384,9 +6384,9 @@ summary.ed-meds-cat { list-style: revert; }
           return tb - ta;
         });
         box.innerHTML = arr.map(function(ex){
-          var st = ex.status === 'procesando' ? 'Procesando' : 'Pendiente';
-          var col = ex.status === 'procesando' ? '#3B82F6' : '#F59E0B';
-          var bg  = ex.status === 'procesando' ? '#DBEAFE' : '#FEF3C7';
+          var st = ex.status === 'procesando' ? 'Procesando' : (ex.status === 'pendiente_muestra' ? 'Pendiente para toma de muestra' : 'Pendiente');
+          var col = ex.status === 'procesando' ? '#3B82F6' : (ex.status === 'pendiente_muestra' ? '#7C3AED' : '#F59E0B');
+          var bg  = ex.status === 'procesando' ? '#DBEAFE' : (ex.status === 'pendiente_muestra' ? '#EDE9FE' : '#FEF3C7');
           var fecha = (ex.createdAt && ex.createdAt.toMillis) ? new Date(ex.createdAt.toMillis()).toLocaleString('es-HN') : '—';
           var nombrePaciente = ex.pacienteNombre || ex.pacienteNombreExpediente || '— sin paciente —';
           var edadTxt = ex.fechaNacimiento ? calcEdad(ex.fechaNacimiento) : '';
@@ -6408,6 +6408,9 @@ summary.ed-meds-cat { list-style: revert; }
                 (ex.notas ? '<div style="font-size:12px;color:#374151;margin-top:4px"><b>Notas:</b> ' + esc(ex.notas) + '</div>' : '') +
               '</div>' +
               '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:start">' +
+                (ex.status === 'pendiente_muestra'
+                  ? '<button class="ed-btn ed-btn-ghost" data-muestra-tomada="' + esc(ex._id) + '">🩸 Muestra tomada</button>'
+                  : '') +
                 (ex.status === 'pendiente'
                   ? '<button class="ed-btn ed-btn-ghost" data-procesar="' + esc(ex._id) + '">▶ Retirado por Laboratorio</button>'
                   : '') +
@@ -6419,6 +6422,12 @@ summary.ed-meds-cat { list-style: revert; }
           '</div>';
         }).join('');
 
+        box.querySelectorAll('[data-muestra-tomada]').forEach(function(b){
+          b.addEventListener('click', function(){
+            cmgDb.collection('examenesLaboratorio').doc(this.getAttribute('data-muestra-tomada')).update({ status: 'pendiente' })
+              .then(function(){ showAlert('✓ Muestra tomada. Lista para retiro de laboratorio.', 'success'); cargarLaboratorioPendientesGlobal(); });
+          });
+        });
         box.querySelectorAll('[data-procesar]').forEach(function(b){
           b.addEventListener('click', function(){
             cmgDb.collection('examenesLaboratorio').doc(this.getAttribute('data-procesar')).update({ status: 'procesando' })

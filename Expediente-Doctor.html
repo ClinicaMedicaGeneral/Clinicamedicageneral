@@ -4902,8 +4902,8 @@ summary.ed-meds-cat { list-style: revert; }
               buildMedsCatsHtml(MEDS_DESPACHO_CATS) +
               '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se despachan medicamentos)</label>' +
             '</div></div>' +
-          '<div class="ed-fgroup full"><label class="ed-label">🏥 Receta externa (medicamentos a comprar en farmacia)</label>' +
-            '<textarea class="ed-textarea" id="cons-receta-externa" rows="3" placeholder="Medicamentos que el paciente debe comprar en una farmacia externa (no los vendemos). Indica nombre, dosis, vía y frecuencia. Ej: Omeprazol 20 mg, 1 cápsula en ayunas por 14 días"></textarea>' +
+          '<div class="ed-fgroup full"><label class="ed-label">🏥 Receta externa (medicamentos a comprar en farmacia) *</label>' +
+            '<textarea class="ed-textarea" id="cons-receta-externa" rows="3" placeholder="Medicamentos que el paciente debe comprar en una farmacia externa (no los vendemos). Indica nombre, dosis, vía y frecuencia. Ej: Omeprazol 20 mg, 1 cápsula en ayunas por 14 días. Si no aplica, escribe: Ninguna." required></textarea>' +
             '<small style="color:#6B7280;display:block;margin-top:4px">Texto libre. Aparecerá en el PDF de la consulta como indicación de compra externa.</small></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">Indicaciones al paciente *</label>' +
             '<textarea class="ed-textarea" id="cons-indicaciones" rows="2" placeholder="Recomendaciones generales, dieta, reposo, signos de alarma" required></textarea></div>' +
@@ -5498,6 +5498,7 @@ summary.ed-meds-cat { list-style: revert; }
     var medsVisita   = collectChecked('cons-meds-visita-list');
     var medsDespacho = collectChecked('cons-meds-despacho-list');
     var recetaExterna = $val('cons-receta-externa');
+    if (!recetaExterna) faltantes.push('Receta externa');
     var visitaNinguno   = grupoEsNinguno('cons-meds-visita-list');
     var despachoNinguno = grupoEsNinguno('cons-meds-despacho-list');
     if (!grupoTieneEleccion('cons-meds-visita-list'))   faltantes.push('Medicamentos aplicados en la visita (marca alguno o "Ninguno")');

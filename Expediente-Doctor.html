@@ -1775,7 +1775,7 @@ summary.ed-meds-cat { list-style: revert; }
         (esServicioConNombre ?
           '<div class="ed-fgroup"><label class="ed-label">Servicio</label><input type="text" class="ed-input" id="' + prefix + '-servicio" value="' + esc(d.servicioNombre || '') + '"></div>' +
           '<div class="ed-fgroup" style="align-self:end"><label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-convertido"' + (d.convertidoConsulta ? ' checked' : '') + '> ❌ Este servicio no se realizó (se convirtió en consulta médica)</label></div>'
-        : '') +
+        : '<div class="ed-fgroup full"><label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-convertidoservicio"' + (d.convertidoServicio ? ' checked' : '') + '> ❌ Esta consulta no se realizó (se convirtió en servicio)</label></div>') +
         '<div class="ed-fgroup"><label class="ed-label">Medicamentos aplicados en consulta</label><input type="text" class="ed-input" id="' + prefix + '-medsvisita" value="' + esc((d.medicamentosVisita || []).join(', ')) + '" placeholder="separados por coma"></div>' +
         '<div class="ed-fgroup"><label class="ed-label">Despacho</label><input type="text" class="ed-input" id="' + prefix + '-medsdespacho" value="' + esc((d.medicamentosDespacho || []).join(', ')) + '" placeholder="separados por coma"></div>' +
         '<div class="ed-fgroup full"><label class="ed-label">Receta externa</label><textarea class="ed-textarea" id="' + prefix + '-recetaext" rows="2">' + esc(d.recetaExterna || '') + '</textarea></div>' +
@@ -1804,6 +1804,8 @@ summary.ed-meds-cat { list-style: revert; }
     if (servicioInput) update.servicioNombre = servicioInput.value.trim();
     var convertidoChk = $id(prefix + '-convertido');
     if (convertidoChk) update.convertidoConsulta = convertidoChk.checked;
+    var convertidoServicioChk = $id(prefix + '-convertidoservicio');
+    if (convertidoServicioChk) update.convertidoServicio = convertidoServicioChk.checked;
 
     showOverlay('Guardando ajuste...');
     cmgDb.collection('consultas').doc(id).update(update)
@@ -1883,13 +1885,19 @@ summary.ed-meds-cat { list-style: revert; }
           var esPruebaStandalone   = d.tipoRegistro === 'prueba-standalone';
           var esServicioStandalone = d.tipoRegistro === 'servicio-standalone' || (!d.diagnostico && d.servicioNombre && !esLabStandalone && !esPruebaStandalone);
           var servicios = (d.serviciosBrindados||[]).join(', ') || (esLabStandalone || esPruebaStandalone || esServicioStandalone ? servicioLabelConCantidad(d) : (d.diagnostico ? 'Consulta médica' : '—'));
-          /* DRM v3 #4: badge de constancia emitida */
+          /* DRM v3 #4: badge de constancia emitida. Si este registro no tiene
+             constancia propia, se deja el slot vacío por ahora — se rellena más
+             abajo si algún servicio hijo vinculado sí la tiene (ver bloque
+             "cargar servicios hijos"), para que aparezca sin importar en cuál de
+             los dos flujos (consulta directa o servicio anexado) se emitió. */
           var badgeConstancia = (d.tieneConstancia || d.constanciaId)
             ? '<span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">📄 Constancia emitida</span>'
             : '';
           var badgeConvertido = d.convertidoConsulta
             ? '<span style="background:#FEE2E2;color:#991B1B;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🔄 No se realizó, se convirtió en consulta</span>'
-            : '';
+            : (d.convertidoServicio
+              ? '<span style="background:#FEE2E2;color:#991B1B;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🔄 No se realizó, se convirtió en servicio</span>'
+              : '');
           var tipoLabel = esPruebaStandalone
             ? '<span style="background:#CCFBF1;color:#0F766E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🧪 Prueba rápida</span>'
             : esLabStandalone
@@ -1903,7 +1911,7 @@ summary.ed-meds-cat { list-style: revert; }
             '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:14px">' +
               '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">' +
                 '<div>' +
-                  '<b style="color:#213C7D;font-size:16px">' + esc(nombrePaciente) + '</b>' + tipoLabel + badgeConstancia + badgeConvertido + '<br>' +
+                  '<b style="color:#213C7D;font-size:16px">' + esc(nombrePaciente) + '</b>' + tipoLabel + '<span id="constancia-badge-' + esc(doc.id) + '">' + badgeConstancia + '</span>' + badgeConvertido + '<br>' +
                   '<small style="color:#6B7280">Expediente: <code style="background:#F3F4F6;padding:1px 6px;border-radius:4px">' + esc(d.codigoPaciente || '—') + '</code> · Médico: ' + esc(d.doctorNombre || d.servicioRealizadoPor || '—') + ' · ' + esc(d.fechaLocal ? d.fechaLocal.slice(0,16).replace('T',' ') : '') + '</small>' +
                 '</div>' +
                 '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
@@ -2010,6 +2018,20 @@ summary.ed-meds-cat { list-style: revert; }
           if (!slot) return;
           cmgDb.collection('consultas').where('consultaPadreId', '==', doc.id).get().then(function(hijos){
             if (hijos.empty) return;
+            /* Si algún servicio hijo tiene constancia, mostrar el badge aunque la
+               consulta padre no tenga la suya propia — la constancia se emite en
+               cualquiera de los dos flujos (consulta directa o servicio vinculado)
+               y en Caja debe verse igual en ambos casos. */
+            var hijoConConstancia = false;
+            hijos.forEach(function(h){
+              if (h.data().tieneConstancia || h.data().constanciaId) hijoConConstancia = true;
+            });
+            if (hijoConConstancia) {
+              var badgeSlot = $id('constancia-badge-' + doc.id);
+              if (badgeSlot && !badgeSlot.innerHTML) {
+                badgeSlot.innerHTML = '<span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">📄 Constancia emitida</span>';
+              }
+            }
             var lines = ['<div style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:6px;padding:8px 10px;font-size:12px"><b style="color:#213C7D">🔗 Servicios vinculados (mismo pago):</b><ul style="margin:4px 0 0 18px;padding:0">'];
             hijos.forEach(function(h){
               var hd = h.data();
@@ -4913,6 +4935,10 @@ summary.ed-meds-cat { list-style: revert; }
           '<button class="ed-btn ed-btn-ghost" id="btn-acc-servicio">🛎️ Realizar servicio</button>' +
         '</div>' +
       '</div>' +
+      '<div class="ed-section">' +
+        '<label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="cons-convertido-servicio"> ❌ Esta consulta no se realizó (se convirtió en servicio)</label>' +
+        '<p style="font-size:12px;color:#6B7280;margin:6px 0 0">Márcalo cuando el paciente vino pidiendo consulta pero lo que en realidad se hizo fue un servicio/procedimiento (ej. extracción de uña). Queda como etiqueta visible para Caja al liquidar.</p>' +
+      '</div>' +
       '<div id="cons-autoguardado-estado" style="font-size:12px;color:#6B7280;margin:0 0 8px;text-align:right"></div>' +
       '<div class="ed-actions">' +
         '<button class="ed-btn ed-btn-primary" id="btn-cons-guardar">💾 Finalizar consulta + Generar PDF</button>' +
@@ -5523,6 +5549,9 @@ summary.ed-meds-cat { list-style: revert; }
       salaEmergencia: salaEmergencia,
       indicaciones: indicaciones,
       proximaCita: proxCita,
+      /* Etiqueta para Caja: el paciente vino por consulta pero en realidad se
+         hizo un servicio/procedimiento en su lugar (ver checkbox del formulario). */
+      convertidoServicio: !!($id('cons-convertido-servicio') && $id('cons-convertido-servicio').checked),
       /* DRM Fun-11 v2: ya no embebemos la constancia en la consulta, flag y referencia */
       tieneConstancia: necesitaIncap,
       constanciaId: constanciaPrep ? constanciaPrep.ref.id : null,
@@ -5914,6 +5943,7 @@ summary.ed-meds-cat { list-style: revert; }
     if (esServicioCompleto)  badge = ' <span style="background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🛎️ Procedimiento completado</span>';
     if (esServicioPendiente) badge = ' <span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">🕐 Procedimiento pendiente</span>';
     if (c.convertidoConsulta) badge = ' <span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">❌ Servicio NO realizado · convertido en consulta</span>';
+    if (!esServicio && c.convertidoServicio) badge = ' <span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">❌ Consulta NO realizada · convertida en servicio</span>';
 
     var titulo = esServicio
       ? esc(servicioLabelConCantidad(c))

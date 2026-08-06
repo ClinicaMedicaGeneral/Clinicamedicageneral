@@ -3050,6 +3050,10 @@ summary.ed-meds-cat { list-style: revert; }
         '<div class="ed-fgroup full"><label class="ed-label">Alergias</label>' + inp('edit-alergias', dg.alergias) + '</div>' +
         '<div class="ed-fgroup full"><label class="ed-label">Obra social / Seguro médico</label>' + inp('edit-obra-social', dg.obraSocial) + '</div>' +
       '</div>' +
+      '<div class="ed-section"><div class="ed-section-title">📝 Notas del expediente</div>' +
+        '<p style="font-size:12px;color:#6B7280;margin:0 0 8px">Notas generales del paciente (advertencias, preferencias, indicaciones a tener en cuenta), no ligadas a una consulta en particular. Visibles para médico y enfermería.</p>' +
+        '<textarea class="ed-textarea" id="edit-notas" rows="4" placeholder="Ej: paciente prefiere citas por la mañana, requiere intérprete, advertencia de reacción a X medicamento...">' + esc(p.notas || '') + '</textarea>' +
+      '</div>' +
       '<div class="ed-section"><div class="ed-section-title">🏥 Antecedentes Patológicos</div><div id="edit-pat-container"></div></div>' +
       '<div class="ed-section"><div class="ed-section-title">🚭 Antecedentes No Patológicos</div><div id="edit-nopat-container"></div></div>' +
       '<div class="ed-section"><div class="ed-section-title">👨‍👩‍👧 Antecedentes Familiares</div>' +
@@ -3127,6 +3131,7 @@ summary.ed-meds-cat { list-style: revert; }
       antecedentesPatologicos: collectAntecedentes('edit-pat-container'),
       antecedentesNoPatologicos: collectAntecedentes('edit-nopat-container'),
       antecedentesFamiliares: $val('edit-familiares'),
+      notas: $val('edit-notas'),
       esD365: $val('edit-es-d365') === 'si',
       /* DRM Fun-10: Cliente especial (Discapacidad / Pensionado / Jubilado), editable sobre un expediente ya creado */
       clienteEspecial: {
@@ -3245,7 +3250,8 @@ summary.ed-meds-cat { list-style: revert; }
           '<div><p class="ed-patient-name">' + esc(dg.nombreCompleto) + '</p>' +
           '<p class="ed-patient-meta">' + (calcEdad(dg.fechaNacimiento) || '') +
           (dg.tipoSangre ? ' · Sangre ' + esc(dg.tipoSangre) : '') +
-          (dg.alergias ? ' · ⚠️ ' + esc(dg.alergias) : '') + '</p></div>' +
+          (dg.alergias ? ' · ⚠️ ' + esc(dg.alergias) : '') + '</p>' +
+          (p.notas ? '<p class="ed-patient-meta" style="color:#92400E">📝 ' + esc(p.notas) + '</p>' : '') + '</div>' +
           '<div class="ed-patient-code">' + esc(p.codigoPaciente) + '</div>' +
         '</div>';
     }

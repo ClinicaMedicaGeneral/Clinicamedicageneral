@@ -1568,6 +1568,26 @@ summary.ed-meds-cat { list-style: revert; }
     });
   }
 
+  /* Normaliza un teléfono guardado en texto libre (con o sin guiones/espacios/
+     código de país) al formato E.164 que espera wa.me: si quedan 8 dígitos
+     (número local hondureño) se le antepone 504; si ya trae más dígitos se
+     asume que el código de país ya viene incluido. */
+  function normalizarTelefonoWa(telefono) {
+    var digitos = (telefono || '').replace(/\D/g, '');
+    if (!digitos) return '';
+    if (digitos.length === 8) return '504' + digitos;
+    return digitos;
+  }
+  /* Link de WhatsApp para enviarle a un paciente el PDF de un examen de
+     laboratorio ya confirmado. Devuelve '' si no hay teléfono registrado. */
+  function waLinkExamen(telefono, pacienteNombre, examenNombre, pdfUrl) {
+    var tel = normalizarTelefonoWa(telefono);
+    if (!tel) return '';
+    var mensaje = 'Hola ' + (pacienteNombre || '') + ', le compartimos el resultado de su examen de laboratorio (' +
+      (examenNombre || 'Laboratorio') + ') de Clínica Médica General: ' + pdfUrl;
+    return 'https://wa.me/' + tel + '?text=' + encodeURIComponent(mensaje);
+  }
+
   /* Quita acentos y normaliza a minúsculas, así "maria" encuentra "María" al filtrar por nombre */
   function normalizarTexto(s) {
     return (s == null ? '' : String(s)).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
@@ -6587,6 +6607,11 @@ summary.ed-meds-cat { list-style: revert; }
     if (vinculadasAhora) {
       banner = '<div style="background:#D1FAE5;border:1px solid #6EE7B7;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#065F46">✓ ' + vinculadasAhora + ' examen' + (vinculadasAhora > 1 ? 'es vinculados' : ' vinculado') + ' automáticamente al expediente por coincidencia de DNI.</div>';
     }
+    /* Teléfono/nombre del paciente actualmente seleccionado, para el botón
+       "Enviar por WhatsApp" de cada examen confirmado. */
+    var waLinkDg = (pacienteActual && pacienteActual.datosGenerales) || {};
+    var waLinkTel = normalizarTelefonoWa(waLinkDg.telefono);
+    var waLinkNombre = waLinkDg.nombreCompleto || '';
     lista.innerHTML = banner + confirmados.map(function (ex) {
       var fecha = ex.fechaExamen || (ex.createdAt && ex.createdAt.toMillis ? new Date(ex.createdAt.toMillis()).toLocaleDateString('es-HN') : '—');
       var size = ex.fileSize ? ' · ' + (ex.fileSize / 1024 / 1024).toFixed(2) + ' MB' : '';
@@ -6604,6 +6629,13 @@ summary.ed-meds-cat { list-style: revert; }
           (ex.pdfUrl
             ? '<a class="ed-consulta-link" href="' + esc(ex.pdfUrl) + '" target="_blank" rel="noopener">📄 Ver PDF</a>'
             : '<button class="ed-consulta-link ed-link-blue" data-subir-orden="' + esc(ex._id) + '">📤 Subir PDF</button>') +
+          /* Solo en laboratorio, y solo cuando el examen ya está subido y confirmado
+             (ex.pdfUrl presente). Usa el teléfono del expediente del paciente. */
+          (ex.pdfUrl
+            ? (waLinkTel
+                ? '<a class="ed-consulta-link" style="background:#DCFCE7 !important;border-color:#86EFAC !important;color:#166534 !important" href="' + esc(waLinkExamen(waLinkTel, waLinkNombre, ex.tipoNombre || ex.tipo, ex.pdfUrl)) + '" target="_blank" rel="noopener">📱 Enviar por WhatsApp</a>'
+                : '<span class="ed-consulta-link" style="opacity:.5;cursor:not-allowed" title="El paciente no tiene teléfono registrado en el expediente">📱 Enviar por WhatsApp</span>')
+            : '') +
           '<button class="ed-consulta-link ed-link-blue" data-mover-examen="' + esc(ex._id) + '">📂 Mover</button>' +
           '<button class="ed-consulta-link ed-link-red" data-borrar-examen="' + esc(ex._id) + '" data-storage-path="' + esc(ex.storagePath || '') + '">🗑️ Borrar</button>' +
         '</div>' +

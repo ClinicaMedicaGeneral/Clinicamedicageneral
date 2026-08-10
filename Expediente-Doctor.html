@@ -3558,7 +3558,14 @@ summary.ed-meds-cat { list-style: revert; }
      compartido entre "Listo para completar Enfermería" y "En Proceso Sueroterapia
      / estabilización" (mismo tipo de registro, status:'servicio'). ─── */
   function buildServicioPendienteItemHtml(it) {
-    var infoExtra = '<div class="ed-pending-vitals">🛎️ ' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>';
+    /* DRM: una consulta entregada a Estabilización (status:'en_estabilizacion')
+       no tiene servicioNombre/servicioPor — usa los campos de la entrega. */
+    var esEstabilizacion = it.status === 'en_estabilizacion';
+    var infoExtra = esEstabilizacion
+      ? '<div class="ed-pending-vitals">🩺 Consulta entregada a Estabilización' + (it.motivoConsulta ? ' · ' + esc(it.motivoConsulta) : '') + '</div>'
+      : '<div class="ed-pending-vitals">🛎️ ' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>';
+    var fechaMostrar = esEstabilizacion ? it.entregadoAEstabilizacionEn : it.fechaServicio;
+    var registradoPorMostrar = esEstabilizacion ? it.entregadoAEstabilizacionPor : it.servicioPor;
     var enAtencionHtml = '';
     if (it.enAtencionPor) {
       var elapsedMin = it.enAtencionDesde ? Math.max(0, Math.floor((Date.now() - tsMillis(it.enAtencionDesde)) / 60000)) : 0;
@@ -3569,14 +3576,16 @@ summary.ed-meds-cat { list-style: revert; }
       enAtencionHtml = '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:' +
         (demorado ? '#92400E' : '#1D4ED8') + ';background:' + (demorado ? '#FEF3C7' : '#DBEAFE') + '">' + enAtencionTexto + '</div>';
     }
-    var iniciadaHtml = it.servicioIniciado
-      ? '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:#166534;background:#DCFCE7;margin-left:4px">📝 Iniciada' + (it.borradorServicioPor ? ' · por ' + esc(it.borradorServicioPor) : '') + '</div>'
+    var yaIniciada = esEstabilizacion ? it.consultaIniciada : it.servicioIniciado;
+    var borradorPorMostrar = esEstabilizacion ? it.borradorPor : it.borradorServicioPor;
+    var iniciadaHtml = yaIniciada
+      ? '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:#166534;background:#DCFCE7;margin-left:4px">📝 Iniciada' + (borradorPorMostrar ? ' · por ' + esc(borradorPorMostrar) : '') + '</div>'
       : '';
     return '<div class="ed-pending-item">' +
       '<div class="ed-pending-info">' +
         '<p class="ed-pending-name">' + esc(it.pacienteNombre || it.codigoPaciente) +
           ' <span style="font-weight:500;color:#6B7280">· ' + esc(it.codigoPaciente) + '</span></p>' +
-        '<p class="ed-pending-meta">📅 ' + fmtDate(it.fechaServicio) + ' · Registrado por ' + esc(it.servicioPor || '—') + '</p>' +
+        '<p class="ed-pending-meta">📅 ' + fmtDate(fechaMostrar) + ' · ' + (esEstabilizacion ? 'Entregado por ' : 'Registrado por ') + esc(registradoPorMostrar || '—') + '</p>' +
         infoExtra +
         enAtencionHtml +
         iniciadaHtml +
@@ -3632,21 +3641,23 @@ summary.ed-meds-cat { list-style: revert; }
   /* ─── Cargar Sueroterapias en curso (status:'servicio', esServicioSuero) en su
      propia sección "En Proceso Sueroterapia / estabilización": a diferencia de un
      servicio rápido (Toma de presión, etc.), una sueroterapia mantiene al paciente
-     en observación/infusión un rato antes de que enfermería pueda completarla. ─── */
+     en observación/infusión un rato antes de que enfermería pueda completarla.
+     DRM: también viven aquí las consultas entregadas a Estabilización
+     (status:'en_estabilizacion') — ver entregarAEstabilizacion(). ─── */
   function cargarEnProcesoSueroterapia() {
     var lista = $id('en-proceso-suero-lista');
     if (!lista) return;
     lista.innerHTML = '<div class="ed-empty"><div class="ed-overlay-spinner" style="margin:0 auto"></div></div>';
     cmgDb.collection('consultas')
-      .where('status', '==', 'servicio')
+      .where('status', 'in', ['servicio', 'en_estabilizacion'])
       .get()
       .then(function (snap) {
         var items = [];
         snap.forEach(function (d) {
           var it = Object.assign({ _id: d.id }, d.data());
-          if (esServicioSuero(it.servicioNombre)) items.push(it);
+          if (it.status === 'en_estabilizacion' || esServicioSuero(it.servicioNombre)) items.push(it);
         });
-        items.sort(function (a, b) { return tsMillis(b.fechaServicio) - tsMillis(a.fechaServicio); });
+        items.sort(function (a, b) { return tsMillis(b.fechaServicio || b.entregadoAEstabilizacionEn) - tsMillis(a.fechaServicio || a.entregadoAEstabilizacionEn); });
         if (!items.length) {
           lista.innerHTML = '<div class="ed-empty"><div class="ed-empty-icon">✅</div><p>No hay sueroterapias en proceso.</p></div>';
           return;
@@ -4863,8 +4874,10 @@ summary.ed-meds-cat { list-style: revert; }
         if (!snap.exists) throw new Error('Registro no encontrado');
         var data = snap.data();
         /* Consulta (no Servicio) es exclusiva de médico/admin: enfermería ni
-           siquiera puede abrir el formulario, aunque llegue aquí por otra vía. */
-        if (data.status !== 'listo_enfermeria' && data.status !== 'servicio' && !esMedicoTratanteClient()) {
+           siquiera puede abrir el formulario, aunque llegue aquí por otra vía.
+           Excepción: 'en_estabilizacion' — el médico ya la entregó a enfermería
+           (ver entregarAEstabilizacion()), así que aquí sí puede completarla. */
+        if (data.status !== 'listo_enfermeria' && data.status !== 'servicio' && data.status !== 'en_estabilizacion' && !esMedicoTratanteClient()) {
           hideOverlay();
           showAlert('Esta Consulta médica solo puede completarla un médico o admin.', 'error');
           return;
@@ -5018,6 +5031,14 @@ summary.ed-meds-cat { list-style: revert; }
       '<div id="cons-autoguardado-estado" style="font-size:12px;color:#6B7280;margin:0 0 8px;text-align:right"></div>' +
       '<div class="ed-actions">' +
         '<button class="ed-btn ed-btn-primary" id="btn-cons-guardar">💾 Finalizar consulta + Generar PDF</button>' +
+        /* DRM: si el paciente pasa a área de procedimientos/estabilización, el
+           médico entrega el manejo a enfermería sin tener que llenar y finalizar
+           la consulta completa todavía — ver entregarAEstabilizacion(). Al
+           reabrirla desde "En Proceso Sueroterapia / Estabilización" ya no tiene
+           sentido volver a entregarla, así que se oculta. */
+        (pre.status !== 'en_estabilizacion'
+          ? '<button class="ed-btn ed-btn-ghost" id="btn-cons-estabilizacion">🔄 Entregar a estabilización</button>'
+          : '') +
         '<button class="ed-btn ed-btn-danger" id="btn-cancelar-registro">🗑️ Cancelar este registro</button>' +
       '</div>';
 
@@ -5027,6 +5048,7 @@ summary.ed-meds-cat { list-style: revert; }
       renderConsultaTab();
     });
     $id('btn-cons-guardar').addEventListener('click', guardarConsulta);
+    if ($id('btn-cons-estabilizacion')) $id('btn-cons-estabilizacion').addEventListener('click', entregarAEstabilizacion);
     $id('btn-cancelar-registro').addEventListener('click', function () {
       if (_consultaAutosaveTimer) { clearTimeout(_consultaAutosaveTimer); _consultaAutosaveTimer = null; }
       cancelarRegistroPendienteDesdeForm();
@@ -5632,6 +5654,44 @@ summary.ed-meds-cat { list-style: revert; }
         showAlert('Error: ' + err.message, 'error');
       });
     };
+  }
+
+  /* ─── Entregar a Estabilización: handoff de permiso, no finaliza la consulta.
+     El paciente pasó de consulta/procedimiento a área de procedimientos y ahora
+     el manejo es de enfermería. La consulta sigue siendo la misma (mismo
+     tipo/facturación al completarla) — solo cambia quién puede completarla y
+     en qué cola aparece mientras tanto ("En Proceso Sueroterapia / Estabilización").
+     El área de estabilización en sí (horas, bomba de infusión, etc.) se sigue
+     capturando en este mismo formulario de Consulta al completarla después. ─── */
+  function entregarAEstabilizacion() {
+    if (!pacienteActual || !consultaPendienteCargada) return;
+    if (!confirm('¿Entregar este paciente a Enfermería / Estabilización? La consulta queda pendiente y enfermería podrá completarla desde "En Proceso Sueroterapia / Estabilización".')) return;
+    var consultaId = consultaPendienteCargada._id;
+    var atendidoPor = cmgAuth.currentUser.displayName || cmgAuth.currentUser.email;
+    /* Guarda lo ya escrito como borrador (igual que el autoguardado) para no
+       perder nada, sin exigir los campos obligatorios de "Finalizar consulta". */
+    var borrador = recolectarBorradorConsulta();
+    showOverlay('Entregando a estabilización...');
+    cmgDb.collection('consultas').doc(consultaId).update({
+      status: 'en_estabilizacion',
+      entregadoAEstabilizacionPor: atendidoPor,
+      entregadoAEstabilizacionEn: firebase.firestore.FieldValue.serverTimestamp(),
+      borrador: borrador,
+      borradorEn: firebase.firestore.FieldValue.serverTimestamp(),
+      borradorPor: atendidoPor,
+      consultaIniciada: true,
+      enAtencionPor: firebase.firestore.FieldValue.delete(),
+      enAtencionDesde: firebase.firestore.FieldValue.delete()
+    }).then(function () {
+      hideOverlay();
+      showAlert('✓ Paciente entregado a Estabilización. Enfermería puede completar la consulta desde "En Proceso Sueroterapia / Estabilización".', 'success');
+      if (_consultaAutosaveTimer) { clearTimeout(_consultaAutosaveTimer); _consultaAutosaveTimer = null; }
+      consultaPendienteCargada = null;
+      renderConsultaTab();
+    }).catch(function (err) {
+      hideOverlay();
+      showAlert('Error: ' + err.message, 'error');
+    });
   }
 
   /* ─── Finalizar consulta (actualiza Pre clínica → pendiente_caja) ─── */

@@ -3678,16 +3678,12 @@ summary.ed-meds-cat { list-style: revert; }
     var p = pacienteActual;
     var dg = p.datosGenerales || {};
 
-    var grupos = CATALOGO_SERVICIOS;
-    var optsHtml = '<option value="">— Seleccionar servicio —</option>';
-    grupos.forEach(function (grp) {
-      optsHtml += '<optgroup label="' + esc(grp.label) + '">';
-      grp.items.forEach(function (s) {
-        optsHtml += '<option value="' + esc(s) + '">' + esc(s) + '</option>';
-      });
-      optsHtml += '</optgroup>';
+    /* DRM: buscador por nombre en vez de <select> nativo con ~35 opciones
+       repartidas en 5 categorías — más rápido que desplazarse por el dropdown. */
+    var serviciosFlat = [];
+    CATALOGO_SERVICIOS.forEach(function (grp) {
+      grp.items.forEach(function (s) { serviciosFlat.push({ value: s, label: s, group: grp.label }); });
     });
-    optsHtml += '<option value="__otro__">✏️ Otro (escribir)</option>';
 
     cont.innerHTML =
       '<button class="ed-back-link" id="btn-volver-modo">← Volver</button>' +
@@ -3704,7 +3700,11 @@ summary.ed-meds-cat { list-style: revert; }
         '</div>' +
         '<div class="ed-fgroup full" id="reg-servicio-grupo" style="display:none">' +
           '<label class="ed-label">Servicio *</label>' +
-          '<select class="ed-input" id="reg-serv-selector" style="appearance:auto;-webkit-appearance:menulist">' + optsHtml + '</select>' +
+          '<div style="position:relative">' +
+            '<input type="text" class="ed-input" id="reg-serv-buscar" placeholder="🔍 Buscar servicio por nombre…" autocomplete="off">' +
+            '<input type="hidden" id="reg-serv-selector">' +
+            '<div id="reg-serv-dropdown" style="display:none;position:absolute;z-index:20;top:100%;left:0;right:0;background:#fff;border:1px solid #D1D5DB;border-radius:8px;margin-top:4px;max-height:260px;overflow:auto;box-shadow:0 6px 16px rgba(0,0,0,.12)"></div>' +
+          '</div>' +
         '</div>' +
         '<div class="ed-fgroup full" id="reg-serv-otro-grupo" style="display:none">' +
           '<label class="ed-label">Especifica el servicio *</label>' +
@@ -3728,9 +3728,59 @@ summary.ed-meds-cat { list-style: revert; }
         if (!esServ) $id('reg-serv-otro-grupo').style.display = 'none';
       });
     });
-    $id('reg-serv-selector').addEventListener('change', function () {
-      $id('reg-serv-otro-grupo').style.display = this.value === '__otro__' ? 'block' : 'none';
+    /* DRM: buscador de servicio (combobox). El <input type="hidden"> conserva
+       el mismo id/contrato ('reg-serv-selector'.value) que usan
+       actualizarBotonRegistro() y guardarRegistroVisita() más abajo. */
+    function renderServOpciones(filtro) {
+      var q = normalizarBusqueda(filtro);
+      var dd = $id('reg-serv-dropdown');
+      var grupoActual = null;
+      var html = '';
+      var huboMatch = false;
+      serviciosFlat.forEach(function (item) {
+        if (q && normalizarBusqueda(item.label).indexOf(q) === -1) return;
+        huboMatch = true;
+        if (item.group !== grupoActual) {
+          grupoActual = item.group;
+          html += '<div style="padding:6px 10px 2px;font-size:10px;font-weight:800;color:#6B7280;letter-spacing:.4px;text-transform:uppercase">' + esc(grupoActual) + '</div>';
+        }
+        html += '<div class="reg-serv-opt" data-value="' + esc(item.value) + '" data-label="' + esc(item.label) + '" style="padding:8px 10px;cursor:pointer">' + esc(item.label) + '</div>';
+      });
+      if (!huboMatch) html += '<div style="padding:10px;font-size:13px;color:#9CA3AF">Sin resultados</div>';
+      html += '<div class="reg-serv-opt" data-value="__otro__" data-label="✏️ Otro (escribir)" style="padding:8px 10px;cursor:pointer;border-top:1px solid #E5E7EB;font-weight:600;color:#213C7D">✏️ Otro (escribir)</div>';
+      dd.innerHTML = html;
+      dd.querySelectorAll('.reg-serv-opt').forEach(function (op) {
+        /* mousedown (no click) para que dispare antes del blur del input de búsqueda */
+        op.addEventListener('mousedown', function (e) {
+          e.preventDefault();
+          seleccionarServicioReg(this.getAttribute('data-value'), this.getAttribute('data-label'));
+        });
+        op.addEventListener('mouseenter', function () { this.style.background = '#F3F4F6'; });
+        op.addEventListener('mouseleave', function () { this.style.background = ''; });
+      });
+    }
+    function seleccionarServicioReg(valor, label) {
+      $id('reg-serv-selector').value = valor;
+      $id('reg-serv-buscar').value = valor === '__otro__' ? '' : label;
+      $id('reg-serv-dropdown').style.display = 'none';
+      $id('reg-serv-otro-grupo').style.display = valor === '__otro__' ? 'block' : 'none';
+      if (valor === '__otro__') $id('reg-serv-otro').focus();
       actualizarBotonRegistro();
+    }
+    $id('reg-serv-buscar').addEventListener('input', function () {
+      /* Escribir de nuevo invalida la selección previa hasta elegir una opción */
+      $id('reg-serv-selector').value = '';
+      $id('reg-serv-otro-grupo').style.display = 'none';
+      renderServOpciones(this.value);
+      $id('reg-serv-dropdown').style.display = '';
+      actualizarBotonRegistro();
+    });
+    $id('reg-serv-buscar').addEventListener('focus', function () {
+      renderServOpciones(this.value);
+      $id('reg-serv-dropdown').style.display = '';
+    });
+    $id('reg-serv-buscar').addEventListener('blur', function () {
+      setTimeout(function () { $id('reg-serv-dropdown').style.display = 'none'; }, 150);
     });
     document.querySelectorAll('input[name="reg-tipo"]').forEach(function (r) {
       r.addEventListener('change', actualizarBotonRegistro);

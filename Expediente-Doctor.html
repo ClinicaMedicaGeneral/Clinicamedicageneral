@@ -5282,6 +5282,7 @@ summary.ed-meds-cat { list-style: revert; }
         tipoNombre     : nombreOrden,
         examenesSolicitados: nombreOrden,
         examenesArray  : seleccionados,
+        resultados     : seleccionados.map(function(nombre){ return { nombre: nombre, status: 'pendiente' }; }),
         proveedor      : proveedorSel,
         medicoSolicitante: medicoSolicitante,
         prioridad      : $val('qm-lab-prioridad'),
@@ -5320,12 +5321,54 @@ summary.ed-meds-cat { list-style: revert; }
 
   /* DRM v3 #2: modal para subir PDF de resultado a una orden existente */
   function abrirSubirResultadoModal(ordenId){
+    cmgDb.collection('examenesLaboratorio').doc(ordenId).get().then(function(doc){
+      if (!doc.exists) { showAlert('La orden ya no existe (¿fue eliminada?)', 'error'); return; }
+      abrirSubirResultadoModalConDatos(Object.assign({ _id: doc.id }, doc.data()));
+    }).catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
+  }
+
+  /* DRM: la orden sigue siendo UN solo documento/PDF (se reemplaza cada vez que
+     se sube). Cuando agrupa varios exámenes (examenesArray.length > 1), el
+     checklist es solo control visual de qué exámenes trae el documento subido:
+     no reparte el PDF por examen. La orden no pasa a "confirmado" hasta que
+     todos queden marcados; si falta alguno queda "procesando" y se puede volver
+     a subir el mismo documento (ya actualizado) más tarde. */
+  function abrirSubirResultadoModalConDatos(ex){
+    var examenes = (ex.examenesArray && ex.examenesArray.length) ? ex.examenesArray : [ex.tipoNombre || ex.examenesSolicitados || 'Examen'];
+    var resultadosPrevios = ex.resultados || [];
+    function marcadoPrevio(nombre){
+      var r = resultadosPrevios.filter(function(x){ return x.nombre === nombre; })[0];
+      return !!r && r.status === 'confirmado';
+    }
+    var multiple = examenes.length > 1;
+
+    var checklistHtml = '';
+    if (multiple) {
+      checklistHtml =
+        '<div class="ed-fgroup full" style="margin-top:4px">' +
+          '<label class="ed-label" style="display:flex;justify-content:space-between;align-items:center">' +
+            '<span>¿Qué exámenes incluye este documento?</span>' +
+            '<span style="font-weight:400;font-size:12px"><label style="font-weight:400"><input type="checkbox" id="qm-up-todos"> Seleccionar todos</label></span>' +
+          '</label>' +
+          '<p style="margin:2px 0 6px;font-size:11px;color:#9CA3AF">Es solo control visual. La orden se confirma cuando estén todos marcados; si falta alguno, subí el mismo documento actualizado más adelante.</p>' +
+          '<div style="border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px;max-height:180px;overflow:auto">' +
+            examenes.map(function(nombre){
+              return '<label style="display:flex;align-items:center;gap:8px;padding:4px 0">' +
+                '<input type="checkbox" class="qm-up-exam-chk" value="' + esc(nombre) + '"' + (marcadoPrevio(nombre) ? ' checked' : '') + '>' +
+                '<span style="flex:1">' + esc(nombre) + '</span>' +
+              '</label>';
+            }).join('') +
+          '</div>' +
+        '</div>';
+    }
+
     var html =
       '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ed-quick-modal">' +
         '<div style="background:#fff;border-radius:12px;max-width:480px;width:100%;padding:24px">' +
           '<h3 style="margin:0 0 6px;color:#213C7D">📤 Subir resultado a la orden</h3>' +
-          '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">El PDF se vincula a la orden y la marca como confirmada.</p>' +
-          '<input type="file" id="qm-up-pdf" accept="application/pdf" class="ed-input">' +
+          '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">' + (multiple ? 'El PDF se vincula a la orden. Se confirma cuando todos los exámenes queden marcados.' : 'El PDF se vincula a la orden y la marca como confirmada.') + '</p>' +
+          checklistHtml +
+          '<input type="file" id="qm-up-pdf" accept="application/pdf" class="ed-input" style="margin-top:10px">' +
           '<div class="ed-fgroup full" style="margin-top:10px"><label class="ed-label">Notas finales (opcional)</label>' +
             '<textarea class="ed-textarea" id="qm-up-notas" rows="2" placeholder="Hallazgos importantes…"></textarea></div>' +
           '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
@@ -5335,15 +5378,28 @@ summary.ed-meds-cat { list-style: revert; }
         '</div>' +
       '</div>';
     document.body.insertAdjacentHTML('beforeend', html);
+
+    if (multiple) {
+      $id('qm-up-todos').addEventListener('change', function(){
+        var checked = this.checked;
+        document.querySelectorAll('.qm-up-exam-chk').forEach(function(c){ c.checked = checked; });
+      });
+    }
+
     $id('qm-cancelar').onclick = function(){ document.getElementById('ed-quick-modal').remove(); };
     $id('qm-guardar').onclick = function(){
       var fi = $id('qm-up-pdf');
       var file = fi.files && fi.files[0];
       if (!file) { showAlert('Seleccioná un PDF', 'error'); return; }
       if (file.size > 15 * 1024 * 1024) { showAlert('El archivo excede 15 MB', 'error'); return; }
-      showOverlay('Subiendo PDF y confirmando orden...');
+
+      var examenesMarcados = multiple
+        ? Array.prototype.slice.call(document.querySelectorAll('.qm-up-exam-chk:checked')).map(function(c){ return c.value; })
+        : examenes;
+
+      showOverlay('Subiendo PDF...');
       var ts = new Date().toISOString().replace(/[:.]/g, '-');
-      var folder = pacienteActual ? pacienteActual.codigoPaciente : 'sin-expediente';
+      var folder = ex.codigoPaciente || (pacienteActual ? pacienteActual.codigoPaciente : 'sin-expediente');
       var safe = (file.name || 'examen').replace(/[^a-zA-Z0-9.-]/g, '_').slice(0, 60);
       var path = 'examenes-laboratorio/' + folder + '/' + ts + '-' + safe;
       var ref = firebase.storage().ref(path);
@@ -5351,19 +5407,33 @@ summary.ed-meds-cat { list-style: revert; }
         .then(function(snap){ return snap.ref.getDownloadURL(); })
         .then(function(url){
           var notas = $val('qm-up-notas');
-          return cmgDb.collection('examenesLaboratorio').doc(ordenId).update({
-            pdfUrl       : url,
-            storagePath  : path,
-            fileSize     : file.size,
-            status       : 'confirmado',
-            confirmadoPor: cmgAuth.currentUser.email,
-            confirmadoEn : firebase.firestore.FieldValue.serverTimestamp(),
-            notasFinales : notas || firebase.firestore.FieldValue.delete()
+          var nuevosResultados = examenes.map(function(nombre){
+            return { nombre: nombre, status: examenesMarcados.indexOf(nombre) !== -1 ? 'confirmado' : 'pendiente' };
           });
-        }).then(function(){
+          var todosMarcados = nuevosResultados.every(function(r){ return r.status === 'confirmado'; });
+          var updateData = {
+            pdfUrl      : url,
+            storagePath : path,
+            fileSize    : file.size,
+            resultados  : nuevosResultados,
+            notasFinales: notas || firebase.firestore.FieldValue.delete()
+          };
+          if (todosMarcados) {
+            updateData.status        = 'confirmado';
+            updateData.confirmadoPor = cmgAuth.currentUser.email;
+            updateData.confirmadoEn  = firebase.firestore.FieldValue.serverTimestamp();
+          } else {
+            /* Faltan exámenes en el documento: la orden sigue viva en la cola
+               hasta que se vuelva a subir el mismo PDF ya completo. */
+            updateData.status = 'procesando';
+          }
+          return cmgDb.collection('examenesLaboratorio').doc(ex._id).update(updateData).then(function(){ return todosMarcados; });
+        }).then(function(todosMarcados){
           hideOverlay();
           document.getElementById('ed-quick-modal').remove();
-          showAlert('✓ Resultado subido y orden confirmada', 'success');
+          showAlert(multiple && !todosMarcados
+            ? '✓ PDF actualizado. Aún faltan exámenes por marcar para confirmar la orden.'
+            : '✓ Resultado subido y orden confirmada', 'success');
           renderLaboratorioTab();
         }).catch(function(err){
           hideOverlay();
@@ -6551,6 +6621,19 @@ summary.ed-meds-cat { list-style: revert; }
           var fecha = (ex.createdAt && ex.createdAt.toMillis) ? new Date(ex.createdAt.toMillis()).toLocaleString('es-HN') : '—';
           var nombrePaciente = ex.pacienteNombre || ex.pacienteNombreExpediente || '— sin paciente —';
           var edadTxt = ex.fechaNacimiento ? calcEdad(ex.fechaNacimiento) : '';
+          /* DRM: si la orden agrupa varios exámenes, mostrar cuáles ya se confirmaron
+             y cuáles siguen pendientes (resultados por examen, no solo por orden). */
+          var listaExamenes = (ex.examenesArray && ex.examenesArray.length > 1) ? ex.examenesArray : null;
+          var resultadosMap = {};
+          (ex.resultados || []).forEach(function(r){ resultadosMap[r.nombre] = r.status; });
+          var desgloseExamenes = listaExamenes
+            ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">' +
+                listaExamenes.map(function(nombre){
+                  var hecho = resultadosMap[nombre] === 'confirmado';
+                  return '<span style="font-size:10px;padding:2px 8px;border-radius:100px;background:' + (hecho ? '#D1FAE5' : '#FEE2E2') + ';color:' + (hecho ? '#065F46' : '#991B1B') + '">' + (hecho ? '✓ ' : '⏳ ') + esc(nombre) + '</span>';
+                }).join('') +
+              '</div>'
+            : '';
           return '<div style="background:' + bg + ';border:1px solid ' + col + ';border-radius:10px;padding:12px;margin-bottom:8px">' +
             '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">' +
               '<div style="flex:1;min-width:0">' +
@@ -6564,6 +6647,7 @@ summary.ed-meds-cat { list-style: revert; }
                   (edadTxt ? ' (' + esc(edadTxt) + ')' : '') +
                 '</div>' +
                 '<div style="font-weight:600;color:#374151;margin-top:4px">🔬 ' + esc(ex.examenesSolicitados || ex.tipoNombre || '—') + ' <span style="background:' + col + ';color:#fff;font-size:10px;padding:2px 8px;border-radius:100px;margin-left:6px">' + st + '</span></div>' +
+                desgloseExamenes +
                 '<div style="font-size:12px;color:#6B7280;margin-top:2px">🏥 Enviado a: <b>' + esc(ex.proveedor || 'Sin especificar') + '</b></div>' +
                 (ex.medicoSolicitante ? '<div style="font-size:12px;color:#6B7280;margin-top:2px">🩺 Médico solicitante: <b>' + esc(ex.medicoSolicitante) + '</b></div>' : '') +
                 '<div style="font-size:12px;color:#6B7280;margin-top:2px">Registrado por: ' + esc(ex.solicitadoPorNombre || ex.solicitadoPor || '—') + ' · ' + esc(fecha) + (ex.prioridad === 'urgente' ? ' · 🚨 URGENTE' : '') + '</div>' +

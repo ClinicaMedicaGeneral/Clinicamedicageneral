@@ -6023,6 +6023,87 @@ summary.ed-meds-cat { list-style: revert; }
         borrarConsultaHistorial(this.getAttribute('data-borrar-consulta'), this.getAttribute('data-constancia-id'));
       });
     });
+
+    /* DRM: edición admin-only del registro desde Historial (solo corrige el
+       expediente clínico, no reabre lo ya facturado en Caja). */
+    lista.querySelectorAll('[data-editar-historial]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var panel = $id('histedit-' + this.getAttribute('data-editar-historial') + '-panel');
+        if (panel) panel.style.display = panel.style.display === 'none' ? '' : 'none';
+      });
+    });
+    lista.querySelectorAll('[data-historial-cancelar-ajuste]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var panel = $id('histedit-' + this.getAttribute('data-historial-cancelar-ajuste') + '-panel');
+        if (panel) panel.style.display = 'none';
+      });
+    });
+    lista.querySelectorAll('[data-historial-guardar-ajuste]').forEach(function(b){
+      b.addEventListener('click', function(){
+        guardarEdicionHistorial(this.getAttribute('data-historial-guardar-ajuste'));
+      });
+    });
+  }
+
+  /* DRM: panel de edición (oculto por defecto) para que Administración corrija,
+     desde el Historial, campos que ya son visibles en la tarjeta — por ejemplo
+     cuando el doctor olvidó marcar "se convirtió en consulta/servicio". No toca
+     nada del cobro ya liquidado en Caja, solo el expediente clínico. */
+  function buildHistorialEditPanelHtml(c) {
+    var prefix = 'histedit-' + c._id;
+    var esServicio = c._kind === 'servicio';
+    return '<div id="' + prefix + '-panel" style="display:none;margin-top:12px;background:#F8FAFC;border:1px dashed #93A5C7;border-radius:8px;padding:12px">' +
+      '<div style="font-size:12px;font-weight:800;color:#213C7D;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">✏️ Editar registro (Administración)</div>' +
+      '<div class="ed-grid ed-grid-2">' +
+        (esServicio
+          ? '<div class="ed-fgroup"><label class="ed-label">Servicio</label><input type="text" class="ed-input" id="' + prefix + '-servicio" value="' + esc(c.servicioNombre || '') + '"></div>' +
+            '<div class="ed-fgroup" style="align-self:end"><label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-convertido"' + (c.convertidoConsulta ? ' checked' : '') + '> ❌ Este servicio no se realizó (se convirtió en consulta médica)</label></div>'
+          : '<div class="ed-fgroup full"><label class="ed-label">Motivo de consulta</label><textarea class="ed-textarea" id="' + prefix + '-motivo" rows="2">' + esc(c.motivoConsulta || '') + '</textarea></div>' +
+            '<div class="ed-fgroup full"><label class="ed-label">Diagnóstico</label><textarea class="ed-textarea" id="' + prefix + '-diagnostico" rows="2">' + esc(c.diagnostico || '') + '</textarea></div>' +
+            '<div class="ed-fgroup full"><label class="ed-meds-opt" style="background:#FEF2F2;border:1px solid #FCA5A5"><input type="checkbox" id="' + prefix + '-convertidoservicio"' + (c.convertidoServicio ? ' checked' : '') + '> ❌ Esta consulta no se realizó (se convirtió en servicio)</label></div>') +
+        '<div class="ed-fgroup"><label class="ed-label">Medicamentos aplicados en consulta</label><input type="text" class="ed-input" id="' + prefix + '-medsvisita" value="' + esc((c.medicamentosVisita || []).join(', ')) + '" placeholder="separados por coma"></div>' +
+        '<div class="ed-fgroup"><label class="ed-label">Despacho</label><input type="text" class="ed-input" id="' + prefix + '-medsdespacho" value="' + esc((c.medicamentosDespacho || []).join(', ')) + '" placeholder="separados por coma"></div>' +
+        '<div class="ed-fgroup full"><label class="ed-label">Receta externa</label><textarea class="ed-textarea" id="' + prefix + '-recetaext" rows="2">' + esc(c.recetaExterna || '') + '</textarea></div>' +
+        (esServicio ? '<div class="ed-fgroup full"><label class="ed-label">Notas</label><textarea class="ed-textarea" id="' + prefix + '-notas" rows="2">' + esc(c.servicioNotas || '') + '</textarea></div>' : '') +
+        (esServicio ? '<div class="ed-fgroup full"><label class="ed-label">Notas de finalización</label><textarea class="ed-textarea" id="' + prefix + '-notasfin" rows="2">' + esc(c.servicioNotasFin || '') + '</textarea></div>' : '') +
+      '</div>' +
+      '<div style="display:flex;gap:8px;margin-top:10px">' +
+        '<button class="ed-btn ed-btn-primary" data-historial-guardar-ajuste="' + esc(c._id) + '">💾 Guardar cambios</button>' +
+        '<button class="ed-btn ed-btn-ghost" data-historial-cancelar-ajuste="' + esc(c._id) + '">Cancelar</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function guardarEdicionHistorial(id) {
+    var prefix = 'histedit-' + id;
+    var esServicio = !!$id(prefix + '-servicio');
+    var update = {
+      medicamentosVisita  : $val(prefix + '-medsvisita').split(',').map(function(s){ return s.trim(); }).filter(Boolean),
+      medicamentosDespacho: $val(prefix + '-medsdespacho').split(',').map(function(s){ return s.trim(); }).filter(Boolean),
+      recetaExterna       : $val(prefix + '-recetaext'),
+      editadoEnHistorial  : {
+        por: cmgAuth.currentUser.email,
+        en : firebase.firestore.FieldValue.serverTimestamp()
+      }
+    };
+    if (esServicio) {
+      update.servicioNombre    = $val(prefix + '-servicio').trim();
+      update.convertidoConsulta = !!($id(prefix + '-convertido') && $id(prefix + '-convertido').checked);
+      update.servicioNotas     = $val(prefix + '-notas');
+      update.servicioNotasFin  = $val(prefix + '-notasfin');
+    } else {
+      update.motivoConsulta     = $val(prefix + '-motivo');
+      update.diagnostico        = $val(prefix + '-diagnostico');
+      update.convertidoServicio = !!($id(prefix + '-convertidoservicio') && $id(prefix + '-convertidoservicio').checked);
+    }
+    showOverlay('Guardando cambios...');
+    cmgDb.collection('consultas').doc(id).update(update)
+      .then(function(){
+        hideOverlay();
+        showAlert('✓ Registro actualizado', 'success');
+        renderHistorialTab();
+      })
+      .catch(function(err){ hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
   }
 
   /* Borra un registro de consulta/servicio del historial (y su constancia vinculada, si tiene) */
@@ -6079,6 +6160,11 @@ summary.ed-meds-cat { list-style: revert; }
     var ajusteLinea = (c.ajustadoEnCaja && c.ajustadoEnCaja.por)
       ? '<div class="ed-consulta-motivo" style="color:#7C3AED"><strong>✏️ Ajustado en caja por:</strong> ' + esc(c.ajustadoEnCaja.por) + ' · ' + fmtDate(c.ajustadoEnCaja.en) + '</div>'
       : '';
+    /* DRM: si un admin corrigió este registro después (ej. el doctor olvidó marcar
+       "convertido en consulta/servicio"), dejarlo visible para trazabilidad. */
+    var edicionLinea = (c.editadoEnHistorial && c.editadoEnHistorial.por)
+      ? '<div class="ed-consulta-motivo" style="color:#7C3AED"><strong>✏️ Editado por Administración:</strong> ' + esc(c.editadoEnHistorial.por) + ' · ' + fmtDate(c.editadoEnHistorial.en) + '</div>'
+      : '';
 
     return '<div class="ed-consulta-item">' +
       '<div>' +
@@ -6091,15 +6177,21 @@ summary.ed-meds-cat { list-style: revert; }
         (esServicio && c.servicioNotas ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas:</strong> ' + esc(c.servicioNotas).slice(0, 100) + '</div>' : '') +
         (esServicio && c.servicioNotasFin ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas de finalización:</strong> ' + esc(c.servicioNotasFin).slice(0, 100) + '</div>' : '') +
         ajusteLinea +
+        edicionLinea +
         (esServicio ? '<div class="ed-consulta-motivo" style="color:#9CA3AF;font-size:11px;font-family:monospace">id: ' + esc(c._id) + ' · status: ' + esc(c.status) + ' · tipoRegistro: ' + esc(c.tipoRegistro || '—') + ' · convertidoConsulta: ' + String(!!c.convertidoConsulta) + '</div>' : '') +
       '</div>' +
       '<div class="ed-consulta-actions">' +
         (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Ver PDF</a>' : '') +
         (c.constanciaId ? '<a class="ed-consulta-link" href="Constancia-Medica.html?id=' + esc(c.constanciaId) + '" target="_blank">📄 Ver constancia</a>' : '') +
         (puedeEditarConstancia ? '<button class="ed-consulta-link ed-link-blue" data-editar-constancia="' + esc(c.constanciaId) + '">✏️ Editar constancia</button>' : '') +
+        /* DRM: editar campos visibles del registro (ej. corregir "convertido en
+           consulta/servicio" que el doctor olvidó marcar) es solo para Administración,
+           y solo corrige el expediente — no toca lo ya cobrado en Caja. */
+        (esAdminUnif() ? '<button class="ed-consulta-link ed-link-blue" data-editar-historial="' + esc(c._id) + '">✏️ Editar</button>' : '') +
         /* DRM: borrar registros del historial es solo para Administración */
         (esAdminUnif() ? '<button class="ed-consulta-link ed-link-red" data-borrar-consulta="' + esc(c._id) + '" data-constancia-id="' + esc(c.constanciaId || '') + '">🗑️ Borrar</button>' : '') +
       '</div>' +
+      (esAdminUnif() ? buildHistorialEditPanelHtml(c) : '') +
     '</div>';
   }
 

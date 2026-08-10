@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>CMG · Plan de contenido agosto 2026</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<style>
+  :root{
+    --navy:#213C7D; --amarillo:#FDD22C; --rojo:#F20F10; --teal:#599FB2;
+    --whatsapp:#25D366; --verde:#4E8273; --crema:#FFEED8; --neutro:#F6F7FB; --negro:#0A0F1F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--navy);color:var(--neutro);font-family:"Helvetica Neue",Arial,sans-serif;line-height:1.5;padding:32px 20px}
+  .wrap{max-width:1180px;margin:0 auto}
+  header{border-bottom:4px solid var(--amarillo);padding-bottom:20px;margin-bottom:32px}
+  header .kicker{color:var(--teal);font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:700}
+  header h1{color:var(--amarillo);font-size:42px;font-weight:900;text-transform:uppercase;line-height:1.05;margin:6px 0}
+  header .sub{color:var(--neutro);font-size:14px;opacity:.85}
+  section{margin-bottom:38px}
+  h2{color:var(--amarillo);font-size:13px;letter-spacing:2px;text-transform:uppercase;font-weight:800;border-left:4px solid var(--rojo);padding-left:10px;margin-bottom:14px}
+  .card{background:var(--neutro);color:var(--negro);border-radius:10px;padding:20px 22px}
+  .resumen p{margin-bottom:10px;font-size:15px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px}
+  .pilar{background:var(--neutro);color:var(--negro);border-radius:10px;padding:16px 18px;border-top:5px solid var(--teal)}
+  .pilar h3{font-size:16px;font-weight:800;color:var(--navy);margin-bottom:6px}
+  .pilar .peso{display:inline-block;background:var(--amarillo);color:var(--navy);font-weight:800;font-size:12px;padding:2px 9px;border-radius:20px;margin-bottom:8px}
+  .pilar p{font-size:13px;margin-bottom:5px}
+  .pilar .regla{color:var(--verde);font-weight:700;font-size:12px}
+  table{width:100%;border-collapse:collapse;background:var(--neutro);color:var(--negro);border-radius:10px;overflow:hidden;font-size:13px}
+  th{background:var(--navy);color:var(--amarillo);text-align:left;padding:10px;font-size:11px;letter-spacing:1px;text-transform:uppercase}
+  td{padding:9px 10px;border-bottom:1px solid #dde1ec;vertical-align:top}
+  tr:nth-child(even) td{background:#eef0f7}
+  tr.hito td{border-left:4px solid var(--rojo)}
+  .tag{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:2px 6px;border-radius:4px}
+  .t-edu{background:#dbe7ea;color:#2c5b68}
+  .t-promo{background:var(--amarillo);color:var(--navy)}
+  .t-emo{background:var(--crema);color:#8a5a12}
+  .mix{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .mix div{flex:1;min-width:150px;background:var(--neutro);color:var(--navy);border-radius:8px;padding:12px;text-align:center}
+  .mix strong{display:block;font-size:32px;font-weight:900}
+  .mix span{font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+  .nota{background:var(--crema);color:var(--negro);border-left:5px solid var(--amarillo);padding:12px 16px;border-radius:6px;font-size:13px;margin-top:12px}
+  .riesgo{border-left-color:var(--rojo)}
+  .ok{border-left-color:var(--verde)}
+  ul{padding-left:20px}
+  li{margin-bottom:5px;font-size:13.5px}
+  .card p{font-size:14px;margin-bottom:9px}
+  footer{border-top:2px solid var(--teal);padding-top:16px;margin-top:40px;font-size:12px;color:var(--teal)}
+  footer b{color:var(--amarillo)}
+  @media print{
+    body{background:#fff;color:#000;padding:0;font-size:11px}
+    header h1{color:#213C7D}
+    h2{color:#213C7D}
+    .card,.pilar,table{box-shadow:none}
+    th{background:#e6e9f2;color:#213C7D}
+    section{page-break-inside:avoid}
+    table{page-break-inside:auto;font-size:9.5px}
+    tr{page-break-inside:avoid}
+    footer{color:#213C7D}
+    footer b{color:#213C7D}
+    @page{size:letter portrait;margin:12mm}
+  }
+
+  /* ── Gate (acceso solo admins) ── */
+  #cmg-gate-loader{
+    position:fixed; inset:0; background:var(--navy); z-index:999;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:12px;
+  }
+  #cmg-gate-loader .spinner{
+    width:34px; height:34px; border-radius:50%;
+    border:3px solid rgba(255,255,255,.15); border-top-color:var(--amarillo);
+    animation:spin .8s linear infinite;
+  }
+  #cmg-gate-loader p{font-size:13px; color:rgba(255,255,255,.65);}
+  @keyframes spin{ to{transform:rotate(360deg);} }
+  #cmg-gate-content{display:none;}
+
+  .adm-bar{
+    max-width:1180px; margin:0 auto 14px;
+    display:flex; align-items:center; justify-content:flex-end; gap:12px;
+  }
+  .adm-bar .who{font-size:12px; color:rgba(255,255,255,.65);}
+  .adm-bar .who strong{color:var(--amarillo);}
+  .adm-bar button{
+    border:1px solid rgba(255,255,255,.25); background:transparent; color:rgba(255,255,255,.75);
+    border-radius:20px; padding:6px 16px; font-size:12px; font-weight:600;
+    cursor:pointer; font-family:inherit; transition:all .18s;
+  }
+  .adm-bar button:hover{background:rgba(255,255,255,.1); color:#fff;}
+</style>
+</head>
+<body>
+
+<div id="cmg-gate-loader">
+  <div class="spinner"></div>
+  <p>Verificando acceso…</p>
+</div>
+
+<div id="cmg-gate-content">
+
+<div class="adm-bar">
+  <span class="who">Conectado como <strong id="adm-user-email"></strong></span>
+  <button id="adm-logout-btn" type="button">Cerrar sesión</button>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="kicker">Clínica Médica General · Cuidamos de tu salud</div>
+    <h1>Plan de contenido<br>Agosto 2026</h1>
+    <div class="sub">Elaborado a partir del reporte ejecutivo de julio 2026 y de la línea base mayo-julio 2026 · Emitido el 7 de agosto de 2026 · Cubre del 8 al 31 de agosto</div>
+  </header>
+
+  <section>
+    <h2>Resumen ejecutivo</h2>
+    <div class="card resumen">
+      <p><b>1.</b> Agosto se enfoca en recuperar visitas, no en subir el precio: junio creció por volumen y sumó L69,421, mientras mayo creció por precio y solo sumó L40,728.</p>
+      <p><b>2.</b> Julio cerró con 10 de 31 días bajo el umbral de L10,500 y con el ticket promedio en L700.36, por debajo de la meta de L740 por segundo mes seguido; eso dispara las reglas P5 y P6.</p>
+      <p><b>3.</b> La meta del mes es de 1.9 visitas adicionales por día: la brecha mensual de L40,367.88 dividida entre el ticket de L700.36 da 58 visitas más al mes.</p>
+      <p><b>4.</b> Queda congelado el Suero Multivitamínico por falta de producto. El Complejo B se descongela: la caída fue de demanda y no de abastecimiento, así que entra con ángulo nuevo bajo la regla P3, no con más presupuesto. El Glutathione entra a sondeo por primera vez.</p>
+      <p><b>5.</b> Extracción de uña recibe el mayor peso del calendario con 5 piezas: crece por tercer mes seguido (+68.41%, +139.45% interanual) y la capacidad de agenda está confirmada, así que se escala en lugar de repartirse.</p>
+    </div>
+    <div class="nota riesgo"><b>Riesgos del mes:</b> (1) agosto no tiene ancla estacional, igual que julio, así que el mes depende del día 20 y de la quincena; (2) los días 1 al 7 ya pasaron y son el eco del pago de fin de mes, el tramo más fuerte del ciclo; (3) sin dashboard de Meta Ads ni presupuesto asignado, la pauta va por orden de prioridad y no por lempiras, y si el presupuesto no acompaña a cauterización se repite julio.</div>
+  </section>
+
+  <section>
+    <h2>Mix del mes</h2>
+    <div class="mix">
+      <div><strong>40%</strong><span>Educativo</span></div>
+      <div><strong>40%</strong><span>Promocional</span></div>
+      <div><strong>20%</strong><span>Emocional</span></div>
+    </div>
+    <div class="nota"><b>Justificación (regla P5):</b> el mix base es 50/30/20. El bloque promocional sube 10 puntos porque 10 de los 31 días de julio quedaron bajo el umbral crítico, un 32.3% que supera el disparador del 25%. Cada punto adicional está anclado a un día débil identificable. <b>Regla P6:</b> como el ticket promedio quedó bajo la meta de L740 en junio (L727.93) y en julio (L700.36), todas las piezas promocionales del mes son combos y ninguna es descuento aislado: rebajar sobre un ticket ya deprimido profundiza el problema.</div>
+    <div class="nota ok"><b>Reparto real:</b> 9 piezas educativas, 10 promocionales y 5 emocionales, sobre 24 días publicados. El bloque emocional no se mueve porque ningún dato del reporte lo obliga.</div>
+  </section>
+
+  <section>
+    <h2>Pilares del mes</h2>
+    <div class="grid">
+      <div class="pilar">
+        <span class="peso">7 piezas · 29%</span>
+        <h3>1. Los días que nadie llena</h3>
+        <p>Llenar el valle de liquidez y la franja de 6 a 10 PM con servicios de entrada y baja fricción.</p>
+        <p><b>Servicios:</b> consulta médica L300, lavado de oído L400, combos de entrada, horario extendido.</p>
+        <p class="regla">Reglas P5, P8 y P9</p>
+      </div>
+      <div class="pilar">
+        <span class="peso">5 piezas · 21%</span>
+        <h3>2. Escalar extracción de uña</h3>
+        <p>Es el motor de crecimiento más sostenido del portafolio y la agenda aguanta más volumen, así que se escala.</p>
+        <p><b>Servicios:</b> extracción de uña L500.</p>
+        <p class="regla">Regla P4 en modo escalar</p>
+      </div>
+      <div class="pilar">
+        <span class="peso">4 piezas · 17%</span>
+        <h3>3. El pilar que no queda en blanco</h3>
+        <p>Cauterización es el mayor pilar acumulado del año y su caída siempre acompaña a la caída de presencia.</p>
+        <p><b>Servicios:</b> cauterización y eliminación de verrugas L200.</p>
+        <p class="regla">Regla P2, presencia semanal obligatoria</p>
+      </div>
+      <div class="pilar">
+        <span class="peso">4 piezas · 17%</span>
+        <h3>4. El chequeo que sí se hace</h3>
+        <p>Recuperar laboratorio y evaluación médica, la mayor pérdida sostenida del trimestre.</p>
+        <p><b>Servicios:</b> exámenes de laboratorio, evaluación médica, citología L500, electrocardiograma L500.</p>
+        <p class="regla">Reglas P8 y P10</p>
+      </div>
+      <div class="pilar">
+        <span class="peso">4 piezas · 17%</span>
+        <h3>5. Sueroterapia con argumento nuevo</h3>
+        <p>La barrera es desconocimiento, no precio: la línea lleva un año sin crecer repitiendo la misma oferta.</p>
+        <p><b>Servicios:</b> Boost L1350, Oxigenador L700, Glutathione L1500, Complejo B L850.</p>
+        <p class="regla">Reglas P3, P7 y P10</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Calendario día por día · 8 al 31 de agosto</h2>
+    <table>
+      <thead>
+        <tr><th>Fecha</th><th>Día</th><th>Pilar</th><th>Servicio</th><th>Tipo</th><th>Formato</th><th>Titular propuesto</th><th>CTA</th><th>Canal</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>8 ago</td><td>Sábado</td><td>1</td><td>Consulta médica L300</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Consulta médica L300, sin cita y hasta las 10 PM</td><td>Llega cuando puedas, atendemos por orden de llegada</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>9 ago</td><td>Domingo</td><td>1</td><td>Horario y diferenciadores</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>El domingo también cuidamos de tu salud</td><td>Estamos abiertos hoy en City Mall</td><td>Facebook, Instagram</td></tr>
+        <tr><td>10 ago</td><td>Lunes</td><td>4</td><td>Exámenes de laboratorio</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Cinco señales de que tu cuerpo te está pidiendo un chequeo</td><td>Escríbenos al WhatsApp y te decimos qué exámenes necesitas</td><td>Facebook, Instagram</td></tr>
+        <tr><td>11 ago</td><td>Martes</td><td>3</td><td>Cauterización L200</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Qué es una verruga y por qué no se quita sola</td><td>Escríbenos y te explicamos cómo es el procedimiento</td><td>Facebook, Instagram</td></tr>
+        <tr><td>12 ago</td><td>Miércoles</td><td>2</td><td>Extracción de uña L500</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Uña encarnada: cuándo deja de ser molestia y pasa a ser problema</td><td>Escríbenos al WhatsApp y te orientamos</td><td>Facebook, Instagram</td></tr>
+        <tr><td>13 ago</td><td>Jueves</td><td>1</td><td>Lavado de oído L400</td><td><span class="tag t-emo">Emocional</span></td><td>Reel</td><td>Volver a escuchar bien lo que dice tu familia</td><td>Ven hoy mismo, sin cita, hasta las 10 PM</td><td>Instagram, Facebook</td></tr>
+        <tr><td>14 ago</td><td>Viernes</td><td>5</td><td>Suero Oxigenador Cerebral L700</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel de objeciones</td><td>Tres dudas frecuentes antes de tu primera sueroterapia</td><td>Habla con nuestra especialista por WhatsApp</td><td>Facebook, Instagram</td></tr>
+        <tr class="hito"><td>15 ago</td><td>Sábado</td><td>1</td><td>Combo consulta L300 y laboratorio</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Quincena: tu consulta médica y tus exámenes el mismo día</td><td>Escríbenos al WhatsApp para armar tu combo</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>16 ago</td><td>Domingo</td><td>4</td><td>Evaluación médica</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>El chequeo que llevas dos años posponiendo</td><td>Hoy estamos abiertos, ven sin cita</td><td>Facebook, Instagram</td></tr>
+        <tr><td>17 ago</td><td>Lunes</td><td>2</td><td>Extracción de uña L500</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Extracción de uña L500, el mismo día que llegas</td><td>Ven hoy, atendemos por orden de llegada</td><td>Facebook, Instagram</td></tr>
+        <tr><td>18 ago</td><td>Martes</td><td>3</td><td>Cauterización L200</td><td><span class="tag t-edu">Educativo</span></td><td>Reel</td><td>Así se elimina una verruga en consulta</td><td>Escríbenos al WhatsApp y agenda tu valoración</td><td>Instagram, Facebook</td></tr>
+        <tr><td>19 ago</td><td>Miércoles</td><td>1</td><td>Lavado de oído L400</td><td><span class="tag t-edu">Educativo</span></td><td>Post</td><td>Lo que no debes meterte en el oído</td><td>Escríbenos y resolvemos tus dudas</td><td>Facebook, Instagram</td></tr>
+        <tr class="hito"><td>20 ago</td><td>Jueves</td><td>1</td><td>Consulta médica L300 y horario extendido</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A y historias todo el día</td><td>Hoy sí puedes: consulta médica L300, abierto hasta las 10 PM</td><td>Ven hoy, sin cita y con parqueo</td><td>Facebook, Instagram, historias, WhatsApp</td></tr>
+        <tr><td>21 ago</td><td>Viernes</td><td>5</td><td>Suero Boost Deportistas L1350</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Suero Boost Deportistas L1350, para recuperar tu energía</td><td>Habla con nuestra especialista por WhatsApp</td><td>Facebook, Instagram</td></tr>
+        <tr><td>22 ago</td><td>Sábado</td><td>2</td><td>Extracción de uña L500</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Deja de caminar con dolor: extracción de uña L500</td><td>Ven este fin de semana, sin cita</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>23 ago</td><td>Domingo</td><td>2</td><td>Extracción de uña L500</td><td><span class="tag t-emo">Emocional</span></td><td>Reel testimonio</td><td>Volver a ponerte los zapatos sin pensarlo dos veces</td><td>Escríbenos al WhatsApp</td><td>Instagram, Facebook</td></tr>
+        <tr><td>24 ago</td><td>Lunes</td><td>4</td><td>Citología base líquida L500</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Citología base líquida: qué es y cada cuánto toca hacértela</td><td>Escríbenos al WhatsApp y te explicamos el proceso</td><td>Facebook, Instagram</td></tr>
+        <tr><td>25 ago</td><td>Martes</td><td>5</td><td>Suero Glutathione L1500</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Qué hace el glutatión en tu cuerpo y para quién está pensado</td><td>Consulta con nuestra especialista por WhatsApp</td><td>Facebook, Instagram</td></tr>
+        <tr><td>26 ago</td><td>Miércoles</td><td>3</td><td>Cauterización L200</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Eliminación de verrugas L200, sin cita previa</td><td>Escríbenos al WhatsApp para tu valoración</td><td>Facebook, Instagram</td></tr>
+        <tr><td>27 ago</td><td>Jueves</td><td>4</td><td>Electrocardiograma L500</td><td><span class="tag t-edu">Educativo</span></td><td>Post</td><td>Electrocardiograma L500: cuándo conviene hacerse uno</td><td>Escríbenos y te decimos si es tu caso</td><td>Facebook, Instagram</td></tr>
+        <tr><td>28 ago</td><td>Viernes</td><td>5</td><td>Combo Boost L1350 y Complejo B L850</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Arma tu combo de sueroterapia: Boost L1350 y Complejo B L850</td><td>Habla con nuestra especialista por WhatsApp</td><td>Facebook, Instagram</td></tr>
+        <tr class="hito"><td>29 ago</td><td>Sábado</td><td>2</td><td>Combo extracción de uña L500 y consulta L300</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Cierre de mes: revisa esa uña y tu consulta el mismo día</td><td>Ven este fin de semana, abrimos hasta las 10 PM</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>30 ago</td><td>Domingo</td><td>1</td><td>Marca y comunidad</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>Un mes más cuidando de tu salud, sin barreras</td><td>Te esperamos en City Mall, todos los días</td><td>Facebook, Instagram</td></tr>
+        <tr class="hito"><td>31 ago</td><td>Lunes</td><td>3</td><td>Cauterización L200</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Último día del mes: eliminación de verrugas L200</td><td>Escríbenos hoy al WhatsApp</td><td>Facebook, Instagram, historias</td></tr>
+      </tbody>
+    </table>
+    <div class="nota"><b>Días 1 al 7 de agosto:</b> sin publicación planificada. El plan se emite el 7 de agosto, así que ese tramo ya transcurrió. Es el eco del pago de fin de mes y el tramo más fuerte del ciclo de liquidez; para septiembre el plan debe entregarse antes del día 1.</div>
+    <div class="nota"><b>Mapa de liquidez aplicado:</b> del 8 al 14 va el valle, con educativo y servicios de entrada. El 15 y 16 es quincena privada, con combo. Del 17 al 19 es antesala del pago público, con anticipación. El 20 se activa desde temprano y no se espera: en julio ese día fue el más débil del mes con L4,658.50 y ocho visitas. Del 21 al 28 va la ventana alta con ticket alto y sueroterapia. Del 29 al 31 va el cierre de mes, que en julio también quedó bajo umbral.</div>
+  </section>
+
+  <section>
+    <h2>Cadencia semanal</h2>
+    <table>
+      <thead><tr><th>Semana</th><th>Piezas de feed</th><th>Carruseles</th><th>Reels</th><th>Historias</th><th>Educativo</th><th>Promo</th><th>Emocional</th></tr></thead>
+      <tbody>
+        <tr><td>8 al 14 ago</td><td>7</td><td>4</td><td>1</td><td>Diarias</td><td>4</td><td>1</td><td>2</td></tr>
+        <tr><td>15 al 21 ago</td><td>7</td><td>0</td><td>1</td><td>Diarias</td><td>2</td><td>4</td><td>1</td></tr>
+        <tr><td>22 al 28 ago</td><td>7</td><td>2</td><td>1</td><td>Diarias</td><td>3</td><td>3</td><td>1</td></tr>
+        <tr><td>29 al 31 ago</td><td>3</td><td>0</td><td>0</td><td>Diarias</td><td>0</td><td>2</td><td>1</td></tr>
+        <tr><td><b>Total mes</b></td><td><b>24</b></td><td><b>6</b></td><td><b>3</b></td><td><b>24 días</b></td><td><b>9</b></td><td><b>10</b></td><td><b>5</b></td></tr>
+      </tbody>
+    </table>
+    <div class="nota"><b>Regla P9 aplicada:</b> seis de las veinticuatro piezas mencionan de forma explícita el horario extendido y la atención por orden de llegada (8, 9, 13, 20, 29 y 30 de agosto), una de cada cuatro. Sus historias se programan después de las 5 PM. El aporte del horario extendido bajó de 10.56% en junio a 8.34% en julio y sigue por debajo del disparador del 10%.</div>
+  </section>
+
+  <section>
+    <h2>Piezas de refuerzo</h2>
+    <div class="card">
+      <p><b>Video del TV de sala de espera.</b> Formato 16:9, de 5 a 6 segundos por slide, transición suave de 0.5 a 1 segundo, loop continuo, Ken Burns sutil sobre foto real, música instrumental suave. Actualizaciones de agosto: retirar el slide del Suero Multivitamínico por falta de producto; verificar que cauterización aparezca a L200 y no a L300; agregar slide del Suero Glutathione L1500, que vuelve a estar disponible; reforzar el slide de horario hasta las 10 PM y el de todo en uno con parqueo y orden de llegada; incluir un slide de aplicación intramuscular L80 e intravenosa L180, que no tienen presencia en el feed este mes.</p>
+      <p><b>Historias.</b> Diarias los 24 días. Refuerzo especial el 20 de agosto: primera historia antes de las 8 AM, segunda al mediodía y tercera a las 5 PM, para activar el día de pago en lugar de esperarlo. Las historias de aplicaciones intramuscular e intravenosa se publican en el valle, del 10 al 14, con el objetivo de generar dato medible sobre servicios que hoy no aparecen desagregados en el reporte.</p>
+      <p><b>Flujos de WhatsApp.</b> Tres encargos: revisar el flujo de sueroterapia con el ángulo nuevo del Complejo B; crear el flujo de extracción de uña, que es el servicio con más peso del mes y hoy no tiene flujo propio; y cerrar los pendientes de lavado de oído, extracción de uña y cauterización que quedaron abiertos en ManyChat.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>KPIs del mes</h2>
+    <table>
+      <thead><tr><th>Indicador</th><th>Julio 2026</th><th>Meta agosto 2026</th><th>Depende de</th></tr></thead>
+      <tbody>
+        <tr><td>Venta total del mes</td><td>L379,336.94</td><td>L416,666.67</td><td>Todos los pilares</td></tr>
+        <tr><td>Promedio diario</td><td>L12,236.68</td><td>L13,441.00</td><td>Pilar 1</td></tr>
+        <tr><td>Ticket promedio</td><td>L700.36</td><td>L740.00</td><td>Combos de los pilares 1 y 5</td></tr>
+        <tr><td>Visitas por día</td><td>17.5</td><td>19.4</td><td>Pilar 1</td></tr>
+        <tr><td>Días bajo umbral de L10,500</td><td>10 de 31</td><td>6 o menos de 31</td><td>Pilares 1 y 3</td></tr>
+        <tr><td>Cauterización</td><td>L47,475.00</td><td>L55,000.00 o más</td><td>Pilar 3</td></tr>
+        <tr><td>Extracción de uña</td><td>L30,650.00</td><td>L33,000.00 o más</td><td>Pilar 2</td></tr>
+        <tr><td>Lavado de oído</td><td>L18,200.00</td><td>L20,000.00 o más</td><td>Pilar 1</td></tr>
+        <tr><td>Laboratorio</td><td>L41,657.75</td><td>L50,000.00 o más</td><td>Pilar 4</td></tr>
+        <tr><td>Evaluación médica</td><td>L71,545.00</td><td>L80,000.00 o más</td><td>Pilares 1 y 4</td></tr>
+        <tr><td>Sueroterapia</td><td>L43,230.00</td><td>L48,000.00 o más</td><td>Pilar 5</td></tr>
+        <tr><td>Suero Complejo B</td><td>L850.00</td><td>L4,000.00 o más</td><td>Pieza del 28 de agosto</td></tr>
+        <tr><td>Suero Glutathione</td><td>Sin dato</td><td>Generar el primer dato medible</td><td>Pieza del 25 de agosto</td></tr>
+        <tr><td>Aporte del horario extendido</td><td>8.34%</td><td>10% o más</td><td>Regla P9, seis piezas</td></tr>
+        <tr><td>ROAS de Meta</td><td>6.42</td><td>7.50 o más</td><td>Pauta asignada</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Encargos a las skills hermanas</h2>
+    <div class="card">
+      <p><b>cmg-meta-ads-copywriter.</b> Prioridad de pauta en este orden, a falta de presupuesto asignado: (1) extracción de uña L500, ángulo de escalamiento, sin objeción que atacar, es demanda que ya responde; (2) cauterización L200, ángulo de presencia continua, objeción a atacar el miedo al procedimiento; (3) consulta médica L300 con horario extendido, ángulo de acceso y disponibilidad nocturna; (4) laboratorio y evaluación médica, ángulo preventivo; (5) sueroterapia Boost L1350 y Oxigenador L700, ángulo de objeción y no de precio.</p>
+      <p><b>ai-ad-image-prompter.</b> Doce piezas con Plantilla A: las del 8, 15, 17, 20, 21, 22, 26, 28, 29 y 31 de agosto. Seis carruseles educativos: 10, 11, 12, 14, 24 y 25. Tres reels: 13, 18 y 23. Tres posts emocionales con foto real: 9, 16 y 30. Todas en formato cuadrado 1080 por 1080, con overlay navy, titular bicromático amarillo y blanco, precio grande en amarillo y franja inferior con punto amarillo de ubicación y punto verde de WhatsApp.</p>
+      <p><b>cmg-whatsapp-cro.</b> Tres flujos. Uno, revisar el flujo de sueroterapia incorporando el ángulo nuevo del Complejo B, cuya caída se confirmó de demanda y no de abastecimiento. Dos, crear desde cero el flujo de extracción de uña. Tres, cerrar los pendientes de lavado de oído, extracción de uña y cauterización. En los tres, el objetivo final es transferir con la Lic. María del Carmen para cerrar.</p>
+      <p><b>cmg-ads-dashboard.</b> Generar el corte de julio 2026 antes del próximo plan. Sin él, las reglas P3 y P11 quedan a ciegas: no se puede distinguir si cauterización cayó por falta de pauta o por mensaje agotado, ni si la sueroterapia falla en alcance o en cierre.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Congelados y datos faltantes</h2>
+    <div class="card">
+      <p><b>Congelados este mes:</b></p>
+      <ul>
+        <li>Suero Multivitamínico L1200: sin producto disponible. Cero piezas.</li>
+        <li>Suero Vitamina D L1350: sin ventas en 2026. Cero piezas.</li>
+        <li>Hígado Detox y Beplenovax: fuera del catálogo activo.</li>
+      </ul>
+      <p style="margin-top:10px"><b>Descongelados y reincorporados:</b></p>
+      <ul>
+        <li>Suero Complejo B L850: la regla P1 se levanta porque la causa quedó confirmada como caída de demanda y no como desabasto. Entra bajo la regla P3, con ángulo nuevo y anclado a Boost, con una sola pieza y sin presupuesto extra.</li>
+        <li>Suero Glutathione L1500: disponible. Entra a sondeo bajo la regla P10 con una pieza educativa, sin pauta, hasta tener dos meses de dato propio.</li>
+      </ul>
+      <p style="margin-top:10px"><b>Datos faltantes a levantar:</b></p>
+      <ul>
+        <li>Dashboard de Meta Ads de julio: gasto, resultados, costo por conversación, CTR, CPM y frecuencia por campaña.</li>
+        <li>Presupuesto publicitario de agosto, total y por campaña.</li>
+        <li>Promociones ya comprometidas para agosto.</li>
+        <li>Lista exacta de los diez días bajo umbral de julio. Solo se conocen cuatro: el 20, el 29, el 30 y el 31.</li>
+        <li>Total de visitas de julio. El reporte solo trae el promedio diario de 17.5.</li>
+        <li>Porcentaje de facturación de 6 a 10 PM sobre el total diario, métrica decisiva de la Fase 2 del piloto.</li>
+        <li>Facturación desagregada de consulta médica, prueba de embarazo, citología, electrocardiograma y aplicaciones intramuscular e intravenosa.</li>
+        <li>Tasa de cierre de conversación de WhatsApp a visita efectiva, por servicio.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Qué revisar el mes que viene</h2>
+    <div class="card">
+      <ul>
+        <li><b>Primero, los días bajo umbral.</b> Si bajan de 10 a 6 o menos, la regla P5 se relaja y el mix vuelve hacia 50/30/20 en septiembre.</li>
+        <li><b>Segundo, el resultado del 20 de agosto.</b> Es el test directo de si activar el día de pago funciona. Si vuelve a ser un día débil, el problema no es el contenido y hay que buscarlo en operación.</li>
+        <li><b>Tercero, extracción de uña.</b> Cuarto mes consecutivo de crecimiento confirmaría el caso replicable. Si se estanca con capacidad disponible y peso máximo de calendario, el techo es de demanda y hay que bajarle el peso.</li>
+        <li><b>Cuarto, el Complejo B.</b> Una sola pieza con ángulo nuevo. Si no se mueve de L850, el producto se retira del catálogo activo en septiembre.</li>
+        <li><b>Quinto, el Glutathione.</b> Cualquier cifra distinta de cero es el primer dato propio del producto y define si entra al plan de septiembre con pauta.</li>
+        <li><b>Sexto, el aporte del horario extendido.</b> Si sube del 8.34% con seis piezas dedicadas, la regla P9 está funcionando y sostiene la decisión de la Fase 2.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <b>Clínica Médica General</b> · City Mall Tegucigalpa · Sin cita, por orden de llegada, hasta las 10 PM · WhatsApp +504 3155-5162 · Cuidamos de tu salud
+  </footer>
+
+</div>
+
+</div><!-- /#cmg-gate-content -->
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
+
+<script>
+(function () {
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) {
+      window.location.href = 'Auth.html?returnTo=Admin-Panel-Contenido.html';
+      return;
+    }
+    cmgStaff.checkAdmin(user, function (ok) {
+      if (!ok) { window.location.href = 'Inicio.html'; return; }
+      document.getElementById('adm-user-email').textContent = user.email;
+      document.getElementById('cmg-gate-loader').style.display = 'none';
+      document.getElementById('cmg-gate-content').style.display = 'block';
+    });
+  });
+
+  document.getElementById('adm-logout-btn').addEventListener('click', function () {
+    cmgAuth.signOut().then(function () { window.location.href = 'Inicio.html'; });
+  });
+})();
+</script>
+
+</body>
+</html>

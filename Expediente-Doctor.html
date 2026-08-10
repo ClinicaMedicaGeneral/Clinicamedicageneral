@@ -6187,12 +6187,29 @@ summary.ed-meds-cat { list-style: revert; }
     if (c.convertidoConsulta) badge = ' <span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">❌ Servicio NO realizado · convertido en consulta</span>';
     if (!esServicio && c.convertidoServicio) badge = ' <span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">❌ Consulta NO realizada · convertida en servicio</span>';
 
+    /* DRM: sin cortar texto — el historial debe mostrar la información completa */
     var titulo = esServicio
       ? esc(servicioLabelConCantidad(c))
-      : esc(c.motivoConsulta || '').slice(0, 120) + (c.motivoConsulta && c.motivoConsulta.length > 120 ? '...' : '');
+      : esc(c.motivoConsulta || '');
 
     var medsVisita   = (c.medicamentosVisita || []).filter(Boolean);
     var medsDespacho = (c.medicamentosDespacho || []).filter(Boolean);
+
+    /* DRM: quién atendió — enfermería (preclínica/signos vitales) y médico o quien
+       completó el servicio, para que el historial diga quién vio al paciente. */
+    var atendioPartes = [];
+    var enfermeriaNombre = c.enfermeriaPor || c.preclinicaPor;
+    if (enfermeriaNombre) atendioPartes.push('👩‍⚕️ Enfermería: ' + esc(enfermeriaNombre));
+    if (!esServicio && c.doctorNombre) atendioPartes.push('🩺 Médico: ' + esc(c.doctorNombre));
+    if (esServicio && c.servicioPor && c.servicioPor !== enfermeriaNombre) atendioPartes.push('🛎️ Completado por: ' + esc(c.servicioPor));
+    var atendioLinea = atendioPartes.length
+      ? '<div class="ed-consulta-motivo" style="color:#374151">' + atendioPartes.join(' · ') + '</div>'
+      : '';
+
+    var vitalsChips = buildVitalsChipsHtml(c.signosVitales);
+    var vitalsHtml = vitalsChips
+      ? '<div style="margin-top:6px"><div style="font-size:12px;font-weight:700;color:#213C7D;margin-bottom:4px">📊 Signos vitales</div><div class="ed-vitals-chips">' + vitalsChips + '</div></div>'
+      : '';
 
     /* DRM v3 #5: badge constancia + permitir editar si < 24h */
     var constanciaBadge = '';
@@ -6220,12 +6237,14 @@ summary.ed-meds-cat { list-style: revert; }
       '<div>' +
         '<div class="ed-consulta-fecha">📅 ' + fmtDate(getFechaDisplay(c)) + badge + constanciaBadge + '</div>' +
         '<div class="ed-consulta-motivo">' + titulo + '</div>' +
-        (!esServicio && c.diagnostico ? '<div class="ed-consulta-motivo"><strong>Dx:</strong> ' + esc(c.diagnostico).slice(0, 100) + '</div>' : '') +
+        atendioLinea +
+        (!esServicio && c.diagnostico ? '<div class="ed-consulta-motivo"><strong>Dx:</strong> ' + esc(c.diagnostico) + '</div>' : '') +
         (medsVisita.length ? '<div class="ed-consulta-motivo" style="color:#374151"><strong>💊 Aplicado en consulta:</strong> ' + esc(medsVisita.join(', ')) + '</div>' : '') +
         (medsDespacho.length ? '<div class="ed-consulta-motivo" style="color:#374151"><strong>📦 Despacho:</strong> ' + esc(medsDespacho.join(', ')) + '</div>' : '') +
-        (c.recetaExterna && c.recetaExterna.trim() ? '<div class="ed-consulta-motivo" style="color:#9A3412"><strong>🏥 Receta externa:</strong> ' + esc(c.recetaExterna).slice(0, 120) + (c.recetaExterna.length > 120 ? '...' : '') + '</div>' : '') +
-        (esServicio && c.servicioNotas ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas:</strong> ' + esc(c.servicioNotas).slice(0, 100) + '</div>' : '') +
-        (esServicio && c.servicioNotasFin ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas de finalización:</strong> ' + esc(c.servicioNotasFin).slice(0, 100) + '</div>' : '') +
+        (c.recetaExterna && c.recetaExterna.trim() ? '<div class="ed-consulta-motivo" style="color:#9A3412"><strong>🏥 Receta externa:</strong> ' + esc(c.recetaExterna) + '</div>' : '') +
+        (esServicio && c.servicioNotas ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas:</strong> ' + esc(c.servicioNotas) + '</div>' : '') +
+        (esServicio && c.servicioNotasFin ? '<div class="ed-consulta-motivo" style="color:#6B7280"><strong>Notas de finalización:</strong> ' + esc(c.servicioNotasFin) + '</div>' : '') +
+        vitalsHtml +
         ajusteLinea +
         edicionLinea +
         (esServicio ? '<div class="ed-consulta-motivo" style="color:#9CA3AF;font-size:11px;font-family:monospace">id: ' + esc(c._id) + ' · status: ' + esc(c.status) + ' · tipoRegistro: ' + esc(c.tipoRegistro || '—') + ' · convertidoConsulta: ' + String(!!c.convertidoConsulta) + '</div>' : '') +

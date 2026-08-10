@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>CMG · Panel de Rendimiento Publicitario</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;800&family=Inter:wght@400;500;600;700&family=Allura&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#213C7D;
+    --navy-deep:#152a5c;
+    --yellow:#FDD22C;
+    --red:#F20F10;
+    --teal:#599FB2;
+    --green:#4E8273;
+    --cream:#FFEED8;
+    --soft:#F6F7FB;
+    --ink:#0A0F1F;
+    --white:#FFFFFF;
+    --line: rgba(10,15,31,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--soft);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px 64px;}
+
+  /* ── Gate (acceso solo admins) ── */
+  #cmg-gate-loader{
+    position:fixed; inset:0; background:var(--soft); z-index:999;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:12px;
+  }
+  #cmg-gate-loader .spinner{
+    width:34px; height:34px; border-radius:50%;
+    border:3px solid var(--line); border-top-color:var(--navy);
+    animation:spin .8s linear infinite;
+  }
+  #cmg-gate-loader p{font-family:'Inter',sans-serif; font-size:13px; color:#6b7290;}
+  @keyframes spin{ to{transform:rotate(360deg);} }
+  #cmg-gate-content{display:none;}
+
+  .adm-bar{
+    max-width:1040px; margin:0 auto; padding:14px 24px 0;
+    display:flex; align-items:center; justify-content:flex-end; gap:12px;
+  }
+  .adm-bar .who{font-size:12.5px; color:#6b7290;}
+  .adm-bar .who strong{color:var(--navy);}
+  .adm-bar button{
+    border:1px solid var(--line); background:var(--white); color:#6b7290;
+    border-radius:100px; padding:6px 16px; font-size:12.5px; font-weight:600;
+    cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s ease;
+  }
+  .adm-bar button:hover{color:var(--navy); border-color:var(--navy);}
+
+  header{
+    background:linear-gradient(155deg, var(--navy) 0%, var(--navy-deep) 100%);
+    color:var(--white);
+    padding:40px 24px 88px;
+    position:relative;
+    overflow:hidden;
+  }
+  header::after{
+    content:"";
+    position:absolute; inset:0;
+    background-image:radial-gradient(circle at 82% 15%, rgba(253,210,44,0.16), transparent 45%),
+                      radial-gradient(circle at 8% 90%, rgba(89,159,178,0.22), transparent 40%);
+    pointer-events:none;
+  }
+  .header-inner{max-width:1040px;margin:0 auto;position:relative;}
+  .brand-row{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+  .pulse-badge{
+    width:40px;height:40px;border-radius:50%;
+    background:rgba(255,255,255,0.12);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .pulse-badge svg{width:22px;height:22px;stroke:var(--yellow);}
+  .brand-name{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700; font-size:14px; letter-spacing:0.14em;
+    text-transform:uppercase; color:rgba(255,255,255,0.75);
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:800;
+    font-size:clamp(28px,4vw,42px);
+    line-height:1.08;
+    margin:0 0 12px;
+    letter-spacing:-0.01em;
+  }
+  .date-pill{
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.18);
+    padding:7px 16px; border-radius:100px;
+    font-size:13px; font-weight:600; color:var(--yellow);
+    letter-spacing:0.02em;
+  }
+  .date-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--yellow);}
+  .subtitle-note{
+    margin-top:14px; font-size:12.5px; color:rgba(255,255,255,0.65); max-width:520px; line-height:1.6;
+  }
+
+  .kpi-strip{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:14px;
+    margin-top:-56px; position:relative; z-index:2;
+  }
+  .kpi-card{
+    background:var(--white);
+    border-radius:16px;
+    padding:20px 20px 18px;
+    box-shadow:0 12px 28px -14px rgba(33,60,125,0.35);
+    border:1px solid var(--line);
+  }
+  .kpi-label{
+    font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase;
+    color:#6b7290; margin-bottom:8px;
+  }
+  .kpi-value{
+    font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:26px; color:var(--navy); line-height:1;
+  }
+  .kpi-sub{font-size:12px; color:#8a90aa; margin-top:6px;}
+
+  .view-tabs{
+    display:inline-flex; gap:4px; background:var(--white); border:1px solid var(--line);
+    border-radius:100px; padding:4px; margin-top:-28px; position:relative; z-index:3;
+    box-shadow:0 8px 20px -12px rgba(33,60,125,0.3);
+  }
+  .tab-btn{
+    font-family:'Inter',sans-serif; font-weight:600; font-size:13px;
+    border:none; background:transparent; color:#6b7290;
+    padding:9px 20px; border-radius:100px; cursor:pointer; transition:all .15s ease;
+  }
+  .tab-btn.active{background:var(--navy); color:var(--white);}
+  .tab-btn:not(.active):hover{color:var(--navy);}
+
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin:52px 0 18px;
+  }
+  .section-head h2{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px; margin:0;
+    color:var(--navy);
+  }
+  .section-note{font-size:12.5px; color:#7a80a0;}
+
+  .campaign{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:20px 24px;
+    margin-bottom:12px;
+    opacity:0; transform:translateY(10px);
+    animation:rise .5s ease forwards;
+  }
+  @keyframes rise{ to{opacity:1; transform:translateY(0);} }
+
+  .campaign-top{
+    display:flex; align-items:center; gap:14px; margin-bottom:14px; flex-wrap:wrap;
+  }
+  .rank{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px;
+    width:26px; height:26px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--soft); color:var(--navy);
+  }
+  .campaign-name{font-weight:600; font-size:15px; flex:1; min-width:180px;}
+  .status-pill{
+    font-size:11px; font-weight:700; letter-spacing:0.03em;
+    padding:5px 12px; border-radius:100px; white-space:nowrap;
+  }
+  .status-escalar{background:rgba(78,130,115,0.12); color:var(--green);}
+  .status-mantener{background:rgba(253,210,44,0.18); color:#8a6d00;}
+  .status-revisar{background:rgba(242,15,16,0.10); color:var(--red);}
+
+  .gauge-row{display:flex; align-items:center; gap:16px; margin-bottom:14px;}
+  .gauge-track{
+    position:relative; flex:1; height:8px; border-radius:100px; overflow:visible;
+    opacity:0.85;
+  }
+  .gauge-marker{
+    position:absolute; top:50%; width:16px; height:16px; border-radius:50%;
+    background:var(--white); border:3px solid var(--navy);
+    transform:translate(-50%,-50%);
+    box-shadow:0 2px 6px rgba(10,15,31,0.25);
+  }
+  .gauge-value{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:17px;
+    color:var(--navy); white-space:nowrap; min-width:78px; text-align:right;
+  }
+  .gauge-value span{font-size:11px; font-weight:500; color:#8a90aa; display:block;}
+
+  .stat-chips{display:flex; gap:22px; flex-wrap:wrap;}
+  .chip{font-size:12.5px; color:#565c78;}
+  .chip b{color:var(--ink); font-weight:600;}
+  .own-threshold{font-size:11px; color:#9298b0; margin-top:8px;}
+
+  .legend{
+    background:var(--white); border:1px solid var(--line); border-radius:16px;
+    padding:22px 24px; margin-top:12px;
+  }
+  table.threshold-table{width:100%; border-collapse:collapse; margin-top:14px; font-size:12.5px;}
+  table.threshold-table th{
+    text-align:left; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase;
+    color:#8a90aa; font-weight:600; padding:0 10px 8px 0; border-bottom:1px solid var(--line);
+  }
+  table.threshold-table td{padding:9px 10px 9px 0; border-bottom:1px solid var(--line); color:#3a3f57;}
+  table.threshold-table tr:last-child td{border-bottom:none;}
+  table.threshold-table td.camp-name{font-weight:600; color:var(--ink);}
+  .zone-g{color:var(--green); font-weight:600;}
+  .zone-y{color:#8a6d00; font-weight:600;}
+  .zone-r{color:var(--red); font-weight:600;}
+
+  .footnotes{margin-top:28px; display:flex; flex-direction:column; gap:10px;}
+  .footnote{
+    font-size:12.5px; color:#565c78; line-height:1.6;
+    padding-left:14px; border-left:3px solid var(--teal);
+  }
+  .footnote.alert{border-color:var(--red);}
+
+  footer{
+    margin-top:56px; padding-top:24px; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+  }
+  .script-note{font-family:'Allura',cursive; font-size:26px; color:var(--teal);}
+  .gen-note{font-size:11.5px; color:#9298b0;}
+
+  @media (max-width:680px){
+    .kpi-strip{grid-template-columns:repeat(2,1fr);}
+    header{padding:32px 20px 100px;}
+    .wrap{padding:0 16px 48px;}
+    table.threshold-table{font-size:11px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .campaign{animation:none; opacity:1; transform:none;}
+  }
+</style>
+</head>
+<body>
+
+<div id="cmg-gate-loader">
+  <div class="spinner"></div>
+  <p>Verificando acceso…</p>
+</div>
+
+<div id="cmg-gate-content">
+
+<div class="adm-bar">
+  <span class="who">Conectado como <strong id="adm-user-email"></strong></span>
+  <button id="adm-logout-btn" type="button">Cerrar sesión</button>
+</div>
+
+<header>
+  <div class="header-inner">
+    <div class="brand-row">
+      <div class="pulse-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 12h4l2 7 4-14 2 7h8"/>
+        </svg>
+      </div>
+      <span class="brand-name">Clínica Médica General · CMG</span>
+    </div>
+    <h1>Panel de rendimiento<br>publicitario</h1>
+    <div class="date-pill"><span class="dot"></span>Acumulado 1 – 10 de agosto, 2026</div>
+    <p class="subtitle-note">Cada campaña se mide contra su propio umbral histórico (promedio ±15%), no contra un estándar único para todas.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="view-tabs">
+    <button class="tab-btn" data-view="hoy" onclick="switchView('hoy')">Hoy · 10 ago</button>
+    <button class="tab-btn active" data-view="acumulado" onclick="switchView('acumulado')">Acumulado 1–10 ago</button>
+  </div>
+
+  <div id="view-hoy" style="display:none;">
+
+  <div class="kpi-strip" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Gasto de hoy</div>
+      <div class="kpi-value">L375.08</div>
+      <div class="kpi-sub">6 campañas activas</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Conversaciones iniciadas</div>
+      <div class="kpi-value">28</div>
+      <div class="kpi-sub">resultados de hoy</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Costo promedio</div>
+      <div class="kpi-value">L13.40</div>
+      <div class="kpi-sub">por conversación</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Impresiones</div>
+      <div class="kpi-value">9,766</div>
+      <div class="kpi-sub">alcance de hoy</div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Campañas — solo hoy</h2>
+    <span class="section-note">agrupadas por estado</span>
+  </div>
+
+  <div class="campaign" style="animation-delay:.02s">
+    <div class="campaign-top">
+      <div class="rank">1</div>
+      <div class="campaign-name">Extracción de Uña</div>
+      <div class="status-pill status-escalar">ESCALAR</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 57.8%, var(--yellow) 57.8%, var(--yellow) 78.3%, var(--red) 78.3%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:33.2%"></div>
+      </div>
+      <div class="gauge-value">L7.63<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>3.42%</b></span>
+      <span class="chip">CPM <b>L36.87</b></span>
+      <span class="chip">Frecuencia <b>1.15</b></span>
+      <span class="chip">Gasto <b>L91.56</b></span>
+      <span class="chip">Resultados <b>12</b></span>
+    </div>
+    <div class="own-threshold">Su umbral: escalar &lt;L13.30 · mantener L13.30–L18.00 · revisar &gt;L18.00 — la más eficiente del día</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.08s">
+    <div class="campaign-top">
+      <div class="rank">2</div>
+      <div class="campaign-name">Cauterizaciones 2026</div>
+      <div class="status-pill status-mantener">MANTENER</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 55.3%, var(--yellow) 55.3%, var(--yellow) 75.0%, var(--red) 75.0%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:58.0%"></div>
+      </div>
+      <div class="gauge-value">L8.70<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>3.31%</b></span>
+      <span class="chip">CPM <b>L28.83</b></span>
+      <span class="chip">Frecuencia <b>1.16</b></span>
+      <span class="chip">Gasto <b>L87.03</b></span>
+      <span class="chip">Resultados <b>10</b></span>
+    </div>
+    <div class="own-threshold">Su umbral: escalar &lt;L8.30 · mantener L8.30–L11.25 · revisar &gt;L11.25 — a centavos de entrar en verde</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.14s">
+    <div class="campaign-top">
+      <div class="rank">3</div>
+      <div class="campaign-name">Lavado de Oído (ManyChat)</div>
+      <div class="status-pill status-mantener">MANTENER</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 58.0%, var(--yellow) 58.0%, var(--yellow) 78.5%, var(--red) 78.5%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:64.5%"></div>
+      </div>
+      <div class="gauge-value">L12.91<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>3.10%</b></span>
+      <span class="chip">CPM <b>L22.62</b></span>
+      <span class="chip">Frecuencia <b>1.11</b></span>
+      <span class="chip">Gasto <b>L38.72</b></span>
+      <span class="chip">Resultados <b>3</b></span>
+    </div>
+    <div class="own-threshold">Su umbral: escalar &lt;L11.60 · mantener L11.60–L15.70 · revisar &gt;L15.70 — 3 conversaciones hoy, muestra chica</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.20s">
+    <div class="campaign-top">
+      <div class="rank">4</div>
+      <div class="campaign-name">Remarketing Lavado de Oído</div>
+      <div class="status-pill status-revisar">REVISAR</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 55.3%, var(--yellow) 55.3%, var(--yellow) 75.0%, var(--red) 75.0%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:100.0%"></div>
+      </div>
+      <div class="gauge-value">L35.21<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>3.41%</b></span>
+      <span class="chip">CPM <b>L44.46</b></span>
+      <span class="chip">Frecuencia <b>1.14</b></span>
+      <span class="chip">Gasto <b>L35.21</b></span>
+      <span class="chip">Resultados <b>1</b></span>
+    </div>
+    <div class="own-threshold">Su umbral: escalar &lt;L8.85 · mantener L8.85–L12.00 · revisar &gt;L12.00 — 1 sola conversación sobre L35 de gasto; el número del día no es señal</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.26s">
+    <div class="campaign-top">
+      <div class="rank">5</div>
+      <div class="campaign-name">Sueroterapia Pilares</div>
+      <div class="status-pill status-revisar">EN OBSERVACIÓN</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 61.1%, var(--yellow) 61.1%, var(--yellow) 77.8%, var(--red) 77.8%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:100.0%"></div>
+      </div>
+      <div class="gauge-value">L48.03<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>2.34%</b></span>
+      <span class="chip">CPM <b>L72.50</b></span>
+      <span class="chip">Frecuencia <b>1.26</b></span>
+      <span class="chip">Gasto <b>L96.06</b></span>
+      <span class="chip">Resultados <b>2</b></span>
+    </div>
+    <div class="own-threshold">Umbral genérico: escalar &lt;L11.00 · mantener L11.00–L14.00 · revisar &gt;L14.00 — 2 resultados sobre L96; es la que más gasta con menos retorno hoy</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.32s">
+    <div class="campaign-top">
+      <div class="rank">6</div>
+      <div class="campaign-name">Oxigenador Cerebral (Plan 90 días)</div>
+      <div class="status-pill status-mantener">SIN DATOS AÚN</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 57.0%, var(--yellow) 57.0%, var(--yellow) 77.2%, var(--red) 77.2%, var(--red) 100%)">
+
+      </div>
+      <div class="gauge-value">—<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>2.76%</b></span>
+      <span class="chip">CPM <b>L60.92</b></span>
+      <span class="chip">Frecuencia <b>1.12</b></span>
+      <span class="chip">Gasto <b>L26.50</b></span>
+      <span class="chip">Resultados <b>0</b></span>
+    </div>
+    <div class="own-threshold">Sin conversaciones registradas aún hoy — L26.50 gastados hasta ahora</div>
+  </div>
+
+  <div class="footnote alert" style="margin-top:6px;">
+    <b>La vista "Hoy" es ruidosa por diseño</b> — con 0 a 12 resultados por campaña en un solo día, una conversación de más o de menos mueve muchísimo el costo por conversación. Úsala para pulso rápido, no para decisiones de presupuesto; para eso, la vista "Acumulado" es más confiable.
+  </div>
+
+  </div>
+
+  <div id="view-acumulado">
+
+  <div class="kpi-strip" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Gasto total</div>
+      <div class="kpi-value">L5,003.58</div>
+      <div class="kpi-sub">6 campañas activas</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Conversaciones iniciadas</div>
+      <div class="kpi-value">468</div>
+      <div class="kpi-sub">resultados totales</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Costo promedio</div>
+      <div class="kpi-value">L10.69</div>
+      <div class="kpi-sub">por conversación</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Impresiones</div>
+      <div class="kpi-value">172,987</div>
+      <div class="kpi-sub">alcance combinado</div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Campañas, contra su propio umbral</h2>
+    <span class="section-note">agrupadas por estado</span>
+  </div>
+
+  <div class="campaign" style="animation-delay:.02s">
+    <div class="campaign-top">
+      <div class="rank">1</div>
+      <div class="campaign-name">Lavado de Oído (ManyChat)</div>
+      <div class="status-pill status-escalar">ESCALAR</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 58.0%, var(--yellow) 58.0%, var(--yellow) 78.5%, var(--red) 78.5%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:36.0%"></div>
+      </div>
+      <div class="gauge-value">L7.19<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>2.67%</b></span>
+      <span class="chip">CPM <b>L20.45</b></span>
+      <span class="chip">Frecuencia <b>1.58</b></span>
+      <span class="chip">Gasto <b>L661.64</b></span>
+      <span class="chip">Resultados <b>92</b></span>
+    </div>
+    <div class="own-threshold">Su umbral (14 meses de historial): escalar &lt;L11.60 · mantener L11.60–L15.70 · revisar &gt;L15.70 — la más eficiente de la cuenta</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.08s">
+    <div class="campaign-top">
+      <div class="rank">2</div>
+      <div class="campaign-name">Extracción de Uña</div>
+      <div class="status-pill status-escalar">ESCALAR</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 57.8%, var(--yellow) 57.8%, var(--yellow) 78.3%, var(--red) 78.3%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:43.2%"></div>
+      </div>
+      <div class="gauge-value">L9.94<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>3.11%</b></span>
+      <span class="chip">CPM <b>L28.04</b></span>
+      <span class="chip">Frecuencia <b>1.85</b></span>
+      <span class="chip">Gasto <b>L1261.91</b></span>
+      <span class="chip">Resultados <b>127</b></span>
+    </div>
+    <div class="own-threshold">Su umbral (8 meses de historial): escalar &lt;L13.30 · mantener L13.30–L18.00 · revisar &gt;L18.00</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.14s">
+    <div class="campaign-top">
+      <div class="rank">3</div>
+      <div class="campaign-name">Cauterizaciones 2026</div>
+      <div class="status-pill status-mantener">MANTENER</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 55.3%, var(--yellow) 55.3%, var(--yellow) 75.0%, var(--red) 75.0%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:65.5%"></div>
+      </div>
+      <div class="gauge-value">L9.83<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>3.31%</b></span>
+      <span class="chip">CPM <b>L23.34</b></span>
+      <span class="chip">Frecuencia <b>1.75</b></span>
+      <span class="chip">Gasto <b>L1258.16</b></span>
+      <span class="chip">Resultados <b>128</b></span>
+    </div>
+    <div class="own-threshold">Su umbral (6 meses de historial): escalar &lt;L8.30 · mantener L8.30–L11.25 · revisar &gt;L11.25 — su barra verde es la más exigente de la cuenta</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.20s">
+    <div class="campaign-top">
+      <div class="rank">4</div>
+      <div class="campaign-name">Remarketing Lavado de Oído</div>
+      <div class="status-pill status-mantener">MANTENER</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 55.3%, var(--yellow) 55.3%, var(--yellow) 75.0%, var(--red) 75.0%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:74.6%"></div>
+      </div>
+      <div class="gauge-value">L11.94<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>3.46%</b></span>
+      <span class="chip">CPM <b>L38.25</b></span>
+      <span class="chip">Frecuencia <b>1.84</b></span>
+      <span class="chip">Gasto <b>L656.65</b></span>
+      <span class="chip">Resultados <b>55</b></span>
+    </div>
+    <div class="own-threshold">Su umbral (4 meses de historial): escalar &lt;L8.85 · mantener L8.85–L12.00 · revisar &gt;L12.00 — pegada al techo amarillo, un mal día la pasa a rojo</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.26s">
+    <div class="campaign-top">
+      <div class="rank">5</div>
+      <div class="campaign-name">Oxigenador Cerebral (Plan 90 días)</div>
+      <div class="status-pill status-mantener">MANTENER</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 57.0%, var(--yellow) 57.0%, var(--yellow) 77.2%, var(--red) 77.2%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:72.5%"></div>
+      </div>
+      <div class="gauge-value">L14.51<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>2.98%</b></span>
+      <span class="chip">CPM <b>L44.80</b></span>
+      <span class="chip">Frecuencia <b>1.67</b></span>
+      <span class="chip">Gasto <b>L478.84</b></span>
+      <span class="chip">Resultados <b>33</b></span>
+    </div>
+    <div class="own-threshold">Umbral provisional (2 meses de historial): escalar &lt;L11.40 · mantener L11.40–L15.45 · revisar &gt;L15.45</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.32s">
+    <div class="campaign-top">
+      <div class="rank">6</div>
+      <div class="campaign-name">Sueroterapia Pilares</div>
+      <div class="status-pill status-revisar">EN OBSERVACIÓN</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 61.1%, var(--yellow) 61.1%, var(--yellow) 77.8%, var(--red) 77.8%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:100.0%"></div>
+      </div>
+      <div class="gauge-value">L20.80<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>2.61%</b></span>
+      <span class="chip">CPM <b>L49.54</b></span>
+      <span class="chip">Frecuencia <b>1.95</b></span>
+      <span class="chip">Gasto <b>L686.38</b></span>
+      <span class="chip">Resultados <b>33</b></span>
+    </div>
+    <div class="own-threshold">Sin historial propio — umbral genérico: escalar &lt;L11.00 · mantener L11.00–L14.00 · revisar &gt;L14.00. Es la campaña más cara de la cuenta este mes</div>
+  </div>
+
+  </div>
+
+  <div class="legend">
+    <div class="section-head" style="margin:0;">
+      <h2 style="font-size:16px;">Umbrales por campaña</h2>
+      <span class="section-note">costo por conversación iniciada · calculado con histórico completo</span>
+    </div>
+    <table class="threshold-table">
+      <tr><th>Campaña</th><th>Historial</th><th class="zone-g">Escalar</th><th class="zone-y">Mantener</th><th class="zone-r">Revisar</th></tr>
+      <tr><td class="camp-name">Cauterizaciones 2026</td><td>6 meses</td><td class="zone-g">&lt; L8.30</td><td class="zone-y">L8.30–L11.25</td><td class="zone-r">&gt; L11.25</td></tr>
+      <tr><td class="camp-name">Remarketing Lavado de Oído</td><td>4 meses</td><td class="zone-g">&lt; L8.85</td><td class="zone-y">L8.85–L12.00</td><td class="zone-r">&gt; L12.00</td></tr>
+      <tr><td class="camp-name">Oxigenador Cerebral</td><td>2 meses (provisional)</td><td class="zone-g">&lt; L11.40</td><td class="zone-y">L11.40–L15.45</td><td class="zone-r">&gt; L15.45</td></tr>
+      <tr><td class="camp-name">Lavado de Oído (ManyChat)</td><td>14 meses</td><td class="zone-g">&lt; L11.60</td><td class="zone-y">L11.60–L15.70</td><td class="zone-r">&gt; L15.70</td></tr>
+      <tr><td class="camp-name">Extracción de Uña</td><td>8 meses</td><td class="zone-g">&lt; L13.30</td><td class="zone-y">L13.30–L18.00</td><td class="zone-r">&gt; L18.00</td></tr>
+      <tr><td class="camp-name">Sueroterapia Pilares</td><td>sin historial</td><td class="zone-g">&lt; L11.00 (genérico)</td><td class="zone-y">L11.00–L14.00</td><td class="zone-r">&gt; L14.00</td></tr>
+    </table>
+  </div>
+
+  <div class="footnotes">
+    <div class="footnote">
+      <b>Frecuencia</b> se mantiene con el mismo umbral para todas las campañas: 🟢 &lt;2.5 · 🟡 2.5–3.0 · 🔴 &gt;3.0 — es señal de fatiga de audiencia, no de eficiencia de costo, y se comporta parecido entre campañas.
+    </div>
+    <div class="footnote alert">
+      <b>Oxigenador Cerebral y Sueroterapia Pilares</b> tienen umbrales provisionales por poco historial (2 meses y 0 meses respectivamente). Se recalculan automáticamente cuando acumulen al menos 3 meses de datos propios.
+    </div>
+    <div class="footnote">
+      <b>Oxigenador Cerebral</b> aún no registra conversaciones hoy (L26.50 gastados). En el acumulado del mes sí tiene volumen suficiente para leerse.
+    </div>
+    <div class="footnote">
+      <b>Horario Extendido</b> queda fuera de este panel — su impacto se mide con el Dashboard de facturación, no con métricas de anuncios.
+    </div>
+  </div>
+
+  <footer>
+    <span class="script-note">Cuidamos de tu salud</span>
+    <span class="gen-note">Generado el 10 de agosto, 2026 · Meta Ads · Clínica Médica General CMG</span>
+  </footer>
+
+</div>
+
+</div><!-- /#cmg-gate-content -->
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
+
+<script>
+function switchView(view){
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.view === view); });
+  document.getElementById('view-hoy').style.display = view === 'hoy' ? 'block' : 'none';
+  document.getElementById('view-acumulado').style.display = view === 'acumulado' ? 'block' : 'none';
+}
+
+(function () {
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) {
+      window.location.href = 'Auth.html?returnTo=Admin-Panel-Ads.html';
+      return;
+    }
+    cmgStaff.checkAdmin(user, function (ok) {
+      if (!ok) { window.location.href = 'Inicio.html'; return; }
+      document.getElementById('adm-user-email').textContent = user.email;
+      document.getElementById('cmg-gate-loader').style.display = 'none';
+      document.getElementById('cmg-gate-content').style.display = 'block';
+    });
+  });
+
+  document.getElementById('adm-logout-btn').addEventListener('click', function () {
+    cmgAuth.signOut().then(function () { window.location.href = 'Inicio.html'; });
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -191,9 +191,10 @@ service cloud.firestore {
       // 'listo_enfermeria' sin datos clínicos todavía.
       // Pre clínica (vitales) y registro de un Servicio ya con datos clínicos los
       // crea el personal clínico (médico o enfermería), vía isDoctor().
-      // Excepción: servicios sin preclínica (Extracción de uña, Lavado de oído,
-      // Retiro de puntos) que Caja registra directo en 'servicio' (Pendiente para
-      // Médico), sin pasar por Enfermería.
+      // Excepción: servicios sin preclínica (todo el catálogo de Servicios que no
+      // es enfermeria-completable, ver esServicioEnfermeria) que Caja registra
+      // directo en 'servicio' (Pendiente para Médico), sin pasar por Enfermería.
+      // MANTENER EN SYNC con SERVICIOS_SIN_PRECLINICA en Expediente-Doctor.html.
       allow create: if isDoctor()
         || (isCaja()
             && request.resource.data.status == 'pendiente_caja'
@@ -202,7 +203,14 @@ service cloud.firestore {
         || (isCaja()
             && request.resource.data.status == 'servicio'
             && request.resource.data.tipo == 'servicio'
-            && request.resource.data.servicioNombre in ['Extracción de uña', 'Lavado de oído', 'Retiro de puntos']);
+            && request.resource.data.servicioNombre in [
+              'Extracción de uña', 'Lavado de oído', 'Retiro de puntos',
+              'Lavado ocular', 'Cauterización lunar/verruga', 'Cirugía menor', 'Curación',
+              'Evaluación de salud (certificado laboral)', 'Control de peso', 'Electrocardiograma',
+              'Colocación de DIU', 'Retiro de DIU', 'Colocación de implanon', 'Extracción de implanon',
+              'Citología Convencional', 'Citología Base Líquida',
+              'Colocación de sonda vesical', 'Colocación de sonda + insumos', 'Retiro de sonda vesical'
+            ]);
       // Borrar consultas/servicios del historial completo es solo para Administración
       // (limpieza de registros de prueba/errores en un expediente real).
       // Excepción: médico o enfermería pueden cancelar, desde su propio formulario

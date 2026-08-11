@@ -228,7 +228,7 @@ body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-
   /* ── Cargar catálogo (parseando Cotizador.html) + overrides ── */
   function boot() {
     Promise.all([
-      fetch('Cotizador.html').then(function(r){ return r.text(); }),
+      fetch('Cotizador.html', { cache: 'no-store' }).then(function(r){ return r.text(); }),
       cmgDb.collection('catalogoConfig').get().then(function(snap){
         var m = {}; snap.forEach(function(d){ m[d.id] = d.data(); }); return m;
       }).catch(function(err){ console.warn('[CMG] catalogoConfig read:', err); return {}; })

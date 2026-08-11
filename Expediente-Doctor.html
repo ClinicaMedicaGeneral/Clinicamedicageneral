@@ -1385,7 +1385,8 @@ summary.ed-meds-cat { list-style: revert; }
     ]},
     { label: 'Cuidado de la mujer', items: [
       'Colocación de DIU', 'Retiro de DIU',
-      'Colocación de implanon', 'Extracción de implanon'
+      'Colocación de implanon', 'Extracción de implanon',
+      'Citología Convencional', 'Citología Base Líquida'
     ]},
     { label: 'Cuidado de las vías urinarias', items: [
       'Colocación de sonda vesical', 'Colocación de sonda + insumos',
@@ -1442,7 +1443,7 @@ summary.ed-meds-cat { list-style: revert; }
     return base;
   }
 
-  /* Catálogo ESTRICTO de exámenes de laboratorio, 141 ítems agrupados, sincronizado con Cotizador.html */
+  /* Catálogo ESTRICTO de exámenes de laboratorio, 143 ítems agrupados, sincronizado con Cotizador.html */
   var CATALOGO_LABORATORIO = [
     { label: 'Pruebas comunes', items: [
       'Prueba de embarazo (rápida)', 'Prueba de dengue (rápida)', 'Prueba DUO (VIH 4ª gen.)',
@@ -1501,6 +1502,9 @@ summary.ed-meds-cat { list-style: revert; }
       'Cultivo Por Bacterias', 'Hemocultivo', 'Marihuana: tetrahidrocannabinol (THC)',
       'Microalbumina', 'Perfil Fehling & Ph En Heces', 'Proteínas Totales en Orina 24 horas',
       'Cociente/Relación Albúmina-Creatinina en Orina', 'Urocultivo'
+    ]},
+    { label: 'Citología', items: [
+      'Citología Convencional', 'Citología Base Líquida'
     ]}
   ];
 
@@ -5277,6 +5281,7 @@ summary.ed-meds-cat { list-style: revert; }
                 '<option value="">— Seleccionar —</option>' +
                 '<option value="Labex">Labex</option>' +
                 '<option value="Masterlab">Masterlab</option>' +
+                '<option value="Laboratorio Rivera">Laboratorio Rivera</option>' +
               '</select></div>' +
             '<div class="ed-fgroup"><label class="ed-label">Prioridad</label>' +
               '<select class="ed-input" id="qm-lab-prioridad"><option value="rutina">Rutina</option><option value="urgente">Urgente</option></select></div>' +

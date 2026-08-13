@@ -3529,7 +3529,7 @@ summary.ed-meds-cat { list-style: revert; }
             ? '<div style="margin-top:4px;font-size:11px;font-weight:700;display:inline-block;padding:3px 8px;border-radius:20px;color:#166534;background:#DCFCE7;margin-left:4px">📝 Iniciada' + (iniciadaPor ? ' · por ' + esc(iniciadaPor) : '') + '</div>'
             : '';
           var fechaMostrar = it.fechaPreclinica || it.fechaServicio;
-          var registradoPor = it.preclinicaPor || it.servicioPor || '—';
+          var registradoPor = it.enfermeriaAtendidoPor || it.preclinicaPor || it.servicioPor || '—';
           var btnLabel = esServicio ? 'Completar →' : 'Continuar →';
           /* Todo lo que llega a esta lista (Consulta o Servicio médico-exclusivo)
              requiere médico/admin: enfermería ni siquiera puede abrir el formulario,
@@ -3580,7 +3580,7 @@ summary.ed-meds-cat { list-style: revert; }
       ? '<div class="ed-pending-vitals">🩺 Consulta entregada a Estabilización' + (it.motivoConsulta ? ' · ' + esc(it.motivoConsulta) : '') + '</div>'
       : '<div class="ed-pending-vitals">🛎️ ' + esc(it.servicioNombre || '—') + (it.servicioNotas ? ' · ' + esc(it.servicioNotas) : '') + '</div>';
     var fechaMostrar = esEstabilizacion ? it.entregadoAEstabilizacionEn : it.fechaServicio;
-    var registradoPorMostrar = esEstabilizacion ? it.entregadoAEstabilizacionPor : it.servicioPor;
+    var registradoPorMostrar = esEstabilizacion ? it.entregadoAEstabilizacionPor : (it.enfermeriaAtendidoPor || it.servicioPor);
     var enAtencionHtml = '';
     if (it.enAtencionPor) {
       var elapsedMin = it.enAtencionDesde ? Math.max(0, Math.floor((Date.now() - tsMillis(it.enAtencionDesde)) / 60000)) : 0;
@@ -3959,6 +3959,26 @@ summary.ed-meds-cat { list-style: revert; }
     return /^(Sueroterapia|Aplicaci[oó]n de Suero)/i.test(nombre || '');
   }
 
+  /* ─── Personal que puede figurar como "Atendido por" ───
+     Las cuentas del sistema son compartidas (p. ej. "Caja · Enfermería"), así que
+     el correo de la sesión NO identifica a la persona que atendió. Por eso cada
+     etapa pide el nombre real y ese nombre es el que se muestra en el historial.
+     MANTENER EN SYNC con los tres formularios que lo usan: Enfermería (Etapa 2),
+     Completar servicio y Consulta médica. */
+  var PERSONAL_ATIENDE = [
+    'Dr. Brian Rojas',
+    'Dr. Hermes Molina',
+    'Dr. Adony Álvarez',
+    'Enfermería (Ana Ruiz)',
+    'Enfermería (Luz Ortíz)'
+  ];
+  function buildAtendidoPorOptionsHtml(seleccionado) {
+    return '<option value="">— Seleccionar —</option>' +
+      PERSONAL_ATIENDE.map(function (n) {
+        return '<option value="' + esc(n) + '"' + (n === seleccionado ? ' selected' : '') + '>' + esc(n) + '</option>';
+      }).join('');
+  }
+
   /* ─── Formulario de atención de Enfermería (Etapa 2) para un registro
      'listo_enfermeria'. Toma signos vitales (obligatorios solo en Consulta y
      Sueroterapias, opcionales en el resto) y, si aplica, la prueba de
@@ -4038,7 +4058,12 @@ summary.ed-meds-cat { list-style: revert; }
             '</div>'
           : '')) +
       '<div class="ed-section">' +
-        '<div class="ed-fgroup full"><label class="ed-label">Notas de enfermería (opcional)</label>' +
+        /* Quién atendió: la cuenta es compartida (Caja · Enfermería), así que hay
+           que registrar el nombre real para que el historial lo muestre. */
+        '<div class="ed-fgroup" style="max-width:300px"><label class="ed-label">Atendido por *</label>' +
+          '<select class="ed-input" id="enf-atendido-por">' + buildAtendidoPorOptionsHtml(it.enfermeriaAtendidoPor) + '</select>' +
+          '<small style="color:#6B7280;display:block;margin-top:4px">Quién atendió al paciente en esta etapa. Aparecerá en el historial.</small></div>' +
+        '<div class="ed-fgroup full" style="margin-top:10px"><label class="ed-label">Notas de enfermería (opcional)</label>' +
           '<textarea class="ed-textarea" id="enf-notas" rows="2" placeholder="Observaciones relevantes"></textarea></div>' +
       '</div>' +
       '<div class="ed-actions">' +
@@ -4101,10 +4126,19 @@ summary.ed-meds-cat { list-style: revert; }
       return;
     }
 
+    /* Nombre real de quien atendió (la cuenta puede ser compartida). Es lo que
+       verá el historial; el correo de la sesión queda solo como trazabilidad. */
+    var atendidoNombre = $val('enf-atendido-por');
+    if (!atendidoNombre) {
+      showAlert('Selecciona en "Atendido por" quién atendió al paciente.', 'error');
+      return;
+    }
+
     var atendidoPor = cmgAuth.currentUser.displayName || cmgAuth.currentUser.email;
     var atendidoEmail = cmgAuth.currentUser.email;
     var updateData = {
       signosVitales: algunaVital ? vitales : null,
+      enfermeriaAtendidoPor: atendidoNombre,
       enfermeriaPor: atendidoPor,
       enfermeriaEmail: atendidoEmail,
       notasEnfermeria: $val('enf-notas')
@@ -4137,7 +4171,7 @@ summary.ed-meds-cat { list-style: revert; }
         var sensNoRequiere = $id('enf-sens-norequiere') && $id('enf-sens-norequiere').checked;
         if (sensNoRequiere) {
           pruebaSensibilidadServicio = {
-            requerida: false, noRequiere: true, confirmadaPor: atendidoPor
+            requerida: false, noRequiere: true, confirmadaPor: atendidoNombre
           };
         } else {
           var sensConfirm = $id('enf-sens-confirm') && $id('enf-sens-confirm').checked;
@@ -4148,7 +4182,7 @@ summary.ed-meds-cat { list-style: revert; }
           }
           pruebaSensibilidadServicio = {
             requerida: true, confirmada: true, resultado: sensResServ,
-            confirmadaPor: atendidoPor, cajaConfirmada: false
+            confirmadaPor: atendidoNombre, cajaConfirmada: false
           };
         }
       }
@@ -4470,7 +4504,7 @@ summary.ed-meds-cat { list-style: revert; }
       '</div>' +
       '<div class="ed-vitals-readonly">' +
         '<div class="ed-vitals-readonly-title">🛎️ Servicio: ' + esc(srv.servicioNombre || '—') +
-          ' · ' + fmtDate(srv.fechaServicio) + ' · Registrado por ' + esc(srv.servicioPor || '—') + '</div>' +
+          ' · ' + fmtDate(srv.fechaServicio) + ' · Registrado por ' + esc(srv.enfermeriaAtendidoPor || srv.servicioPor || '—') + '</div>' +
         (srv.servicioNotas ? '<div style="margin-top:8px;font-size:12px;color:#374151"><strong>Notas de registro:</strong> ' + esc(srv.servicioNotas) + '</div>' : '') +
         (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.requerida ? '<div style="margin-top:8px;font-size:12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:8px"><strong>🧪 Prueba de sensibilidad:</strong> ' + esc(srv.pruebaSensibilidadServicio.resultado) + ' · confirmada por ' + esc(srv.pruebaSensibilidadServicio.confirmadaPor || '—') + '</div>' : '') +
         (srv.pruebaSensibilidadServicio && srv.pruebaSensibilidadServicio.noRequiere ? '<div style="margin-top:8px;font-size:12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:6px;padding:8px;color:#166534"><strong>🧪 Prueba de sensibilidad:</strong> no necesaria para este medicamento.</div>' : '') +
@@ -4519,14 +4553,11 @@ summary.ed-meds-cat { list-style: revert; }
         '<div class="ed-grid ed-grid-2">' +
           '<div class="ed-fgroup full"><label class="ed-label">Notas de finalización (opcional)</label>' +
             '<textarea class="ed-textarea" id="serv-notas-fin" rows="2" placeholder="Observaciones al completar el servicio"></textarea></div>' +
+          /* Se preselecciona quien ya atendió en la etapa de Enfermería, para no
+             tener que volver a elegirlo si es la misma persona. */
           '<div class="ed-fgroup"><label class="ed-label">Atendido por *</label>' +
             '<select class="ed-input" id="serv-realizado-por">' +
-              '<option value="">— Seleccionar —</option>' +
-              '<option value="Dr. Brian Rojas">Dr. Brian Rojas</option>' +
-              '<option value="Dr. Hermes Molina">Dr. Hermes Molina</option>' +
-              '<option value="Dr. Adony Álvarez">Dr. Adony Álvarez</option>' +
-              '<option value="Enfermería (Ana Ruiz)">Enfermería (Ana Ruiz)</option>' +
-              '<option value="Enfermería (Luz Ortíz)">Enfermería (Luz Ortíz)</option>' +
+              buildAtendidoPorOptionsHtml(srv.enfermeriaAtendidoPor) +
             '</select></div>' +
         '</div>' +
       '</div>' +
@@ -4976,7 +5007,7 @@ summary.ed-meds-cat { list-style: revert; }
       '</div>' +
 
       '<div class="ed-vitals-readonly">' +
-        '<div class="ed-vitals-readonly-title">📊 Signos vitales (Pre clínica · ' + fmtDate(pre.fechaPreclinica) + ' · por ' + esc(pre.preclinicaPor || '—') + ')</div>' +
+        '<div class="ed-vitals-readonly-title">📊 Signos vitales (Pre clínica · ' + fmtDate(pre.fechaPreclinica) + ' · por ' + esc(pre.enfermeriaAtendidoPor || pre.preclinicaPor || '—') + ')</div>' +
         (chips.length ? '<div class="ed-vitals-chips">' + chips.join('') + '</div>' : '<div style="font-size:13px;color:#6B7280">Sin signos vitales registrados</div>') +
         (pre.notasPreclinica ? '<div style="margin-top:8px;font-size:12px;color:#374151"><strong>Notas:</strong> ' + esc(pre.notasPreclinica) + '</div>' : '') +
         (pre.pruebaSensibilidad && pre.pruebaSensibilidad.realizada ? '<div style="margin-top:8px;font-size:12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;padding:8px"><strong>🧪 Prueba de sensibilidad:</strong> ' + esc(pre.pruebaSensibilidad.medicamento) + ' → <strong>' + esc(pre.pruebaSensibilidad.resultado) + '</strong>' + (pre.pruebaSensibilidad.observaciones ? ' · ' + esc(pre.pruebaSensibilidad.observaciones) : '') + '</div>' : '') +
@@ -5016,12 +5047,7 @@ summary.ed-meds-cat { list-style: revert; }
           /* DRM Fun-2: dropdown de médico tratante */
           '<div class="ed-fgroup"><label class="ed-label">Atendido por *</label>' +
             '<select class="ed-input" id="cons-medico" required>' +
-              '<option value="">— Seleccionar —</option>' +
-              '<option value="Dr. Brian Rojas">Dr. Brian Rojas</option>' +
-              '<option value="Dr. Hermes Molina">Dr. Hermes Molina</option>' +
-              '<option value="Dr. Adony Álvarez">Dr. Adony Álvarez</option>' +
-              '<option value="Enfermería (Ana Ruiz)">Enfermería (Ana Ruiz)</option>' +
-              '<option value="Enfermería (Luz Ortíz)">Enfermería (Luz Ortíz)</option>' +
+              buildAtendidoPorOptionsHtml() +
             '</select></div>' +
         '</div>' +
       '</div>' +
@@ -6274,10 +6300,27 @@ summary.ed-meds-cat { list-style: revert; }
     /* DRM: quién atendió — enfermería (preclínica/signos vitales) y médico o quien
        completó el servicio, para que el historial diga quién vio al paciente. */
     var atendioPartes = [];
-    var enfermeriaNombre = c.enfermeriaPor || c.preclinicaPor;
+    /* Se muestra el NOMBRE que se eligió en "Atendido por" al atender, no el correo
+       de la sesión: las cuentas son compartidas (p. ej. "Caja · Enfermería") y el
+       correo no dice quién vio al paciente. El correo queda como respaldo para los
+       registros antiguos, anteriores a que se pidiera el nombre. */
+    var cuentaEnfermeria = c.enfermeriaPor || c.preclinicaPor;
+    var enfermeriaNombre = c.enfermeriaAtendidoPor || cuentaEnfermeria;
     if (enfermeriaNombre) atendioPartes.push('👩‍⚕️ Enfermería: ' + esc(enfermeriaNombre));
-    if (!esServicio && c.doctorNombre) atendioPartes.push('🩺 Médico: ' + esc(c.doctorNombre));
-    if (esServicio && c.servicioPor && c.servicioPor !== enfermeriaNombre) atendioPartes.push('🛎️ Completado por: ' + esc(c.servicioPor));
+
+    /* Quién completó la atención: en un Servicio es el "Atendido por" del formulario
+       de completar (servicioRealizadoPor); en una Consulta, el médico tratante. */
+    var completoNombre = c.servicioRealizadoPor || c.doctorNombre;
+    if (!esServicio && completoNombre) atendioPartes.push('🩺 Médico: ' + esc(completoNombre));
+    if (esServicio && completoNombre && completoNombre !== enfermeriaNombre) {
+      atendioPartes.push('🛎️ Atendido por: ' + esc(completoNombre));
+    }
+    /* Quién dejó registrado el servicio (Caja/Enfermería), solo si no es ninguno
+       de los anteriores — si no, se repetiría la misma persona tres veces. */
+    if (esServicio && c.servicioPor && c.servicioPor !== cuentaEnfermeria
+        && c.servicioPor !== enfermeriaNombre && c.servicioPor !== completoNombre) {
+      atendioPartes.push('📝 Registrado por: ' + esc(c.servicioPor));
+    }
     var atendioLinea = atendioPartes.length
       ? '<div class="ed-consulta-motivo" style="color:#374151">' + atendioPartes.join(' · ') + '</div>'
       : '';

@@ -870,6 +870,10 @@
     $id('pr-loading').style.display = 'none';
     $id('pr-type-card').style.display = '';
     loadHistory();
+    /* Las pruebas pendientes se cargan aquí, ya con sesión: si se consultan antes
+       de que Firebase restaure la sesión, Firestore responde "Missing or
+       insufficient permissions" y la lista se queda vacía o en error. */
+    cargarPendientes();
   });
 
   $id('pr-logout').addEventListener('click', function () {
@@ -1134,18 +1138,21 @@
             createdAt           : firebase.firestore.FieldValue.serverTimestamp()
           }).catch(function(e){ console.warn('[CMG] Error creando caja entry para prueba rápida:', e); });
 
+          btn.textContent = textoBase;
           if (modo === 'pendiente') {
             toast('📋 Prueba dejada pendiente. Podrás reabrirla cuando tengas el resultado.');
             cargarPendientes();
             /* Limpiar form y NO renderizar hoja */
             $id('btn-cancelar').click();
+            /* El botón queda según el formulario (vacío = deshabilitado). Antes se
+               reactivaba a ciegas y se podía guardar una segunda prueba en blanco. */
+            updateSaveBtn();
           } else {
             if (match) toast('✓ Vinculado al expediente ' + match.codigoPaciente);
             else       toast('✓ Resultado guardado (sin expediente vinculado)');
             renderResultSheet(data);
+            btn.disabled = false;
           }
-          btn.textContent = textoBase;
-          btn.disabled = false;
         });
       })
       .catch(function (err) {
@@ -1215,12 +1222,8 @@
       toast('Prueba reanudada. Confirma y haz clic en Imprimir.');
     });
   }
-  /* Cargar pendientes al inicio */
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    setTimeout(cargarPendientes, 500);
-  } else {
-    document.addEventListener('DOMContentLoaded', function(){ setTimeout(cargarPendientes, 500); });
-  }
+  /* La carga inicial de pendientes ocurre en onAuthStateChanged (ver AUTH GUARD),
+     no con un temporizador: hacerlo antes de tener sesión da error de permisos. */
 
   /* ════════════════════════════════════════════════════════════
      RENDER RESULT SHEET

@@ -1,0 +1,19 @@
+# Herramientas locales de desarrollo (no forman parte del sitio)
+.claude/
+CLAUDE.md
+graphify-out/
+
+# Documentacion interna de pruebas y handoff (se mantiene solo en local)
+COMIENZA-AQUI.md
+DATOS-PRUEBA.md
+ESCENARIOS-FLUJO-2026.md
+ESCENARIOS-PRUEBA.md
+GUIA-RAPIDA-EJECUCION.md
+HANDOFF.md
+README-PRUEBAS.md
+REPORTE-PRUEBAS.md
+RESUMEN-CREADO.txt
+check.txt
+
+# Material de referencia
+Plantilla-Ejercicios-Consultas.pdf

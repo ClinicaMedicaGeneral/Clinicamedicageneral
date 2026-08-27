@@ -206,7 +206,7 @@ service cloud.firestore {
             && request.resource.data.servicioNombre in [
               'Extracción de uña', 'Lavado de oído', 'Retiro de puntos',
               'Lavado ocular', 'Cauterización lunar/verruga', 'Cirugía menor', 'Curación',
-              'Evaluación de salud (certificado laboral)', 'Control de peso', 'Electrocardiograma',
+              'Control de peso', 'Electrocardiograma',
               'Colocación de DIU', 'Retiro de DIU', 'Colocación de implanon', 'Extracción de implanon',
               'Citología Convencional', 'Citología Base Líquida',
               'Colocación de sonda vesical', 'Colocación de sonda + insumos', 'Retiro de sonda vesical'

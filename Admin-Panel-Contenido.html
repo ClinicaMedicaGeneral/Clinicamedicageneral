@@ -44,6 +44,17 @@
   .nota{background:var(--crema);color:var(--negro);border-left:5px solid var(--amarillo);padding:12px 16px;border-radius:6px;font-size:13px;margin-top:12px}
   .riesgo{border-left-color:var(--rojo)}
   .ok{border-left-color:var(--verde)}
+  .diag{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+  .diag div{background:var(--neutro);color:var(--navy);border-radius:8px;padding:14px 16px}
+  .diag strong{display:block;font-size:22px;font-weight:900;color:var(--navy)}
+  .diag span{font-size:11px;letter-spacing:.5px;text-transform:uppercase;font-weight:700;color:var(--teal)}
+  .diag em{display:block;font-style:normal;font-size:12px;color:#556;margin-top:3px}
+  .cruce{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:12px;margin-top:6px}
+  .cruce div{background:var(--neutro);color:var(--negro);border-radius:10px;padding:14px 16px;border-top:4px solid var(--teal)}
+  .cruce h4{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--navy);font-weight:800;margin-bottom:6px}
+  .cruce p{font-size:12.5px;margin:0}
+  .t-sin{background:#e3e5ee;color:#4a5168}
+  tr.alto td{border-left:4px solid var(--amarillo)}
   ul{padding-left:20px}
   li{margin-bottom:5px;font-size:13.5px}
   .card p{font-size:14px;margin-bottom:9px}
@@ -109,81 +120,90 @@
 <div class="wrap">
 
   <header>
-    <div class="kicker">Clínica Médica General · Cuidamos de tu salud</div>
+    <div class="kicker">Clínica Médica General · Dirección Comercial</div>
     <h1>Plan de contenido<br>Septiembre 2026</h1>
-    <div class="sub">Elaborado a partir del reporte ejecutivo de agosto 2026, del dashboard de Meta Ads al 2 de septiembre y de la línea base mayo-agosto 2026 · Emitido el 2 de septiembre de 2026 · Cubre del 3 al 30 de septiembre</div>
+    <div class="sub"><b>Del ticket al volumen.</b> Elaborado a partir del reporte ejecutivo de agosto 2026 y del dashboard de Meta Ads al 2 de septiembre · Emitido el 2 de septiembre de 2026 · Cubre del 3 al 30 de septiembre</div>
   </header>
 
   <section>
     <h2>Resumen ejecutivo</h2>
     <div class="card resumen">
-      <p><b>1.</b> Septiembre se enfoca en recuperar volumen de pacientes, no ticket: agosto ya subió el ticket a L744.98 (sobre la meta de L740) pero el flujo de pacientes lleva tres meses plano en 17.5/día, contra la meta de 19.</p>
-      <p><b>2.</b> La meta del mes es de 1.5 visitas adicionales por día: pasar de 17.5 a 19 pacientes/día equivale a unas 39 visitas más en septiembre. El ticket ya está sobre meta, así que la única palanca que queda es volumen.</p>
-      <p><b>3.</b> Agosto cerró con 9 de 31 días bajo el umbral de L10,500 (29%), todavía sobre el disparador del 25%: la regla P5 se mantiene y el bloque promocional sube 5 puntos. La regla P6 se relaja: el ticket recuperó la meta y se rompió la racha de dos meses por debajo.</p>
-      <p><b>4.</b> Extracción de uña rompió su racha de tres meses de crecimiento (−35.6% en agosto) con la campaña de Meta todavía barata: el problema es de mensaje y de cierre en WhatsApp, no de alcance. Pasa de escalar a ángulo nuevo bajo la regla P3.</p>
-      <p><b>5.</b> Entra una campaña nueva de electrocardiograma para adulto mayor a L375 (L500 con el 25% de tercera edad), anclada al Día Mundial del Corazón (29 de septiembre), con L70/día del presupuesto liberado. Los otros L130/día liberados quedan de reserva para cauterización o laboratorio.</p>
+      <p><b>1.</b> Septiembre se enfoca en volumen de entrada: lavado de oído, consulta y laboratorio como puerta, con cauterización sostenida como pilar mayor.</p>
+      <p><b>2.</b> Lo obliga el reporte de agosto: el flujo quedó plano en 17.5 pacientes por día por tercer mes, un 8% bajo la meta de 19, mientras la venta subió solo por ticket (L744.98, +6.37%).</p>
+      <p><b>3.</b> Meta del mes: 1.6 pacientes adicionales por día. La brecha de L35,964.91 al mes, medida contra el ticket de L744.98, equivale a 48 pacientes más repartidos en 30 días operados.</p>
+      <p><b>4.</b> Quedan congelados, sin ninguna pieza: Suero Multivitamínico, Vitamina D, Beplenovax / Hígado Detox por insumo, y Suero Complejo B hasta que la Dirección confirme disponibilidad.</p>
+      <p><b>5.</b> Riesgo principal: la recuperación de agosto vino de precio y mezcla —los insumos netos cayeron 9.74% mientras las categorías subieron 7.28%. Si el ticket revierte hacia L700 sin colchón de volumen, la venta cae con él.</p>
     </div>
-    <div class="nota riesgo"><b>Riesgos del mes:</b> (1) el 15 de septiembre es feriado de Independencia y la semana cívica del 1 al 15 desvía tráfico de City Mall; (2) la quincena privada del 15 choca con el feriado, así que el gasto quincenal se corre al 16; (3) si el volumen de pacientes no se mueve y el ticket revierte a L700, la facturación cae con él porque la recuperación de agosto no se apoyó en más tratamientos (insumos netos −9.74%); (4) Servicios Médicos y Evaluación Médica, la mitad de las categorías netas, llevan dos meses cediendo.</div>
+    <div class="nota riesgo"><b>Riesgos del mes:</b> (1) la recuperación de agosto no se apoyó en más tratamientos ejecutados, así que un ticket de vuelta a L700 arrastra la facturación; (2) el 15 de septiembre es feriado de Independencia y la quincena privada se corre al 16; (3) el valle de liquidez del 6 al 14 cae sobre dos domingos seguidos; (4) Evaluación Médica lleva dos meses cediendo (−4.63% a L68,230) y no tiene pauta directa.</div>
   </section>
 
   <section>
     <h2>Diagnóstico de agosto</h2>
     <div class="card">
-      <p><b>Recuperación parcial y por ticket.</b> Venta total L407,119.55 (+7.32% vs julio), tercer mes más alto del año. Promedio diario L13,132.89, casi en la meta. Ticket L744.98 (+6.37%), de vuelta sobre meta tras tres meses. Pacientes/día 17.5, plano por tercer mes.</p>
-      <p><b>Servicios:</b> cauterización se estabiliza (L47,690, +0.5% mensual, +11.8% interanual). Lavado de oído rebota fuerte (L25,600, +40.7%, +14.3% interanual). Extracción de uña rompe su racha (L19,750, −35.6% mensual, aún +37.2% interanual). Suero Oxigenador confirma el relanzamiento (L19,600, +55.6%, segundo mes al alza). Suero Boost sigue sin reaccionar (L17,550, −7.1%, −38.1% interanual). Vitamina C mejor mes desde marzo (L8,000). Complejo B recupera parcialmente (L2,550) pero sigue débil.</p>
-      <p><b>Financiero:</b> categorías netas +7.28% (L292,296.75) con Laboratorio +48% y Sueroterapia +18%, pero Servicios Médicos −4% y Evaluación Médica −4.6%. Insumos netos −9.74%: la recuperación es de precio y mezcla, no de más tratamientos ejecutados.</p>
-      <p><b>Publicidad (dashboard al 31 de agosto):</b> 6 campañas de conversión, L17,605, 1,474 conversaciones, L11.94 promedio. La más cara fue Sueroterapia Pilares (L19.51). ROAS ≈ 6.2, estable. Se descarta Sueroterapia Pilares y se descansa Remarketing Lavado de Oído: L200/día liberados.</p>
+      <div class="diag">
+        <div><strong>L407,119</strong><span>Venta del mes</span><em>+7.32% vs julio</em></div>
+        <div><strong>L744.98</strong><span>Ticket promedio</span><em>+6.37% · sobre meta L740</em></div>
+        <div><strong>17.5</strong><span>Pacientes por día</span><em>plano 3 meses · meta 19</em></div>
+        <div><strong>9 de 31</strong><span>Días bajo umbral</span><em>29.0% · disparador 25%</em></div>
+      </div>
+      <p style="margin:14px 0 4px"><b>Cruce de pauta contra venta</b> <span style="opacity:.7">— fuente: reporte ejecutivo de agosto 2026</span></p>
+      <div class="cruce">
+        <div><h4>Invierte y vende · sostener</h4><p>Cauterización L47,690 (+0.45% mensual, +11.82% interanual) y lavado de oído L25,600 (+40.66%, +14.29% interanual). Suero Oxigenador L19,600 (+55.56%) vende, pero su campaña cerró en rojo a L18.44 por conversación.</p></div>
+        <div><h4>Invierte y no vende · mensaje</h4><p>Extracción de uña cae 35.56% a L19,750 con la pauta todavía eficiente (L10.87 por conversación, CTR 3.38%). El problema no es alcance: es la objeción y el paso de conversación a visita.</p></div>
+        <div><h4>Vende sin invertir · amplificar</h4><p>Laboratorio L61,635.25 (+47.96%) vuelve a ser el ancla del mes sin pauta propia. Suero Vitamina C L8,000 (+166.67%) reacciona bien y pide combo.</p></div>
+        <div><h4>Ni invierte ni vende · sondear</h4><p>Electrocardiograma entra con L70 al día para generar dato propio. Evaluación médica cede 4.63% a L68,230 y no tiene pauta directa: se trabaja como CTA dentro de las piezas de entrada.</p></div>
+      </div>
     </div>
   </section>
 
   <section>
     <h2>Mix del mes</h2>
     <div class="mix">
-      <div><strong>45%</strong><span>Educativo</span></div>
-      <div><strong>35%</strong><span>Promocional</span></div>
-      <div><strong>20%</strong><span>Emocional</span></div>
+      <div><strong>44%</strong><span>Educativo · 12 piezas</span></div>
+      <div><strong>37%</strong><span>Promocional · 10</span></div>
+      <div><strong>19%</strong><span>Emocional · 5</span></div>
     </div>
-    <div class="nota"><b>Justificación (regla P5):</b> el mix base es 50/30/20. El bloque promocional sube 5 puntos —no 10 como en agosto— porque los días bajo umbral bajaron de 10 a 9 de 31 (32% → 29%), siguen sobre el disparador del 25% pero mejorando. Cada punto adicional está anclado a los tramos débiles identificados en agosto: 3 al 5, 21 al 23 y el cierre de mes. <b>Regla P6 relajada:</b> el ticket promedio recuperó la meta en agosto (L744.98 sobre L740) y se rompió la racha de dos meses por debajo, así que las piezas promocionales ya no tienen que ser todas combos. Aun así, el aprendizaje de P6 sigue vigente —el volumen paga más que el precio— y por eso el foco promocional es conversión de servicios de entrada, no descuento sobre ticket alto.</div>
-    <div class="nota ok"><b>Reparto real:</b> 12 piezas educativas, 10 promocionales y 6 emocionales, sobre 28 días publicados (43 / 36 / 21). El bloque emocional queda algo por encima del 20% por las tres fechas de calendario del mes (Día del Niño, Independencia, Día del Maestro); ningún dato obliga a subirlo más.</div>
+    <div class="nota"><b>Justificación numérica (regla P5):</b> el bloque promocional sube 7 puntos porque los días bajo umbral quedaron en 29.0% (9 de 31), todavía sobre el disparador del 25%, y la brecha mensual de L35,964.91 medida contra el ticket de L744.98 equivale a 48 pacientes adicionales al mes, 1.6 por día operado. Cada punto extra está anclado a un día débil identificable: 3, 4, 5, 21, 22, 23 y 30 de septiembre, los tramos que fallaron en agosto.</div>
+    <div class="nota ok"><b>Emocional:</b> queda en 19% solo por redondeo de 5 piezas sobre 27; ningún dato obliga a moverlo. La regla P6 no aplica este mes —el ticket cerró sobre la meta.</div>
   </section>
 
   <section>
-    <h2>Pilares del mes</h2>
+    <h2>Pilares del mes · cinco pilares, 100% del calendario</h2>
     <div class="grid">
       <div class="pilar">
-        <span class="peso">9 piezas · 33%</span>
-        <h3>1. Recuperar volumen de pacientes</h3>
-        <p>Es la única palanca que queda: el ticket ya está sobre meta y el flujo de pacientes lleva tres meses plano. Servicios de entrada, baja fricción y cross-sell.</p>
-        <p><b>Servicios:</b> consulta médica L300, lavado de oído L400, aplicación IM L80 e IV L180, horario extendido.</p>
-        <p class="regla">Reglas P5, P8 y P9</p>
+        <span class="peso">32% · P8 · P2</span>
+        <h3>1. Puerta de entrada</h3>
+        <p>Atiende el estancamiento del flujo: 17.5 pacientes por día durante tres meses, 8% bajo la meta. Servicios de ticket bajo y necesidad frecuente que mueven volumen; cada pieza cierra con cross-sell hacia evaluación médica o laboratorio.</p>
+        <p><b>Servicios:</b> lavado de oído L400, consulta médica L300, aplicaciones, evaluación médica.</p>
+        <p class="regla">Reglas P8 y P2</p>
       </div>
       <div class="pilar">
-        <span class="peso">3 piezas · 11%</span>
-        <h3>2. Extracción de uña, ángulo nuevo</h3>
-        <p>Rompió su racha de crecimiento con la campaña todavía barata: el problema es mensaje y cierre en WhatsApp, no alcance. Ángulo de objeción, no más presupuesto.</p>
+        <span class="peso">22% · P2</span>
+        <h3>2. Cauterización sostenida</h3>
+        <p>Pilar mayor de la clínica con L356,890 acumulados al cierre de agosto: presencia mínima semanal, sin excepción. Incorpora la promoción ya comprometida de precio por lesión adicional, que además empuja el ticket sin descuento.</p>
+        <p><b>Servicios:</b> cauterización L200 la primera lesión, L100 cada adicional.</p>
+        <p class="regla">Regla P2, presencia semanal obligatoria</p>
+      </div>
+      <div class="pilar">
+        <span class="peso">16% · P3 · P11</span>
+        <h3>3. Objeción y cierre</h3>
+        <p>Cayó 35.56% con costo por conversación en zona verde (L10.87): no falta alcance, falta cierre. Objeción a atacar: "me da miedo el dolor y creo que se cura sola". Nada de más presupuesto: ángulo nuevo, contenido de objeción y revisión del flujo de WhatsApp.</p>
         <p><b>Servicios:</b> extracción de uña L500.</p>
         <p class="regla">Reglas P3 y P11</p>
       </div>
       <div class="pilar">
-        <span class="peso">4 piezas · 15%</span>
-        <h3>3. El pilar que no queda en blanco</h3>
-        <p>Cauterización es el pilar de mayor tamaño (L356,890 acumulado) y su caída siempre acompaña a la caída de presencia. Se estabilizó en agosto: hay que sostenerla.</p>
-        <p><b>Servicios:</b> cauterización y eliminación de verrugas L200.</p>
-        <p class="regla">Regla P2, presencia semanal obligatoria</p>
+        <span class="peso">18% · P10</span>
+        <h3>4. Laboratorio como ancla</h3>
+        <p>Laboratorio sostiene la recuperación con +47.96% sin pauta propia: se amplifica con educativo y con CTA dentro de las piezas de consulta. El electrocardiograma entra a sondear con presencia mínima, solo para generar dato medible.</p>
+        <p><b>Servicios:</b> exámenes de laboratorio, electrocardiograma L500 (L375 tercera edad).</p>
+        <p class="regla">Regla P10</p>
       </div>
       <div class="pilar">
-        <span class="peso">7 piezas · 26%</span>
-        <h3>4. Corazón y chequeo del adulto mayor</h3>
-        <p>Recuperar laboratorio (rebotó +48% en agosto) y evaluación médica (dos meses cediendo). Lanza la campaña nueva de electrocardiograma anclada al Día Mundial del Corazón.</p>
-        <p><b>Servicios:</b> electrocardiograma L375 adulto mayor, exámenes de laboratorio, perfil de lípidos, evaluación médica, citología L500.</p>
-        <p class="regla">Reglas P8 y P10</p>
-      </div>
-      <div class="pilar">
-        <span class="peso">4 piezas · 15%</span>
-        <h3>5. Sueroterapia con argumento nuevo</h3>
-        <p>El oxigenador confirmó que el mensaje nuevo funciona: sostenerlo y replicar la lógica en Boost, que lleva cuatro meses sin reaccionar. La barrera es desconocimiento, no precio.</p>
-        <p><b>Servicios:</b> Oxigenador L700, Boost L1350, Vitamina C L1000, Complejo B L850 (una pieza de sondeo, sujeta a disponibilidad).</p>
-        <p class="regla">Reglas P3 y P7</p>
+        <span class="peso">12% · P7</span>
+        <h3>5. Sueroterapia con ángulo nuevo</h3>
+        <p>El oxigenador demostró que el mensaje renovado funciona (+55.56% en dos meses al alza). Esa plantilla se replica en Suero Boost, estancado en L17,550 y −38.10% interanual. Ticket alto y volumen bajo: 60% del bloque es educativo, porque la barrera es desconocimiento, no precio.</p>
+        <p><b>Servicios:</b> Suero Oxigenador L700, Suero Boost, Suero Vitamina C.</p>
+        <p class="regla">Regla P7</p>
       </div>
     </div>
   </section>
@@ -195,136 +215,97 @@
         <tr><th>Fecha</th><th>Día</th><th>Pilar</th><th>Servicio</th><th>Tipo</th><th>Formato</th><th>Titular propuesto</th><th>CTA</th><th>Canal</th></tr>
       </thead>
       <tbody>
-        <tr class="hito"><td>3 sep</td><td>Miércoles</td><td>1</td><td>Consulta médica L300</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Consulta médica L300, sin cita y hasta las 10 PM</td><td>Llega cuando puedas, atendemos por orden de llegada</td><td>Facebook, Instagram, historias</td></tr>
-        <tr><td>4 sep</td><td>Jueves</td><td>3</td><td>Cauterización L200</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Cómo saber si esa lesión en tu piel necesita cauterización</td><td>Escríbenos y te explicamos cómo es el procedimiento</td><td>Facebook, Instagram</td></tr>
-        <tr><td>5 sep</td><td>Viernes</td><td>4</td><td>Exámenes de laboratorio</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Aprovecha el fin de semana: tus exámenes de laboratorio sin cita</td><td>Escríbenos y te decimos qué exámenes necesitas</td><td>Facebook, Instagram, historias</td></tr>
-        <tr><td>6 sep</td><td>Sábado</td><td>1</td><td>Lavado de oído L400</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Lavado de oído L400 este fin de semana, sin cita</td><td>Ven hoy, atendemos por orden de llegada</td><td>Facebook, Instagram, historias</td></tr>
-        <tr><td>7 sep</td><td>Domingo</td><td>1</td><td>Horario y diferenciadores</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>El domingo también cuidamos de tu salud</td><td>Estamos abiertos hoy en City Mall</td><td>Facebook, Instagram</td></tr>
-        <tr><td>8 sep</td><td>Lunes</td><td>4</td><td>Evaluación médica</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Cinco señales de que tu cuerpo te está pidiendo un chequeo</td><td>Escríbenos al WhatsApp y agenda tu evaluación</td><td>Facebook, Instagram</td></tr>
-        <tr><td>9 sep</td><td>Martes</td><td>2</td><td>Extracción de uña L500</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel de objeciones</td><td>"Pensé que se curaba sola": lo que pasa cuando dejas una uña encarnada</td><td>Escríbenos al WhatsApp y te orientamos sin compromiso</td><td>Facebook, Instagram</td></tr>
-        <tr class="hito"><td>10 sep</td><td>Miércoles</td><td>1</td><td>Consulta médica L300 · Día del Niño</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>Día del Niño: cuidar de tu familia empieza por una consulta a tiempo</td><td>Trae a los tuyos, sin cita y con parqueo</td><td>Facebook, Instagram, historias</td></tr>
-        <tr><td>11 sep</td><td>Jueves</td><td>3</td><td>Cauterización L200</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Verruga, lunar o mezquino: cómo saber qué tienes</td><td>Escríbenos y te explicamos cómo es el procedimiento</td><td>Facebook, Instagram</td></tr>
-        <tr><td>12 sep</td><td>Viernes</td><td>5</td><td>Suero Oxigenador Cerebral L700</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel de objeciones</td><td>Tres dudas frecuentes antes de tu primera sueroterapia</td><td>Habla con nuestra especialista por WhatsApp</td><td>Facebook, Instagram</td></tr>
-        <tr><td>13 sep</td><td>Sábado</td><td>1</td><td>Aplicación IM L80 e IV L180</td><td><span class="tag t-edu">Educativo</span></td><td>Post</td><td>¿Tu médico te dejó una inyección? Te la aplicamos sin cita, L80</td><td>Ven con tu receta, atendemos por orden de llegada</td><td>Facebook, Instagram, historias</td></tr>
-        <tr><td>14 sep</td><td>Domingo</td><td>4</td><td>Chequeo preventivo</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>El chequeo que llevas dos años posponiendo</td><td>Hoy estamos abiertos, ven sin cita</td><td>Facebook, Instagram</td></tr>
-        <tr><td>15 sep</td><td>Martes</td><td>—</td><td>Día de la Independencia</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>Feliz Día de la Independencia, Honduras</td><td>Consulta nuestro horario de hoy en el perfil</td><td>Facebook, Instagram, historias</td></tr>
-        <tr class="hito"><td>16 sep</td><td>Miércoles</td><td>1</td><td>Combo consulta L300 y laboratorio</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Quincena: tu consulta médica y tus exámenes el mismo día</td><td>Escríbenos al WhatsApp para armar tu combo</td><td>Facebook, Instagram, historias</td></tr>
-        <tr class="hito"><td>17 sep</td><td>Jueves</td><td>5</td><td>Suero Oxigenador L700 · Día del Maestro</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Día del Maestro: recupera tu energía con una sueroterapia</td><td>Habla con nuestra especialista por WhatsApp</td><td>Facebook, Instagram, historias</td></tr>
-        <tr><td>18 sep</td><td>Viernes</td><td>2</td><td>Extracción de uña L500</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Deja de caminar con dolor: extracción de uña L500, el mismo día</td><td>Ven hoy, atendemos por orden de llegada</td><td>Facebook, Instagram</td></tr>
-        <tr><td>19 sep</td><td>Sábado</td><td>3</td><td>Cauterización L200</td><td><span class="tag t-edu">Educativo</span></td><td>Reel</td><td>Así se elimina una verruga en consulta</td><td>Escríbenos al WhatsApp y agenda tu valoración</td><td>Instagram, Facebook</td></tr>
-        <tr class="hito"><td>20 sep</td><td>Domingo</td><td>1</td><td>Consulta médica L300 y horario extendido</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A e historias todo el día</td><td>Hoy sí puedes: consulta médica L300, abierto hasta las 10 PM</td><td>Ven hoy, sin cita y con parqueo</td><td>Facebook, Instagram, historias, WhatsApp</td></tr>
-        <tr><td>21 sep</td><td>Lunes</td><td>5</td><td>Suero Oxigenador Cerebral L700 · Día del Alzheimer</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Día Mundial del Alzheimer: hábitos que cuidan tu memoria a cualquier edad</td><td>Consulta con nuestra especialista por WhatsApp</td><td>Facebook, Instagram</td></tr>
-        <tr><td>22 sep</td><td>Martes</td><td>4</td><td>Electrocardiograma L375 (adulto mayor)</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>¿Tu especialista te pidió un electrocardiograma? Realízalo por L375</td><td>Escríbenos al WhatsApp y agenda el tuyo</td><td>Facebook, Instagram</td></tr>
-        <tr><td>23 sep</td><td>Miércoles</td><td>1</td><td>Lavado de oído L400</td><td><span class="tag t-edu">Educativo</span></td><td>Post</td><td>Lo que no debes meterte en el oído</td><td>Escríbenos y resolvemos tus dudas</td><td>Facebook, Instagram</td></tr>
-        <tr><td>24 sep</td><td>Jueves</td><td>2</td><td>Extracción de uña L500</td><td><span class="tag t-emo">Emocional</span></td><td>Reel testimonio</td><td>Volver a ponerte los zapatos sin pensarlo dos veces</td><td>Escríbenos al WhatsApp</td><td>Instagram, Facebook</td></tr>
-        <tr><td>25 sep</td><td>Viernes</td><td>5</td><td>Combo Suero Boost L1350 y Vitamina C L1000</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Arma tu combo de sueroterapia: Boost y Vitamina C</td><td>Habla con nuestra especialista por WhatsApp</td><td>Facebook, Instagram</td></tr>
-        <tr><td>26 sep</td><td>Sábado</td><td>4</td><td>Citología base líquida L500</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Citología base líquida: qué es y cada cuánto toca hacértela</td><td>Escríbenos al WhatsApp y te explicamos el proceso</td><td>Facebook, Instagram</td></tr>
-        <tr><td>27 sep</td><td>Domingo</td><td>3</td><td>Cauterización L200</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>Ese lunar que te molesta desde hace años tiene solución</td><td>Hoy estamos abiertos, ven sin cita</td><td>Facebook, Instagram</td></tr>
-        <tr><td>28 sep</td><td>Lunes</td><td>4</td><td>Chequeo cardiovascular: electrocardiograma + perfil de lípidos</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Después de los 60: dos exámenes que tu corazón agradece</td><td>Escríbenos al WhatsApp y arma tu chequeo</td><td>Facebook, Instagram</td></tr>
-        <tr class="hito"><td>29 sep</td><td>Martes</td><td>4</td><td>Electrocardiograma L375 (adulto mayor) · Día Mundial del Corazón</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A e historias todo el día</td><td>Día Mundial del Corazón: electrocardiograma para adulto mayor L375</td><td>Escríbenos al WhatsApp y agenda hoy mismo</td><td>Facebook, Instagram, historias, WhatsApp</td></tr>
-        <tr class="hito"><td>30 sep</td><td>Miércoles</td><td>1</td><td>Combo consulta L300 y lavado de oído L400</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Último día del mes: revisa tu oído y tu salud el mismo día</td><td>Ven hoy, abrimos hasta las 10 PM</td><td>Facebook, Instagram, historias</td></tr>
+        <tr class="hito"><td>3 sep</td><td>Jueves</td><td>1</td><td>Lavado de oído L400</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Lavado de oído L400, sin cita y hasta las 10 PM</td><td>Llega cuando puedas, atendemos por orden de llegada</td><td>Facebook, Instagram, historias</td></tr>
+        <tr class="hito"><td>4 sep</td><td>Viernes</td><td>2</td><td>Cauterización L200</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Cauterización L200 la primera lesión y L100 cada adicional</td><td>Escríbenos y cotiza cuántas lesiones quieres tratar</td><td>Facebook, Instagram, historias</td></tr>
+        <tr class="hito"><td>5 sep</td><td>Sábado</td><td>1</td><td>Consulta médica L300</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Consulta médica L300 este sábado, sin cita y con parqueo</td><td>Ven hoy, te atendemos por orden de llegada</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>6 sep</td><td>Domingo</td><td>1</td><td>Horario y diferenciadores</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>El domingo también cuidamos de tu salud</td><td>Estamos abiertos hoy en City Mall, llega sin cita</td><td>Facebook, Instagram</td></tr>
+        <tr><td>7 sep</td><td>Lunes</td><td>4</td><td>Exámenes de laboratorio</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Cinco señales de que tu cuerpo te está pidiendo un chequeo</td><td>Escríbenos y te decimos qué exámenes necesitas</td><td>Facebook, Instagram</td></tr>
+        <tr><td>8 sep</td><td>Martes</td><td>3</td><td>Extracción de uña L500</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel de objeciones</td><td>"Pensé que se curaba sola": lo que pasa cuando dejas una uña encarnada</td><td>Escríbenos y te orientamos sin compromiso</td><td>Facebook, Instagram</td></tr>
+        <tr><td>9 sep</td><td>Miércoles</td><td>1</td><td>Lavado de oído L400</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Por qué el cotonete empeora el tapón de cera</td><td>Escríbenos y hazte tu lavado de oído hoy</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>10 sep</td><td>Jueves</td><td>1</td><td>Consulta familiar · Día del Niño</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>Hoy es su día: cuidamos de los más pequeños de tu familia</td><td>Tráelo sin cita, te atendemos hoy mismo</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>11 sep</td><td>Viernes</td><td>2</td><td>Cauterización L200</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Cómo saber si esa lesión en tu piel necesita cauterización</td><td>Escríbenos y te explicamos cómo es el procedimiento</td><td>Facebook, Instagram</td></tr>
+        <tr><td>12 sep</td><td>Sábado</td><td>1</td><td>Consulta médica L300</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Gripe, alergia o algo más: cómo saber cuándo ya toca consultar</td><td>Escríbenos y te orientamos, o llega sin cita hoy</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>13 sep</td><td>Domingo</td><td>—</td><td>Sin publicación de feed</td><td><span class="tag t-sin">Sin pieza</span></td><td>Solo historias</td><td>Fondo del valle de liquidez y segundo domingo seguido: se sostiene con historias de horario</td><td>Estamos abiertos hoy, llega sin cita</td><td>Historias</td></tr>
+        <tr><td>14 sep</td><td>Lunes</td><td>4</td><td>Electrocardiograma L500 (L375 tercera edad)</td><td><span class="tag t-edu">Educativo</span></td><td>Post Plantilla A</td><td>Electrocardiograma el mismo día: L375 para adulto mayor</td><td>Escríbenos y te explicamos cómo prepararte</td><td>Facebook, Instagram, TV sala de espera</td></tr>
+        <tr><td>15 sep</td><td>Martes</td><td>1</td><td>Horario · Independencia</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>15 de septiembre: hoy también estamos abiertos en City Mall</td><td>Llega sin cita, te atendemos hasta las 10 PM</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>16 sep</td><td>Miércoles</td><td>2</td><td>Cauterización L200</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Quincena: L200 la primera lesión y L100 cada una adicional</td><td>Escríbenos y cotiza tus lesiones hoy</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>17 sep</td><td>Jueves</td><td>5</td><td>Suero Oxigenador L700</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Qué hace el suero oxigenador cuando ya nada te deja concentrarte</td><td>Escríbenos y te explicamos si es para ti</td><td>Facebook, Instagram</td></tr>
+        <tr><td>18 sep</td><td>Viernes</td><td>4</td><td>Exámenes de laboratorio</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>Detrás de cada resultado hay un equipo que lo revisa dos veces</td><td>Cotiza tus exámenes por WhatsApp y te decimos precios hoy</td><td>Facebook, Instagram</td></tr>
+        <tr><td>19 sep</td><td>Sábado</td><td>1</td><td>Lavado de oído L400</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Cuánta cera es normal y cuándo ya es un tapón</td><td>Escríbenos y hazte tu lavado de oído L400 hoy</td><td>Facebook, Instagram, historias</td></tr>
+        <tr class="alto"><td>20 sep</td><td>Domingo</td><td>1 · 2</td><td>Consulta L300 + Lavado L400</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A + historias desde las 9 AM</td><td>Domingo 20: consulta L300 y lavado de oído L400, sin cita</td><td>Ven hoy mismo a City Mall, sótano 2</td><td>Facebook, Instagram, historias, TV sala de espera</td></tr>
+        <tr class="hito"><td>21 sep</td><td>Lunes</td><td>3</td><td>Extracción de uña L500</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Extracción de uña L500: se resuelve hoy y caminas igual mañana</td><td>Escríbenos y te contamos paso a paso qué esperar</td><td>Facebook, Instagram, historias</td></tr>
+        <tr class="hito"><td>22 sep</td><td>Martes</td><td>5</td><td>Suero Boost</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel de objeciones</td><td>Cansancio que no se quita durmiendo: cuándo una sueroterapia sí ayuda</td><td>Escríbenos y la Lic. María del Carmen te orienta</td><td>Facebook, Instagram, WhatsApp</td></tr>
+        <tr class="hito"><td>23 sep</td><td>Miércoles</td><td>1</td><td>Consulta médica L300</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Consulta médica L300 hasta las 10 PM, sin cita y por orden de llegada</td><td>Pasa después del trabajo, aquí te esperamos</td><td>Facebook, Instagram, historias después de 5 PM</td></tr>
+        <tr><td>24 sep</td><td>Jueves</td><td>5</td><td>Combo Vitamina C + Oxigenador</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Combo Vitamina C y Oxigenador: energía y enfoque en 45 minutos</td><td>Escríbenos y arma tu combo con la Lic. María del Carmen</td><td>Facebook, Instagram, WhatsApp</td></tr>
+        <tr><td>25 sep</td><td>Viernes</td><td>4</td><td>Exámenes de laboratorio</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Qué significa cada valor de tu hemograma, explicado simple</td><td>Cotiza tus exámenes por WhatsApp y recíbelos en 30 minutos</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>26 sep</td><td>Sábado</td><td>2</td><td>Cauterización L200</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Verruga, lunar o acrocordón: cómo se ve cada uno y qué se hace</td><td>Escríbenos una foto y te decimos si aplica L200</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>27 sep</td><td>Domingo</td><td>1</td><td>Experiencia en la clínica</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>Lo que más nos dicen: llegué sin cita y salí atendido</td><td>Ven cuando lo necesites, estamos en City Mall</td><td>Facebook, Instagram</td></tr>
+        <tr><td>28 sep</td><td>Lunes</td><td>5</td><td>Suero Oxigenador L700</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Tres señales de que tu cerebro está trabajando con poco oxígeno</td><td>Escríbenos y te decimos si el oxigenador te conviene</td><td>Facebook, Instagram, TV sala de espera</td></tr>
+        <tr><td>29 sep</td><td>Martes</td><td>1</td><td>Lavado L400 + Consulta L300</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A</td><td>Cierra el mes atendido: consulta L300 y lavado de oído L400</td><td>Llega hoy, sin cita y hasta las 10 PM</td><td>Facebook, Instagram, historias</td></tr>
+        <tr class="hito"><td>30 sep</td><td>Miércoles</td><td>2</td><td>Cauterización L200</td><td><span class="tag t-promo">Promo</span></td><td>Post Plantilla A + historia de recordatorio</td><td>Último día: L100 por cada lesión adicional en cauterización</td><td>Escríbenos antes de la medianoche y te agendamos</td><td>Facebook, Instagram, historias</td></tr>
       </tbody>
     </table>
-    <div class="nota"><b>Días 1 y 2 de septiembre:</b> sin publicación planificada. El plan se emite el 2 de septiembre, así que ese tramo ya transcurrió. Para octubre el plan debe entregarse antes del día 1 para no perder el eco del pago de fin de mes.</div>
-    <div class="nota"><b>15 de septiembre (Independencia):</b> feriado nacional, "verificar apertura". Solo lleva una pieza emocional de marca; ninguna promoción. Si la clínica abre con horario reducido, se comunica por historias ese mismo día.</div>
-    <div class="nota"><b>Mapa de liquidez aplicado:</b> del 3 al 5 va el eco del pago de fin de mes, con promoción fuerte de servicios de entrada. Del 6 al 14 va el valle, con educativo y ticket bajo. El 15 es feriado y la quincena privada se corre al 16, con combo. Del 17 al 19 es antesala del pago público. El 20 cae en domingo: se activa desde temprano con historias, igual que se intentó en agosto (ese día facturó L12,216 frente a los L4,658 de julio). Del 21 al 28 va la ventana alta, con sueroterapia y la campaña de corazón. El 29 y 30 va el cierre de mes, que en agosto volvió a quedar bajo umbral el día 30.</div>
+    <div class="nota riesgo"><b>Barra roja (3, 4, 5, 21, 22, 23 y 30):</b> días que quedaron bajo el umbral crítico en agosto. Ahí se ancla el refuerzo promocional de la regla P5.</div>
+    <div class="nota"><b>Barra amarilla (20 de septiembre):</b> es el día de mayor potencial del mes —pago público en domingo— y se activa desde las 9 AM, no se espera.</div>
+    <div class="nota"><b>Mapa de liquidez aplicado:</b> del 3 al 5 va el eco del pago de fin de mes, con promoción de servicios de entrada. Del 6 al 14 va el valle, con educativo y ticket bajo; el 13 se sostiene solo con historias. El 15 es feriado de Independencia y la quincena privada se corre al 16, con combo de cauterización. Del 17 al 19 es antesala del pago público. El 20 cae en domingo y se activa temprano. Del 21 al 28 va la ventana alta. El 29 y 30 va el cierre de mes, que en agosto volvió a quedar bajo umbral el día 30.</div>
+    <div class="nota"><b>Días 1 y 2 de septiembre:</b> sin publicación planificada; el plan se emite el 2. Para octubre debe entregarse antes del día 1 para no perder el eco del pago de fin de mes.</div>
   </section>
 
   <section>
-    <h2>Cadencia semanal</h2>
+    <h2>Cadencia y piezas de refuerzo · 27 piezas de feed</h2>
     <table>
-      <thead><tr><th>Semana</th><th>Piezas de feed</th><th>Carruseles</th><th>Reels</th><th>Historias</th><th>Educativo</th><th>Promo</th><th>Emocional</th></tr></thead>
+      <thead><tr><th>Semana</th><th>Educativo</th><th>Promo</th><th>Emocional</th><th>Feed</th><th>Historias</th></tr></thead>
       <tbody>
-        <tr><td>3 al 7 sep</td><td>5</td><td>1</td><td>0</td><td>Diarias</td><td>1</td><td>3</td><td>1</td></tr>
-        <tr><td>8 al 14 sep</td><td>7</td><td>4</td><td>0</td><td>Diarias</td><td>5</td><td>0</td><td>2</td></tr>
-        <tr><td>15 al 21 sep</td><td>7</td><td>1</td><td>1</td><td>Diarias</td><td>2</td><td>4</td><td>1</td></tr>
-        <tr><td>22 al 28 sep</td><td>7</td><td>2</td><td>1</td><td>Diarias</td><td>4</td><td>1</td><td>2</td></tr>
-        <tr><td>29 al 30 sep</td><td>2</td><td>0</td><td>0</td><td>Diarias</td><td>0</td><td>2</td><td>0</td></tr>
-        <tr><td><b>Total mes</b></td><td><b>28</b></td><td><b>8</b></td><td><b>2</b></td><td><b>28 días</b></td><td><b>12</b></td><td><b>10</b></td><td><b>6</b></td></tr>
+        <tr><td>3 al 6 sep</td><td>0</td><td>3</td><td>1</td><td>4</td><td>Diarias</td></tr>
+        <tr><td>7 al 13 sep</td><td>5</td><td>0</td><td>1</td><td>6</td><td>Diarias</td></tr>
+        <tr><td>14 al 20 sep</td><td>3</td><td>2</td><td>2</td><td>7</td><td>Diarias + refuerzo el 20</td></tr>
+        <tr><td>21 al 27 sep</td><td>3</td><td>3</td><td>1</td><td>7</td><td>Diarias, después de 5 PM del 21 al 23</td></tr>
+        <tr><td>28 al 30 sep</td><td>1</td><td>2</td><td>0</td><td>3</td><td>Diarias</td></tr>
+        <tr><td><b>Total mes</b></td><td><b>12 · 44%</b></td><td><b>10 · 37%</b></td><td><b>5 · 19%</b></td><td><b>27</b></td><td><b>28 días</b></td></tr>
       </tbody>
     </table>
-    <div class="nota"><b>Regla P9 aplicada:</b> siete de las veintiséis piezas mencionan de forma explícita el horario extendido y la atención por orden de llegada (3, 6, 10, 13, 20, 29 y 30 de septiembre), más de una de cada cuatro. Sus historias se programan después de las 5 PM. El aporte del horario extendido no se pudo medir en agosto por la pausa de la campaña; en julio fue 8.34%, todavía bajo el disparador del 10%.</div>
-  </section>
-
-  <section>
-    <h2>Piezas de refuerzo</h2>
-    <div class="card">
-      <p><b>Video del TV de sala de espera.</b> Formato 16:9, de 5 a 6 segundos por slide, transición suave de 0.5 a 1 segundo, loop continuo, Ken Burns sutil sobre foto real, música instrumental suave. Actualizaciones de septiembre: agregar slide de electrocardiograma para adulto mayor L375; agregar slide de Suero Vitamina C L1000, que vuelve a tener tracción; reforzar el slide de aplicación IM L80 e IV L180, que este mes sí tiene pieza de feed; mantener el slide de horario hasta las 10 PM y el de parqueo con orden de llegada; retirar el slide de Suero Multivitamínico si sigue sin producto.</p>
-      <p><b>Historias.</b> Diarias los 26 días. Refuerzo especial el 20 de septiembre (pago público, domingo): primera historia antes de las 8 AM, segunda al mediodía y tercera a las 5 PM. Refuerzo el 29 de septiembre (Día Mundial del Corazón): serie de historias sobre el electrocardiograma para adulto mayor, con la especialista explicando en qué consiste el examen.</p>
-      <p><b>Flujos de WhatsApp.</b> Dos encargos prioritarios: crear desde cero el flujo de extracción de uña, que rompió su racha con la campaña todavía barata —la fuga está en la conversación, no en el alcance—; y crear el flujo de la campaña nueva de electrocardiograma para adulto mayor. En ambos, el objetivo es transferir con la Lic. María del Carmen para cerrar en visita.</p>
+    <div class="card" style="margin-top:14px">
+      <p><b>Video del TV de sala de espera.</b> 16:9, de 5 a 6 segundos por slide, transición suave de 0.8 segundos, loop continuo, Ken Burns sutil, música instrumental suave. Se actualizan tres slides este mes: electrocardiograma con L375 para adulto mayor, cauterización con el precio por lesión adicional, y horario sin cita hasta las 10 PM. Sale al aire el 14 de septiembre.</p>
+      <p><b>Historias.</b> Todos los días. Del 21 al 23 se programan después de las 5 PM con el mensaje de horario extendido, porque son los tres días que cayeron bajo el umbral en agosto. El 20 llevan refuerzo desde las 9 AM y recordatorio a las 4 PM. El 13 sostienen el día completo sin pieza de feed. Objetivo: mover el aporte de la franja de 6 a 10 PM, que quedó sin medir en agosto.</p>
+      <p><b>Flujos de WhatsApp.</b> Uno nuevo y uno revisado. Nuevo: extracción de uña, enfocado en resolver miedo al dolor y tiempo de recuperación antes de ofrecer el horario. Revisado: sueroterapia, para transferir con la Lic. María del Carmen en el segundo mensaje y no en el quinto. Ambos se encargan a la skill de CRO conversacional.</p>
     </div>
   </section>
 
   <section>
-    <h2>KPIs del mes</h2>
+    <h2>KPIs de septiembre · punto de partida agosto 2026</h2>
     <table>
-      <thead><tr><th>Indicador</th><th>Agosto 2026</th><th>Meta septiembre 2026</th><th>Depende de</th></tr></thead>
+      <thead><tr><th>Indicador</th><th>Agosto 2026</th><th>Meta septiembre</th><th>Depende de</th></tr></thead>
       <tbody>
-        <tr><td>Venta total del mes</td><td>L407,119.55</td><td>L416,666.67 o más</td><td>Todos los pilares</td></tr>
-        <tr><td>Promedio diario</td><td>L13,132.89</td><td>L13,200.00 o más</td><td>Pilar 1</td></tr>
-        <tr><td>Ticket promedio</td><td>L744.98</td><td>Sostener sobre L740.00</td><td>Pilares 4 y 5</td></tr>
-        <tr><td>Pacientes por día</td><td>17.5</td><td>19.0 (1.5 visitas más/día)</td><td>Pilar 1</td></tr>
-        <tr><td>Días bajo umbral de L10,500</td><td>9 de 31</td><td>6 o menos de 30</td><td>Pilares 1 y 3</td></tr>
-        <tr><td>Cauterización</td><td>L47,690.00</td><td>Sostener sobre L47,000.00</td><td>Pilar 3</td></tr>
-        <tr><td>Extracción de uña</td><td>L19,750.00</td><td>L24,000.00 o más</td><td>Pilar 2</td></tr>
-        <tr><td>Lavado de oído</td><td>L25,600.00</td><td>Sostener sobre L22,000.00</td><td>Pilar 1</td></tr>
-        <tr><td>Laboratorio</td><td>L61,635.25</td><td>Sostener sobre L55,000.00</td><td>Pilar 4</td></tr>
-        <tr><td>Evaluación médica</td><td>L68,230.00</td><td>L75,000.00 o más</td><td>Pilares 1 y 4</td></tr>
-        <tr><td>Electrocardiograma (adulto mayor)</td><td>Sin dato desagregado</td><td>Generar el primer dato medible</td><td>Pilar 4, campaña nueva</td></tr>
-        <tr><td>Sueroterapia</td><td>L47,700.00</td><td>Sostener sobre L45,000.00</td><td>Pilar 5</td></tr>
-        <tr><td>Suero Boost</td><td>L17,550.00</td><td>L20,000.00 o más</td><td>Pieza del 25, ángulo nuevo</td></tr>
-        <tr><td>Aporte del horario extendido</td><td>Sin dato (campaña pausada)</td><td>Medir y superar 10%</td><td>Regla P9, siete piezas</td></tr>
-        <tr><td>ROAS de Meta</td><td>≈ 6.2</td><td>7.00 o más</td><td>Pauta reasignada</td></tr>
+        <tr><td>Venta total del mes</td><td>L407,119.55</td><td>L416,666.67</td><td>Pilares 1 y 2</td></tr>
+        <tr><td>Promedio diario</td><td>L13,132.89</td><td>L13,888.89</td><td>Pilar 1 y activación del 20</td></tr>
+        <tr><td>Ticket promedio</td><td>L744.98</td><td>Sostener sobre L740</td><td>Combos del pilar 5 y cross-sell a laboratorio</td></tr>
+        <tr><td>Pacientes por día</td><td>17.5</td><td>19.1</td><td>Pilar 1, es el KPI del mes</td></tr>
+        <tr><td>Días bajo umbral de L10,500</td><td>9 de 31 · 29.0%</td><td>7 de 30 · 23%</td><td>Promocional anclado al 3, 4, 5, 21, 22, 23 y 30</td></tr>
+        <tr><td>Cauterización</td><td>L47,690.00</td><td>L50,000.00</td><td>Pilar 2 y promoción por lesión adicional</td></tr>
+        <tr><td>Lavado de oído</td><td>L25,600.00</td><td>L28,000.00</td><td>Pilar 1, cuatro piezas en el mes</td></tr>
+        <tr><td>Extracción de uña</td><td>L19,750.00</td><td>L24,000.00</td><td>Pilar 3: contenido de objeción y flujo de WhatsApp</td></tr>
+        <tr><td>Laboratorio · categoría neta</td><td>L61,635.25</td><td>Sostener sobre L58,000</td><td>Pilar 4 y CTA dentro de piezas de entrada</td></tr>
+        <tr><td>Suero Oxigenador</td><td>L19,600.00</td><td>L21,000.00 · costo por conversación bajo L15.45</td><td>Pilar 5, sostener el ángulo nuevo</td></tr>
+        <tr><td>Suero Boost</td><td>L17,550.00</td><td>L19,500.00</td><td>Pilar 5: mensaje replicado del oxigenador</td></tr>
+        <tr><td>Electrocardiograma</td><td>Sin dato desagregado</td><td>Generar línea base medible</td><td>Pilar 4, sondeo con L70 al día</td></tr>
+        <tr><td>Aporte del horario de 6 a 10 PM</td><td>Sin medir · 8.34% en julio</td><td>Volver a medir, sobre 9%</td><td>Historias nocturnas y mención en 1 de cada 4 piezas</td></tr>
+        <tr><td>Costo por conversación</td><td>L11.94</td><td>Bajo L11.00</td><td>Cierre del experimento de sueroterapia y descanso del remarketing</td></tr>
+        <tr><td>ROAS de Meta</td><td>6.2</td><td>6.5 con gasto máximo de L18,000</td><td>Reasignación de los L200 diarios liberados</td></tr>
       </tbody>
     </table>
+    <div class="nota"><b>Presupuesto del mes:</b> rango aprobado de L10,000 a L20,000. Agosto gastó L18,054.74. Septiembre trabaja con techo de L18,000: cauterización y lavado de oído sostienen su pauta, extracción de uña mantiene la suya sin aumento, electrocardiograma arranca con L70 al día y quedan L130 al día de reserva para reforzar cauterización o laboratorio según la lectura del día 15.</div>
   </section>
 
   <section>
-    <h2>Encargos a las skills hermanas</h2>
+    <h2>Restricciones y encargos · regla P1, datos faltantes, skills hermanas</h2>
     <div class="card">
-      <p><b>cmg-meta-ads-copywriter.</b> Prioridad de pauta:</p>
-      <ul>
-        <li><b>Campaña nueva — Electrocardiograma adulto mayor.</b> Servicio: electrocardiograma. Precio: L375 (L500 con el 25% de descuento de tercera edad; L350 con el 30% de cuarta edad). Ángulo: "Si vas a tu especialista o tu especialista te pidió un electrocardiograma, realízalo por tan solo L375". Público: adulto mayor y sus hijos que gestionan la cita. Objeción a atacar: "es caro / hay que ir a un hospital / es un trámite complicado" — el mensaje debe dejar claro que es rápido, sin cita, con resultado el mismo día y con médico que lo interpreta. Presupuesto: L70/día. Destino: WhatsApp (ManyChat). Ancla noticiosa: Día Mundial del Corazón, 29 de septiembre.</li>
-        <li><b>Extracción de uña L500</b> — ángulo nuevo de objeción (no de escalamiento). Objeción a atacar: "pensé que se curaba sola" y "me da miedo el procedimiento". El presupuesto se mantiene, no sube. Delegar el flujo a cmg-whatsapp-cro.</li>
-        <li><b>Cauterización L200</b> — ángulo de presencia continua y de identificación ("verruga, lunar o mezquino"). Sostener presupuesto: respondió rápido en junio y se estabilizó en agosto.</li>
-        <li><b>Consulta médica L300 con horario extendido</b> — ángulo de acceso y disponibilidad nocturna, foco en volumen de pacientes.</li>
-        <li><b>Suero Oxigenador L700</b> — sostener el ángulo nuevo que funcionó dos meses seguidos. <b>Suero Boost L1350</b> — propuesta y piezas nuevas, no repetición de precio (regla P3).</li>
-        <li><b>Reserva de L130/día liberados:</b> mantener disponible para reforzar cauterización o laboratorio si alguno cae bajo su rango en la primera quincena.</li>
-      </ul>
-      <p><b>ai-ad-image-prompter.</b> Diez piezas con Plantilla A: 3, 5, 6, 16, 17, 18, 20, 25, 29 y 30 de septiembre. Ocho carruseles educativos: 4, 8, 9, 11, 12, 21, 26 y 28. Dos reels: 19 y 24. Seis posts emocionales con foto real: 7, 10, 14, 15, 24 y 27 (el 24 es reel testimonio con foto real de base). Todas en formato cuadrado 1080 por 1080, overlay navy, titular bicromático amarillo y blanco, precio grande en amarillo y franja inferior con punto amarillo de ubicación y punto verde de WhatsApp. Para las piezas de electrocardiograma (22, 28, 29), la imagen debe mostrar un adulto mayor tranquilo, no equipo hospitalario intimidante.</p>
-      <p><b>cmg-whatsapp-cro.</b> Dos flujos nuevos. Uno, el de extracción de uña: la campaña de Meta trae conversaciones baratas (L10.87) pero la facturación cayó 35.6%, así que la fuga está entre la conversación y la visita. Dos, el de electrocardiograma para adulto mayor, con la lógica de "tu especialista te lo pidió": recoger qué especialista, para cuándo lo necesita y ofrecer el mismo día. En ambos, transferir con la Lic. María del Carmen para cerrar.</p>
-      <p><b>cmg-ads-dashboard.</b> Dashboard actualizado al 2 de septiembre (acumulado del mes en curso). Revisar de nuevo al cerrar la primera semana: con la muestra de 2 días, la primera decisión sobre la reserva de L130/día se toma con datos de la semana 1 completa.</p>
+      <p><b>Congelados · sin ninguna pieza.</b> Suero Multivitamínico, Vitamina D y Beplenovax / Hígado Detox quedan fuera del calendario por problema de insumo reportado por la Dirección. Suero Complejo B también: cerró agosto en L2,550, apenas el 20% de su nivel histórico y −57.50% interanual, y su colapso de julio apunta a desabasto. No se promociona lo que no se puede entregar. Ninguno vuelve al calendario hasta que la Dirección confirme disponibilidad estable por escrito.</p>
+      <p><b>Datos faltantes.</b> Capacidad de agenda médica por servicio: se asume al límite, por lo que el peso del pilar 1 se reparte en franjas de baja ocupación y no se concentra en un solo día. Aporte del horario de 6 a 10 PM: sin medir en agosto por la pausa de la campaña desde el 13. Electrocardiograma y aplicaciones: sin desagregar en el reporte. Tasa de cierre de conversación a visita en WhatsApp: no se mide todavía, y es la métrica que explicaría la caída de extracción de uña.</p>
     </div>
-  </section>
-
-  <section>
-    <h2>Congelados y datos faltantes</h2>
-    <div class="card">
-      <p><b>Congelados este mes:</b></p>
-      <ul>
-        <li>Suero Multivitamínico L1200: sin producto disponible (proveedor). Cero piezas.</li>
-        <li>Suero Vitamina D L1350: sin ventas en 2026. Cero piezas.</li>
-        <li>Hígado Detox y Beplenovax: fuera del catálogo activo.</li>
-      </ul>
-      <p style="margin-top:10px"><b>Bajo condición:</b></p>
-      <ul>
-        <li>Suero Complejo B L850: recuperó parcialmente en agosto (L850 → L2,550) pero sigue en el 20% de su nivel normal. Entra con una sola pieza de sondeo el mes, y solo si la Dirección confirma disponibilidad estable de producto. Si no, queda congelado.</li>
-      </ul>
-      <p style="margin-top:10px"><b>Decisiones publicitarias aplicadas:</b></p>
-      <ul>
-        <li>Remarketing – Lavado de Oído: en descanso. Liberó L70/día ≈ L2,100/mes.</li>
-        <li>Sueroterapia Pilares: descartada. Liberó L130/día ≈ L3,900/mes.</li>
-        <li>Total liberado L200/día: L70/día a la campaña nueva de electrocardiograma, L130/día de reserva.</li>
-      </ul>
-      <p style="margin-top:10px"><b>Datos faltantes a levantar:</b></p>
-      <ul>
-        <li>Total de visitas de agosto y de septiembre. El reporte solo trae el promedio diario.</li>
-        <li>Facturación desagregada de electrocardiograma, consulta médica, citología y aplicaciones IM e IV.</li>
-        <li>Porcentaje de facturación de 6 a 10 PM sobre el total diario (métrica de la Fase 2 del piloto de horario extendido); requiere reactivar o instrumentar la medición.</li>
-        <li>Tasa de cierre de conversación de WhatsApp a visita efectiva, por servicio — crítica para extracción de uña.</li>
-        <li>Confirmación de disponibilidad de producto de Suero Complejo B.</li>
-        <li>Decisión de la Dirección sobre el piloto de Horario Extendido: reactivar con ajustes o cerrar. Lleva pausado desde el 13 de agosto.</li>
-      </ul>
+    <div class="card" style="margin-top:14px">
+      <p><b>cmg-meta-ads-copywriter.</b> Cauterización L200 la primera lesión y L100 cada adicional, solo lesiones no virales, ángulo de precio por lesión con presupuesto sostenido. Lavado de oído L400, ángulo de solución inmediata y horario extendido. Extracción de uña L500, ángulo nuevo de objeción: miedo al dolor y tiempo de recuperación, sin aumento de presupuesto. Suero Oxigenador L700, replicar el mensaje que funcionó en agosto. Electrocardiograma L500 con L375 para adulto mayor, campaña nueva de L70 al día.</p>
+      <p><b>ai-ad-image-prompter.</b> Las 10 piezas promocionales van en Plantilla A: foto real de fondo, overlay navy, titular bicromático amarillo y blanco, precio grande en amarillo y franja inferior con ubicación y WhatsApp. Las 12 educativas van en carrusel con fondo navy y numeración. Las 5 emocionales usan foto real de la clínica y del equipo, sin precio. Se pasa por pieza el servicio, el titular propuesto y el formato del calendario.</p>
+      <p><b>cmg-whatsapp-cro.</b> Extracción de uña: costo por conversación bajo en L10.87 con cierre débil, el flujo debe resolver dolor y recuperación antes de mencionar horario. Sueroterapia priorizada (Oxigenador, Boost y Vitamina C en combo): transferir con la Lic. María del Carmen en el segundo mensaje. En ambos casos el objetivo es cierre, no alcance.</p>
     </div>
   </section>
 
@@ -332,12 +313,10 @@
     <h2>Qué revisar el mes que viene</h2>
     <div class="card">
       <ul>
-        <li><b>Primero, los pacientes por día.</b> Es el KPI del mes. Si sube de 17.5 hacia 19, el pilar 1 funcionó y septiembre demuestra que el negocio puede recuperar por volumen y no solo por ticket. Si sigue plano con el ticket ya sobre meta, el techo es estructural y hay que buscarlo en operación o en capacidad de agenda.</li>
-        <li><b>Segundo, extracción de uña.</b> Con ángulo nuevo y flujo de WhatsApp propio. Si vuelve a L24,000 o más, la caída de agosto fue de mensaje. Si sigue en L19,000–20,000, julio fue el pico y hay que recalibrar su rango.</li>
-        <li><b>Tercero, el electrocardiograma.</b> Cualquier cifra desagregada es el primer dato propio del servicio y define si la campaña sigue, escala con la reserva de L130/día o se cierra.</li>
-        <li><b>Cuarto, Suero Boost.</b> Cuarto mes sin reaccionar. Si el ángulo nuevo del 25 no lo mueve de L17,500–18,000, procede una revisión de fondo del producto, no más pauta.</li>
-        <li><b>Quinto, Servicios Médicos y Evaluación Médica.</b> Llevan dos meses cediendo. Si no dejan de restar en septiembre, arrastran toda la recuperación.</li>
-        <li><b>Sexto, el aporte del horario extendido.</b> Solo se puede revisar si se reactiva la campaña o se instrumenta la medición. Sin ese dato, la regla P9 y la decisión de la Fase 2 siguen a ciegas.</li>
+        <li><b>Primero, pacientes por día.</b> Si no pasa de 17.5, el problema no es el mensaje de entrada y hay que revisar capacidad de atención y tiempos de espera, no contenido.</li>
+        <li><b>Segundo, extracción de uña.</b> Septiembre define si julio fue la excepción o agosto lo es, y con ello si el pilar 3 continúa.</li>
+        <li><b>Tercero, días bajo umbral.</b> Si el ancla promocional en los siete días débiles no los levanta, la regla P5 deja de ser suficiente y el mes siguiente cambia de palanca.</li>
+        <li><b>Cuarto, Suero Boost.</b> Si el mensaje replicado del oxigenador no lo mueve, procede evaluar su salida y no otro relanzamiento.</li>
       </ul>
     </div>
   </section>

@@ -220,6 +220,12 @@
   .zone-y{color:#8a6d00; font-weight:600;}
   .zone-r{color:var(--red); font-weight:600;}
 
+  .table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  .daily-matrix td, .daily-matrix th{text-align:center; white-space:nowrap;}
+  .daily-matrix td.camp-name, .daily-matrix th:first-child{text-align:left;}
+  .daily-matrix td.day-strong{background:rgba(242,15,16,0.05);}
+  .matrix-note{font-size:11px; color:#9298b0; margin-top:12px;}
+
   .footnotes{margin-top:28px; display:flex; flex-direction:column; gap:10px;}
   .footnote{
     font-size:12.5px; color:#565c78; line-height:1.6;
@@ -280,6 +286,7 @@
   <div class="view-tabs">
     <button class="tab-btn" data-view="hoy" onclick="switchView('hoy')">Hoy · 7 sep</button>
     <button class="tab-btn active" data-view="acumulado" onclick="switchView('acumulado')">Acumulado 1–7 sep</button>
+    <button class="tab-btn" data-view="dias" onclick="switchView('dias')">Día a día</button>
   </div>
 
   <div id="view-hoy" style="display:none;">
@@ -570,6 +577,78 @@
 
   </div>
 
+  <div id="view-dias" style="display:none;">
+
+  <div class="section-head">
+    <h2>Totales por día</h2>
+    <span class="section-note">1–7 sep · 5 campañas de conversión</span>
+  </div>
+
+  <div class="legend" style="margin-top:0;">
+    <div class="table-scroll">
+    <table class="threshold-table daily-matrix">
+      <tr><th>Día</th><th>Gasto</th><th>Conversaciones</th><th>Costo prom.</th><th>Impresiones</th></tr>
+      <tr><td class="camp-name">mar 1 sep</td><td>L394.80</td><td>35</td><td class="zone-y">L11.28</td><td>10,776</td></tr>
+      <tr><td class="camp-name">mié 2 sep</td><td>L310.34</td><td>37</td><td class="zone-g">L8.39</td><td>9,009</td></tr>
+      <tr><td class="camp-name">jue 3 sep</td><td>L458.64</td><td>41</td><td class="zone-y">L11.19</td><td>12,746</td></tr>
+      <tr><td class="camp-name">vie 4 sep</td><td>L383.49</td><td>40</td><td class="zone-g">L9.59</td><td>10,142</td></tr>
+      <tr><td class="camp-name day-strong">sáb 5 sep</td><td class="day-strong">L350.87</td><td class="day-strong">22</td><td class="zone-r day-strong">L15.95</td><td class="day-strong">10,756</td></tr>
+      <tr><td class="camp-name">dom 6 sep</td><td>L532.02</td><td>47</td><td class="zone-y">L11.32</td><td>17,059</td></tr>
+      <tr><td class="camp-name">lun 7 sep</td><td>L236.47</td><td>20</td><td class="zone-y">L11.82</td><td>5,057</td></tr>
+      <tr><td class="camp-name"><b>Total 1–7</b></td><td><b>L2,666.63</b></td><td><b>242</b></td><td><b>L11.02</b></td><td><b>75,545</b></td></tr>
+    </table>
+    </div>
+    <p class="matrix-note">Suma de los 5 días-campaña de conversión. Difiere levemente del KPI de "Acumulado" (L2,706.82 / 241) porque ese incluye el gasto residual de 2 pausadas y la atribución diaria sigue ajustándose 24–48 h.</p>
+  </div>
+
+  <div class="section-head">
+    <h2>Costo por conversación — campaña por día</h2>
+    <span class="section-note">color según el umbral propio de cada campaña</span>
+  </div>
+
+  <div class="legend" style="margin-top:0;">
+    <div class="table-scroll">
+    <table class="threshold-table daily-matrix">
+      <tr><th>Campaña</th><th>mar 1</th><th>mié 2</th><th>jue 3</th><th>vie 4</th><th>sáb 5</th><th>dom 6</th><th>lun 7</th></tr>
+      <tr>
+        <td class="camp-name">Lavado de Oído (ManyChat)</td>
+        <td class="zone-g">L10.61</td><td class="zone-g">L6.67</td><td class="zone-g">L11.29</td><td class="zone-g">L5.58</td><td class="zone-g">L6.70</td><td class="zone-g">L5.78</td><td class="zone-g">L8.28</td>
+      </tr>
+      <tr>
+        <td class="camp-name">Extracción de Uña</td>
+        <td class="zone-g">L12.28</td><td class="zone-g">L6.42</td><td class="zone-g">L11.80</td><td class="zone-g">L8.49</td><td class="zone-g">L11.85</td><td class="zone-y">L14.02</td><td class="zone-g">L11.19</td>
+      </tr>
+      <tr>
+        <td class="camp-name">Cauterizaciones 2026</td>
+        <td class="zone-r">L11.90</td><td class="zone-y">L10.31</td><td class="zone-r">L11.35</td><td class="zone-y">L11.19</td><td class="zone-r">L36.19</td><td class="zone-r">L11.77</td><td class="zone-y">L9.04</td>
+      </tr>
+      <tr>
+        <td class="camp-name">Oxigenador Cerebral</td>
+        <td class="zone-g">L9.11</td><td class="zone-r">L22.26</td><td class="zone-g">L10.99</td><td class="zone-g">L9.82</td><td class="zone-r">L32.11</td><td class="zone-r">L16.45</td><td>—</td>
+      </tr>
+      <tr>
+        <td class="camp-name">Electrocardiograma</td>
+        <td>—</td><td>—</td><td class="zone-g">L9.70</td><td class="zone-r">L22.07</td><td class="zone-r">L49.88</td><td class="zone-r">L15.99</td><td class="zone-r">L16.88</td>
+      </tr>
+    </table>
+    </div>
+    <p class="matrix-note">Verde / amarillo / rojo se leen contra el umbral de cada fila (ver "Umbrales por campaña" abajo), no entre campañas. Guion (—) = campaña sin actividad o sin conversación atribuida ese día.</p>
+  </div>
+
+  <div class="footnotes" style="margin-top:20px;">
+    <div class="footnote alert">
+      <b>El sábado 5 sep fue el día flojo:</b> L15.95 por conversación (vs L8–L12 el resto de la semana). Cauterizaciones cerró ese día en L36.19, Oxigenador en L32.11 y Electrocardiograma en L49.88 — las tres con gasto normal pero muy pocas conversaciones atribuidas. Es efecto de atribución de fin de semana: parte de esas conversaciones aún puede entrar con fecha del 5 sep en los próximos días.
+    </div>
+    <div class="footnote">
+      <b>Lavado de Oído es la única en verde los 7 días</b> (L5.58–L11.29). Extracción de Uña se mantuvo en verde salvo el domingo 6 (L14.02, amarillo). Cauterizaciones lleva toda la semana en amarillo/rojo contra su umbral exigente (&lt;L8.30 para verde), aunque en valores absolutos sigue barata.
+    </div>
+    <div class="footnote">
+      <b>Electrocardiograma</b> arrancó el 3 sep en verde (L9.70) y se encareció de ahí en adelante — típico de una campaña nueva mientras el algoritmo aprende y la atribución se completa. Se revisa a diario.
+    </div>
+  </div>
+
+  </div>
+
   <div class="legend">
     <div class="section-head" style="margin:0;">
       <h2 style="font-size:16px;">Umbrales por campaña</h2>
@@ -587,7 +666,7 @@
 
   <div class="footnotes">
     <div class="footnote">
-      <b>Siete días de septiembre:</b> las 5 campañas activas suman 241 conversaciones a L11.05 promedio — sube frente al corte del 5 sep (L10.19) y queda cerca del cierre de agosto (L11.94). El alza es de fin de semana: entre el 6 y el 7 de septiembre se sumaron 81 conversaciones a ≈L12.75 cada una. Lavado de Oído (L7.33) y Extracción de Uña (L10.52) siguen sosteniendo el promedio hacia abajo.
+      <b>Siete días de septiembre:</b> las 5 campañas activas suman 241 conversaciones a L11.05 promedio — sube frente al corte del 5 sep (L10.19) y queda cerca del cierre de agosto (L11.94). El alza viene del sábado 5 sep (L15.95 ese día, con atribución todavía incompleta en Cauterizaciones, Oxigenador y Electrocardiograma); el domingo 6 y el lunes 7 ya recuperaron a ~L11.3–L11.8. Ver el detalle en la pestaña "Día a día". Lavado de Oído (L7.33) y Extracción de Uña (L10.52) siguen sosteniendo el promedio hacia abajo.
     </div>
     <div class="footnote alert">
       <b>Oxigenador Cerebral y Electrocardiograma arrastran el promedio:</b> Oxigenador subió a L14.51 (de L12.23) y Electrocardiograma a L18.13 (de L14.71), ambas en rojo. Electrocardiograma es una campaña de 5 días con atribución todavía incompleta y se deja correr; Oxigenador sí necesita mano al creativo — su CTR (2.60%) lleva días bajo el piso verde de 3.5%.
@@ -633,6 +712,7 @@ function switchView(view){
   document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.view === view); });
   document.getElementById('view-hoy').style.display = view === 'hoy' ? 'block' : 'none';
   document.getElementById('view-acumulado').style.display = view === 'acumulado' ? 'block' : 'none';
+  document.getElementById('view-dias').style.display = view === 'dias' ? 'block' : 'none';
 }
 
 (function () {

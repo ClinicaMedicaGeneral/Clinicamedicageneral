@@ -1856,6 +1856,72 @@ summary.ed-meds-cat { list-style: revert; }
       .catch(function(err){ hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
   }
 
+  /* DRM: modal para emitir una constancia médica desde Caja a un registro que
+     todavía está 'pendiente_caja' (servicio/consulta ya realizada pero no
+     liquidada). Reutiliza prepararConstancia() y la plantilla Constancia-Medica.
+     Emitir la constancia NO cambia el status: el registro sigue en la cola de Caja. */
+  function abrirEmitirConstanciaCajaModal(consultaId, d, dgPac) {
+    dgPac = dgPac || {};
+    var nombrePac = d.pacienteNombre || dgPac.nombreCompleto || '—';
+    var html =
+      '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="caja-const-modal">' +
+        '<div style="background:#fff;border-radius:12px;max-width:520px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
+          '<h3 style="margin:0 0 6px;color:#213C7D">📄 Emitir constancia médica</h3>' +
+          '<p style="margin:0 0 10px;font-size:13px;color:#6B7280">Paciente: <b>' + esc(nombrePac) + '</b> · Expediente <code style="background:#F3F4F6;padding:1px 6px;border-radius:4px">' + esc(d.codigoPaciente || '—') + '</code></p>' +
+          '<p style="margin:0 0 14px;font-size:12px;color:#92400E;background:#FFFBEB;border:1px solid #FCD34D;border-radius:6px;padding:6px 8px">El registro sigue <b>pendiente de caja</b>. Emitir la constancia no lo liquida.</p>' +
+          '<div class="ed-grid ed-grid-2" style="gap:10px">' +
+            '<div class="ed-fgroup"><label class="ed-label">Días de incapacidad *</label>' +
+              '<input type="number" min="1" class="ed-input" id="cajaconst-dias"></div>' +
+            '<div class="ed-fgroup"><label class="ed-label">Desde *</label>' +
+              '<input type="date" class="ed-input" id="cajaconst-desde" value="' + fechaHoyLocal() + '"></div>' +
+            '<div class="ed-fgroup full"><label class="ed-label">Motivo / Diagnóstico para la constancia *</label>' +
+              '<textarea class="ed-textarea" id="cajaconst-motivo" rows="2" placeholder="Texto que aparecerá en la constancia (ej. Reposo por cuadro gripal agudo)"></textarea></div>' +
+            '<div class="ed-fgroup full"><label class="ed-label">Observaciones adicionales</label>' +
+              '<textarea class="ed-textarea" id="cajaconst-obs" rows="2" placeholder="Restricciones, recomendaciones laborales, etc."></textarea></div>' +
+          '</div>' +
+          '<div style="font-size:11px;color:#92400E;margin-top:6px">El formato sigue la plantilla "FORMATO DE CONSTANCIA (NO CAMBIAR)".</div>' +
+          '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
+            '<button class="ed-btn ed-btn-ghost" id="cajaconst-cancelar">Cancelar</button>' +
+            '<button class="ed-btn ed-btn-primary" id="cajaconst-guardar">📄 Emitir y abrir constancia</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+    var cerrar = function(){ var m = $id('caja-const-modal'); if (m) m.remove(); };
+    $id('cajaconst-cancelar').onclick = cerrar;
+    $id('caja-const-modal').addEventListener('click', function(e){ if (e.target === this) cerrar(); });
+    $id('cajaconst-guardar').onclick = function(){
+      if (!esMedicoTratanteClient()) { showAlert('Solo el médico puede emitir constancias.', 'error'); return; }
+      var dias = $val('cajaconst-dias'), desde = $val('cajaconst-desde'), motivo = $val('cajaconst-motivo');
+      if (!dias || !desde || !motivo) { showAlert('Días, desde y motivo son obligatorios', 'error'); return; }
+      var medico = cmgAuth.currentUser.displayName || cmgAuth.currentUser.email;
+      var constanciaPrep = prepararConstancia(
+        consultaId,
+        { codigoPaciente: d.codigoPaciente, datosGenerales: dgPac },
+        { dias: dias, desde: desde, motivo: motivo, observaciones: $val('cajaconst-obs') },
+        medico
+      );
+      showOverlay('Emitiendo constancia…');
+      var batch = cmgDb.batch();
+      batch.set(constanciaPrep.ref, constanciaPrep.data);
+      batch.update(cmgDb.collection('consultas').doc(consultaId), {
+        tieneConstancia: true,
+        constanciaId: constanciaPrep.ref.id,
+        constanciaEmitidaEnCaja: {
+          por: cmgAuth.currentUser.email,
+          en: firebase.firestore.FieldValue.serverTimestamp()
+        }
+      });
+      batch.commit().then(function(){
+        hideOverlay();
+        cerrar();
+        showAlert('✓ Constancia emitida. Abriendo en otra pestaña…', 'success');
+        window.open('Constancia-Medica.html?id=' + encodeURIComponent(constanciaPrep.ref.id), '_blank', 'noopener');
+        renderCajaTab();
+      }).catch(function(err){ hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
+    };
+  }
+
   function renderCajaTab() {
     var box = $id('caja-lista');
     if (!box) return;
@@ -1885,9 +1951,11 @@ summary.ed-meds-cat { list-style: revert; }
         resultadosDg.forEach(function(r){ dgPorCodigoCaja[r.codigo] = r.dg || {}; });
 
         var html = '<div style="display:flex;flex-direction:column;gap:12px">';
+        var cajaDocCache = {};
         snap.forEach(function(doc){
           var d = doc.data();
           var dgPac = dgPorCodigoCaja[d.codigoPaciente] || {};
+          cajaDocCache[doc.id] = { d: d, dg: dgPac };
           var faltantesDatos = [];
           if (!dgPac.numeroIdentidad) faltantesDatos.push('Identidad');
           if (!dgPac.telefono) faltantesDatos.push('Teléfono');
@@ -1955,6 +2023,9 @@ summary.ed-meds-cat { list-style: revert; }
                 '</div>' +
                 '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
                   '<button class="ed-btn ed-btn-ghost" data-caja-editar="' + doc.id + '">✏️ Editar</button>' +
+                  (d.constanciaId
+                    ? '<a class="ed-btn ed-btn-ghost" href="Constancia-Medica.html?id=' + esc(d.constanciaId) + '" target="_blank" rel="noopener">📄 Ver constancia</a>'
+                    : '<button class="ed-btn ed-btn-ghost" data-caja-constancia="' + doc.id + '"' + (esMedicoTratanteClient() ? '' : ' disabled title="Solo el médico puede emitir constancias"') + '>📄 Emitir constancia</button>') +
                   '<button class="ed-btn ed-btn-primary" data-caja-id="' + doc.id + '">✅ Pago Liquidado en Caja</button>' +
                 '</div>' +
               '</div>' +
@@ -2033,6 +2104,17 @@ summary.ed-meds-cat { list-style: revert; }
         box.querySelectorAll('[data-caja-guardar-ajuste]').forEach(function(b){
           b.addEventListener('click', function(){
             guardarAjusteCaja(this.getAttribute('data-caja-guardar-ajuste'));
+          });
+        });
+        /* DRM: emitir constancia médica a un registro que sigue pendiente de caja.
+           Solo médico tratante (el botón llega deshabilitado para Caja/Enfermería). */
+        box.querySelectorAll('[data-caja-constancia]').forEach(function(b){
+          b.addEventListener('click', function(){
+            if (!esMedicoTratanteClient()) { showAlert('Solo el médico puede emitir constancias.', 'error'); return; }
+            var id = this.getAttribute('data-caja-constancia');
+            var cached = cajaDocCache[id];
+            if (!cached) { showAlert('No se pudo cargar el registro. Refresca la pestaña.', 'error'); return; }
+            abrirEmitirConstanciaCajaModal(id, cached.d, cached.dg);
           });
         });
         /* Prellenar y cablear el toggle de Área de Estabilización de cada panel de ajuste */

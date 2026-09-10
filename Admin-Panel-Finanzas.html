@@ -96,6 +96,18 @@
     margin:0 0 12px;
     letter-spacing:-0.01em;
   }
+  .month-picker{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px;
+  }
+  .month-picker label{font-size:12px; color:rgba(255,255,255,0.6); letter-spacing:0.04em; text-transform:uppercase; font-weight:600;}
+  .month-picker select{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:15px;
+    color:var(--navy); background:var(--white);
+    border:1px solid rgba(255,255,255,0.25); border-radius:100px;
+    padding:8px 18px; cursor:pointer; -webkit-appearance:none; appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23213C7D' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 16px center; padding-right:40px;
+  }
   .date-pill{
     display:inline-flex; align-items:center; gap:8px;
     background:rgba(255,255,255,0.1);
@@ -161,11 +173,7 @@
     border-radius:16px;
     padding:22px 24px;
     margin-bottom:12px;
-    opacity:0; transform:translateY(10px);
-    animation:rise .5s ease forwards;
   }
-  @keyframes rise{ to{opacity:1; transform:translateY(0);} }
-
   .card-title{font-weight:600; font-size:15px; margin-bottom:16px;}
   .card-title span{font-weight:500; font-size:12.5px; color:#8a90aa; margin-left:8px;}
 
@@ -224,6 +232,11 @@
   }
   .footnote.alert{border-color:var(--red);}
 
+  .empty-note{
+    background:var(--white); border:1px dashed var(--line); border-radius:16px;
+    padding:32px 24px; text-align:center; color:#8a90aa; font-size:13px; margin-top:12px;
+  }
+
   footer{
     margin-top:56px; padding-top:24px; border-top:1px solid var(--line);
     display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
@@ -238,9 +251,6 @@
     .split{grid-template-columns:1fr;}
     .bar-label{width:112px;}
     table.data-table{font-size:11px;}
-  }
-  @media (prefers-reduced-motion:reduce){
-    .card{animation:none; opacity:1; transform:none;}
   }
 </style>
 </head>
@@ -269,8 +279,12 @@
       <span class="brand-name">Clínica Médica General · CMG</span>
     </div>
     <h1>Panel de facturación<br>mensual</h1>
-    <div class="date-pill"><span class="dot"></span>Septiembre 2026 · corte al 8 de septiembre</div>
-    <p class="subtitle-note">Réplica del dashboard que envía el Departamento de Finanzas. Los datos van hasta el 8 de septiembre (8 días registrados): las cifras de ventas cerrarán más altas al final del mes. La hoja se actualiza con uno o dos días de rezago (última edición: 7/9/2026).</p>
+    <div class="month-picker">
+      <label for="month-select">Mes</label>
+      <select id="month-select"></select>
+    </div>
+    <div class="date-pill"><span class="dot"></span><span id="date-pill-text">—</span></div>
+    <p class="subtitle-note" id="subtitle-note">Réplica del dashboard del Departamento de Finanzas de CMG.</p>
   </div>
 </header>
 
@@ -288,61 +302,61 @@
   <div class="kpi-strip" style="margin-top:24px;">
     <div class="kpi-card">
       <div class="kpi-label">Ventas del mes</div>
-      <div class="kpi-value">L73,602.05</div>
-      <div class="kpi-sub down">−81.92% vs agosto (−L333,517.50)</div>
+      <div class="kpi-value" id="k-ventas">—</div>
+      <div class="kpi-sub" id="k-ventas-sub">—</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Promedio diario de ventas</div>
-      <div class="kpi-value">L9,200.26</div>
-      <div class="kpi-sub down">−29.94% vs agosto · 8 días</div>
+      <div class="kpi-value" id="k-promdia">—</div>
+      <div class="kpi-sub" id="k-promdia-sub">—</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Pacientes por día</div>
-      <div class="kpi-value">14</div>
-      <div class="kpi-sub">pago promedio L660.73 / paciente</div>
+      <div class="kpi-value" id="k-pacdia">—</div>
+      <div class="kpi-sub" id="k-pacdia-sub">—</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Representación del año</div>
-      <div class="kpi-value">1.52%</div>
+      <div class="kpi-value" id="k-rep">—</div>
       <div class="kpi-sub">de la referencia anual · piso mensual 8.33%</div>
     </div>
   </div>
 
   <div class="section-head">
     <h2>Cómo se cobró</h2>
-    <span class="section-note">mezcla de medios de pago · septiembre</span>
+    <span class="section-note">mezcla de medios de pago</span>
   </div>
 
-  <div class="card" style="animation-delay:.02s">
-    <div class="card-title">Mezcla de pago <span>sobre L73,602.05 facturados</span></div>
+  <div class="card">
+    <div class="card-title">Mezcla de pago <span id="pay-mix-note">—</span></div>
     <div class="bar-row">
       <div class="bar-label">POS (tarjeta)</div>
-      <div class="bar-track"><div class="bar-fill" style="width:74.1%"></div></div>
-      <div class="bar-val">74.1%<span>≈ L54,550</span></div>
+      <div class="bar-track"><div class="bar-fill" id="bar-pos"></div></div>
+      <div class="bar-val" id="val-pos">—</div>
     </div>
     <div class="bar-row">
       <div class="bar-label">Efectivo</div>
-      <div class="bar-track"><div class="bar-fill teal" style="width:25.9%"></div></div>
-      <div class="bar-val">25.9%<span>≈ L19,052</span></div>
+      <div class="bar-track"><div class="bar-fill teal" id="bar-efec"></div></div>
+      <div class="bar-val" id="val-efec">—</div>
     </div>
     <div class="bar-row">
       <div class="bar-label">Transferencia</div>
-      <div class="bar-track"><div class="bar-fill green" style="width:0"></div></div>
-      <div class="bar-val">0.0%<span>sin movimientos</span></div>
+      <div class="bar-track"><div class="bar-fill green" id="bar-transf"></div></div>
+      <div class="bar-val" id="val-transf">—</div>
     </div>
   </div>
 
-  <div class="card" style="animation-delay:.08s">
-    <div class="card-title">POS por banco <span>L54,550.55 procesados en terminal</span></div>
+  <div class="card">
+    <div class="card-title">POS por banco <span id="bank-note">—</span></div>
     <div class="bar-row">
       <div class="bar-label">Davivienda</div>
-      <div class="bar-track"><div class="bar-fill" style="width:83%"></div></div>
-      <div class="bar-val">L45,284.05<span>83% del POS</span></div>
+      <div class="bar-track"><div class="bar-fill" id="bar-davi"></div></div>
+      <div class="bar-val" id="val-davi">—</div>
     </div>
     <div class="bar-row">
       <div class="bar-label">Ficohsa</div>
-      <div class="bar-track"><div class="bar-fill teal" style="width:17%"></div></div>
-      <div class="bar-val">L9,266.50<span>17% del POS</span></div>
+      <div class="bar-track"><div class="bar-fill teal" id="bar-fico"></div></div>
+      <div class="bar-val" id="val-fico">—</div>
     </div>
   </div>
 
@@ -352,36 +366,24 @@
   </div>
 
   <div class="split">
-    <div class="mini"><div class="k">Pacientes nuevos</div><div class="v">50.89%</div><div class="s">de la asistencia del mes</div></div>
-    <div class="mini"><div class="k">Pacientes recurrentes</div><div class="v">49.11%</div><div class="s">de la asistencia del mes</div></div>
+    <div class="mini"><div class="k">Pacientes nuevos</div><div class="v" id="m-nuevos">—</div><div class="s">de la asistencia del mes</div></div>
+    <div class="mini"><div class="k">Pacientes recurrentes</div><div class="v" id="m-recur">—</div><div class="s">de la asistencia del mes</div></div>
   </div>
 
-  <div class="card" style="animation-delay:.14s; margin-top:12px;">
-    <div class="card-title">Ingresos por jornada <span>día más fuerte vs. más flojo</span></div>
-    <div class="table-scroll">
-    <table class="data-table">
-      <tr><th>Jornada</th><th class="num">Ingresos</th><th class="num">Pacientes</th></tr>
-      <tr><td class="row-name zone-g">Viernes — el más fuerte</td><td class="num">L14,624.00</td><td class="num">18</td></tr>
-      <tr><td class="row-name zone-r">Domingo — el más flojo</td><td class="num">L3,620.50</td><td class="num">8</td></tr>
-    </table>
+  <div class="card" style="margin-top:12px;">
+    <div class="card-title">Ritmo de atención</div>
+    <div class="stat-chips">
+      <span class="chip">Pacientes por día <b id="c-pacdia">—</b></span>
+      <span class="chip">Pago promedio por paciente <b id="c-pagopac">—</b></span>
+      <span class="chip">Día más fuerte de la semana <b id="c-diafuerte">—</b></span>
     </div>
-    <div class="stat-chips" style="margin-top:14px;">
-      <span class="chip">Horario regular <b>96%</b> de los ingresos</span>
-      <span class="chip">Horario extendido <b>4%</b> (L2,714.80)</span>
+    <div class="stat-chips" id="jornada-chips" style="margin-top:12px;" hidden>
+      <span class="chip">Horario regular <b id="c-jreg">—</b> de los ingresos</span>
+      <span class="chip">Horario extendido <b id="c-jext">—</b></span>
     </div>
   </div>
 
-  <div class="footnotes">
-    <div class="footnote">
-      <b>Corte parcial:</b> los datos van hasta el 8 de septiembre (8 días). Las L73,602.05 y el 1.52% de representación del año son de mes en curso — al cierre subirán. Lo que sí se puede leer ya es el <b>ritmo diario: L9,200.26</b>, que va <b>−29.94% por debajo</b> del promedio diario de agosto.
-    </div>
-    <div class="footnote">
-      <b>El cobro es casi todo con tarjeta:</b> POS 74.1% vs efectivo 25.9%, y dentro del POS <b>Davivienda concentra el 83%</b> (L45,284.05). Transferencias en cero.
-    </div>
-    <div class="footnote">
-      <b>Mezcla de pacientes pareja:</b> 50.89% nuevos y 49.11% recurrentes. Ticket promedio del mes L660.73 por paciente, con 14 pacientes por día.
-    </div>
-  </div>
+  <div class="footnotes" id="fn-resumen"></div>
 
   </div>
 
@@ -390,167 +392,41 @@
 
   <div class="section-head" style="margin-top:32px;">
     <h2>Últimos 3 meses</h2>
-    <span class="section-note">ventas totales · septiembre en curso</span>
+    <span class="section-note">ventas totales</span>
   </div>
-
-  <div class="card" style="animation-delay:.02s">
-    <div class="bar-row">
-      <div class="bar-label">Julio 2026</div>
-      <div class="bar-track"><div class="bar-fill teal" style="width:93%"></div></div>
-      <div class="bar-val">L379,336.94</div>
-    </div>
-    <div class="bar-row">
-      <div class="bar-label">Agosto 2026</div>
-      <div class="bar-track"><div class="bar-fill teal" style="width:100%"></div></div>
-      <div class="bar-val">L407,119.55</div>
-    </div>
-    <div class="bar-row">
-      <div class="bar-label">Septiembre 2026</div>
-      <div class="bar-track"><div class="bar-fill yellow" style="width:18%"></div></div>
-      <div class="bar-val">L73,602.05<span>parcial · 8 días</span></div>
-    </div>
-  </div>
+  <div class="card" id="card-ult3"></div>
 
   <div class="section-head">
-    <h2>Septiembre, año con año</h2>
-    <span class="section-note">últimos 5 años · mismo mes</span>
+    <h2 id="hist-title">Mismo mes, año con año</h2>
+    <span class="section-note">últimos años</span>
   </div>
-
-  <div class="card" style="animation-delay:.08s">
-    <div class="bar-row">
-      <div class="bar-label">Sep 2022</div>
-      <div class="bar-track"><div class="bar-fill" style="width:79%"></div></div>
-      <div class="bar-val">L295,812.65</div>
-    </div>
-    <div class="bar-row">
-      <div class="bar-label">Sep 2023</div>
-      <div class="bar-track"><div class="bar-fill" style="width:55%"></div></div>
-      <div class="bar-val">L207,148.25</div>
-    </div>
-    <div class="bar-row">
-      <div class="bar-label">Sep 2024</div>
-      <div class="bar-track"><div class="bar-fill" style="width:91%"></div></div>
-      <div class="bar-val">L341,595.89</div>
-    </div>
-    <div class="bar-row">
-      <div class="bar-label">Sep 2025</div>
-      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
-      <div class="bar-val">L374,760.65</div>
-    </div>
-    <div class="bar-row">
-      <div class="bar-label">Sep 2026</div>
-      <div class="bar-track"><div class="bar-fill yellow" style="width:20%"></div></div>
-      <div class="bar-val">L73,602.05<span>parcial · 8 días</span></div>
-    </div>
-  </div>
+  <div class="card" id="card-hist"></div>
 
   <div class="section-head">
     <h2>Acumulado del año</h2>
-    <span class="section-note">ambos años al 8 de septiembre · mismo corte</span>
+    <span class="section-note" id="acum-note">—</span>
   </div>
+  <div class="split" id="acum-split"></div>
+  <div class="split" style="margin-top:12px;" id="acum-split2"></div>
 
-  <div class="split">
-    <div class="mini"><div class="k">Acumulado 2025 (al 8 sep)</div><div class="v">L3,397,908.77</div><div class="s">mismo día de corte del año pasado</div></div>
-    <div class="mini"><div class="k">Acumulado 2026 (al 8 sep)</div><div class="v">L3,178,627.59</div><div class="s" style="color:#8a6d00;font-weight:600;">−6.45% vs 2025 (−L219,281)</div></div>
-  </div>
-
-  <div class="split" style="margin-top:12px;">
-    <div class="mini"><div class="k">Total ventas 2025 (año completo)</div><div class="v">L4,855,873.11</div><div class="s">referencia anual que usa la hoja para 2026</div></div>
-    <div class="mini"><div class="k">Avance vs. referencia anual</div><div class="v">65.5%</div><div class="s">la hoja lo expresa como −34.54% · falta Q4</div></div>
-  </div>
-
-  <div class="footnotes">
-    <div class="footnote">
-      <b>El año va parejo con 2025:</b> al mismo día de corte (8 de septiembre) 2026 lleva L3.18 M contra L3.40 M de 2025 — <b>−6.45%</b>. Es una comparación día por día, no mes cerrado.
-    </div>
-    <div class="footnote">
-      <b>Corte con rezago:</b> la hoja de Finanzas va uno o dos días atrás. Estos acumulados están al 8 de septiembre; en la próxima actualización pasan al corte del 9 de septiembre (ambos años).
-    </div>
-    <div class="footnote">
-      <b>El −34.54% de la hoja compara distinto:</b> mide el acumulado 2026 contra el <b>total del año completo 2025</b> (L4,855,873.11), no contra el mismo periodo. Sobre esa base, 2026 va en 65.5% con el cuarto trimestre todavía por delante.
-    </div>
-    <div class="footnote">
-      <b>La "representación del mes" (1.52%)</b> se calcula sobre esa referencia anual (L4,855,873.11); el piso esperado por mes es 8.33% (un doceavo). Septiembre va en 1.52% sólo por ser un corte de 8 días.
-    </div>
-    <div class="footnote">
-      <b>Septiembre suele cerrar entre L295 K y L407 K</b> (rango de los últimos años y del trimestre). Con 8 días facturados a ritmo de L9,200/día, la proyección lineal simple ronda L276 K — por debajo de cualquier septiembre reciente, aunque el ritmo diario tiende a subir en la segunda quincena.
-    </div>
-  </div>
+  <div class="footnotes" id="fn-ventas"></div>
 
   </div>
 
   <!-- ══════════ HORARIO EXTENDIDO ══════════ -->
   <div id="view-extendido" style="display:none;">
-
-  <div class="kpi-strip" style="margin-top:24px;">
-    <div class="kpi-card">
-      <div class="kpi-label">Total facturado</div>
-      <div class="kpi-value">L2,714.80</div>
-      <div class="kpi-sub">4% de la facturación del mes</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Pacientes atendidos</div>
-      <div class="kpi-value">8</div>
-      <div class="kpi-sub">en 8 días de septiembre</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Promedio por paciente</div>
-      <div class="kpi-value">L339.35</div>
-      <div class="kpi-sub">L2,714.80 ÷ 8 · vs L660.73 regular</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Cobertura de costo fijo</div>
-      <div class="kpi-value" style="color:var(--red);">−L16,798.72</div>
-      <div class="kpi-sub down">no cubre su costo fijo</div>
-    </div>
-  </div>
-
-  <div class="section-head">
-    <h2>Facturación día por día</h2>
-    <span class="section-note">1 – 8 de septiembre · horario extendido</span>
-  </div>
-
-  <div class="legend" style="margin-top:0;">
-    <div class="table-scroll">
-    <table class="data-table">
-      <tr><th>Día</th><th class="num">Facturado</th><th class="num">Pacientes</th><th class="num">Prom. x paciente</th></tr>
-      <tr><td class="row-name">1 sep</td><td class="num">L600.00</td><td class="num">1</td><td class="num">L600.00</td></tr>
-      <tr><td class="row-name">2 sep</td><td class="num">L72.80</td><td class="num">1</td><td class="num">L72.80</td></tr>
-      <tr><td class="row-name">3 sep</td><td class="num">L900.00</td><td class="num">1</td><td class="num">L900.00</td></tr>
-      <tr><td class="row-name">4 sep</td><td class="num">L0.00</td><td class="num">0</td><td class="num">—</td></tr>
-      <tr><td class="row-name">5 sep</td><td class="num">L412.00</td><td class="num">2</td><td class="num">L206.00</td></tr>
-      <tr><td class="row-name">6 sep</td><td class="num">L0.00</td><td class="num">0</td><td class="num">—</td></tr>
-      <tr><td class="row-name">7 sep</td><td class="num">L730.00</td><td class="num">1</td><td class="num">L730.00</td></tr>
-      <tr><td class="row-name">8 sep</td><td class="num">L0.00</td><td class="num">0</td><td class="num">—</td></tr>
-      <tr class="total"><td>Total 1–8</td><td class="num">L2,714.80</td><td class="num">8</td><td class="num">L339.35</td></tr>
-    </table>
-    </div>
-    <p class="section-note" style="margin-top:12px;">Días 9 a 30 sin registro al momento del corte (7 sep). El total mensual de pacientes atendidos en horario extendido es <b>8</b> (dato de Finanzas); el desglose por día que reporta la hoja identifica 6, por lo que 2 pacientes quedan sin día asignado en la tabla.</p>
-  </div>
-
-  <div class="footnotes">
-    <div class="footnote alert">
-      <b>Horario Extendido sigue en rojo:</b> 8 pacientes en 8 días y L2,714.80 facturados no alcanzan a cubrir su costo fijo — déficit de <b>L16,798.72</b> en el mes.
-    </div>
-    <div class="footnote">
-      <b>Coincide con el Panel de Ads:</b> la campaña de Horario Extendido está pausada desde el 13 de agosto y no hay pauta activa empujando esta jornada. Sin inversión publicitaria, la demanda espontánea en horario extendido es de ~1 paciente por día.
-    </div>
-    <div class="footnote">
-      <b>Ticket más bajo que el regular:</b> L339.35 por paciente vs L660.73 en horario normal. El día 2 (L72.80) fue una consulta de bajo monto que arrastra el promedio.
-    </div>
-  </div>
-
+  <div id="ext-content"></div>
   </div>
 
   <div class="footnotes" style="margin-top:32px;">
     <div class="footnote">
-      <b>Fuente:</b> hoja mensual del Departamento de Finanzas de CMG (Dashboard 09'2026). Algunas gráficas de la hoja original no se reproducen aquí — este panel recoge los indicadores numéricos. Para el rendimiento publicitario ver el <b>Panel de Rendimiento Publicitario</b>.
+      <b>Fuente:</b> libro mensual del Departamento de Finanzas de CMG (pestañas 10'2025 – 09'2026). Este panel reproduce los indicadores numéricos de cada mes; algunas gráficas de la hoja original no se incluyen. Para el rendimiento publicitario, ver el <b>Panel de Rendimiento Publicitario</b>.
     </div>
   </div>
 
   <footer>
     <span class="script-note">Cuidamos de tu salud</span>
-    <span class="gen-note">Datos al 8 de septiembre, 2026 · Departamento de Finanzas · Clínica Médica General CMG</span>
+    <span class="gen-note" id="gen-note">Departamento de Finanzas · Clínica Médica General CMG</span>
   </footer>
 
 </div>
@@ -565,6 +441,402 @@
 <script src="cmg-staff.js"></script>
 
 <script>
+/* ═══════════════ DATOS — Departamento de Finanzas CMG ═══════════════ */
+
+// Ventas mensuales totales (año cerrado 2025, y 2026 hasta el corte)
+var V2025 = [426322.60,388369.57,495618.75,360856.35,355547.63,382252.10,488989.85,391377.65,374760.65,389722.55,402741.10,399314.33];
+var V2026 = [440023.30,335955.55,398372.45,331083.37,371811.55,441232.90,379336.95,407010.80,73602.05];
+var TOT2024 = 3617415.07;
+var TOT2025 = 4855873.11;
+var MES_NOMBRE = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+// Serie combinada para "últimos 3 meses"
+var SERIE = [];
+V2025.forEach(function(v,i){ SERIE.push({y:2025,m:i,v:v}); });
+V2026.forEach(function(v,i){ SERIE.push({y:2026,m:i,v:v}); });
+
+function acum(arr,upto){ var s=0; for(var i=0;i<=upto;i++) s+=arr[i]; return s; }
+
+// Datos por mes. clave = "AAAA-MM"
+var DATA = {
+  '2025-10': {
+    label:'Octubre 2025', y:2025, m:9, cerrado:true, actualizado:'31/10/2025',
+    ventas:389722.55, varPct:3.99, varMonto:14961.90,
+    repAnual:8.03, promDiario:12571.70, promDiarioVarPct:0.64,
+    pos:63.9, efec:34.9, transf:1.2, davi:119059.50, fico:130012.00,
+    hist:{2021:406756.86,2022:173825.75,2023:224619.38,2024:310849.97,2025:389722.55},
+    nuevos:64.78, recur:35.22, promPacDia:18, pagoXPac:707.93, diaFuerte:'Miércoles',
+    jornada:null, ext:null
+  },
+  '2025-11': {
+    label:'Noviembre 2025', y:2025, m:10, cerrado:true, actualizado:'30/11/2025',
+    ventas:402741.10, varPct:3.34, varMonto:13018.55,
+    repAnual:8.29, promDiario:13424.70, promDiarioVarPct:6.79,
+    pos:68.1, efec:31.9, transf:0.1, davi:149622.00, fico:124274.43,
+    hist:{2021:419764.75,2022:242894.74,2023:211945.74,2024:363524.54,2025:402741.10},
+    nuevos:50.10, recur:49.90, promPacDia:17, pagoXPac:764.41, diaFuerte:'Sábado',
+    jornada:null, ext:null
+  },
+  '2025-12': {
+    label:'Diciembre 2025', y:2025, m:11, cerrado:true, actualizado:'31/12/2025',
+    ventas:399314.33, varPct:-0.85, varMonto:-3426.77,
+    repAnual:8.22, promDiario:12881.11, promDiarioVarPct:-4.05,
+    pos:66.6, efec:32.5, transf:0.8, davi:123269.60, fico:143095.85,
+    hist:{2021:555803.95,2022:415944.95,2023:229021.11,2024:424255.54,2025:399314.33},
+    nuevos:58.90, recur:41.10, promPacDia:18, pagoXPac:706.27, diaFuerte:'Lunes',
+    jornada:null, ext:null
+  },
+  '2026-01': {
+    label:'Enero 2026', y:2026, m:0, cerrado:true, actualizado:'31/1/2026',
+    ventas:440023.30, varPct:10.19, varMonto:40708.97,
+    repAnual:9.06, promDiario:14194.30, promDiarioVarPct:6.64,
+    pos:60.7, efec:38.1, transf:1.2, davi:132654.15, fico:134229.75,
+    hist:{2022:1077327.85,2023:243162.31,2024:263029.50,2025:426322.60,2026:440023.30},
+    nuevos:58.02, recur:41.98, promPacDia:20, pagoXPac:707.93, diaFuerte:'Sábado',
+    jornada:null, ext:null
+  },
+  '2026-02': {
+    label:'Febrero 2026', y:2026, m:1, cerrado:true, actualizado:'28/2/2026',
+    ventas:335955.55, varPct:-23.65, varMonto:-104067.75,
+    repAnual:6.92, promDiario:11998.41, promDiarioVarPct:-15.47,
+    pos:70.0, efec:29.2, transf:0.8, davi:122731.30, fico:112598.75,
+    hist:{2022:585455.95,2023:155907.05,2024:180259.10,2025:388369.57,2026:335955.55},
+    nuevos:57.30, recur:42.70, promPacDia:17, pagoXPac:730.65, diaFuerte:'Sábado',
+    jornada:null, ext:null
+  },
+  '2026-03': {
+    label:'Marzo 2026', y:2026, m:2, cerrado:true, actualizado:'31/3/2026',
+    ventas:398372.45, varPct:18.58, varMonto:62416.90,
+    repAnual:8.20, promDiario:12850.72, promDiarioVarPct:7.10,
+    pos:63.8, efec:35.4, transf:0.8, davi:129072.70, fico:125258.50,
+    hist:{2022:364587.00,2023:186649.50,2024:242271.34,2025:495618.75,2026:398372.45},
+    nuevos:58.26, recur:41.74, promPacDia:17, pagoXPac:742.33, diaFuerte:'Sábado',
+    jornada:null, ext:null
+  },
+  '2026-04': {
+    label:'Abril 2026', y:2026, m:3, cerrado:true, actualizado:'30/4/2026',
+    ventas:331083.37, varPct:-16.89, varMonto:-67289.08,
+    repAnual:6.82, promDiario:11036.11, promDiarioVarPct:-14.12,
+    pos:64.0, efec:35.0, transf:0.9, davi:109155.77, fico:102870.75,
+    hist:{2022:332712.25,2023:202391.50,2024:211420.00,2025:360856.35,2026:331083.37},
+    nuevos:56.93, recur:43.07, promPacDia:16, pagoXPac:691.62, diaFuerte:'Lunes',
+    jornada:null, ext:null
+  },
+  '2026-05': {
+    label:'Mayo 2026', y:2026, m:4, cerrado:true, actualizado:'31/5/2026',
+    ventas:371811.55, varPct:12.30, varMonto:40728.18,
+    repAnual:7.66, promDiario:11993.92, promDiarioVarPct:8.68,
+    pos:68.3, efec:31.3, transf:0.4, davi:143273.55, fico:110536.25,
+    hist:{2022:283743.50,2023:185043.75,2024:253298.15,2025:355547.63,2026:371811.55},
+    nuevos:56.85, recur:43.15, promPacDia:16, pagoXPac:746.24, diaFuerte:'Sábado',
+    jornada:{regular:91, extendido:9}, ext:null
+  },
+  '2026-06': {
+    label:'Junio 2026', y:2026, m:5, cerrado:true, actualizado:'30/6/2026',
+    ventas:441232.90, varPct:18.67, varMonto:69421.35,
+    repAnual:9.09, promDiario:14707.76, promDiarioVarPct:22.63,
+    pos:66.1, efec:33.6, transf:0.3, davi:70577.25, fico:220891.75,
+    hist:{2022:366861.00,2023:294663.65,2024:345734.75,2025:382252.10,2026:441232.90},
+    nuevos:55.63, recur:44.37, promPacDia:20, pagoXPac:738.01, diaFuerte:'Sábado',
+    jornada:{regular:89, extendido:11},
+    ext:{ pctMes:11, promDia:2, cobertura:null, parcial:false, dias:[
+      [1,2518,4],[2,1600,2],[3,1365,1],[4,2697,3],[5,390,1],[6,0,0],[7,0,0],[8,830,2],[9,120,1],[10,2084,4],
+      [11,2804,4],[12,3740,3],[13,5145,4],[14,0,0],[15,1220.75,3],[16,630,1],[17,0,0],[18,1128,2],[19,2335,1],[20,3578.75,3],
+      [21,0,0],[22,1902,3],[23,0,0],[24,3165,3],[25,1308,3],[26,996,3],[27,1200,1],[28,0,0],[29,2465,2],[30,3364.25,3] ] }
+  },
+  '2026-07': {
+    label:'Julio 2026', y:2026, m:6, cerrado:true, actualizado:'31/7/2026',
+    ventas:379336.95, varPct:-14.03, varMonto:-61895.95,
+    repAnual:7.81, promDiario:12236.68, promDiarioVarPct:-16.80,
+    pos:66.8, efec:31.2, transf:2.1, davi:47352.25, fico:205911.95,
+    hist:{2022:1175669.66,2023:323572.74,2024:289177.32,2025:488989.85,2026:379336.95},
+    nuevos:51.31, recur:48.69, promPacDia:17, pagoXPac:713.13, diaFuerte:'Miércoles',
+    jornada:{regular:92, extendido:8},
+    ext:{ pctMes:9, promDia:2, cobertura:null, parcial:false, dias:[
+      [1,400,1],[2,0,0],[3,2675,3],[4,1520,1],[5,0,0],[6,1348,2],[7,2429,3],[8,1360,1],[9,895,1],[10,360,2],
+      [11,0,0],[12,0,0],[13,1200,2],[14,2234,4],[15,600,1],[16,2836,2],[17,904,3],[18,1740,1],[19,0,0],[20,104,1],
+      [21,104,1],[22,624,2],[23,1764,3],[24,912,3],[25,974,2],[26,0,0],[27,1304,3],[28,325,1],[29,1068,3],[30,2104,3],[31,1860,1] ] }
+  },
+  '2026-08': {
+    label:'Agosto 2026', y:2026, m:7, cerrado:true, actualizado:'31/8/2026',
+    ventas:407010.80, varPct:7.30, varMonto:27673.85,
+    repAnual:8.38, promDiario:13129.38, promDiarioVarPct:7.30,
+    pos:70.7, efec:28.9, transf:0.4, davi:134210.50, fico:153544.25,
+    hist:{2022:385339.10,2023:235068.25,2024:391998.97,2025:391377.65,2026:407010.80},
+    nuevos:58.33, recur:41.67, promPacDia:17, pagoXPac:749.79, diaFuerte:'Lunes',
+    jornada:{regular:94, extendido:6},
+    ext:{ pctMes:6, promDia:1, cobertura:null, parcial:false, dias:[
+      [1,1770,1],[2,0,0],[3,600,1],[4,830,1],[5,0,0],[6,1105,1],[7,2825,2],[8,455,1],[9,0,0],[10,78,1],
+      [11,1378,1],[12,0,0],[13,1720,2],[14,1328,3],[15,1575,1],[16,0,0],[17,0,0],[18,390,1],[19,990,1],[20,0,0],
+      [21,600,1],[22,740,1],[23,0,0],[24,5759,6],[25,0,0],[26,0,0],[27,1094,2],[28,0,0],[29,650,1],[30,0,0],[31,1025,2] ] }
+  },
+  '2026-09': {
+    label:'Septiembre 2026', y:2026, m:8, cerrado:false, corte:'8 de septiembre', actualizado:'7/9/2026', diasCorte:8,
+    ventas:73602.05, varPct:-81.92, varMonto:-333517.50,
+    repAnual:1.52, promDiario:9200.26, promDiarioVarPct:-29.94,
+    pos:74.1, efec:25.9, transf:0.0, davi:45284.05, fico:9266.50,
+    hist:{2022:295812.65,2023:207148.25,2024:341595.89,2025:374760.65,2026:73602.05},
+    nuevos:50.89, recur:49.11, promPacDia:14, pagoXPac:660.73, diaFuerte:'Viernes',
+    jornada:{regular:96, extendido:4},
+    acum2025Periodo:3397908.77, // acumulado 2025 al 8 sep (dato de Finanzas)
+    acum2026Periodo:3178627.59, // acumulado 2026 al 8 sep (dato de Finanzas)
+    ext:{ pctMes:5, promDia:1, cobertura:-16798.72, parcial:true, dias:[
+      [1,600,1],[2,72.80,1],[3,900,1],[4,0,0],[5,412,2],[6,0,0],[7,730,1],[8,0,0] ], pacientesReales:8 }
+  }
+};
+
+var ORDER = ['2026-09','2026-08','2026-07','2026-06','2026-05','2026-04','2026-03','2026-02','2026-01','2025-12','2025-11','2025-10'];
+
+/* ═══════════════ FORMATO ═══════════════ */
+function L(n){ return 'L' + (n).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function Lk(n){ // versión compacta para millones
+  if(Math.abs(n) >= 1000000) return 'L' + (n/1000000).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' M';
+  return L(n);
+}
+function pct(n,dec){ dec = dec==null?2:dec; return (n>0?'+':'') + n.toFixed(dec) + '%'; }
+function signL(n){ return (n>=0?'+L':'−L') + Math.abs(n).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function negL(n){ return '−L' + Math.abs(n).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function esc(s){ return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+
+/* ═══════════════ RENDER ═══════════════ */
+function render(key){
+  var d = DATA[key];
+  if(!d) return;
+  var closed = d.cerrado;
+  var yearArr = d.y === 2025 ? V2025 : V2026;
+  var yearIdx = d.m;
+
+  /* — Encabezado — */
+  var pillTxt = closed
+    ? d.label + ' · mes cerrado'
+    : d.label + ' · corte al ' + d.corte;
+  document.getElementById('date-pill-text').textContent = pillTxt;
+  document.getElementById('subtitle-note').innerHTML = closed
+    ? 'Réplica del dashboard del Departamento de Finanzas de CMG. ' + d.label + ' es un mes cerrado (hoja actualizada el ' + d.actualizado + ').'
+    : 'Réplica del dashboard del Departamento de Finanzas de CMG. Los datos de ' + d.label + ' van hasta el ' + d.corte + ' (' + d.diasCorte + ' días registrados): las cifras cerrarán más altas al final del mes. La hoja se actualiza con uno o dos días de rezago (última edición: ' + d.actualizado + ').';
+  document.getElementById('gen-note').textContent = 'Datos ' + (closed ? 'de ' + d.label : 'al ' + d.corte + ', ' + d.y) + ' · Departamento de Finanzas · Clínica Médica General CMG';
+
+  /* — KPIs — */
+  document.getElementById('k-ventas').textContent = L(d.ventas);
+  var vs = document.getElementById('k-ventas-sub');
+  vs.textContent = pct(d.varPct) + ' vs mes anterior (' + signL(d.varMonto) + ')';
+  vs.className = 'kpi-sub ' + (d.varPct < 0 ? 'down' : 'up');
+
+  document.getElementById('k-promdia').textContent = L(d.promDiario);
+  var ps = document.getElementById('k-promdia-sub');
+  ps.textContent = pct(d.promDiarioVarPct) + ' vs mes anterior' + (closed ? '' : ' · ' + d.diasCorte + ' días');
+  ps.className = 'kpi-sub ' + (d.promDiarioVarPct < 0 ? 'down' : 'up');
+
+  document.getElementById('k-pacdia').textContent = d.promPacDia;
+  document.getElementById('k-pacdia-sub').textContent = 'pago promedio ' + L(d.pagoXPac) + ' / paciente';
+  document.getElementById('k-rep').textContent = d.repAnual.toFixed(2) + '%';
+
+  /* — Mezcla de pago — */
+  document.getElementById('pay-mix-note').textContent = 'sobre ' + L(d.ventas) + ' facturados';
+  setBar('bar-pos','val-pos', d.pos, '≈ ' + L(d.ventas*d.pos/100));
+  setBar('bar-efec','val-efec', d.efec, '≈ ' + L(d.ventas*d.efec/100));
+  setBar('bar-transf','val-transf', d.transf, d.transf === 0 ? 'sin movimientos' : '≈ ' + L(d.ventas*d.transf/100));
+
+  /* — POS por banco — */
+  var posTot = d.davi + d.fico;
+  document.getElementById('bank-note').textContent = L(posTot) + ' procesados en terminal';
+  var mx = Math.max(d.davi, d.fico);
+  document.getElementById('bar-davi').style.width = (d.davi/mx*100) + '%';
+  document.getElementById('bar-fico').style.width = (d.fico/mx*100) + '%';
+  document.getElementById('val-davi').innerHTML = L(d.davi) + '<span>' + Math.round(d.davi/posTot*100) + '% del POS</span>';
+  document.getElementById('val-fico').innerHTML = L(d.fico) + '<span>' + Math.round(d.fico/posTot*100) + '% del POS</span>';
+
+  /* — Pacientes — */
+  document.getElementById('m-nuevos').textContent = d.nuevos.toFixed(2) + '%';
+  document.getElementById('m-recur').textContent = d.recur.toFixed(2) + '%';
+  document.getElementById('c-pacdia').textContent = d.promPacDia;
+  document.getElementById('c-pagopac').textContent = L(d.pagoXPac);
+  document.getElementById('c-diafuerte').textContent = d.diaFuerte;
+  var jc = document.getElementById('jornada-chips');
+  if(d.jornada){
+    jc.hidden = false;
+    document.getElementById('c-jreg').textContent = d.jornada.regular + '%';
+    document.getElementById('c-jext').textContent = d.jornada.extendido + '% (' + (d.ext ? L(extTotal(d.ext)) : '≈ ' + L(d.ventas*d.jornada.extendido/100)) + ')';
+  } else {
+    jc.hidden = true;
+  }
+
+  /* — Footnotes Resumen — */
+  renderFnResumen(d);
+
+  /* ═══ Tab Ventas ═══ */
+  renderUlt3(d);
+  renderHist(d);
+  renderAcum(d, yearArr, yearIdx);
+  renderFnVentas(d, yearArr, yearIdx);
+
+  /* ═══ Tab Horario Extendido ═══ */
+  renderExtendido(d);
+}
+
+function setBar(barId, valId, p, subtxt){
+  document.getElementById(barId).style.width = Math.max(0, Math.min(100, p)) + '%';
+  document.getElementById(valId).innerHTML = p.toFixed(1).replace('.0','.0') + '%<span>' + subtxt + '</span>';
+}
+
+function extTotal(ext){ var s=0; ext.dias.forEach(function(r){ s+=r[1]; }); return s; }
+function extPac(ext){ if(ext.pacientesReales) return ext.pacientesReales; var s=0; ext.dias.forEach(function(r){ s+=r[2]; }); return s; }
+
+function renderUlt3(d){
+  var idx = -1;
+  for(var i=0;i<SERIE.length;i++){ if(SERIE[i].y===d.y && SERIE[i].m===d.m){ idx=i; break; } }
+  var rows = [];
+  for(var j=Math.max(0,idx-2); j<=idx; j++) rows.push(SERIE[j]);
+  var mx = Math.max.apply(null, rows.map(function(r){return r.v;}));
+  var html = '';
+  rows.forEach(function(r){
+    var isCur = (r.y===d.y && r.m===d.m);
+    var partial = isCur && !d.cerrado;
+    html += '<div class="bar-row">' +
+      '<div class="bar-label">' + cap(MES_NOMBRE[r.m]) + ' ' + r.y + '</div>' +
+      '<div class="bar-track"><div class="bar-fill ' + (partial?'yellow':(isCur?'':'teal')) + '" style="width:' + (r.v/mx*100) + '%"></div></div>' +
+      '<div class="bar-val">' + L(r.v) + (partial ? '<span>parcial · ' + d.diasCorte + ' días</span>' : '') + '</div>' +
+    '</div>';
+  });
+  document.getElementById('card-ult3').innerHTML = html;
+}
+
+function renderHist(d){
+  var yrs = Object.keys(d.hist).map(Number).sort();
+  document.getElementById('hist-title').textContent = cap(MES_NOMBRE[d.m]) + ', año con año';
+  var mx = Math.max.apply(null, yrs.map(function(y){return d.hist[y];}));
+  var html = '';
+  yrs.forEach(function(y){
+    var v = d.hist[y];
+    var isCur = (y === d.y);
+    var partial = isCur && !d.cerrado;
+    html += '<div class="bar-row">' +
+      '<div class="bar-label">' + MES_NOMBRE[d.m].slice(0,3) + ' ' + y + '</div>' +
+      '<div class="bar-track"><div class="bar-fill ' + (partial?'yellow':(isCur?'':'teal')) + '" style="width:' + (v/mx*100) + '%"></div></div>' +
+      '<div class="bar-val">' + L(v) + (partial ? '<span>parcial · ' + d.diasCorte + ' días</span>' : '') + '</div>' +
+    '</div>';
+  });
+  document.getElementById('card-hist').innerHTML = html;
+}
+
+function renderAcum(d, yearArr, yearIdx){
+  var acumCur = d.acum2026Periodo != null ? d.acum2026Periodo : acum(yearArr, yearIdx);
+  var note, s1='', s2='';
+
+  if(d.y === 2026){
+    var acumPrev = d.acum2025Periodo != null ? d.acum2025Periodo : acum(V2025, yearIdx);
+    var yoy = (acumCur/acumPrev - 1) * 100;
+    var periodoTxt = d.cerrado ? 'enero – ' + MES_NOMBRE[d.m] : 'enero – ' + d.corte;
+    note = 'ambos años, ' + periodoTxt;
+    s1 = mini('Acumulado 2025 (' + (d.cerrado ? 'ene–' + MES_NOMBRE[d.m].slice(0,3) : 'al ' + d.corte) + ')', L(acumPrev), 'mismo periodo del año pasado');
+    s1 += mini('Acumulado 2026 (' + (d.cerrado ? 'ene–' + MES_NOMBRE[d.m].slice(0,3) : 'al ' + d.corte) + ')', L(acumCur),
+      '<span style="color:' + (yoy<0?'#8a6d00':'#4E8273') + ';font-weight:600;">' + pct(yoy) + ' vs 2025</span>');
+    s2 = mini('Total ventas 2025 (año completo)', L(TOT2025), 'referencia anual que usa la hoja');
+    s2 += mini('Avance vs. referencia anual', (acumCur/TOT2025*100).toFixed(1) + '%',
+      'la hoja lo expresa como ' + pct(acumCur/TOT2025*100 - 100) + (d.cerrado ? '' : ' · falta cerrar el año'));
+  } else {
+    // meses 2025 → comparados contra el total 2024
+    note = 'enero – ' + MES_NOMBRE[d.m] + ' 2025';
+    s1 = mini('Acumulado 2025 (ene–' + MES_NOMBRE[d.m].slice(0,3) + ')', L(acumCur), 'ventas del año a la fecha');
+    s1 += mini('Total ventas 2024 (año completo)', L(TOT2024), 'referencia anual que usa la hoja');
+    s2 = mini('Avance vs. referencia anual', (acumCur/TOT2024*100).toFixed(1) + '%',
+      'la hoja lo expresa como ' + pct(acumCur/TOT2024*100 - 100));
+    s2 += '';
+  }
+  document.getElementById('acum-note').textContent = note;
+  document.getElementById('acum-split').innerHTML = s1;
+  document.getElementById('acum-split2').innerHTML = s2;
+  document.getElementById('acum-split2').style.display = s2 ? 'grid' : 'none';
+}
+
+function mini(k,v,s){ return '<div class="mini"><div class="k">' + k + '</div><div class="v">' + v + '</div><div class="s">' + s + '</div></div>'; }
+function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function fn(txt, alert){ return '<div class="footnote' + (alert?' alert':'') + '">' + txt + '</div>'; }
+
+function renderFnResumen(d){
+  var out = '';
+  var dir = d.varPct >= 0 ? 'subió' : 'bajó';
+  out += fn('<b>' + d.label + '</b> facturó <b>' + L(d.ventas) + '</b>, ' + dir + ' ' + pct(d.varPct) + ' frente al mes anterior (' + signL(d.varMonto) + ').' + (d.cerrado ? '' : ' Es un corte parcial de ' + d.diasCorte + ' días; el ritmo diario (' + L(d.promDiario) + ') es el dato comparable y va ' + pct(d.promDiarioVarPct) + ' vs el mes anterior.'), !d.cerrado);
+  var bancoMayor = d.davi >= d.fico ? 'Davivienda' : 'Ficohsa';
+  var bancoPct = Math.round(Math.max(d.davi,d.fico) / (d.davi+d.fico) * 100);
+  out += fn('<b>Cobro:</b> POS ' + d.pos.toFixed(1) + '% / efectivo ' + d.efec.toFixed(1) + '%' + (d.transf>=0.5?' / transferencia ' + d.transf.toFixed(1) + '%':'') + '. Dentro del POS, <b>' + bancoMayor + ' concentra el ' + bancoPct + '%</b>.');
+  out += fn('<b>Pacientes:</b> ' + d.nuevos.toFixed(1) + '% nuevos y ' + d.recur.toFixed(1) + '% recurrentes. Ticket promedio ' + L(d.pagoXPac) + ' por paciente, con ' + d.promPacDia + ' pacientes por día. El día más fuerte de la semana es <b>' + d.diaFuerte + '</b>.');
+  if(d.ext){
+    var t = extTotal(d.ext), p = extPac(d.ext);
+    out += fn('<b>Horario Extendido:</b> ' + p + ' pacientes y ' + L(t) + ' facturados (' + d.ext.pctMes + '% del mes).' + (d.ext.cobertura!=null ? ' No cubre su costo fijo — déficit de ' + L(Math.abs(d.ext.cobertura)).slice(1).replace(/^/,'L') + '.' : ''), d.ext.cobertura!=null);
+  }
+  document.getElementById('fn-resumen').innerHTML = out;
+}
+
+function renderFnVentas(d, yearArr, yearIdx){
+  var out = '';
+  var acumCur = d.acum2026Periodo != null ? d.acum2026Periodo : acum(yearArr, yearIdx);
+  if(d.y === 2026){
+    var acumPrev = d.acum2025Periodo != null ? d.acum2025Periodo : acum(V2025, yearIdx);
+    var yoy = (acumCur/acumPrev - 1) * 100;
+    out += fn('<b>Acumulado del año:</b> ' + (d.cerrado ? 'enero–' + MES_NOMBRE[d.m] : 'al ' + d.corte) + ' 2026 lleva ' + Lk(acumCur) + ' contra ' + Lk(acumPrev) + ' en el mismo periodo de 2025 — <b>' + pct(yoy) + '</b>.' + (d.cerrado ? '' : ' Comparación día por día, no mes cerrado.'), yoy < -8);
+    out += fn('<b>El % de la hoja compara distinto:</b> mide el acumulado 2026 contra el <b>total del año completo 2025</b> (' + Lk(TOT2025) + '), por eso marca ' + pct(acumCur/TOT2025*100 - 100) + '. Sobre esa base, 2026 va en ' + (acumCur/TOT2025*100).toFixed(1) + '%' + (d.cerrado ? '' : ' con meses aún por facturar') + '.');
+  } else {
+    out += fn('<b>Acumulado del año:</b> enero–' + MES_NOMBRE[d.m] + ' 2025 lleva ' + Lk(acumCur) + '. El año 2024 cerró en ' + Lk(TOT2024) + '; la hoja expresa el avance como ' + pct(acumCur/TOT2024*100 - 100) + '.');
+  }
+  var hy = d.hist, yrs = Object.keys(hy).map(Number).sort();
+  var prevYrs = yrs.filter(function(y){return y!==d.y;});
+  var mn = Math.min.apply(null, prevYrs.map(function(y){return hy[y];}));
+  var mxv = Math.max.apply(null, prevYrs.map(function(y){return hy[y];}));
+  out += fn('<b>' + cap(MES_NOMBRE[d.m]) + '</b> en años anteriores se movió entre ' + Lk(mn) + ' y ' + Lk(mxv) + '. Este año va en ' + Lk(d.ventas) + (d.cerrado ? '.' : ' (parcial, ' + d.diasCorte + ' días).'));
+  document.getElementById('fn-ventas').innerHTML = out;
+}
+
+function renderExtendido(d){
+  var box = document.getElementById('ext-content');
+  if(!d.ext){
+    box.innerHTML = '<div class="empty-note">El programa de <b>Horario Extendido</b> no estaba activo en ' + d.label + '.' +
+      (d.jornada ? '<br>La hoja sí registra la jornada extendida como <b>' + d.jornada.extendido + '%</b> de los ingresos del mes, sin desglose diario.' : '') + '</div>';
+    return;
+  }
+  var t = extTotal(d.ext), p = extPac(d.ext), prom = t / p;
+  var html = '<div class="kpi-strip" style="margin-top:24px;">' +
+    kpi('Total facturado', L(t), d.ext.pctMes + '% de la facturación del mes') +
+    kpi('Pacientes atendidos', p, (d.cerrado ? 'en el mes' : 'en ' + d.diasCorte + ' días') + ' · ' + d.ext.promDia + ' por día') +
+    kpi('Promedio por paciente', L(prom), 'vs ' + L(d.pagoXPac) + ' en horario regular') +
+    (d.ext.cobertura != null
+      ? kpiRed('Cobertura de costo fijo', '−L' + Math.abs(d.ext.cobertura).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2}), 'no cubre su costo fijo')
+      : kpi('Jornada extendida', (d.jornada?d.jornada.extendido:'—') + '%', 'de los ingresos del mes')) +
+  '</div>';
+
+  html += '<div class="section-head"><h2>Facturación día por día</h2><span class="section-note">' +
+    (d.cerrado ? '1 – ' + d.ext.dias.length : '1 – ' + d.ext.dias.length) + ' · ' + MES_NOMBRE[d.m] + ' · horario extendido</span></div>';
+  html += '<div class="legend" style="margin-top:0;"><div class="table-scroll"><table class="data-table">' +
+    '<tr><th>Día</th><th class="num">Facturado</th><th class="num">Pacientes</th><th class="num">Prom. x paciente</th></tr>';
+  d.ext.dias.forEach(function(r){
+    html += '<tr><td class="row-name">' + r[0] + ' ' + MES_NOMBRE[d.m].slice(0,3) + '</td>' +
+      '<td class="num">' + L(r[1]) + '</td><td class="num">' + r[2] + '</td>' +
+      '<td class="num">' + (r[2] ? L(r[1]/r[2]) : '—') + '</td></tr>';
+  });
+  var sumPac = 0; d.ext.dias.forEach(function(r){ sumPac += r[2]; });
+  html += '<tr class="total"><td>Total</td><td class="num">' + L(t) + '</td><td class="num">' + p + '</td><td class="num">' + L(prom) + '</td></tr>';
+  html += '</table></div>';
+  if(d.ext.pacientesReales && d.ext.pacientesReales !== sumPac){
+    html += '<p class="section-note" style="margin-top:12px;">El total mensual de pacientes en horario extendido es <b>' + d.ext.pacientesReales + '</b> (dato de Finanzas); el desglose por día suma ' + sumPac + ', por lo que ' + (d.ext.pacientesReales - sumPac) + ' quedan sin día asignado.</p>';
+  }
+  html += '</div>';
+
+  html += '<div class="footnotes">';
+  if(d.ext.cobertura != null){
+    html += fn('<b>Horario Extendido en rojo:</b> ' + p + ' pacientes y ' + L(t) + ' facturados no cubren su costo fijo — déficit de L' + Math.abs(d.ext.cobertura).toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' en el mes.', true);
+  }
+  html += fn('<b>Ticket vs. horario regular:</b> L' + prom.toLocaleString('es-HN',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' por paciente en jornada extendida contra ' + L(d.pagoXPac) + ' en horario normal.');
+  html += fn('<b>Coincide con el Panel de Ads:</b> la campaña de Horario Extendido está pausada desde el 13 de agosto de 2026. Sin pauta activa, la demanda espontánea en jornada extendida ronda ' + d.ext.promDia + ' paciente(s) por día.');
+  html += '</div>';
+
+  box.innerHTML = html;
+}
+
+function kpi(label,val,sub){ return '<div class="kpi-card"><div class="kpi-label">' + label + '</div><div class="kpi-value">' + val + '</div><div class="kpi-sub">' + sub + '</div></div>'; }
+function kpiRed(label,val,sub){ return '<div class="kpi-card"><div class="kpi-label">' + label + '</div><div class="kpi-value" style="color:var(--red);">' + val + '</div><div class="kpi-sub down">' + sub + '</div></div>'; }
+
+/* ═══════════════ NAV ═══════════════ */
 function switchView(view){
   document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.view === view); });
   document.getElementById('view-resumen').style.display = view === 'resumen' ? 'block' : 'none';
@@ -572,6 +844,19 @@ function switchView(view){
   document.getElementById('view-extendido').style.display = view === 'extendido' ? 'block' : 'none';
 }
 
+function initSelector(){
+  var sel = document.getElementById('month-select');
+  ORDER.forEach(function(k){
+    var o = document.createElement('option');
+    o.value = k; o.textContent = DATA[k].label;
+    sel.appendChild(o);
+  });
+  sel.value = ORDER[0];
+  sel.addEventListener('change', function(){ render(sel.value); window.scrollTo({top:0,behavior:'smooth'}); });
+  render(ORDER[0]);
+}
+
+/* ═══════════════ GATE ═══════════════ */
 (function () {
   cmgAuth.onAuthStateChanged(function (user) {
     if (!user) {
@@ -583,6 +868,7 @@ function switchView(view){
       document.getElementById('adm-user-email').textContent = user.email;
       document.getElementById('cmg-gate-loader').style.display = 'none';
       document.getElementById('cmg-gate-content').style.display = 'block';
+      initSelector();
     });
   });
 

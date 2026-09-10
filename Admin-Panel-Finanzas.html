@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>CMG · Panel de Facturación</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;800&family=Inter:wght@400;500;600;700&family=Allura&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#213C7D;
+    --navy-deep:#152a5c;
+    --yellow:#FDD22C;
+    --red:#F20F10;
+    --teal:#599FB2;
+    --green:#4E8273;
+    --cream:#FFEED8;
+    --soft:#F6F7FB;
+    --ink:#0A0F1F;
+    --white:#FFFFFF;
+    --line: rgba(10,15,31,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--soft);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px 64px;}
+
+  /* ── Gate (acceso solo admins) ── */
+  #cmg-gate-loader{
+    position:fixed; inset:0; background:var(--soft); z-index:999;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:12px;
+  }
+  #cmg-gate-loader .spinner{
+    width:34px; height:34px; border-radius:50%;
+    border:3px solid var(--line); border-top-color:var(--navy);
+    animation:spin .8s linear infinite;
+  }
+  #cmg-gate-loader p{font-family:'Inter',sans-serif; font-size:13px; color:#6b7290;}
+  @keyframes spin{ to{transform:rotate(360deg);} }
+  #cmg-gate-content{display:none;}
+
+  .adm-bar{
+    max-width:1040px; margin:0 auto; padding:14px 24px 0;
+    display:flex; align-items:center; justify-content:flex-end; gap:12px;
+  }
+  .adm-bar .who{font-size:12.5px; color:#6b7290;}
+  .adm-bar .who strong{color:var(--navy);}
+  .adm-bar button{
+    border:1px solid var(--line); background:var(--white); color:#6b7290;
+    border-radius:100px; padding:6px 16px; font-size:12.5px; font-weight:600;
+    cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s ease;
+  }
+  .adm-bar button:hover{color:var(--navy); border-color:var(--navy);}
+
+  header{
+    background:linear-gradient(155deg, var(--navy) 0%, var(--navy-deep) 100%);
+    color:var(--white);
+    padding:40px 24px 88px;
+    position:relative;
+    overflow:hidden;
+  }
+  header::after{
+    content:"";
+    position:absolute; inset:0;
+    background-image:radial-gradient(circle at 82% 15%, rgba(253,210,44,0.16), transparent 45%),
+                      radial-gradient(circle at 8% 90%, rgba(89,159,178,0.22), transparent 40%);
+    pointer-events:none;
+  }
+  .header-inner{max-width:1040px;margin:0 auto;position:relative;}
+  .brand-row{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+  .pulse-badge{
+    width:40px;height:40px;border-radius:50%;
+    background:rgba(255,255,255,0.12);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .pulse-badge svg{width:22px;height:22px;stroke:var(--yellow);}
+  .brand-name{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700; font-size:14px; letter-spacing:0.14em;
+    text-transform:uppercase; color:rgba(255,255,255,0.75);
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:800;
+    font-size:clamp(28px,4vw,42px);
+    line-height:1.08;
+    margin:0 0 12px;
+    letter-spacing:-0.01em;
+  }
+  .date-pill{
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.18);
+    padding:7px 16px; border-radius:100px;
+    font-size:13px; font-weight:600; color:var(--yellow);
+    letter-spacing:0.02em;
+  }
+  .date-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--yellow);}
+  .subtitle-note{
+    margin-top:14px; font-size:12.5px; color:rgba(255,255,255,0.65); max-width:560px; line-height:1.6;
+  }
+
+  .kpi-strip{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:14px;
+    margin-top:-56px; position:relative; z-index:2;
+  }
+  .kpi-card{
+    background:var(--white);
+    border-radius:16px;
+    padding:20px 20px 18px;
+    box-shadow:0 12px 28px -14px rgba(33,60,125,0.35);
+    border:1px solid var(--line);
+  }
+  .kpi-label{
+    font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase;
+    color:#6b7290; margin-bottom:8px;
+  }
+  .kpi-value{
+    font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:24px; color:var(--navy); line-height:1;
+  }
+  .kpi-sub{font-size:12px; color:#8a90aa; margin-top:6px;}
+  .kpi-sub.down{color:var(--red);}
+  .kpi-sub.up{color:var(--green);}
+
+  .view-tabs{
+    display:inline-flex; gap:4px; background:var(--white); border:1px solid var(--line);
+    border-radius:100px; padding:4px; margin-top:-28px; position:relative; z-index:3;
+    box-shadow:0 8px 20px -12px rgba(33,60,125,0.3);
+  }
+  .tab-btn{
+    font-family:'Inter',sans-serif; font-weight:600; font-size:13px;
+    border:none; background:transparent; color:#6b7290;
+    padding:9px 20px; border-radius:100px; cursor:pointer; transition:all .15s ease;
+  }
+  .tab-btn.active{background:var(--navy); color:var(--white);}
+  .tab-btn:not(.active):hover{color:var(--navy);}
+
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    margin:52px 0 18px;
+  }
+  .section-head h2{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px; margin:0;
+    color:var(--navy);
+  }
+  .section-note{font-size:12.5px; color:#7a80a0;}
+
+  .card{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:22px 24px;
+    margin-bottom:12px;
+    opacity:0; transform:translateY(10px);
+    animation:rise .5s ease forwards;
+  }
+  @keyframes rise{ to{opacity:1; transform:translateY(0);} }
+
+  .card-title{font-weight:600; font-size:15px; margin-bottom:16px;}
+  .card-title span{font-weight:500; font-size:12.5px; color:#8a90aa; margin-left:8px;}
+
+  /* barras horizontales */
+  .bar-row{display:flex; align-items:center; gap:14px; margin-bottom:12px;}
+  .bar-row:last-child{margin-bottom:0;}
+  .bar-label{font-size:13px; width:150px; flex-shrink:0; color:#3a3f57;}
+  .bar-track{flex:1; height:12px; border-radius:100px; background:var(--soft); overflow:hidden;}
+  .bar-fill{height:100%; border-radius:100px; background:var(--navy);}
+  .bar-fill.teal{background:var(--teal);}
+  .bar-fill.green{background:var(--green);}
+  .bar-fill.yellow{background:var(--yellow);}
+  .bar-val{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
+    color:var(--navy); white-space:nowrap; min-width:96px; text-align:right;
+  }
+  .bar-val span{font-size:11px; font-weight:500; color:#8a90aa; display:block;}
+
+  .stat-chips{display:flex; gap:22px; flex-wrap:wrap; margin-top:4px;}
+  .chip{font-size:12.5px; color:#565c78;}
+  .chip b{color:var(--ink); font-weight:600;}
+
+  .split{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .mini{
+    background:var(--white); border:1px solid var(--line); border-radius:16px; padding:18px 20px;
+  }
+  .mini .k{font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#6b7290;}
+  .mini .v{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:20px; color:var(--navy); margin-top:6px;}
+  .mini .s{font-size:12px; color:#8a90aa; margin-top:4px;}
+
+  .legend{
+    background:var(--white); border:1px solid var(--line); border-radius:16px;
+    padding:22px 24px; margin-top:12px;
+  }
+  table.data-table{width:100%; border-collapse:collapse; margin-top:14px; font-size:12.5px;}
+  table.data-table th{
+    text-align:left; font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase;
+    color:#8a90aa; font-weight:600; padding:0 10px 8px 0; border-bottom:1px solid var(--line);
+  }
+  table.data-table td{padding:9px 10px 9px 0; border-bottom:1px solid var(--line); color:#3a3f57;}
+  table.data-table tr:last-child td{border-bottom:none;}
+  table.data-table td.row-name{font-weight:600; color:var(--ink);}
+  table.data-table td.num{text-align:right; font-variant-numeric:tabular-nums;}
+  table.data-table th.num{text-align:right;}
+  table.data-table tr.total td{border-top:2px solid var(--line); border-bottom:none; font-weight:700; color:var(--ink); padding-top:11px;}
+  .zone-g{color:var(--green); font-weight:600;}
+  .zone-y{color:#8a6d00; font-weight:600;}
+  .zone-r{color:var(--red); font-weight:600;}
+
+  .table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+
+  .footnotes{margin-top:28px; display:flex; flex-direction:column; gap:10px;}
+  .footnote{
+    font-size:12.5px; color:#565c78; line-height:1.6;
+    padding-left:14px; border-left:3px solid var(--teal);
+  }
+  .footnote.alert{border-color:var(--red);}
+
+  footer{
+    margin-top:56px; padding-top:24px; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+  }
+  .script-note{font-family:'Allura',cursive; font-size:26px; color:var(--teal);}
+  .gen-note{font-size:11.5px; color:#9298b0;}
+
+  @media (max-width:680px){
+    .kpi-strip{grid-template-columns:repeat(2,1fr);}
+    header{padding:32px 20px 100px;}
+    .wrap{padding:0 16px 48px;}
+    .split{grid-template-columns:1fr;}
+    .bar-label{width:112px;}
+    table.data-table{font-size:11px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .card{animation:none; opacity:1; transform:none;}
+  }
+</style>
+</head>
+<body>
+
+<div id="cmg-gate-loader">
+  <div class="spinner"></div>
+  <p>Verificando acceso…</p>
+</div>
+
+<div id="cmg-gate-content">
+
+<div class="adm-bar">
+  <span class="who">Conectado como <strong id="adm-user-email"></strong></span>
+  <button id="adm-logout-btn" type="button">Cerrar sesión</button>
+</div>
+
+<header>
+  <div class="header-inner">
+    <div class="brand-row">
+      <div class="pulse-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/>
+        </svg>
+      </div>
+      <span class="brand-name">Clínica Médica General · CMG</span>
+    </div>
+    <h1>Panel de facturación<br>mensual</h1>
+    <div class="date-pill"><span class="dot"></span>Septiembre 2026 · corte al 7 de septiembre</div>
+    <p class="subtitle-note">Réplica del dashboard que envía el Departamento de Finanzas. Los datos corresponden a un corte parcial del mes (8 días registrados): las cifras de ventas cerrarán más altas al final de septiembre. Última actualización de la hoja: 7/9/2026.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="view-tabs">
+    <button class="tab-btn active" data-view="resumen" onclick="switchView('resumen')">Resumen</button>
+    <button class="tab-btn" data-view="ventas" onclick="switchView('ventas')">Ventas &amp; histórico</button>
+    <button class="tab-btn" data-view="extendido" onclick="switchView('extendido')">Horario Extendido</button>
+  </div>
+
+  <!-- ══════════ RESUMEN ══════════ -->
+  <div id="view-resumen">
+
+  <div class="kpi-strip" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Ventas del mes</div>
+      <div class="kpi-value">L73,602.05</div>
+      <div class="kpi-sub down">−81.92% vs agosto (−L333,517.50)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Promedio diario de ventas</div>
+      <div class="kpi-value">L9,200.26</div>
+      <div class="kpi-sub down">−29.94% vs agosto · 8 días</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Pacientes por día</div>
+      <div class="kpi-value">14</div>
+      <div class="kpi-sub">pago promedio L660.73 / paciente</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Representación del año</div>
+      <div class="kpi-value">1.52%</div>
+      <div class="kpi-sub">del total 2026 · mínimo esperado 8.33%</div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Cómo se cobró</h2>
+    <span class="section-note">mezcla de medios de pago · septiembre</span>
+  </div>
+
+  <div class="card" style="animation-delay:.02s">
+    <div class="card-title">Mezcla de pago <span>sobre L73,602.05 facturados</span></div>
+    <div class="bar-row">
+      <div class="bar-label">POS (tarjeta)</div>
+      <div class="bar-track"><div class="bar-fill" style="width:74.1%"></div></div>
+      <div class="bar-val">74.1%<span>≈ L54,550</span></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Efectivo</div>
+      <div class="bar-track"><div class="bar-fill teal" style="width:25.9%"></div></div>
+      <div class="bar-val">25.9%<span>≈ L19,052</span></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Transferencia</div>
+      <div class="bar-track"><div class="bar-fill green" style="width:0"></div></div>
+      <div class="bar-val">0.0%<span>sin movimientos</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="animation-delay:.08s">
+    <div class="card-title">POS por banco <span>L54,550.55 procesados en terminal</span></div>
+    <div class="bar-row">
+      <div class="bar-label">Davivienda</div>
+      <div class="bar-track"><div class="bar-fill" style="width:83%"></div></div>
+      <div class="bar-val">L45,284.05<span>83% del POS</span></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Ficohsa</div>
+      <div class="bar-track"><div class="bar-fill teal" style="width:17%"></div></div>
+      <div class="bar-val">L9,266.50<span>17% del POS</span></div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Pacientes</h2>
+    <span class="section-note">asistencia y ticket promedio</span>
+  </div>
+
+  <div class="split">
+    <div class="mini"><div class="k">Pacientes nuevos</div><div class="v">50.89%</div><div class="s">de la asistencia del mes</div></div>
+    <div class="mini"><div class="k">Pacientes recurrentes</div><div class="v">49.11%</div><div class="s">de la asistencia del mes</div></div>
+  </div>
+
+  <div class="card" style="animation-delay:.14s; margin-top:12px;">
+    <div class="card-title">Ingresos por jornada <span>día más fuerte vs. más flojo</span></div>
+    <div class="table-scroll">
+    <table class="data-table">
+      <tr><th>Jornada</th><th class="num">Ingresos</th><th class="num">Pacientes</th></tr>
+      <tr><td class="row-name zone-g">Viernes — el más fuerte</td><td class="num">L14,624.00</td><td class="num">18</td></tr>
+      <tr><td class="row-name zone-r">Domingo — el más flojo</td><td class="num">L3,620.50</td><td class="num">8</td></tr>
+    </table>
+    </div>
+    <div class="stat-chips" style="margin-top:14px;">
+      <span class="chip">Horario regular <b>96%</b> de los ingresos</span>
+      <span class="chip">Horario extendido <b>4%</b> (L2,714.80)</span>
+    </div>
+  </div>
+
+  <div class="footnotes">
+    <div class="footnote">
+      <b>Corte parcial:</b> la hoja se actualizó el 7 de septiembre con 8 días registrados. Las L73,602.05 y el 1.52% de representación del año son de mes en curso — al cierre subirán. Lo que sí se puede leer ya es el <b>ritmo diario: L9,200.26</b>, que va <b>−29.94% por debajo</b> del promedio diario de agosto.
+    </div>
+    <div class="footnote">
+      <b>El cobro es casi todo con tarjeta:</b> POS 74.1% vs efectivo 25.9%, y dentro del POS <b>Davivienda concentra el 83%</b> (L45,284.05). Transferencias en cero.
+    </div>
+    <div class="footnote">
+      <b>Mezcla de pacientes pareja:</b> 50.89% nuevos y 49.11% recurrentes. Ticket promedio del mes L660.73 por paciente, con 14 pacientes por día.
+    </div>
+  </div>
+
+  </div>
+
+  <!-- ══════════ VENTAS & HISTÓRICO ══════════ -->
+  <div id="view-ventas" style="display:none;">
+
+  <div class="section-head" style="margin-top:32px;">
+    <h2>Últimos 3 meses</h2>
+    <span class="section-note">ventas totales · septiembre en curso</span>
+  </div>
+
+  <div class="card" style="animation-delay:.02s">
+    <div class="bar-row">
+      <div class="bar-label">Julio 2026</div>
+      <div class="bar-track"><div class="bar-fill teal" style="width:93%"></div></div>
+      <div class="bar-val">L379,336.94</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Agosto 2026</div>
+      <div class="bar-track"><div class="bar-fill teal" style="width:100%"></div></div>
+      <div class="bar-val">L407,119.55</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Septiembre 2026</div>
+      <div class="bar-track"><div class="bar-fill yellow" style="width:18%"></div></div>
+      <div class="bar-val">L73,602.05<span>parcial · 8 días</span></div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Septiembre, año con año</h2>
+    <span class="section-note">últimos 5 años · mismo mes</span>
+  </div>
+
+  <div class="card" style="animation-delay:.08s">
+    <div class="bar-row">
+      <div class="bar-label">Sep 2022</div>
+      <div class="bar-track"><div class="bar-fill" style="width:79%"></div></div>
+      <div class="bar-val">L295,812.65</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Sep 2023</div>
+      <div class="bar-track"><div class="bar-fill" style="width:55%"></div></div>
+      <div class="bar-val">L207,148.25</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Sep 2024</div>
+      <div class="bar-track"><div class="bar-fill" style="width:91%"></div></div>
+      <div class="bar-val">L341,595.89</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Sep 2025</div>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <div class="bar-val">L374,760.65</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Sep 2026</div>
+      <div class="bar-track"><div class="bar-fill yellow" style="width:20%"></div></div>
+      <div class="bar-val">L73,602.05<span>parcial · 8 días</span></div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Acumulado del año</h2>
+    <span class="section-note">enero – septiembre</span>
+  </div>
+
+  <div class="split">
+    <div class="mini"><div class="k">Acumulado 2025</div><div class="v">L4,855,873.11</div><div class="s">mismo periodo del año pasado</div></div>
+    <div class="mini"><div class="k">Acumulado 2026</div><div class="v">L3,178,627.59</div><div class="s" style="color:var(--red);font-weight:600;">−34.54% vs 2025</div></div>
+  </div>
+
+  <div class="footnotes">
+    <div class="footnote alert">
+      <b>El año va −34.54% frente a 2025:</b> L3.18 M contra L4.86 M en el mismo tramo. La brecha ya venía de meses anteriores; septiembre en curso todavía no mueve la aguja.
+    </div>
+    <div class="footnote">
+      <b>Septiembre suele cerrar entre L295 K y L407 K</b> (rango de los últimos años y del trimestre). Con 8 días facturados a ritmo de L9,200/día, la proyección lineal simple ronda L276 K — por debajo de cualquier septiembre reciente, aunque el ritmo diario tiende a subir en la segunda quincena.
+    </div>
+  </div>
+
+  </div>
+
+  <!-- ══════════ HORARIO EXTENDIDO ══════════ -->
+  <div id="view-extendido" style="display:none;">
+
+  <div class="kpi-strip" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Total facturado</div>
+      <div class="kpi-value">L2,714.80</div>
+      <div class="kpi-sub">4% de la facturación del mes</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Pacientes atendidos</div>
+      <div class="kpi-value">6</div>
+      <div class="kpi-sub">5% del total mensual · 1 por día</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Promedio por paciente</div>
+      <div class="kpi-value">L452.47</div>
+      <div class="kpi-sub">vs L660.73 en horario regular</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Cobertura de costo fijo</div>
+      <div class="kpi-value" style="color:var(--red);">−L16,798.72</div>
+      <div class="kpi-sub down">no cubre su costo fijo</div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Facturación día por día</h2>
+    <span class="section-note">1 – 8 de septiembre · horario extendido</span>
+  </div>
+
+  <div class="legend" style="margin-top:0;">
+    <div class="table-scroll">
+    <table class="data-table">
+      <tr><th>Día</th><th class="num">Facturado</th><th class="num">Pacientes</th><th class="num">Prom. x paciente</th></tr>
+      <tr><td class="row-name">1 sep</td><td class="num">L600.00</td><td class="num">1</td><td class="num">L600.00</td></tr>
+      <tr><td class="row-name">2 sep</td><td class="num">L72.80</td><td class="num">1</td><td class="num">L72.80</td></tr>
+      <tr><td class="row-name">3 sep</td><td class="num">L900.00</td><td class="num">1</td><td class="num">L900.00</td></tr>
+      <tr><td class="row-name">4 sep</td><td class="num">L0.00</td><td class="num">0</td><td class="num">—</td></tr>
+      <tr><td class="row-name">5 sep</td><td class="num">L412.00</td><td class="num">2</td><td class="num">L206.00</td></tr>
+      <tr><td class="row-name">6 sep</td><td class="num">L0.00</td><td class="num">0</td><td class="num">—</td></tr>
+      <tr><td class="row-name">7 sep</td><td class="num">L730.00</td><td class="num">1</td><td class="num">L730.00</td></tr>
+      <tr><td class="row-name">8 sep</td><td class="num">L0.00</td><td class="num">0</td><td class="num">—</td></tr>
+      <tr class="total"><td>Total 1–8</td><td class="num">L2,714.80</td><td class="num">6</td><td class="num">L452.47</td></tr>
+    </table>
+    </div>
+    <p class="section-note" style="margin-top:12px;">Días 9 a 30 sin registro al momento del corte (7 sep). El promedio por paciente del total pondera los 6 pacientes efectivos.</p>
+  </div>
+
+  <div class="footnotes">
+    <div class="footnote alert">
+      <b>Horario Extendido sigue en rojo:</b> 6 pacientes en 8 días y L2,714.80 facturados no alcanzan a cubrir su costo fijo — déficit de <b>L16,798.72</b> en el mes. Solo 4 de los 8 días tuvieron al menos un paciente.
+    </div>
+    <div class="footnote">
+      <b>Coincide con el Panel de Ads:</b> la campaña de Horario Extendido está pausada desde el 13 de agosto y no hay pauta activa empujando esta jornada. Sin inversión publicitaria, la demanda espontánea en horario extendido es de ~1 paciente por día.
+    </div>
+    <div class="footnote">
+      <b>Ticket más bajo que el regular:</b> L452.47 por paciente vs L660.73 en horario normal. El día 2 (L72.80) fue una sola consulta de bajo monto que arrastra el promedio.
+    </div>
+  </div>
+
+  </div>
+
+  <div class="footnotes" style="margin-top:32px;">
+    <div class="footnote">
+      <b>Fuente:</b> hoja mensual del Departamento de Finanzas de CMG (Dashboard 09'2026). Algunas gráficas de la hoja original no se reproducen aquí — este panel recoge los indicadores numéricos. Para el rendimiento publicitario ver el <b>Panel de Rendimiento Publicitario</b>.
+    </div>
+  </div>
+
+  <footer>
+    <span class="script-note">Cuidamos de tu salud</span>
+    <span class="gen-note">Datos al 7 de septiembre, 2026 · Departamento de Finanzas · Clínica Médica General CMG</span>
+  </footer>
+
+</div>
+
+</div><!-- /#cmg-gate-content -->
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
+
+<script>
+function switchView(view){
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.view === view); });
+  document.getElementById('view-resumen').style.display = view === 'resumen' ? 'block' : 'none';
+  document.getElementById('view-ventas').style.display = view === 'ventas' ? 'block' : 'none';
+  document.getElementById('view-extendido').style.display = view === 'extendido' ? 'block' : 'none';
+}
+
+(function () {
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) {
+      window.location.href = 'Auth.html?returnTo=Admin-Panel-Finanzas.html';
+      return;
+    }
+    cmgStaff.checkAdmin(user, function (ok) {
+      if (!ok) { window.location.href = 'Inicio.html'; return; }
+      document.getElementById('adm-user-email').textContent = user.email;
+      document.getElementById('cmg-gate-loader').style.display = 'none';
+      document.getElementById('cmg-gate-content').style.display = 'block';
+    });
+  });
+
+  document.getElementById('adm-logout-btn').addEventListener('click', function () {
+    cmgAuth.signOut().then(function () { window.location.href = 'Inicio.html'; });
+  });
+})();
+</script>
+
+</body>
+</html>

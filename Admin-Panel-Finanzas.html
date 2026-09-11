@@ -445,7 +445,7 @@
 
 // Ventas mensuales totales (año cerrado 2025, y 2026 hasta el corte)
 var V2025 = [426322.60,388369.57,495618.75,360856.35,355547.63,382252.10,488989.85,391377.65,374760.65,389722.55,402741.10,399314.33];
-var V2026 = [440023.30,335955.55,398372.45,331083.37,371811.55,441232.90,379336.95,407010.80,73602.05];
+var V2026 = [440023.30,335955.55,398372.45,331083.37,371811.55,441232.90,379336.95,407010.80,84688.05];
 var TOT2024 = 3617415.07;
 var TOT2025 = 4855873.11;
 var MES_NOMBRE = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -571,17 +571,17 @@ var DATA = {
       [21,600,1],[22,740,1],[23,0,0],[24,5759,6],[25,0,0],[26,0,0],[27,1094,2],[28,0,0],[29,650,1],[30,0,0],[31,1025,2] ] }
   },
   '2026-09': {
-    label:'Septiembre 2026', y:2026, m:8, cerrado:false, corte:'8 de septiembre', actualizado:'7/9/2026', diasCorte:8,
-    ventas:73602.05, varPct:-81.92, varMonto:-333517.50,
-    repAnual:1.52, promDiario:9200.26, promDiarioVarPct:-29.94,
-    pos:74.1, efec:25.9, transf:0.0, davi:45284.05, fico:9266.50,
-    hist:{2022:295812.65,2023:207148.25,2024:341595.89,2025:374760.65,2026:73602.05},
-    nuevos:50.89, recur:49.11, promPacDia:14, pagoXPac:660.73, diaFuerte:'Viernes',
+    label:'Septiembre 2026', y:2026, m:8, cerrado:false, corte:'9 de septiembre', actualizado:'9/9/2026', diasCorte:9,
+    ventas:84688.05, varPct:-79.20, varMonto:-322431.50,
+    repAnual:1.74, promDiario:9409.78, promDiarioVarPct:-28.35,
+    pos:70.5, efec:29.5, transf:0.0, davi:45284.05, fico:14382.00,
+    hist:{2022:295812.65,2023:207148.25,2024:341595.89,2025:374760.65,2026:84688.05},
+    nuevos:54.20, recur:45.80, promPacDia:15, pagoXPac:652.14, diaFuerte:'Viernes',
     jornada:{regular:96, extendido:4},
-    acum2025Periodo:3397908.77, // acumulado 2025 al 8 sep (dato de Finanzas)
-    acum2026Periodo:3178627.59, // acumulado 2026 al 8 sep (dato de Finanzas)
-    ext:{ pctMes:5, promDia:1, cobertura:-16798.72, parcial:true, dias:[
-      [1,600,1],[2,72.80,1],[3,900,1],[4,0,0],[5,412,2],[6,0,0],[7,730,1],[8,0,0] ], pacientesReales:8 }
+    acum2025Periodo:3401762.70, // acumulado 2025 al 9 sep — estimado: cierres Jan-Ago 2025 (exactos) + sep 2025 prorrateado a 9/30 días, la hoja no expone el dato diario de 2025
+    acum2026Periodo:3189713.60, // acumulado 2026 al 9 sep (dato de Finanzas, "Ventas Actuales")
+    ext:{ pctMes:5, promDia:1, cobertura:-16198.72, parcial:true, dias:[
+      [1,600,1],[2,72.80,1],[3,900,1],[4,0,0],[5,412,2],[6,0,0],[7,730,1],[8,0,0],[9,600,1] ] }
   }
 };
 

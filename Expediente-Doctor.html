@@ -5654,25 +5654,33 @@ summary.ed-meds-cat { list-style: revert; }
       }).then(function(labDocRef){
         document.getElementById('ed-quick-modal').remove();
         showAlert('✓ Orden de laboratorio creada (' + seleccionados.length + ' examen' + (seleccionados.length>1?'es':'') + '). Aparece en pestaña Laboratorio como pendiente.', 'success');
-        /* Orden externa (sin consulta padre): crear liquidación pendiente en Caja */
-        if (!consultaPadreId) {
-          var now = new Date();
-          var pad = function(n){ return String(n).padStart(2,'0'); };
-          var fechaLocal = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate()) +
-            'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
-          cmgDb.collection('consultas').add({
-            status               : 'pendiente_caja',
-            tipoRegistro         : 'lab-standalone',
-            codigoPaciente       : pacienteActual.codigoPaciente,
-            pacienteNombre       : dg.nombreCompleto || '',
-            serviciosBrindados   : seleccionados,
-            servicioNombre       : nombreOrden,
-            doctorNombre         : cmgAuth.currentUser.displayName || cmgAuth.currentUser.email,
-            fechaLocal           : fechaLocal,
-            examenesLaboratorioId: labDocRef.id,
-            createdAt            : firebase.firestore.FieldValue.serverTimestamp()
-          }).catch(function(e){ console.warn('[CMG] Error creando entrada de caja para orden de lab:', e); });
-        }
+        /* Toda orden de laboratorio genera su propia entrada en Caja, igual que un
+           servicio: si viene de una consulta activa (consultaPadreId) queda como
+           "servicio-completo" vinculado a ella — no aparece como tarjeta propia en
+           Caja, se liquida junto con la consulta padre (igual que un servicio
+           vinculado) —; si es una orden externa, queda 'pendiente_caja' por su
+           cuenta, como antes. En ambos casos lleva 'fecha' para contar como
+           atención en el calendario de la pestaña Historial. */
+        var now = new Date();
+        var pad = function(n){ return String(n).padStart(2,'0'); };
+        var fechaLocal = now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate()) +
+          'T' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+        var medicoNombre = cmgAuth.currentUser.displayName || cmgAuth.currentUser.email;
+        cmgDb.collection('consultas').add({
+          status               : consultaPadreId ? 'servicio-completo' : 'pendiente_caja',
+          tipoRegistro         : consultaPadreId ? 'lab-vinculado' : 'lab-standalone',
+          consultaPadreId      : consultaPadreId || null,
+          codigoPaciente       : pacienteActual.codigoPaciente,
+          pacienteNombre       : dg.nombreCompleto || '',
+          serviciosBrindados   : seleccionados,
+          servicioNombre       : nombreOrden,
+          doctorNombre         : medicoNombre,
+          servicioRealizadoPor : medicoNombre,
+          fecha                : firebase.firestore.FieldValue.serverTimestamp(),
+          fechaLocal           : fechaLocal,
+          examenesLaboratorioId: labDocRef.id,
+          createdAt            : firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(function(e){ console.warn('[CMG] Error creando entrada de caja para orden de lab:', e); });
       }).catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
     };
   }
@@ -6383,9 +6391,11 @@ summary.ed-meds-cat { list-style: revert; }
       results[0].forEach(function (doc) {
         var data = doc.data();
         /* Omitir Pre clínicas pendientes y los "stub" de facturación que solo duplican
-           una prueba rápida o una orden de laboratorio (ya se listan aparte, abajo). */
+           una prueba rápida o una orden de laboratorio (ya se listan aparte, abajo) —
+           tanto si la orden fue externa (lab-standalone) como si salió de una
+           consulta activa (lab-vinculado). */
         if (data.status === 'preclinica') return;
-        if (data.tipoRegistro === 'prueba-standalone' || data.tipoRegistro === 'lab-standalone') return;
+        if (data.tipoRegistro === 'prueba-standalone' || data.tipoRegistro === 'lab-standalone' || data.tipoRegistro === 'lab-vinculado') return;
         /* Un servicio standalone completado pasa a status 'pendiente_caja' (igual que una
            consulta), así que hay que distinguirlo por tipoRegistro, no solo por status. */
         var esServicio = data.status === 'servicio' || data.status === 'servicio-completo' ||
@@ -6419,11 +6429,14 @@ summary.ed-meds-cat { list-style: revert; }
   function fmtDateOnly(key) {
     return new Date(key + 'T00:00:00').toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: 'numeric' });
   }
-  /* Excluye del calendario lo mismo que ya excluye el historial de un paciente:
-     pre clínicas pendientes y los "stub" de facturación duplicados. */
+  /* A diferencia del historial de un paciente, aquí SÍ cuentan las órdenes de
+     laboratorio (lab-standalone / lab-vinculado) como atención — es la única
+     vista donde deben aparecer como "paciente atendido" ese día. Solo se
+     excluyen las preclínicas pendientes y los stubs de prueba rápida (fuera
+     de alcance de esta vista por ahora). */
   function esRegistroAtencionValido(data) {
     if (data.status === 'preclinica') return false;
-    if (data.tipoRegistro === 'prueba-standalone' || data.tipoRegistro === 'lab-standalone') return false;
+    if (data.tipoRegistro === 'prueba-standalone') return false;
     return true;
   }
 
@@ -6563,9 +6576,10 @@ summary.ed-meds-cat { list-style: revert; }
     html += items.map(function (it) {
       var ms = getFechaMs(it);
       var hora = ms ? new Date(ms).toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' }) : '—';
+      var esLab = it.tipoRegistro === 'lab-standalone' || it.tipoRegistro === 'lab-vinculado';
       var esServicio = it.status === 'servicio' || it.status === 'servicio-completo' ||
         it.tipoRegistro === 'servicio-standalone' || it.tipoRegistro === 'servicio-vinculado';
-      var tipoLabel = esServicio ? '🛎️ Procedimiento' : '🩺 Consulta';
+      var tipoLabel = esLab ? '🔬 Laboratorio' : (esServicio ? '🛎️ Procedimiento' : '🩺 Consulta');
       return '<button type="button" class="ed-cal-pac-item" data-cal-pac="' + esc(it.codigoPaciente || '') + '">' +
         '<span class="ed-cal-pac-hora">' + hora + '</span>' +
         '<span class="ed-cal-pac-nombre">' + esc(it.pacienteNombre || '—') + '</span>' +
@@ -7480,7 +7494,15 @@ summary.ed-meds-cat { list-style: revert; }
             var id = this.getAttribute('data-eliminar-orden');
             if (!confirm('¿Eliminar esta orden pendiente? Esta acción no se puede deshacer (útil si se repitió por accidente).')) return;
             cmgDb.collection('examenesLaboratorio').doc(id).delete()
-              .then(function(){ showAlert('✓ Orden eliminada', 'success'); cargarLaboratorioPendientesGlobal(); })
+              .then(function(){
+                showAlert('✓ Orden eliminada', 'success');
+                cargarLaboratorioPendientesGlobal();
+                /* Borrar también su entrada en Caja, si aún no se había liquidado —
+                   para no dejar un cobro pendiente de un examen que ya no existe. */
+                cmgDb.collection('consultas').where('examenesLaboratorioId', '==', id).get().then(function(stubs){
+                  stubs.forEach(function(s){ if (!s.data().pagoLiquidadoEnCaja) s.ref.delete(); });
+                });
+              })
               .catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
           });
         });

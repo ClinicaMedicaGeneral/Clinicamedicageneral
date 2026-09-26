@@ -2072,6 +2072,60 @@ summary.ed-meds-cat { list-style: revert; }
     };
   }
 
+  /* DRM: modal para emitir una referencia médica (Especialista/Emergencia) desde
+     Caja o Historial. A diferencia de la constancia de incapacidad, emitir la
+     referencia no depende del status del registro ni lo cambia — solo crea el
+     documento de referencia y lo vincula a la consulta. onDone() la llama el
+     caller para refrescar su propia lista (Caja o Historial). */
+  function abrirEmitirReferenciaModal(consultaId, pacienteInfo, onDone) {
+    pacienteInfo = pacienteInfo || {};
+    var dg = pacienteInfo.datosGenerales || {};
+    var nombrePac = dg.nombreCompleto || pacienteInfo.pacienteNombre || '—';
+    var html =
+      '<div style="background:#000a;position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" id="ref-modal">' +
+        '<div style="background:#fff;border-radius:12px;max-width:600px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
+          '<h3 style="margin:0 0 6px;color:#213C7D">📄 Emitir referencia médica</h3>' +
+          '<p style="margin:0 0 14px;font-size:13px;color:#6B7280">Paciente: <b>' + esc(nombrePac) + '</b> · Expediente <code style="background:#F3F4F6;padding:1px 6px;border-radius:4px">' + esc(pacienteInfo.codigoPaciente || '—') + '</code></p>' +
+          buildReferenciaCamposHtml('refmodal') +
+          '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
+            '<button class="ed-btn ed-btn-ghost" id="refmodal-cancelar">Cancelar</button>' +
+            '<button class="ed-btn ed-btn-primary" id="refmodal-guardar">📄 Emitir y abrir referencia</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+    var cerrar = function(){ var m = $id('ref-modal'); if (m) m.remove(); };
+    $id('refmodal-cancelar').onclick = cerrar;
+    $id('ref-modal').addEventListener('click', function(e){ if (e.target === this) cerrar(); });
+    $id('refmodal-guardar').onclick = function(){
+      if (!esMedicoTratanteClient()) { showAlert('Solo el médico puede emitir referencias.', 'error'); return; }
+      var faltantes = [];
+      var refDatos = collectReferenciaData('refmodal', faltantes, true);
+      if (faltantes.length) { showAlert('Faltan campos obligatorios: ' + faltantes.join(', '), 'error'); return; }
+      var medico = cmgAuth.currentUser.displayName || cmgAuth.currentUser.email;
+      var referenciaPrep = prepararReferencia(
+        consultaId,
+        { codigoPaciente: pacienteInfo.codigoPaciente, datosGenerales: dg },
+        refDatos.datos,
+        medico
+      );
+      showOverlay('Emitiendo referencia…');
+      var batch = cmgDb.batch();
+      batch.set(referenciaPrep.ref, referenciaPrep.data);
+      batch.update(cmgDb.collection('consultas').doc(consultaId), {
+        tieneReferencia: true,
+        referenciaId: referenciaPrep.ref.id
+      });
+      batch.commit().then(function(){
+        hideOverlay();
+        cerrar();
+        showAlert('✓ Referencia emitida. Abriendo en otra pestaña…', 'success');
+        window.open('Referencia-Medica.html?id=' + encodeURIComponent(referenciaPrep.ref.id), '_blank', 'noopener');
+        if (onDone) onDone();
+      }).catch(function(err){ hideOverlay(); showAlert('Error: ' + err.message, 'error'); });
+    };
+  }
+
   function renderCajaTab() {
     var box = $id('caja-lista');
     if (!box) return;
@@ -2150,6 +2204,9 @@ summary.ed-meds-cat { list-style: revert; }
           var badgeConstancia = (d.tieneConstancia || d.constanciaId)
             ? '<span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">📄 Constancia emitida</span>'
             : '';
+          var badgeReferencia = (d.tieneReferencia || d.referenciaId)
+            ? '<span style="background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">📄 Referencia emitida</span>'
+            : '';
           var badgeConvertido = d.convertidoConsulta
             ? '<span style="background:#FEE2E2;color:#991B1B;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">🔄 No se realizó, se convirtió en consulta</span>'
             : (d.convertidoServicio
@@ -2168,7 +2225,7 @@ summary.ed-meds-cat { list-style: revert; }
             '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:14px">' +
               '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">' +
                 '<div>' +
-                  '<b style="color:#213C7D;font-size:16px">' + esc(nombrePaciente) + '</b>' + tipoLabel + '<span id="constancia-badge-' + esc(doc.id) + '">' + badgeConstancia + '</span>' + badgeConvertido + '<br>' +
+                  '<b style="color:#213C7D;font-size:16px">' + esc(nombrePaciente) + '</b>' + tipoLabel + '<span id="constancia-badge-' + esc(doc.id) + '">' + badgeConstancia + '</span><span id="referencia-badge-' + esc(doc.id) + '">' + badgeReferencia + '</span>' + badgeConvertido + '<br>' +
                   '<small style="color:#6B7280">Expediente: <code style="background:#F3F4F6;padding:1px 6px;border-radius:4px">' + esc(d.codigoPaciente || '—') + '</code> · Médico: ' + esc(d.doctorNombre || d.servicioRealizadoPor || '—') + ' · ' + esc(d.fechaLocal ? d.fechaLocal.slice(0,16).replace('T',' ') : '') + '</small>' +
                 '</div>' +
                 '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
@@ -2176,6 +2233,9 @@ summary.ed-meds-cat { list-style: revert; }
                   (d.constanciaId
                     ? '<a class="ed-btn ed-btn-ghost" href="Constancia-Medica.html?id=' + esc(d.constanciaId) + '" target="_blank" rel="noopener">📄 Ver constancia</a>'
                     : '<button class="ed-btn ed-btn-ghost" data-caja-constancia="' + doc.id + '"' + (esMedicoTratanteClient() ? '' : ' disabled title="Solo el médico puede emitir constancias"') + '>📄 Emitir constancia</button>') +
+                  (d.referenciaId
+                    ? '<a class="ed-btn ed-btn-ghost" href="Referencia-Medica.html?id=' + esc(d.referenciaId) + '" target="_blank" rel="noopener">📄 Ver referencia</a>'
+                    : '<button class="ed-btn ed-btn-ghost" data-caja-referencia="' + doc.id + '"' + (esMedicoTratanteClient() ? '' : ' disabled title="Solo el médico puede emitir referencias"') + '>📄 Emitir referencia</button>') +
                   '<button class="ed-btn ed-btn-primary" data-caja-id="' + doc.id + '">✅ Pago Liquidado en Caja</button>' +
                 '</div>' +
               '</div>' +
@@ -2267,6 +2327,17 @@ summary.ed-meds-cat { list-style: revert; }
             abrirEmitirConstanciaCajaModal(id, cached.d, cached.dg);
           });
         });
+        /* DRM: emitir referencia médica a un registro que sigue pendiente de caja.
+           Solo médico tratante (el botón llega deshabilitado para Caja/Enfermería). */
+        box.querySelectorAll('[data-caja-referencia]').forEach(function(b){
+          b.addEventListener('click', function(){
+            if (!esMedicoTratanteClient()) { showAlert('Solo el médico puede emitir referencias.', 'error'); return; }
+            var id = this.getAttribute('data-caja-referencia');
+            var cached = cajaDocCache[id];
+            if (!cached) { showAlert('No se pudo cargar el registro. Refresca la pestaña.', 'error'); return; }
+            abrirEmitirReferenciaModal(id, { codigoPaciente: cached.d.codigoPaciente, pacienteNombre: cached.d.pacienteNombre, datosGenerales: cached.dg }, renderCajaTab);
+          });
+        });
         /* Prellenar y cablear el toggle de Área de Estabilización de cada panel de ajuste */
         snap.forEach(function(doc){
           var d = doc.data();
@@ -2294,13 +2365,21 @@ summary.ed-meds-cat { list-style: revert; }
                cualquiera de los dos flujos (consulta directa o servicio vinculado)
                y en Caja debe verse igual en ambos casos. */
             var hijoConConstancia = false;
+            var hijoConReferencia = false;
             hijos.forEach(function(h){
               if (h.data().tieneConstancia || h.data().constanciaId) hijoConConstancia = true;
+              if (h.data().tieneReferencia || h.data().referenciaId) hijoConReferencia = true;
             });
             if (hijoConConstancia) {
               var badgeSlot = $id('constancia-badge-' + doc.id);
               if (badgeSlot && !badgeSlot.innerHTML) {
                 badgeSlot.innerHTML = '<span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">📄 Constancia emitida</span>';
+              }
+            }
+            if (hijoConReferencia) {
+              var badgeSlotRef = $id('referencia-badge-' + doc.id);
+              if (badgeSlotRef && !badgeSlotRef.innerHTML) {
+                badgeSlotRef.innerHTML = '<span style="background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;margin-left:8px">📄 Referencia emitida</span>';
               }
             }
             var lines = ['<div style="background:#F9FAFB;border:1px dashed #D1D5DB;border-radius:6px;padding:8px 10px;font-size:12px"><b style="color:#213C7D">🔗 Servicios vinculados (mismo pago):</b><ul style="margin:4px 0 0 18px;padding:0">'];
@@ -4725,6 +4804,134 @@ summary.ed-meds-cat { list-style: revert; }
     return { ref: ref, data: data };
   }
 
+  /* ─── Referencia médica (Especialista/Emergencia), mismo patrón que la
+     constancia de incapacidad de arriba, pero como tercer tipo de documento
+     independiente (colección `referencias`). Disponible desde el toggle
+     embebido de Consulta y desde el modal independiente de Caja/Historial. ─── */
+  function buildReferenciaCamposHtml(prefix) {
+    return '<div class="ed-grid ed-grid-2">' +
+      '<div class="ed-fgroup"><label class="ed-label">Tipo *</label>' +
+        '<select class="ed-input" id="' + prefix + '-ref-tipo">' +
+          '<option value="especialista">Especialista</option>' +
+          '<option value="emergencia">Emergencia</option>' +
+        '</select></div>' +
+      '<div class="ed-fgroup"><label class="ed-label">Destino (hospital/especialidad) *</label>' +
+        '<input type="text" class="ed-input" id="' + prefix + '-ref-destino" placeholder="Ej. Hospital María, Cardiología"></div>' +
+      '<div class="ed-fgroup full"><label class="ed-label">Antecedentes patológicos personales</label>' +
+        '<textarea class="ed-textarea" id="' + prefix + '-ref-antecedentes" rows="2"></textarea></div>' +
+      '<div class="ed-fgroup full"><label class="ed-label">Historia de la enfermedad actual (motivo) *</label>' +
+        '<textarea class="ed-textarea" id="' + prefix + '-ref-motivo" rows="2" placeholder="Motivo de la referencia"></textarea></div>' +
+      '<div class="ed-fgroup full"><label class="ed-label">Examen físico / hallazgos</label>' +
+        '<textarea class="ed-textarea" id="' + prefix + '-ref-examen" rows="2"></textarea></div>' +
+      '<div class="ed-fgroup full"><label class="ed-label">Signos vitales</label>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+          '<input type="text" class="ed-input" id="' + prefix + '-ref-pa" placeholder="PA" style="width:90px">' +
+          '<input type="text" class="ed-input" id="' + prefix + '-ref-fc" placeholder="FC" style="width:90px">' +
+          '<input type="text" class="ed-input" id="' + prefix + '-ref-fr" placeholder="FR" style="width:90px">' +
+          '<input type="text" class="ed-input" id="' + prefix + '-ref-temp" placeholder="Temp" style="width:90px">' +
+        '</div></div>' +
+      '<div class="ed-fgroup full"><label class="ed-label">Impresión diagnóstica / sospecha *</label>' +
+        '<textarea class="ed-textarea" id="' + prefix + '-ref-diagnostico" rows="2"></textarea></div>' +
+      '<div class="ed-fgroup full"><label class="ed-label">Tratamiento ya iniciado</label>' +
+        '<textarea class="ed-textarea" id="' + prefix + '-ref-tratamiento" rows="2"></textarea></div>' +
+      '<div class="ed-fgroup full"><label class="ed-label">Recomendación</label>' +
+        '<textarea class="ed-textarea" id="' + prefix + '-ref-recomendacion" rows="2"></textarea></div>' +
+    '</div>';
+  }
+  function buildReferenciaSectionHtml(prefix) {
+    return '<div class="ed-section" id="' + prefix + '-referencia-section">' +
+      '<div class="ed-section-title">📄 ¿Necesita referencia?</div>' +
+      '<div style="display:flex;gap:12px;margin-bottom:8px">' +
+        '<label class="ed-meds-opt"><input type="radio" name="' + prefix + '-referencia" value="no" checked> No</label>' +
+        '<label class="ed-meds-opt"><input type="radio" name="' + prefix + '-referencia" value="si"> Sí</label>' +
+      '</div>' +
+      '<div id="' + prefix + '-referencia-form" style="display:none;background:#EFF6FF;border:1px solid #93C5FD;border-radius:8px;padding:12px;margin-top:8px">' +
+        buildReferenciaCamposHtml(prefix) +
+      '</div>' +
+    '</div>';
+  }
+  function wireReferenciaToggle(prefix) {
+    document.querySelectorAll('input[name="' + prefix + '-referencia"]').forEach(function (r) {
+      r.addEventListener('change', function () {
+        var form = $id(prefix + '-referencia-form');
+        if (form) form.style.display = (this.value === 'si') ? 'block' : 'none';
+      });
+    });
+  }
+  /* Lee la respuesta de referencia y agrega los campos faltantes al arreglo dado.
+     necesitaSiempre=true para el modal independiente de Caja/Historial, que no
+     tiene el radio No/Sí porque ahí SIEMPRE se está emitiendo una referencia. */
+  function collectReferenciaData(prefix, faltantes, necesitaSiempre) {
+    var necesita = necesitaSiempre;
+    if (!necesita) {
+      var radio = document.querySelector('input[name="' + prefix + '-referencia"]:checked');
+      necesita = !!(radio && radio.value === 'si');
+    }
+    var datos = null;
+    if (necesita) {
+      var destino = $val(prefix + '-ref-destino');
+      var motivo = $val(prefix + '-ref-motivo');
+      var diagnostico = $val(prefix + '-ref-diagnostico');
+      if (!destino)     faltantes.push('Destino de la referencia');
+      if (!motivo)      faltantes.push('Historia de la enfermedad actual');
+      if (!diagnostico) faltantes.push('Impresión diagnóstica');
+      datos = {
+        tipo: $val(prefix + '-ref-tipo') || 'especialista',
+        destino: destino,
+        antecedentes: $val(prefix + '-ref-antecedentes'),
+        motivo: motivo,
+        examenFisico: $val(prefix + '-ref-examen'),
+        signosVitales: {
+          pa: $val(prefix + '-ref-pa'),
+          fc: $val(prefix + '-ref-fc'),
+          fr: $val(prefix + '-ref-fr'),
+          temp: $val(prefix + '-ref-temp')
+        },
+        diagnostico: diagnostico,
+        tratamiento: $val(prefix + '-ref-tratamiento'),
+        recomendacion: $val(prefix + '-ref-recomendacion')
+      };
+    }
+    return { necesita: necesita, datos: datos };
+  }
+  /* Arma un ref nuevo (id conocido de antemano) + los datos de la referencia, sin
+     escribir todavía — mismo patrón que prepararConstancia(), para poder incluir
+     referenciaId en el mismo batch atómico que guarda la consulta/servicio. */
+  function prepararReferencia(consultaId, paciente, datosReferencia, emitidaPor) {
+    var dg2 = (paciente && paciente.datosGenerales) || {};
+    var hoyLocal = fechaHoyLocal();
+    var numero = 'REF-' + hoyLocal.replace(/-/g, '') + '-' + Math.floor(Math.random() * 9000 + 1000);
+    var ref = cmgDb.collection('referencias').doc();
+    var data = {
+      numero: numero,
+      consultaId: consultaId,
+      codigoPaciente: paciente.codigoPaciente,
+      pacienteNombre: dg2.nombreCompleto || '',
+      pacienteTipoId: dg2.tipoIdentidad || '',
+      pacienteDNI: dg2.numeroIdentidad || '',
+      pacienteFechaNacimiento: dg2.fechaNacimiento || '',
+      pacienteEdad: (function (f) {
+        if (!f) return '';
+        try { var d = new Date(f), h = new Date(), e = h.getFullYear() - d.getFullYear(), m = h.getMonth() - d.getMonth(); if (m < 0 || (m === 0 && h.getDate() < d.getDate())) e--; return e + ' años'; } catch (_) { return ''; }
+      })(dg2.fechaNacimiento),
+      fechaConsulta: hoyLocal,
+      tipo: datosReferencia.tipo,
+      destino: datosReferencia.destino,
+      antecedentes: datosReferencia.antecedentes,
+      motivo: datosReferencia.motivo,
+      examenFisico: datosReferencia.examenFisico,
+      signosVitales: datosReferencia.signosVitales,
+      diagnostico: datosReferencia.diagnostico,
+      tratamiento: datosReferencia.tratamiento,
+      recomendacion: datosReferencia.recomendacion,
+      emitidaPor: emitidaPor,
+      emitidaPorEmail: cmgAuth.currentUser.email,
+      emitidaEn: hoyLocal + 'T00:00:00',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    return { ref: ref, data: data };
+  }
+
   /* ─── Formulario para completar un servicio pendiente ─── */
   function renderCompletarServicioForm() {
     /* Cancela cualquier autoguardado pendiente de un formulario anterior, para
@@ -5297,6 +5504,8 @@ summary.ed-meds-cat { list-style: revert; }
       '</div>' +
       /* DRM Fun-11: pregunta de incapacidad */
       buildIncapSectionHtml('cons') +
+      /* Referencia médica (Especialista/Emergencia): mismo patrón de toggle que incapacidad */
+      buildReferenciaSectionHtml('cons') +
       /* Área de Estabilización: sección habilitada por checkbox con elementos de uso en horas */
       buildEmergenciaSectionHtml('cons') +
       /* DRM v3 #3: acciones rápidas desde la consulta */
@@ -5360,6 +5569,9 @@ summary.ed-meds-cat { list-style: revert; }
 
     /* DRM Fun-11: toggle del formulario de incapacidad */
     wireIncapToggle('cons');
+
+    /* Toggle del formulario de referencia médica */
+    wireReferenciaToggle('cons');
 
     /* Toggle del formulario de Área de Estabilización */
     wireEmergenciaToggle('cons');
@@ -6031,6 +6243,11 @@ summary.ed-meds-cat { list-style: revert; }
     var necesitaIncap = incap.necesita;
     var datosIncap = incap.datos;
 
+    /* Referencia médica (Especialista/Emergencia) → documento HTML aparte, mismo patrón que la constancia */
+    var refer = collectReferenciaData('cons', faltantes);
+    var necesitaReferencia = refer.necesita;
+    var datosReferencia = refer.datos;
+
     if (faltantes.length) {
       showAlert('Faltan campos obligatorios: ' + faltantes.join(', '), 'error');
       return;
@@ -6039,6 +6256,8 @@ summary.ed-meds-cat { list-style: revert; }
     var preId = consultaPendienteCargada._id;
     /* Ref con id conocido de antemano para poder incluir constanciaId en el mismo batch */
     var constanciaPrep = necesitaIncap ? prepararConstancia(preId, pacienteActual, datosIncap, medico) : null;
+    /* Ref con id conocido de antemano para poder incluir referenciaId en el mismo batch */
+    var referenciaPrep = necesitaReferencia ? prepararReferencia(preId, pacienteActual, datosReferencia, medico) : null;
 
     /* Compatibilidad: campo tratamiento legado = resumen de medicamentos */
     var tratamientoResumen =
@@ -6070,6 +6289,8 @@ summary.ed-meds-cat { list-style: revert; }
       /* DRM Fun-11 v2: ya no embebemos la constancia en la consulta, flag y referencia */
       tieneConstancia: necesitaIncap,
       constanciaId: constanciaPrep ? constanciaPrep.ref.id : null,
+      tieneReferencia: necesitaReferencia,
+      referenciaId: referenciaPrep ? referenciaPrep.ref.id : null,
       /* La consulta ya se finalizó: el borrador de autoguardado no sirve más. */
       borrador: firebase.firestore.FieldValue.delete(),
       borradorEn: firebase.firestore.FieldValue.delete(),
@@ -6099,17 +6320,23 @@ summary.ed-meds-cat { list-style: revert; }
       .then(function (url) {
         consulta.pdfUrl = url;
         consulta.storagePath = storagePath;
-        /* Paso 3: Actualizar documento existente + crear constancia (si aplica) en un solo batch atómico */
+        /* Paso 3: Actualizar documento existente + crear constancia/referencia (si aplica) en un solo batch atómico */
         var batch = cmgDb.batch();
         batch.update(cmgDb.collection('consultas').doc(preId), consulta);
         if (constanciaPrep) batch.set(constanciaPrep.ref, constanciaPrep.data);
+        if (referenciaPrep) batch.set(referenciaPrep.ref, referenciaPrep.data);
         return batch.commit();
       })
       .then(function () {
         hideOverlay();
-        if (constanciaPrep) {
+        if (constanciaPrep) window.open('Constancia-Medica.html?id=' + encodeURIComponent(constanciaPrep.ref.id), '_blank', 'noopener');
+        if (referenciaPrep) window.open('Referencia-Medica.html?id=' + encodeURIComponent(referenciaPrep.ref.id), '_blank', 'noopener');
+        if (constanciaPrep && referenciaPrep) {
+          showAlert('✓ Consulta finalizada. Abriendo constancia y referencia médica en otras pestañas…', 'success');
+        } else if (constanciaPrep) {
           showAlert('✓ Consulta finalizada. Abriendo constancia médica en otra pestaña…', 'success');
-          window.open('Constancia-Medica.html?id=' + encodeURIComponent(constanciaPrep.ref.id), '_blank', 'noopener');
+        } else if (referenciaPrep) {
+          showAlert('✓ Consulta finalizada. Abriendo referencia médica en otra pestaña…', 'success');
         } else {
           showAlert('✓ Consulta finalizada exitosamente. PDF generado.', 'success');
         }
@@ -6702,6 +6929,18 @@ summary.ed-meds-cat { list-style: revert; }
       });
     });
 
+    /* Emitir referencia médica desde el Historial: a diferencia de la constancia
+       (que aquí solo se ve, no se crea), la referencia SÍ se puede crear desde
+       el historial — el médico puede decidir referir revisando el historial
+       días después de la consulta. */
+    lista.querySelectorAll('[data-emitir-referencia]').forEach(function(b){
+      b.addEventListener('click', function(){
+        if (!esMedicoTratanteClient()) { showAlert('Solo el médico puede emitir referencias.', 'error'); return; }
+        var id = this.getAttribute('data-emitir-referencia');
+        abrirEmitirReferenciaModal(id, pacienteActual, renderHistorialTab);
+      });
+    });
+
     /* DRM: edición admin-only del registro desde Historial (solo corrige el
        expediente clínico, no reabre lo ya facturado en Caja). */
     lista.querySelectorAll('[data-editar-historial]').forEach(function(b){
@@ -6868,6 +7107,11 @@ summary.ed-meds-cat { list-style: revert; }
       }
     }
 
+    /* Badge de referencia médica emitida (Especialista/Emergencia) */
+    var referenciaBadge = c.referenciaId
+      ? ' <span style="background:#DBEAFE;color:#1E40AF;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px">📄 Con referencia</span>'
+      : '';
+
     /* DRM: si caja ajustó este registro antes de liquidar, dejarlo visible en el historial */
     var ajusteLinea = (c.ajustadoEnCaja && c.ajustadoEnCaja.por)
       ? '<div class="ed-consulta-motivo" style="color:#7C3AED"><strong>✏️ Ajustado en caja por:</strong> ' + esc(c.ajustadoEnCaja.por) + ' · ' + fmtDate(c.ajustadoEnCaja.en) + '</div>'
@@ -6880,7 +7124,7 @@ summary.ed-meds-cat { list-style: revert; }
 
     return '<div class="ed-consulta-item">' +
       '<div>' +
-        '<div class="ed-consulta-fecha">📅 ' + fmtDate(getFechaDisplay(c)) + badge + constanciaBadge + '</div>' +
+        '<div class="ed-consulta-fecha">📅 ' + fmtDate(getFechaDisplay(c)) + badge + constanciaBadge + referenciaBadge + '</div>' +
         '<div class="ed-consulta-motivo">' + titulo + '</div>' +
         atendioLinea +
         (!esServicio && c.diagnostico ? '<div class="ed-consulta-motivo"><strong>Dx:</strong> ' + esc(c.diagnostico) + '</div>' : '') +
@@ -6898,6 +7142,9 @@ summary.ed-meds-cat { list-style: revert; }
         (c.pdfUrl ? '<a class="ed-consulta-link" href="' + esc(c.pdfUrl) + '" target="_blank">📄 Ver PDF</a>' : '') +
         (c.constanciaId ? '<a class="ed-consulta-link" href="Constancia-Medica.html?id=' + esc(c.constanciaId) + '" target="_blank">📄 Ver constancia</a>' : '') +
         (puedeEditarConstancia ? '<button class="ed-consulta-link ed-link-blue" data-editar-constancia="' + esc(c.constanciaId) + '">✏️ Editar constancia</button>' : '') +
+        (c.referenciaId
+          ? '<a class="ed-consulta-link" href="Referencia-Medica.html?id=' + esc(c.referenciaId) + '" target="_blank">📄 Ver referencia</a>'
+          : (esMedicoTratanteClient() ? '<button class="ed-consulta-link ed-link-blue" data-emitir-referencia="' + esc(c._id) + '">📄 Emitir referencia</button>' : '')) +
         /* DRM: editar campos visibles del registro (ej. corregir "convertido en
            consulta/servicio" que el doctor olvidó marcar) es solo para Administración,
            y solo corrige el expediente — no toca lo ya cobrado en Caja. */

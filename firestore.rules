@@ -394,6 +394,30 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ═══ /referencias/{id} ═════════════════════════════════════
+    // Referencia médica (Especialista/Emergencia), calcado de /constancias.
+    //   - Staff: lectura/escritura total.
+    //   - Caja: solo lectura.
+    //   - Paciente: puede leer las referencias ligadas a su expediente.
+    match /referencias/{referenciaId} {
+      allow read: if isDoctor() || isCaja()
+        || (
+          isAuth()
+          && resource.data.codigoPaciente != null
+          && exists(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente))
+          && (
+            get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.ownerUid == request.auth.uid
+            || (
+              get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon is list
+              && request.auth.uid in get(/databases/$(database)/documents/expedientes/$(resource.data.codigoPaciente)).data.compartidoCon
+            )
+          )
+        );
+      allow create, update: if isDoctor();
+      // Borrar una referencia es solo para Administración.
+      allow delete: if isAdmin();
+    }
+
     // ═══ /electrocardiogramas/{id} ═══════════════════════════════
     // Hoja de resultados del servicio "Electrocardiograma" (informe + foto del trazo).
     //   - Staff: lectura/escritura total.

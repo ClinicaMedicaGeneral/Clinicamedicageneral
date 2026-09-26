@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referencia Médica · CMG</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; }
+
+/* ── Toolbar ── */
+.cm-toolbar {
+  max-width: 850px;
+  margin: 28px auto 16px;
+  padding: 0 28px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.cm-back {
+  color: #213C7D;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+.cm-back:hover { text-decoration: underline; }
+.cm-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.cm-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity .15s, transform .1s;
+}
+.cm-btn:hover { opacity: .9; }
+.cm-btn:active { transform: scale(.98); }
+.cm-btn-print { background: #059669; color: #fff; }
+
+/* ── Loading / Error ── */
+.cm-message {
+  max-width: 850px;
+  margin: 60px auto;
+  padding: 40px;
+  background: #fff;
+  border-radius: 12px;
+  text-align: center;
+  color: #4B5563;
+}
+.cm-spinner {
+  width: 28px; height: 28px;
+  border: 3px solid #E5E7EB;
+  border-top-color: #213C7D;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══ HOJA DE REFERENCIA ═══ */
+.cm-container {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 0 28px 40px;
+}
+.cm-sheet {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  color: #213C7D;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0,0,0,.06);
+}
+/* Marca de agua */
+.cm-watermark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: .06;
+  z-index: 0;
+}
+.cm-watermark img { width: 60%; max-width: 480px; }
+
+/* Header */
+.cm-header {
+  position: relative; z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 32px;
+  border-bottom: 3px solid #FDD22C;
+  background: linear-gradient(180deg,#fafbff 0%,#fff 100%);
+}
+.cm-header img { width: 56px; height: auto; }
+.cm-header .cm-h-name {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: .3px;
+  margin: 0;
+}
+.cm-header .cm-h-sub {
+  font-size: 12px;
+  color: #6B7280;
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+/* Body */
+.cm-body { position: relative; z-index: 1; padding: 28px 32px; }
+.cm-title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin: 4px 0 12px;
+  color: #213C7D;
+  border-top: 1px solid #E5E7EB;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 12px 0;
+  background: #F9FAFB;
+}
+
+.cm-tipo-wrap { text-align: center; margin: 0 0 18px; }
+.cm-tipo-badge {
+  display: inline-block;
+  padding: 4px 16px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+.cm-tipo-badge.especialista { background: #DBEAFE; color: #1E40AF; }
+.cm-tipo-badge.emergencia { background: #FEE2E2; color: #991B1B; }
+
+.cm-meta {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: #6B7280;
+  margin-bottom: 18px;
+}
+.cm-meta b { color: #213C7D; }
+
+.cm-paragraph {
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: #1F2937;
+  margin: 14px 0;
+  text-align: justify;
+}
+.cm-paragraph b { color: #213C7D; }
+.cm-paragraph-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  color: #213C7D;
+  margin-bottom: 4px;
+}
+
+.cm-details {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 18px 0;
+  font-size: 14px;
+  color: #1F2937;
+}
+.cm-details-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed #E5E7EB;
+  padding: 6px 0;
+  gap: 12px;
+}
+.cm-details-row:last-child { border-bottom: 0; }
+.cm-details-row b { color: #213C7D; min-width: 180px; }
+
+/* Firma */
+.cm-firma {
+  margin-top: 60px;
+  display: flex;
+  justify-content: flex-end;
+}
+.cm-firma-box {
+  width: 280px;
+  text-align: center;
+  border-top: 1px solid #213C7D;
+  padding-top: 6px;
+  font-size: 13px;
+  color: #213C7D;
+}
+.cm-firma-box small {
+  display: block;
+  color: #6B7280;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+/* Pie de página */
+.cm-foot {
+  position: relative; z-index: 1;
+  padding: 16px 32px 24px;
+  border-top: 1px solid #E5E7EB;
+  background: #F9FAFB;
+  text-align: center;
+  font-size: 11px;
+  color: #6B7280;
+  line-height: 1.6;
+}
+.cm-foot b { color: #213C7D; }
+
+/* Print */
+@media print {
+  body { background: #fff; }
+  .no-print { display: none !important; }
+  .cm-toolbar { display: none; }
+  .cm-container { padding: 0; max-width: none; }
+  .cm-sheet { border: none; box-shadow: none; }
+  @page { size: A4; margin: 16mm; }
+}
+</style>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-9HH25BNVW0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-9HH25BNVW0');
+</script>
+</head>
+<body>
+
+<!-- Toolbar -->
+<div class="cm-toolbar no-print">
+  <a href="Expediente-Doctor.html" class="cm-back">← Volver al expediente</a>
+  <div class="cm-actions">
+    <button class="cm-btn cm-btn-print" id="cm-btn-print">🖨️ Imprimir</button>
+  </div>
+</div>
+
+<!-- Loading / Error placeholder -->
+<div id="cm-loading" class="cm-message">
+  <div class="cm-spinner"></div>
+  Cargando referencia...
+</div>
+
+<!-- Referencia -->
+<div id="cm-container" class="cm-container" style="display:none">
+  <div class="cm-sheet" id="cm-sheet">
+    <div class="cm-watermark"><img src="assets/isotipo-color.png" alt=""></div>
+
+    <!-- Header -->
+    <div class="cm-header">
+      <img src="assets/isotipo-color.png" alt="CMG">
+      <div>
+        <p class="cm-h-name">CLÍNICA MÉDICA GENERAL CMG, S. DE R.L.</p>
+        <p class="cm-h-sub">Boulevard Económica Europea · City Mall LC-214, Tegucigalpa · +504 3155-5162</p>
+      </div>
+    </div>
+
+    <div class="cm-body">
+      <h2 class="cm-title">REFERENCIA MÉDICA</h2>
+      <div class="cm-tipo-wrap"><span class="cm-tipo-badge" id="cm-tipo-badge">—</span></div>
+
+      <div class="cm-meta">
+        <div>N° Referencia: <b id="cm-num">—</b></div>
+        <div>Tegucigalpa, M.D.C., <b id="cm-fecha-emision">—</b></div>
+      </div>
+
+      <p class="cm-paragraph">
+        Por medio de la presente se refiere al/la paciente
+        <b id="cm-paciente-nombre">—</b>,
+        identificado(a) con <b id="cm-paciente-tipoid">documento</b> N° <b id="cm-paciente-dni">—</b>,
+        de <b id="cm-paciente-edad">—</b>,
+        evaluado(a) en esta institución el día <b id="cm-fecha-consulta">—</b>,
+        hacia <b id="cm-destino">—</b>.
+      </p>
+
+      <div class="cm-details">
+        <div class="cm-details-row"><b>Destino:</b> <span id="cm-destino-row">—</span></div>
+        <div class="cm-details-row"><b>Signos vitales:</b> <span id="cm-signos">—</span></div>
+      </div>
+
+      <p class="cm-paragraph" id="cm-antecedentes-p" style="display:none">
+        <span class="cm-paragraph-label">Antecedentes patológicos personales</span>
+        <span id="cm-antecedentes">—</span>
+      </p>
+
+      <p class="cm-paragraph" style="background:#FFFBEB;border-left:4px solid #FDD22C;padding:10px 14px">
+        <span class="cm-paragraph-label">Historia de la enfermedad actual</span>
+        <span id="cm-motivo">—</span>
+      </p>
+
+      <p class="cm-paragraph" id="cm-examen-p" style="display:none">
+        <span class="cm-paragraph-label">Examen físico / hallazgos</span>
+        <span id="cm-examen">—</span>
+      </p>
+
+      <p class="cm-paragraph" style="background:#EFF6FF;border-left:4px solid #213C7D;padding:10px 14px">
+        <span class="cm-paragraph-label">Impresión diagnóstica / sospecha</span>
+        <span id="cm-diagnostico">—</span>
+      </p>
+
+      <p class="cm-paragraph" id="cm-tratamiento-p" style="display:none">
+        <span class="cm-paragraph-label">Tratamiento ya iniciado</span>
+        <span id="cm-tratamiento">—</span>
+      </p>
+
+      <p class="cm-paragraph" id="cm-recomendacion-p" style="display:none">
+        <span class="cm-paragraph-label">Recomendación</span>
+        <span id="cm-recomendacion">—</span>
+      </p>
+
+      <p class="cm-paragraph">
+        Se extiende la presente referencia a solicitud del/la interesado(a) para los
+        fines clínicos correspondientes, agradeciendo de antemano la atención
+        brindada al paciente.
+      </p>
+
+      <!-- Firma -->
+      <div class="cm-firma">
+        <div class="cm-firma-box">
+          <b id="cm-medico-nombre">—</b>
+          <small>Médico tratante · Clínica Médica General CMG</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie -->
+    <div class="cm-foot">
+      <p>
+        <b>Clínica Médica General CMG, S. de R.L.</b> · administracion@clinicamedicacmg.net · clinicamedicacmg.net
+      </p>
+      <p style="margin-top:4px">
+        Empresa/institución receptora: solicitar verificación primero.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase + lógica -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script>
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return (s||'').toString().replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  function fmtFecha(s){
+    if (!s) return '—';
+    try {
+      var d = new Date(s + 'T00:00:00');
+      if (isNaN(d.getTime())) d = new Date(s);
+      return d.toLocaleDateString('es-HN', { day:'2-digit', month:'long', year:'numeric' });
+    } catch(e){ return s; }
+  }
+  function fechaHoyLocal(){
+    var d = new Date();
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function calcEdad(fechaNac){
+    if (!fechaNac) return '';
+    try {
+      var d = new Date(fechaNac);
+      var hoy = new Date();
+      var e = hoy.getFullYear() - d.getFullYear();
+      var m = hoy.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && hoy.getDate() < d.getDate())) e--;
+      return e + ' años';
+    } catch(err){ return ''; }
+  }
+
+  function getParam(name){
+    var m = new RegExp('[?&]' + name + '=([^&]+)').exec(window.location.search);
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+
+  function tipoIdLabel(tipo){
+    if (!tipo) return 'documento de identidad';
+    if (tipo === 'dni') return 'DNI';
+    if (tipo === 'residencia') return 'Carnet de Residencia';
+    if (tipo === 'extranjera') return 'Identidad Extranjera';
+    return tipo;
+  }
+
+  function fmtSignosVitales(sv){
+    if (!sv) return '—';
+    var partes = [];
+    if (sv.pa)   partes.push('PA: ' + sv.pa);
+    if (sv.fc)   partes.push('FC: ' + sv.fc + ' lpm');
+    if (sv.fr)   partes.push('FR: ' + sv.fr + ' rpm');
+    if (sv.temp) partes.push('Temp: ' + sv.temp + '°C');
+    return partes.length ? partes.join(' · ') : '—';
+  }
+
+  function render(data){
+    $('cm-num').textContent = data.numero || data._id || '—';
+    $('cm-fecha-emision').textContent = fmtFecha((data.emitidaEn || fechaHoyLocal()).slice(0,10));
+    $('cm-paciente-nombre').textContent = data.pacienteNombre || '—';
+    $('cm-paciente-tipoid').textContent = tipoIdLabel(data.pacienteTipoId);
+    $('cm-paciente-dni').textContent = data.pacienteDNI || '—';
+    $('cm-paciente-edad').textContent = data.pacienteEdad || calcEdad(data.pacienteFechaNacimiento) || '—';
+    $('cm-fecha-consulta').textContent = fmtFecha(data.fechaConsulta);
+
+    var tipo = (data.tipo || 'especialista').toLowerCase();
+    var badge = $('cm-tipo-badge');
+    badge.textContent = tipo === 'emergencia' ? 'Emergencia' : 'Especialista';
+    badge.className = 'cm-tipo-badge ' + (tipo === 'emergencia' ? 'emergencia' : 'especialista');
+
+    var destino = data.destino || '—';
+    $('cm-destino').textContent = destino;
+    $('cm-destino-row').textContent = destino;
+    $('cm-signos').textContent = fmtSignosVitales(data.signosVitales);
+
+    if (data.antecedentes) {
+      $('cm-antecedentes').textContent = data.antecedentes;
+      $('cm-antecedentes-p').style.display = '';
+    }
+    $('cm-motivo').textContent = data.motivo || '—';
+    if (data.examenFisico) {
+      $('cm-examen').textContent = data.examenFisico;
+      $('cm-examen-p').style.display = '';
+    }
+    $('cm-diagnostico').textContent = data.diagnostico || '—';
+    if (data.tratamiento) {
+      $('cm-tratamiento').textContent = data.tratamiento;
+      $('cm-tratamiento-p').style.display = '';
+    }
+    if (data.recomendacion) {
+      $('cm-recomendacion').textContent = data.recomendacion;
+      $('cm-recomendacion-p').style.display = '';
+    }
+    $('cm-medico-nombre').textContent = data.emitidaPor || '—';
+
+    $('cm-loading').style.display = 'none';
+    $('cm-container').style.display = '';
+    document.title = 'Referencia ' + (data.pacienteNombre || '') + ' · CMG';
+  }
+
+  function showError(msg){
+    $('cm-loading').innerHTML = '<div style="color:#b91c1c;font-weight:700">❌ ' + esc(msg) + '</div><div style="margin-top:8px;font-size:13px">' +
+      '<a href="Expediente-Doctor.html" class="cm-back">← Volver al expediente</a></div>';
+  }
+
+  /* Imprimir */
+  $('cm-btn-print').addEventListener('click', function(){ window.print(); });
+
+  /* Inicializar */
+  var id = getParam('id');
+  if (!id) { showError('No se especificó la referencia (parámetro ?id= ausente).'); return; }
+
+  firebase.auth().onAuthStateChanged(function(user){
+    if (!user) { showError('Sesión requerida. Inicia sesión.'); return; }
+    firebase.firestore().collection('referencias').doc(id).get()
+      .then(function(snap){
+        if (!snap.exists) { showError('La referencia no existe o fue eliminada.'); return; }
+        var d = snap.data();
+        d._id = snap.id;
+        render(d);
+      })
+      .catch(function(err){
+        showError('Error al cargar la referencia: ' + err.message);
+      });
+  });
+})();
+</script>
+
+</body>
+</html>

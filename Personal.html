@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestión de Personal · CMG</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-serif; color: #1F2937; }
+
+/* ── Topbar ── */
+.pz-top {
+  background: #213C7D; color: #fff;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 20;
+}
+.pz-top-left { display: flex; align-items: center; gap: 12px; }
+.pz-top-left img { width: 34px; }
+.pz-top-title { font-size: 16px; font-weight: 900; letter-spacing: .3px; }
+.pz-top-title small { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6); letter-spacing: .5px; }
+.pz-top-right { display: flex; align-items: center; gap: 10px; font-size: 13px; flex-wrap: wrap; }
+.pz-email { color: rgba(255,255,255,.7); font-size: 13px; }
+.pz-nav-link {
+  color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
+  padding: 6px 12px; border-radius: 7px; border: 1px solid rgba(255,255,255,.25);
+  transition: background .15s;
+}
+.pz-nav-link:hover { background: rgba(255,255,255,.1); }
+.pz-nav-link.active { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.4); }
+.pz-logout {
+  background: transparent; border: 1px solid rgba(255,255,255,.25); color: rgba(255,255,255,.8);
+  padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: background .15s;
+}
+.pz-logout:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+/* ── Wrap ── */
+.pz-wrap { max-width: 880px; margin: 0 auto; padding: 24px; }
+.pz-note {
+  background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF;
+  border-radius: 10px; padding: 12px 16px; font-size: 13px; line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+/* ── Banner de importación inicial ── */
+.pz-seed {
+  display: none; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E;
+  border-radius: 10px; padding: 14px 16px; font-size: 13px; line-height: 1.6;
+  margin-bottom: 18px;
+}
+.pz-seed.is-visible { display: flex; }
+.pz-seed-txt { flex: 1; min-width: 240px; }
+.pz-seed-btn {
+  background: #213C7D; color: #fff; border: none; border-radius: 8px;
+  padding: 10px 18px; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer;
+}
+.pz-seed-btn:hover { opacity: .92; }
+.pz-seed-btn:disabled { opacity: .5; cursor: default; }
+
+/* ── Sección (Médicos / Enfermería) ── */
+.pz-cat { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(33,60,125,.07); margin-bottom: 18px; overflow: hidden; }
+.pz-cat-h {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; background: #FAFBFF; border-bottom: 1px solid #EEF1F8;
+}
+.pz-cat-h h3 { margin: 0; font-size: 15px; font-weight: 900; color: #213C7D; }
+.pz-cat-count { font-size: 12px; color: #9CA3AF; font-weight: 700; }
+.pz-add-btn {
+  background: none; border: none; color: #213C7D; font-weight: 800; font-size: 13px;
+  cursor: pointer; text-decoration: underline; font-family: inherit;
+}
+.pz-cat-body { padding: 6px 0; }
+
+.pz-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 12px 20px; border-bottom: 1px solid #F3F4F6;
+}
+.pz-row:last-child { border-bottom: none; }
+.pz-row-name { font-size: 14px; font-weight: 700; color: #1F2937; }
+.pz-row-del {
+  background: none; border: none; color: #B91C1C; font-size: 12px; font-weight: 700;
+  cursor: pointer; text-decoration: underline; font-family: inherit; flex-shrink: 0;
+}
+
+.pz-add-form { display: none; grid-template-columns: 1fr auto; gap: 10px; padding: 14px 20px; border-bottom: 1px solid #F3F4F6; }
+.pz-input {
+  height: 40px; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 0 12px;
+  font-family: inherit; font-size: 14px; outline: none; background: #fff; width: 100%;
+}
+.pz-input:focus { border-color: #213C7D; }
+.pz-btn-submit {
+  height: 40px; padding: 0 18px; border: none; border-radius: 8px;
+  background: #213C7D; color: #fff; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer;
+}
+.pz-btn-submit:hover { opacity: .92; }
+
+.pz-msg { text-align: center; padding: 30px 20px; color: #6B7280; font-size: 13px; }
+.pz-spinner { width: 30px; height: 30px; border: 3px solid #E5E7EB; border-top-color: #213C7D; border-radius: 50%; animation: pzspin .7s linear infinite; margin: 0 auto 14px; }
+@keyframes pzspin { to { transform: rotate(360deg); } }
+
+.pz-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #213C7D; color: #fff; padding: 12px 22px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,.25);
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50;
+}
+.pz-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.pz-toast.is-error { background: #C70B0C; }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
+<script src="cmg-catalogos.js"></script>
+</head>
+<body>
+
+<div class="pz-top">
+  <div class="pz-top-left">
+    <img src="assets/isotipo-color.png" alt="CMG">
+    <div class="pz-top-title">Gestión de Personal<small>Panel Administrativo</small></div>
+  </div>
+  <div class="pz-top-right">
+    <span class="pz-email" id="pz-email">—</span>
+    <a class="pz-nav-link" href="Admin-D365.html">Doctor 365</a>
+    <a class="pz-nav-link" href="Admin-Precios.html">Precios</a>
+    <a class="pz-nav-link" href="Admin-Usuarios.html">Usuarios</a>
+    <a class="pz-nav-link" href="Admin-Sitio.html">Sitio web</a>
+    <a class="pz-nav-link active" href="Personal.html">Personal</a>
+    <a class="pz-nav-link" href="Proveedores.html">Proveedores</a>
+    <a class="pz-nav-link" href="Medicamentos.html">Medicamentos</a>
+    <button class="pz-logout" id="pz-logout">Salir</button>
+  </div>
+</div>
+
+<div class="pz-wrap">
+  <div class="pz-note">
+    Estos nombres son los que aparecen en el selector <b>«Atendido por»</b> del Expediente del Doctor (Enfermería, Completar servicio y Consulta médica) y en <b>«Solicitado por»</b> al crear una orden de laboratorio. Las cuentas del sistema son compartidas — por ejemplo «Caja · Enfermería» —, así que cada etapa pide el nombre real de quien atendió y ese es el que queda en el historial.
+  </div>
+
+  <div class="pz-seed" id="pz-seed">
+    <span class="pz-seed-txt">
+      Todavía no hay personal configurado, así que el portal sigue usando la lista que traía escrita adentro. Importala de un clic para poder editarla desde acá.
+    </span>
+    <button type="button" class="pz-seed-btn" id="pz-seed-btn">Importar la lista actual</button>
+  </div>
+
+  <div id="pz-list">
+    <div class="pz-msg"><div class="pz-spinner"></div>Cargando personal…</div>
+  </div>
+</div>
+
+<div class="pz-toast" id="pz-toast">—</div>
+
+<script>
+(function () {
+  var _personal = []; // [{id, nombre, tipo}]
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  var toastEl = $('pz-toast'), toastT;
+  function toast(msg, isErr) {
+    toastEl.textContent = msg;
+    toastEl.classList.toggle('is-error', !!isErr);
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toastEl.classList.remove('is-visible'); }, 3200);
+  }
+
+  /* ── Auth: solo admin ── */
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = 'Auth.html?returnTo=Personal.html'; return; }
+    cmgStaff.checkAdmin(user, function (ok) {
+      if (!ok) {
+        document.body.innerHTML =
+          '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;font-family:system-ui">' +
+          '<div><h1 style="color:#991B1B">🚫 Acceso restringido</h1>' +
+          '<p style="color:#6B7280;margin:14px 0 24px">Solo los administradores pueden gestionar el personal.</p>' +
+          '<a href="Inicio.html" style="background:#213C7D;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">Volver al sitio</a>' +
+          '</div></div>';
+        return;
+      }
+      $('pz-email').textContent = user.email;
+      boot();
+    });
+  });
+  $('pz-logout').addEventListener('click', function () {
+    cmgAuth.signOut().then(function () { window.location.href = 'Inicio.html'; });
+  });
+
+  /* ── Cargar ── */
+  function personalRef() { return cmgDb.collection('personal'); }
+
+  function boot() {
+    personalRef().get().then(function (snap) {
+      _personal = [];
+      snap.forEach(function (doc) { _personal.push(Object.assign({ id: doc.id }, doc.data())); });
+      render();
+    }).catch(function (err) {
+      $('pz-list').innerHTML = '<div class="pz-msg" style="color:#B91C1C">No se pudo cargar el personal.<br>' + esc(err.message) + '</div>';
+    });
+  }
+
+  /* ── Render ── */
+  function seccionHtml(tipo, titulo) {
+    var items = _personal.filter(function (p) { return p.tipo === tipo; })
+      .sort(function (a, b) { return (a.nombre || '').localeCompare(b.nombre || ''); });
+    var rows = items.map(function (p) {
+      return '<div class="pz-row">' +
+        '<span class="pz-row-name">' + esc(p.nombre) + '</span>' +
+        '<button type="button" class="pz-row-del" data-del="' + esc(p.id) + '">Eliminar</button>' +
+      '</div>';
+    }).join('');
+    return '<div class="pz-cat" data-tipo="' + tipo + '">' +
+      '<div class="pz-cat-h"><h3>' + esc(titulo) + '</h3>' +
+        '<span><span class="pz-cat-count">' + items.length + '</span> · <button type="button" class="pz-add-btn" data-add="' + tipo + '">+ Agregar</button></span>' +
+      '</div>' +
+      '<div class="pz-cat-body">' +
+        '<div class="pz-add-form" id="pz-add-form-' + tipo + '">' +
+          '<input type="text" class="pz-input" id="pz-add-input-' + tipo + '" placeholder="Nombre completo (ej. Dr. Juan Pérez)">' +
+          '<button type="button" class="pz-btn-submit" data-submit="' + tipo + '">Crear</button>' +
+        '</div>' +
+        (items.length ? rows : '<div class="pz-msg">Todavía no agregaste a nadie acá.</div>') +
+      '</div>' +
+    '</div>';
+  }
+
+  function render() {
+    /* Mientras la colección esté vacía, Expediente-Doctor.html sigue usando la
+       lista de respaldo de cmg-catalogos.js: nada se rompe, pero tampoco se
+       puede editar. El banner ofrece copiarla a Firestore de un clic. */
+    $('pz-seed').classList.toggle('is-visible', _personal.length === 0);
+    $('pz-list').innerHTML = seccionHtml('medico', 'Médicos') + seccionHtml('enfermeria', 'Enfermería');
+    bind();
+  }
+
+  function bind() {
+    document.querySelectorAll('[data-add]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var form = $('pz-add-form-' + btn.dataset.add);
+        form.style.display = (form.style.display === 'none' || !form.style.display) ? 'grid' : 'none';
+        if (form.style.display === 'grid') $('pz-add-input-' + btn.dataset.add).focus();
+      });
+    });
+    document.querySelectorAll('[data-submit]').forEach(function (btn) {
+      btn.addEventListener('click', function () { agregar(btn.dataset.submit); });
+    });
+    document.querySelectorAll('.pz-add-form input').forEach(function (inp) {
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); agregar(inp.id.replace('pz-add-input-', '')); }
+      });
+    });
+    document.querySelectorAll('[data-del]').forEach(function (btn) {
+      btn.addEventListener('click', function () { eliminar(btn.dataset.del); });
+    });
+  }
+
+  /* ── Alta / baja ── */
+  function agregar(tipo) {
+    var input = $('pz-add-input-' + tipo);
+    var nombre = (input.value || '').trim();
+    if (!nombre) return;
+    var yaEsta = _personal.some(function (p) { return (p.nombre || '').trim().toLowerCase() === nombre.toLowerCase(); });
+    if (yaEsta) { toast('Esa persona ya está en la lista.', true); return; }
+    personalRef().add({ nombre: nombre, tipo: tipo, creadoEn: firebase.firestore.FieldValue.serverTimestamp() })
+      .then(function (ref) {
+        _personal.push({ id: ref.id, nombre: nombre, tipo: tipo });
+        render();
+        toast('Agregado.');
+      }).catch(function (err) {
+        toast('Error al agregar: ' + err.message, true);
+      });
+  }
+
+  function eliminar(id) {
+    /* Solo desaparece del selector para atenciones NUEVAS: las consultas ya
+       guardadas conservan el nombre como texto y no se quedan sin "Atendido por". */
+    if (!confirm('¿Eliminar a esta persona de la lista? Las consultas ya registradas conservan su "Atendido por"; solo deja de aparecer al registrar atenciones nuevas.')) return;
+    personalRef().doc(id).delete().then(function () {
+      _personal = _personal.filter(function (p) { return p.id !== id; });
+      render();
+      toast('Eliminado.');
+    }).catch(function (err) {
+      toast('Error al eliminar: ' + err.message, true);
+    });
+  }
+
+  /* ── Importar la lista de respaldo (cmg-catalogos.js) ── */
+  $('pz-seed-btn').addEventListener('click', function () {
+    var base = (window.cmgCatalogos && cmgCatalogos.PERSONAL) || [];
+    if (!base.length) { toast('No hay lista de respaldo para importar.', true); return; }
+    if (!confirm('Se van a crear ' + base.length + ' registros de personal con la lista actual del sistema. ¿Continuar?')) return;
+    var btn = this;
+    btn.disabled = true; btn.textContent = 'Importando…';
+    var batch = cmgDb.batch();
+    base.forEach(function (p) {
+      batch.set(personalRef().doc(), {
+        nombre: p.nombre, tipo: p.tipo,
+        creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+    batch.commit().then(function () {
+      toast('Lista importada.');
+      btn.disabled = false; btn.textContent = 'Importar la lista actual';
+      boot();
+    }).catch(function (err) {
+      btn.disabled = false; btn.textContent = 'Importar la lista actual';
+      toast('Error al importar: ' + err.message, true);
+    });
+  });
+})();
+</script>
+</body>
+</html>

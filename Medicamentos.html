@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catálogo de Medicamentos · CMG</title>
+<link rel="icon" href="assets/isotipo-color.png">
+<link rel="stylesheet" href="assets/cmg-tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #F4F6FB; font-family: 'Now','Segoe UI',Arial,sans-serif; color: #1F2937; }
+
+/* ── Topbar ── */
+.mz-top {
+  background: #213C7D; color: #fff;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 20;
+}
+.mz-top-left { display: flex; align-items: center; gap: 12px; }
+.mz-top-left img { width: 34px; }
+.mz-top-title { font-size: 16px; font-weight: 900; letter-spacing: .3px; }
+.mz-top-title small { display: block; font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6); letter-spacing: .5px; }
+.mz-top-right { display: flex; align-items: center; gap: 10px; font-size: 13px; flex-wrap: wrap; }
+.mz-email { color: rgba(255,255,255,.7); font-size: 13px; }
+.mz-nav-link {
+  color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
+  padding: 6px 12px; border-radius: 7px; border: 1px solid rgba(255,255,255,.25);
+  transition: background .15s;
+}
+.mz-nav-link:hover { background: rgba(255,255,255,.1); }
+.mz-nav-link.active { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.4); }
+.mz-logout {
+  background: transparent; border: 1px solid rgba(255,255,255,.25); color: rgba(255,255,255,.8);
+  padding: 6px 14px; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: background .15s;
+}
+.mz-logout:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+/* ── Wrap ── */
+.mz-wrap { max-width: 1040px; margin: 0 auto; padding: 24px; }
+.mz-note {
+  background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF;
+  border-radius: 10px; padding: 12px 16px; font-size: 13px; line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+/* ── Banner de importación inicial ── */
+.mz-seed {
+  display: none; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E;
+  border-radius: 10px; padding: 14px 16px; font-size: 13px; line-height: 1.6;
+  margin-bottom: 18px;
+}
+.mz-seed.is-visible { display: flex; }
+.mz-seed-txt { flex: 1; min-width: 240px; }
+.mz-seed-btn {
+  background: #213C7D; color: #fff; border: none; border-radius: 8px;
+  padding: 10px 18px; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer;
+}
+.mz-seed-btn:hover { opacity: .92; }
+.mz-seed-btn:disabled { opacity: .5; cursor: default; }
+
+.mz-search {
+  width: 100%; height: 42px; border: 1.5px solid #E5E7EB; border-radius: 10px;
+  padding: 0 14px; font-family: inherit; font-size: 14px; outline: none; background: #fff;
+  margin-bottom: 18px;
+}
+.mz-search:focus { border-color: #213C7D; }
+
+/* ── Sección (Aplicados en visita / Despacho) ── */
+.mz-cat { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px rgba(33,60,125,.07); margin-bottom: 18px; overflow: hidden; }
+.mz-cat-h {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 14px 20px; background: #FAFBFF; border-bottom: 1px solid #EEF1F8;
+}
+.mz-cat-h h3 { margin: 0; font-size: 15px; font-weight: 900; color: #213C7D; }
+.mz-cat-count { font-size: 12px; color: #9CA3AF; font-weight: 700; }
+.mz-add-btn {
+  background: none; border: none; color: #213C7D; font-weight: 800; font-size: 13px;
+  cursor: pointer; text-decoration: underline; font-family: inherit;
+}
+.mz-cat-body { padding: 6px 0; }
+
+/* ── Grupo por categoría ── */
+.mz-grupo { border-bottom: 1px solid #F3F4F6; }
+.mz-grupo:last-child { border-bottom: none; }
+.mz-grupo > summary {
+  cursor: pointer; padding: 10px 20px; font-size: 13px; font-weight: 800; color: #374151;
+  background: #F9FAFB; list-style: none; display: flex; align-items: center; gap: 8px;
+}
+.mz-grupo > summary::-webkit-details-marker { display: none; }
+.mz-grupo > summary::before { content: '▸'; color: #9CA3AF; transition: transform .15s; }
+.mz-grupo[open] > summary::before { transform: rotate(90deg); }
+.mz-grupo-count { color: #9CA3AF; font-weight: 700; font-size: 12px; }
+
+.mz-row {
+  display: grid; grid-template-columns: 1fr 130px 190px auto; align-items: center; gap: 14px;
+  padding: 10px 20px; border-top: 1px solid #F3F4F6;
+}
+.mz-row-name { font-size: 14px; font-weight: 700; color: #1F2937; overflow-wrap: anywhere; }
+.mz-row-del {
+  background: none; border: none; color: #B91C1C; font-size: 12px; font-weight: 700;
+  cursor: pointer; text-decoration: underline; font-family: inherit; flex-shrink: 0; justify-self: end;
+}
+
+.mz-price-wrap { position: relative; }
+.mz-price-wrap .mz-prefix { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #9CA3AF; pointer-events: none; }
+.mz-price-input {
+  height: 38px; width: 100%; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 0 10px 0 22px;
+  font-family: inherit; font-size: 14px; outline: none; background: #fff;
+}
+.mz-price-input:focus { border-color: #213C7D; }
+
+.mz-excl-switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12.5px; color: #374151; font-weight: 600; }
+.mz-excl-switch input { display: none; }
+.mz-excl-track { width: 40px; height: 22px; background: #D1D5DB; border-radius: 12px; position: relative; transition: background .15s; flex-shrink: 0; }
+.mz-excl-thumb { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: left .15s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.mz-excl-switch input:checked + .mz-excl-track { background: #FDD22C; }
+.mz-excl-switch input:checked + .mz-excl-track .mz-excl-thumb { left: 21px; }
+
+.mz-add-form { display: none; grid-template-columns: 1fr 190px 130px auto; gap: 10px; padding: 14px 20px; background: #FAFBFF; border-bottom: 1px solid #F3F4F6; align-items: center; }
+.mz-add-form .mz-nueva-cat { grid-column: 1 / -1; }
+.mz-input {
+  height: 40px; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 0 12px;
+  font-family: inherit; font-size: 14px; outline: none; background: #fff; width: 100%;
+}
+.mz-input:focus { border-color: #213C7D; }
+.mz-select {
+  height: 40px; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 0 10px;
+  font-family: inherit; font-size: 13px; outline: none; background: #fff; width: 100%;
+}
+.mz-btn-submit {
+  height: 40px; padding: 0 18px; border: none; border-radius: 8px;
+  background: #213C7D; color: #fff; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer;
+}
+.mz-btn-submit:hover { opacity: .92; }
+
+.mz-msg { text-align: center; padding: 30px 20px; color: #6B7280; font-size: 13px; }
+.mz-spinner { width: 30px; height: 30px; border: 3px solid #E5E7EB; border-top-color: #213C7D; border-radius: 50%; animation: mzspin .7s linear infinite; margin: 0 auto 14px; }
+@keyframes mzspin { to { transform: rotate(360deg); } }
+
+.mz-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #213C7D; color: #fff; padding: 12px 22px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,.25);
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50;
+}
+.mz-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.mz-toast.is-error { background: #C70B0C; }
+
+@media (max-width: 720px) {
+  .mz-row, .mz-add-form { grid-template-columns: 1fr; }
+  .mz-row-del { justify-self: start; }
+}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="cmg-staff.js"></script>
+<script src="cmg-catalogos.js"></script>
+</head>
+<body>
+
+<div class="mz-top">
+  <div class="mz-top-left">
+    <img src="assets/isotipo-color.png" alt="CMG">
+    <div class="mz-top-title">Catálogo de Medicamentos<small>Panel Administrativo</small></div>
+  </div>
+  <div class="mz-top-right">
+    <span class="mz-email" id="mz-email">—</span>
+    <a class="mz-nav-link" href="Admin-D365.html">Doctor 365</a>
+    <a class="mz-nav-link" href="Admin-Precios.html">Precios</a>
+    <a class="mz-nav-link" href="Admin-Usuarios.html">Usuarios</a>
+    <a class="mz-nav-link" href="Admin-Sitio.html">Sitio web</a>
+    <a class="mz-nav-link" href="Personal.html">Personal</a>
+    <a class="mz-nav-link" href="Proveedores.html">Proveedores</a>
+    <a class="mz-nav-link active" href="Medicamentos.html">Medicamentos</a>
+    <button class="mz-logout" id="mz-logout">Salir</button>
+  </div>
+</div>
+
+<div class="mz-wrap">
+  <div class="mz-note">
+    Estos medicamentos son los que aparecen en los checklists <b>«Medicamentos aplicados en visita»</b> y <b>«Medicamentos de despacho»</b> del Expediente del Doctor (Consulta médica y Completar servicio), agrupados por la categoría que elijas acá.
+    <br>
+    El <b>precio</b> y el interruptor <b>«Excluir de descuentos»</b> se guardan pero todavía no los usa ninguna pantalla de CMG: quedan listos para cuando se facture medicamento en Caja. Podés dejarlos en cero por ahora.
+    <br>
+    La <b>prueba de sensibilidad</b> no se administra acá: es un chequeo clínico, no un medicamento, y el portal la muestra siempre de primera en la lista de visita.
+  </div>
+
+  <div class="mz-seed" id="mz-seed">
+    <span class="mz-seed-txt">
+      Todavía no hay catálogo configurado, así que el portal sigue usando la lista que traía escrita adentro. Importala de un clic para poder editarla desde acá.
+    </span>
+    <button type="button" class="mz-seed-btn" id="mz-seed-btn">Importar el catálogo actual</button>
+  </div>
+
+  <input type="search" class="mz-search" id="mz-search" placeholder="🔍 Buscar medicamento por nombre…">
+
+  <div id="mz-list">
+    <div class="mz-msg"><div class="mz-spinner"></div>Cargando medicamentos…</div>
+  </div>
+</div>
+
+<div class="mz-toast" id="mz-toast">—</div>
+
+<script>
+(function () {
+  var _meds = []; // [{id, nombre, categoria, tipo:'visita'|'despacho', precio, excluidoDescuento}]
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  /* Misma normalización que el buscador del portal: ignora tildes y mayúsculas */
+  function norm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+
+  var toastEl = $('mz-toast'), toastT;
+  function toast(msg, isErr) {
+    toastEl.textContent = msg;
+    toastEl.classList.toggle('is-error', !!isErr);
+    toastEl.classList.add('is-visible');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toastEl.classList.remove('is-visible'); }, 3200);
+  }
+
+  /* ── Auth: solo admin ── */
+  cmgAuth.onAuthStateChanged(function (user) {
+    if (!user) { window.location.href = 'Auth.html?returnTo=Medicamentos.html'; return; }
+    cmgStaff.checkAdmin(user, function (ok) {
+      if (!ok) {
+        document.body.innerHTML =
+          '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px;text-align:center;font-family:system-ui">' +
+          '<div><h1 style="color:#991B1B">🚫 Acceso restringido</h1>' +
+          '<p style="color:#6B7280;margin:14px 0 24px">Solo los administradores pueden gestionar el catálogo de medicamentos.</p>' +
+          '<a href="Inicio.html" style="background:#213C7D;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">Volver al sitio</a>' +
+          '</div></div>';
+        return;
+      }
+      $('mz-email').textContent = user.email;
+      boot();
+    });
+  });
+  $('mz-logout').addEventListener('click', function () {
+    cmgAuth.signOut().then(function () { window.location.href = 'Inicio.html'; });
+  });
+
+  /* ── Cargar ── */
+  function medsRef() { return cmgDb.collection('medicamentos'); }
+
+  function boot() {
+    medsRef().get().then(function (snap) {
+      _meds = [];
+      snap.forEach(function (doc) { _meds.push(Object.assign({ id: doc.id }, doc.data())); });
+      render();
+    }).catch(function (err) {
+      $('mz-list').innerHTML = '<div class="mz-msg" style="color:#B91C1C">No se pudo cargar el catálogo de medicamentos.<br>' + esc(err.message) + '</div>';
+    });
+  }
+
+  /* ── Categorías disponibles para una sección: las del catálogo base más las
+     que el admin ya haya creado por su cuenta ── */
+  function categoriasDe(tipo) {
+    var base = (window.cmgCatalogos &&
+      (tipo === 'visita' ? cmgCatalogos.CATEGORIAS_VISITA : cmgCatalogos.CATEGORIAS_DESPACHO)) || [];
+    var vistas = base.slice();
+    _meds.forEach(function (m) {
+      if (m.tipo === tipo && m.categoria && vistas.indexOf(m.categoria) === -1) vistas.push(m.categoria);
+    });
+    return vistas;
+  }
+
+  /* ── Render ── */
+  function rowHtml(m) {
+    var precio = (m.precio === undefined || m.precio === null) ? 0 : m.precio;
+    var excl = m.excluidoDescuento === true;
+    return '<div class="mz-row" data-nombre="' + esc(norm(m.nombre)) + '">' +
+      '<span class="mz-row-name">' + esc(m.nombre) + '</span>' +
+      '<div class="mz-price-wrap"><span class="mz-prefix">L</span>' +
+        '<input type="number" min="0" step="0.01" class="mz-price-input" data-id="' + esc(m.id) + '" data-field="precio" value="' + esc(precio) + '">' +
+      '</div>' +
+      '<label class="mz-excl-switch"><input type="checkbox" data-id="' + esc(m.id) + '" data-field="excluidoDescuento"' + (excl ? ' checked' : '') + '>' +
+        '<span class="mz-excl-track"><span class="mz-excl-thumb"></span></span> Excluir de descuentos</label>' +
+      '<button type="button" class="mz-row-del" data-del="' + esc(m.id) + '">Eliminar</button>' +
+    '</div>';
+  }
+
+  /* Mismo criterio que agruparPorCategoria() en cmg-catalogos.js: manda el
+     campo `orden` (los sueros van por volumen, no alfabéticos) y a igual
+     orden se desempata por nombre. Así el panel muestra los medicamentos en
+     la misma secuencia en que los verá el doctor en el checklist. */
+  function porOrden(a, b) {
+    var oa = typeof a.orden === 'number' ? a.orden : 9999;
+    var ob = typeof b.orden === 'number' ? b.orden : 9999;
+    if (oa !== ob) return oa - ob;
+    return (a.nombre || '').localeCompare(b.nombre || '');
+  }
+
+  function seccionHtml(tipo, titulo) {
+    var items = _meds.filter(function (m) { return m.tipo === tipo; });
+    var cats = categoriasDe(tipo);
+    /* Agrupa respetando el orden de `cats` (catálogo base primero, luego las
+       categorías propias en el orden en que aparecieron). */
+    var gruposHtml = cats.map(function (cat) {
+      var deCat = items.filter(function (m) { return (m.categoria || 'Sin categoría') === cat; }).sort(porOrden);
+      if (!deCat.length) return '';
+      return '<details class="mz-grupo">' +
+        '<summary>' + esc(cat) + ' <span class="mz-grupo-count">(' + deCat.length + ')</span></summary>' +
+        deCat.map(rowHtml).join('') +
+      '</details>';
+    }).join('');
+    /* Cualquier ítem cuya categoría no esté en la lista (p. ej. quedó vacía) */
+    var huerfanos = items.filter(function (m) { return cats.indexOf(m.categoria || 'Sin categoría') === -1; }).sort(porOrden);
+    if (huerfanos.length) {
+      gruposHtml += '<details class="mz-grupo"><summary>Sin categoría <span class="mz-grupo-count">(' + huerfanos.length + ')</span></summary>' +
+        huerfanos.map(rowHtml).join('') + '</details>';
+    }
+
+    var catOptions = cats.map(function (c) { return '<option value="' + esc(c) + '">' + esc(c) + '</option>'; }).join('');
+
+    return '<div class="mz-cat" data-tipo="' + tipo + '">' +
+      '<div class="mz-cat-h"><h3>' + esc(titulo) + '</h3>' +
+        '<span><span class="mz-cat-count">' + items.length + '</span> · <button type="button" class="mz-add-btn" data-add="' + tipo + '">+ Agregar</button></span>' +
+      '</div>' +
+      '<div class="mz-cat-body">' +
+        '<div class="mz-add-form" id="mz-add-form-' + tipo + '">' +
+          '<input type="text" class="mz-input" id="mz-add-nombre-' + tipo + '" placeholder="Nombre del medicamento">' +
+          '<select class="mz-select" id="mz-add-cat-' + tipo + '">' + catOptions +
+            '<option value="__nueva__">+ Nueva categoría…</option>' +
+          '</select>' +
+          '<div class="mz-price-wrap"><span class="mz-prefix">L</span><input type="number" min="0" step="0.01" class="mz-input" id="mz-add-precio-' + tipo + '" placeholder="0.00" style="padding-left:22px"></div>' +
+          '<button type="button" class="mz-btn-submit" data-submit="' + tipo + '">Crear</button>' +
+          '<input type="text" class="mz-input mz-nueva-cat" id="mz-add-nuevacat-' + tipo + '" placeholder="Nombre de la nueva categoría (podés usar un emoji al inicio)" style="display:none">' +
+        '</div>' +
+        (items.length ? gruposHtml : '<div class="mz-msg">Todavía no agregaste medicamentos acá.</div>') +
+      '</div>' +
+    '</div>';
+  }
+
+  function render() {
+    /* Mientras la colección esté vacía, Expediente-Doctor.html sigue usando el
+       catálogo de respaldo de cmg-catalogos.js. */
+    $('mz-seed').classList.toggle('is-visible', _meds.length === 0);
+    $('mz-list').innerHTML =
+      seccionHtml('visita', 'Aplicados en visita') +
+      seccionHtml('despacho', 'Despacho');
+    bind();
+    filtrar();
+  }
+
+  function bind() {
+    document.querySelectorAll('[data-add]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var form = $('mz-add-form-' + btn.dataset.add);
+        form.style.display = (form.style.display === 'none' || !form.style.display) ? 'grid' : 'none';
+        if (form.style.display === 'grid') $('mz-add-nombre-' + btn.dataset.add).focus();
+      });
+    });
+    ['visita', 'despacho'].forEach(function (tipo) {
+      var sel = $('mz-add-cat-' + tipo);
+      if (!sel) return;
+      sel.addEventListener('change', function () {
+        var nueva = $('mz-add-nuevacat-' + tipo);
+        nueva.style.display = sel.value === '__nueva__' ? '' : 'none';
+        if (sel.value === '__nueva__') nueva.focus();
+      });
+    });
+    document.querySelectorAll('[data-submit]').forEach(function (btn) {
+      btn.addEventListener('click', function () { agregar(btn.dataset.submit); });
+    });
+    document.querySelectorAll('.mz-add-form input[type="text"]').forEach(function (inp) {
+      inp.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        agregar(inp.id.indexOf('-visita') !== -1 ? 'visita' : 'despacho');
+      });
+    });
+    document.querySelectorAll('[data-del]').forEach(function (btn) {
+      btn.addEventListener('click', function () { eliminar(btn.dataset.del); });
+    });
+    document.querySelectorAll('input[data-field="precio"]').forEach(function (inp) {
+      inp.addEventListener('change', function () { guardarCampo(inp.dataset.id, 'precio', parseFloat(inp.value) || 0); });
+    });
+    document.querySelectorAll('input[data-field="excluidoDescuento"]').forEach(function (chk) {
+      chk.addEventListener('change', function () { guardarCampo(chk.dataset.id, 'excluidoDescuento', !!chk.checked); });
+    });
+  }
+
+  /* ── Buscador: filtra filas y abre los grupos con coincidencias ── */
+  function filtrar() {
+    var q = norm($('mz-search').value || '');
+    document.querySelectorAll('.mz-row[data-nombre]').forEach(function (row) {
+      row.style.display = (!q || row.dataset.nombre.indexOf(q) !== -1) ? '' : 'none';
+    });
+    document.querySelectorAll('.mz-grupo').forEach(function (det) {
+      var visibles = Array.prototype.filter.call(det.querySelectorAll('.mz-row[data-nombre]'), function (r) {
+        return r.style.display !== 'none';
+      }).length;
+      det.style.display = (!q || visibles) ? '' : 'none';
+      det.open = q ? visibles > 0 : det.open;
+    });
+  }
+  $('mz-search').addEventListener('input', filtrar);
+
+  /* ── Alta / baja / edición ── */
+  function agregar(tipo) {
+    var nombre = ($('mz-add-nombre-' + tipo).value || '').trim();
+    if (!nombre) { toast('Escribí el nombre del medicamento.', true); return; }
+
+    var sel = $('mz-add-cat-' + tipo);
+    var categoria = sel.value === '__nueva__'
+      ? ($('mz-add-nuevacat-' + tipo).value || '').trim()
+      : sel.value;
+    if (!categoria) { toast('Escribí el nombre de la nueva categoría.', true); return; }
+
+    var yaEsta = _meds.some(function (m) {
+      return m.tipo === tipo &&
+        (m.categoria || '') === categoria &&
+        (m.nombre || '').trim().toLowerCase() === nombre.toLowerCase();
+    });
+    if (yaEsta) { toast('Ese medicamento ya está en esa categoría.', true); return; }
+
+    var precio = parseFloat($('mz-add-precio-' + tipo).value) || 0;
+    /* Va al final de su categoría: el orden dentro del grupo lo definió quien
+       armó el catálogo y no queremos que un alta lo reacomode. */
+    var orden = _meds.reduce(function (max, m) {
+      if (m.tipo !== tipo || (m.categoria || '') !== categoria) return max;
+      return Math.max(max, typeof m.orden === 'number' ? m.orden : 0);
+    }, -1) + 1;
+
+    medsRef().add({
+      nombre: nombre, categoria: categoria, tipo: tipo, orden: orden,
+      precio: precio, excluidoDescuento: false,
+      creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function (ref) {
+      _meds.push({ id: ref.id, nombre: nombre, categoria: categoria, tipo: tipo, orden: orden, precio: precio, excluidoDescuento: false });
+      render();
+      toast('Medicamento agregado.');
+    }).catch(function (err) {
+      toast('Error al agregar: ' + err.message, true);
+    });
+  }
+
+  function guardarCampo(id, field, value) {
+    var payload = {}; payload[field] = value;
+    medsRef().doc(id).set(payload, { merge: true }).then(function () {
+      var m = _meds.filter(function (x) { return x.id === id; })[0];
+      if (m) m[field] = value;
+      toast('Guardado.');
+    }).catch(function (err) {
+      toast('Error al guardar: ' + err.message, true);
+    });
+  }
+
+  function eliminar(id) {
+    /* Solo sale del checklist para atenciones NUEVAS: las consultas ya
+       guardadas conservan el nombre del medicamento como texto. */
+    if (!confirm('¿Eliminar este medicamento del catálogo? Las consultas ya registradas lo conservan; solo deja de aparecer en los checklists de atenciones nuevas.')) return;
+    medsRef().doc(id).delete().then(function () {
+      _meds = _meds.filter(function (m) { return m.id !== id; });
+      render();
+      toast('Eliminado.');
+    }).catch(function (err) {
+      toast('Error al eliminar: ' + err.message, true);
+    });
+  }
+
+  /* ── Importar el catálogo de respaldo (cmg-catalogos.js) ──
+     Son ~100 documentos: Firestore limita cada batch a 500 escrituras, así que
+     con uno alcanza de sobra, pero se parte igual por si el catálogo crece. */
+  $('mz-seed-btn').addEventListener('click', function () {
+    var base = (window.cmgCatalogos && cmgCatalogos.MEDICAMENTOS) || [];
+    if (!base.length) { toast('No hay catálogo de respaldo para importar.', true); return; }
+    if (!confirm('Se van a crear ' + base.length + ' medicamentos con el catálogo actual del sistema. ¿Continuar?')) return;
+    var btn = this;
+    btn.disabled = true; btn.textContent = 'Importando…';
+
+    var lotes = [], TAM = 400;
+    for (var i = 0; i < base.length; i += TAM) lotes.push(base.slice(i, i + TAM));
+
+    lotes.reduce(function (prev, lote) {
+      return prev.then(function () {
+        var batch = cmgDb.batch();
+        lote.forEach(function (m) {
+          batch.set(medsRef().doc(), {
+            nombre: m.nombre, categoria: m.categoria, tipo: m.tipo,
+            orden: typeof m.orden === 'number' ? m.orden : 0,
+            precio: m.precio || 0, excluidoDescuento: !!m.excluidoDescuento,
+            creadoEn: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        });
+        return batch.commit();
+      });
+    }, Promise.resolve()).then(function () {
+      toast('Catálogo importado.');
+      btn.disabled = false; btn.textContent = 'Importar el catálogo actual';
+      boot();
+    }).catch(function (err) {
+      btn.disabled = false; btn.textContent = 'Importar el catálogo actual';
+      toast('Error al importar: ' + err.message, true);
+    });
+  });
+})();
+</script>
+</body>
+</html>

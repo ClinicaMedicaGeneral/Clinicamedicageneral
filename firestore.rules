@@ -478,6 +478,36 @@ service cloud.firestore {
       allow write: if isDoctor() || isAdmin();
     }
 
+    // ═══ /personal/{id} ════════════════════════════════════════
+    // Médicos y enfermería que pueden figurar como "Atendido por" en el
+    // Expediente del Doctor y como "Solicitado por" en una orden de
+    // laboratorio. Se gestionan desde Personal.html.
+    //   - Lectura: todo el personal del portal (necesitan llenar el selector).
+    //   - Escritura: solo Admin.
+    match /personal/{personalId} {
+      allow read: if isDoctor() || isCaja();
+      allow write: if isAdmin();
+    }
+
+    // ═══ /proveedores/{id} ═════════════════════════════════════
+    // Laboratorios a los que CMG manda las muestras — alimentan el selector
+    // "Proveedor (laboratorio)" al crear una orden. Se gestionan desde
+    // Proveedores.html.
+    match /proveedores/{proveedorId} {
+      allow read: if isDoctor() || isCaja();
+      allow write: if isAdmin();
+    }
+
+    // ═══ /medicamentos/{id} ════════════════════════════════════
+    // Catálogo de medicamentos (nombre, categoría, tipo visita/despacho,
+    // precio y exclusión de descuentos) que alimenta los checklists de
+    // Consulta médica y Completar servicio. Se gestiona desde
+    // Medicamentos.html.
+    match /medicamentos/{medicamentoId} {
+      allow read: if isDoctor() || isCaja();
+      allow write: if isAdmin();
+    }
+
     // ═══ Bloqueo por defecto ═══════════════════════════════════
     // Cualquier otra colección queda bloqueada.
     match /{document=**} {

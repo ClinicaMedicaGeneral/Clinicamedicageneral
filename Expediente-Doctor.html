@@ -1490,6 +1490,7 @@ summary.ed-meds-cat { list-style: revert; }
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script src="firebase-init.js"></script>
 <script src="cmg-staff.js"></script>
+<script src="cmg-catalogos.js"></script>
 
 <!-- jsPDF para generar PDF de consultas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -2701,6 +2702,14 @@ summary.ed-meds-cat { list-style: revert; }
         _isMedicoTratanteCache = isMed;
         if ($id('tab-consulta').style.display !== 'none') renderConsultaTab();
       });
+      /* Precarga de los catálogos que el admin gestiona desde el panel
+         (Personal.html / Proveedores.html / Medicamentos.html). Son los
+         selectores "Atendido por" y "Proveedor (laboratorio)" y los checklists
+         de medicamentos. Si la colección está vacía se queda el respaldo de
+         cmg-catalogos.js, así que los formularios nunca salen en blanco. */
+      cargarPersonalAtiende();
+      cargarProveedores();
+      cargarMedicamentos();
       /* Mostrar nombre del doctor */
       $id('ed-user-chip').style.display = '';
       var _edN = user.displayName || user.email.split('@')[0]; if (user.email === 'skarleth.admoncmg@gmail.com') { _edN = 'Ing. ' + _edN; var _t = $id('ed-user-title'); if (_t) _t.textContent = ''; } $id('ed-user-name').textContent = _edN;
@@ -4286,20 +4295,72 @@ summary.ed-meds-cat { list-style: revert; }
      Las cuentas del sistema son compartidas (p. ej. "Caja · Enfermería"), así que
      el correo de la sesión NO identifica a la persona que atendió. Por eso cada
      etapa pide el nombre real y ese nombre es el que se muestra en el historial.
-     MANTENER EN SYNC con los tres formularios que lo usan: Enfermería (Etapa 2),
-     Completar servicio y Consulta médica. */
-  var PERSONAL_ATIENDE = [
-    'Dr. Brian Rojas',
-    'Dr. Hermes Molina',
-    'Dr. Adony Álvarez',
-    'Enfermería (Ana Ruiz)',
-    'Enfermería (Luz Ortíz)'
-  ];
-  function buildAtendidoPorOptionsHtml(seleccionado) {
+     Lo usan cuatro formularios: Enfermería (Etapa 2), Completar servicio,
+     Consulta médica y "Solicitado por" de la orden de laboratorio.
+
+     Ya no es una lista fija: la administra Personal.html y vive en la colección
+     /personal. Se carga una sola vez desde el AUTH GUARD (cargarPersonalAtiende).
+     Mientras esa colección esté vacía se usa el respaldo de cmg-catalogos.js, que
+     es exactamente la lista que estaba escrita acá antes — así nada cambia hasta
+     que el admin importe o edite la suya. */
+  var _personalAtiende = [];   // nombres, médicos primero
+  var _medicosAtiende  = [];   // solo tipo 'medico' — para "Solicitado por"
+  function aplicarPersonal(items) {
+    items = (items || []).slice().sort(function (a, b) {
+      if (a.tipo !== b.tipo) return a.tipo === 'medico' ? -1 : 1;
+      return (a.nombre || '').localeCompare(b.nombre || '');
+    });
+    _personalAtiende = items.map(function (it) { return it.nombre; }).filter(Boolean);
+    _medicosAtiende = items.filter(function (it) { return it.tipo === 'medico'; })
+      .map(function (it) { return it.nombre; }).filter(Boolean);
+  }
+  aplicarPersonal((window.cmgCatalogos && cmgCatalogos.PERSONAL) || []);
+  function cargarPersonalAtiende() {
+    cmgDb.collection('personal').get()
+      .then(function (snap) {
+        if (snap.empty) return;   // sin configurar: se queda el respaldo
+        var items = [];
+        snap.forEach(function (doc) { items.push(doc.data()); });
+        aplicarPersonal(items);
+      })
+      .catch(function (err) {
+        console.warn('[CMG] No se pudo cargar el personal (Atendido por):', err);
+      });
+  }
+  function buildOptionsHtml(nombres, seleccionado) {
     return '<option value="">— Seleccionar —</option>' +
-      PERSONAL_ATIENDE.map(function (n) {
+      (nombres || []).map(function (n) {
         return '<option value="' + esc(n) + '"' + (n === seleccionado ? ' selected' : '') + '>' + esc(n) + '</option>';
       }).join('');
+  }
+  function buildAtendidoPorOptionsHtml(seleccionado) {
+    return buildOptionsHtml(_personalAtiende, seleccionado);
+  }
+
+  /* ─── Laboratorios a los que se manda la muestra ───
+     Los administra Proveedores.html y viven en la colección /proveedores.
+     Mismo criterio que el personal: si está vacía, respaldo de cmg-catalogos.js
+     (Labex, Masterlab, Laboratorio Rivera). */
+  var _proveedores = [];
+  function aplicarProveedores(items) {
+    _proveedores = (items || []).map(function (it) { return it.nombre; }).filter(Boolean)
+      .sort(function (a, b) { return a.localeCompare(b); });
+  }
+  aplicarProveedores((window.cmgCatalogos && cmgCatalogos.PROVEEDORES) || []);
+  function cargarProveedores() {
+    cmgDb.collection('proveedores').get()
+      .then(function (snap) {
+        if (snap.empty) return;   // sin configurar: se queda el respaldo
+        var items = [];
+        snap.forEach(function (doc) { items.push(doc.data()); });
+        aplicarProveedores(items);
+      })
+      .catch(function (err) {
+        console.warn('[CMG] No se pudieron cargar los proveedores:', err);
+      });
+  }
+  function buildProveedoresOptionsHtml(seleccionado) {
+    return buildOptionsHtml(_proveedores, seleccionado);
   }
 
   /* ─── Formulario de atención de Enfermería (Etapa 2) para un registro
@@ -4530,53 +4591,50 @@ summary.ed-meds-cat { list-style: revert; }
       });
   }
 
-  /* ─── Catálogos de medicamentos, compartidos entre Consulta y Completar servicio ─── */
-  var MEDS_VISITA_CATS = [
-    { titulo: '🧪 Prueba de sensibilidad', items: [
-      'Prueba de sensibilidad'
-    ] },
-    { titulo: '💉 Inyectable', items: [
-      'Alergil', 'Amikacina', 'Antigripal - Antiviral IM', 'Astriaxona 1g', 'Bixicort',
-      'Citicolina 500mg', 'Clevium', 'Complejo B', 'Dexametasona 8 mg', 'Dexketoprofeno',
-      'Diazepam', 'Diclofenac Sodico', 'DICLO-NEURAXIN', 'Diclosona', 'Dipirona',
-      'DOLGENAL AMP', 'Dramanyl', 'Epinefrina (Pinadrina 1 mg)', 'Esomeprazol 40 mg', 'Ferroin',
-      'Furosemida', 'Gentamicina', 'Glirron', 'Hidrocortisona 100mg', 'Hidrocortisona 500mg',
-      'Hioscina', 'Insulina Cristalina (UI - Unidad Internacional)', 'Labetalol', 'Levofloxacina 750mg / 150ml', 'Metoclopramida',
-      'Metronidazol 500 MG (I.V.)', 'Onemer (Ketorolaco 30mg)', 'Orfenaflex', 'Paracetamol 10mg /100 ml (Benphamol)', 'Penicilina 1.2 millones',
-      'Ranitidina', 'Rofemed 1g', 'Sertal Compuesto', 'Sulfato de Magnesio 10%', 'Tiamina',
-      'TONVAL (Pantoprazol 40mg)', 'Tramadol', 'Ultra-Neuraxin', 'Vitamina K'
-    ] },
-    { titulo: '🧴 Insumos (Sueros)', items: [
-      'Suero Solución Salina 1000 ml', 'Suero Solución Salina 500 ml', 'Suero Solución Salina 250 ml', 'Suero Solución Salina 100 ml',
-      'Suero Hartman 1000 ml', 'Suero Hartman 500 ml', 'Suero Hartman 250 ml', 'Suero Hartman 100 ml',
-      'Suero Mixto 1000 ml', 'Suero Mixto 500 ml', 'Suero Mixto 250 ml', 'Suero Mixto 100 ml',
-      'Suero Dextrosa 1000 ml', 'Suero Dextrosa 500 ml', 'Suero Dextrosa 250 ml', 'Suero Dextrosa 100 ml'
-    ] },
-    { titulo: '🏥 Sueroterapia (En Consultorio)', items: [
-      'Suero de Glucosa'
-    ] },
-    { titulo: '💧 Gotas / Otros', items: [
-      'Budoxigen'
-    ] }
-  ];
-  var MEDS_DESPACHO_CATS = [
-    { titulo: '🥤 Suspensión', items: [
-      'Acetaminofen', 'Acla-Med', 'Desloratadina 2.5 mg', 'Dilabrom HH', 'Kold-Grip',
-      'Sales de Rehidratacion Oral', 'Tusivanz', 'VISCOF-D', 'CORIVIT'
-    ] },
-    { titulo: '💊 Tableta / Cápsula', items: [
-      'Acetaminofen 500 mg', 'Amoxicilina + Acido Clavulonico 875 mg / 125 mg (Caja de 14 unidades)', 'Azitromicina 500mg', 'Cetirizina 10 MG', 'Ciprofloxacina 500 MG',
-      'Demoxil 500 mg', 'Desloratadina 5 MG', 'Difenac 75mg', 'DolFix (Diclofenaco Potásico 100 mg)', 'Fluconazol 150 mg', 'Gastrolev',
-      'Hidrocloratiazida 25 MG', 'Hioscina 10 MG', 'Ibuprofeno 600 MG', 'KoldGrip', 'Levofloxacino 750 mg (Calox)',
-      'Loratadina 10 MG (Lorat)', 'Paracetamol 750 MG', 'Rhinolar 5mg', 'Ultifenol Plus+'
-    ] },
-    { titulo: '🧴 Tópico', items: [
-      'Ketoconazol 2%', 'Septidex', 'Sulfadiazina de Plata', 'Ultifenol Gel'
-    ] },
-    { titulo: '💧 Gotas', items: [
-      'Otan', 'Budoxigen'
-    ] }
-  ];
+  /* ─── Catálogos de medicamentos, compartidos entre Consulta y Completar servicio ───
+     Los administra Medicamentos.html y viven en la colección /medicamentos
+     (nombre, categoria, tipo). Se cargan una sola vez desde el AUTH GUARD
+     (cargarMedicamentos) y se agrupan por categoría con el mismo formato que
+     consume buildMedsCatsHtml. Mientras la colección esté vacía se usa el
+     respaldo de cmg-catalogos.js, que es exactamente lo que estaba escrito acá.
+
+     La "Prueba de sensibilidad" NO viene del catálogo administrable: es un
+     chequeo clínico previo al inyectable, no un medicamento, y siempre va de
+     primera en la lista de visita (el formulario de resultado se ancla a ese
+     título — ver buildSensResultadoHtml). */
+  var _medsVisitaCats = [];
+  var _medsDespachoCats = [];
+  function catsRespaldo(tipo) {
+    var c = window.cmgCatalogos;
+    if (!c) return [];
+    return c.agruparPorCategoria(
+      c.MEDICAMENTOS, tipo,
+      tipo === 'visita' ? c.CATEGORIAS_VISITA : c.CATEGORIAS_DESPACHO
+    );
+  }
+  function aplicarMedsCats(visita, despacho) {
+    var sens = (window.cmgCatalogos && cmgCatalogos.PRUEBA_SENSIBILIDAD_CAT) || null;
+    _medsVisitaCats = (sens ? [sens] : []).concat(visita || []);
+    _medsDespachoCats = despacho || [];
+  }
+  aplicarMedsCats(catsRespaldo('visita'), catsRespaldo('despacho'));
+  function cargarMedicamentos() {
+    cmgDb.collection('medicamentos').get()
+      .then(function (snap) {
+        if (snap.empty) return;   // sin configurar: se queda el respaldo
+        var docs = [];
+        snap.forEach(function (doc) { docs.push(doc.data()); });
+        var c = window.cmgCatalogos;
+        aplicarMedsCats(
+          c.agruparPorCategoria(docs, 'visita', c.CATEGORIAS_VISITA),
+          c.agruparPorCategoria(docs, 'despacho', c.CATEGORIAS_DESPACHO)
+        );
+      })
+      .catch(function (err) {
+        console.warn('[CMG] No se pudo cargar el catálogo de medicamentos:', err);
+      });
+  }
+
   /* Cada categoría es un <details> desplegable (colapsado por defecto); el buscador
      asociado (wireMedsBuscador) las abre automáticamente cuando hay coincidencias. */
   function buildMedsCatsHtml(cats, extraAfterTitle) {
@@ -4986,13 +5044,13 @@ summary.ed-meds-cat { list-style: revert; }
           '<div class="ed-fgroup full"><label class="ed-label">💊 Medicamentos aplicados en consulta</label>' +
             '<input type="text" id="serv-meds-visita-buscar" class="ed-input" placeholder="🔍 Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="serv-meds-visita-list" class="ed-meds-list" data-meds-group="visita">' +
-              buildMedsCatsHtml(MEDS_VISITA_CATS, { titulo: '🧪 Prueba de sensibilidad', html: buildSensResultadoHtml('serv') }) +
+              buildMedsCatsHtml(_medsVisitaCats, { titulo: '🧪 Prueba de sensibilidad', html: buildSensResultadoHtml('serv') }) +
               '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se aplicó ningún medicamento)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">📦 Medicamentos de despacho</label>' +
             '<input type="text" id="serv-meds-despacho-buscar" class="ed-input" placeholder="🔍 Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="serv-meds-despacho-list" class="ed-meds-list" data-meds-group="despacho">' +
-              buildMedsCatsHtml(MEDS_DESPACHO_CATS) +
+              buildMedsCatsHtml(_medsDespachoCats) +
               '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se despachan medicamentos)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">🏥 Receta externa (medicamentos a comprar en farmacia)</label>' +
@@ -5479,13 +5537,13 @@ summary.ed-meds-cat { list-style: revert; }
           '<div class="ed-fgroup full"><label class="ed-label">💊 Medicamentos aplicados en la visita *</label>' +
             '<input type="text" id="cons-meds-visita-buscar" class="ed-input" placeholder="🔍 Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="cons-meds-visita-list" class="ed-meds-list" data-meds-group="visita">' +
-              buildMedsCatsHtml(MEDS_VISITA_CATS, { titulo: '🧪 Prueba de sensibilidad', html: buildSensResultadoHtml('cons') }) +
+              buildMedsCatsHtml(_medsVisitaCats, { titulo: '🧪 Prueba de sensibilidad', html: buildSensResultadoHtml('cons') }) +
               '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se aplicó ningún medicamento en la visita)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">📦 Medicamentos de despacho *</label>' +
             '<input type="text" id="cons-meds-despacho-buscar" class="ed-input" placeholder="🔍 Buscar medicamento..." style="margin-bottom:6px">' +
             '<div id="cons-meds-despacho-list" class="ed-meds-list" data-meds-group="despacho">' +
-              buildMedsCatsHtml(MEDS_DESPACHO_CATS) +
+              buildMedsCatsHtml(_medsDespachoCats) +
               '<label class="ed-meds-opt" style="background:#FEF3C7;border:1px dashed #F59E0B"><input type="checkbox" value="__ninguno__" data-meds-ninguno="1"> ⛔ Ninguno (no se despachan medicamentos)</label>' +
             '</div></div>' +
           '<div class="ed-fgroup full"><label class="ed-label">🏥 Receta externa (medicamentos a comprar en farmacia) *</label>' +
@@ -5771,19 +5829,15 @@ summary.ed-meds-cat { list-style: revert; }
           '<div class="ed-grid ed-grid-2" style="gap:10px;margin-top:10px">' +
             '<div class="ed-fgroup"><label class="ed-label">Proveedor (laboratorio) *</label>' +
               '<select class="ed-input" id="qm-lab-proveedor" style="appearance:auto;-webkit-appearance:menulist">' +
-                '<option value="">— Seleccionar —</option>' +
-                '<option value="Labex">Labex</option>' +
-                '<option value="Masterlab">Masterlab</option>' +
-                '<option value="Laboratorio Rivera">Laboratorio Rivera</option>' +
+                buildProveedoresOptionsHtml() +
               '</select></div>' +
             '<div class="ed-fgroup"><label class="ed-label">Prioridad</label>' +
               '<select class="ed-input" id="qm-lab-prioridad"><option value="rutina">Rutina</option><option value="urgente">Urgente</option></select></div>' +
             '<div class="ed-fgroup full"><label class="ed-label">Solicitado por *</label>' +
+              /* Solo médicos (Personal.html, tipo 'medico'); "Orden externa" es
+                 para la muestra que llega con orden de otro consultorio. */
               '<select class="ed-input" id="qm-lab-solicitadopor" style="appearance:auto;-webkit-appearance:menulist">' +
-                '<option value="">— Seleccionar —</option>' +
-                '<option value="Dr. Brian Rojas">Dr. Brian Rojas</option>' +
-                '<option value="Dr. Hermes Molina">Dr. Hermes Molina</option>' +
-                '<option value="Dr. Adony Álvarez">Dr. Adony Álvarez</option>' +
+                buildOptionsHtml(_medicosAtiende) +
                 '<option value="Orden externa">Orden externa</option>' +
               '</select></div>' +
           '</div>' +

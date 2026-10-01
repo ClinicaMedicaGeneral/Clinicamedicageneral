@@ -445,7 +445,7 @@
 
 // Ventas mensuales totales (año cerrado 2025, y 2026 hasta el corte)
 var V2025 = [426322.60,388369.57,495618.75,360856.35,355547.63,382252.10,488989.85,391377.65,374760.65,389722.55,402741.10,399314.33];
-var V2026 = [440023.30,335955.55,398372.45,331083.37,371811.55,441232.90,379336.95,407010.80,319682.32];
+var V2026 = [440023.30,335955.55,398372.45,331083.37,371811.55,441232.90,379336.95,407010.80,333284.30];
 var TOT2024 = 3617415.07;
 var TOT2025 = 4855873.11;
 var MES_NOMBRE = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -571,17 +571,18 @@ var DATA = {
       [21,600,1],[22,740,1],[23,0,0],[24,5759,6],[25,0,0],[26,0,0],[27,1094,2],[28,0,0],[29,650,1],[30,0,0],[31,1025,2] ] }
   },
   '2026-09': {
-    label:'Septiembre 2026', y:2026, m:8, cerrado:false, corte:'29 de septiembre', actualizado:'29/9/2026', diasCorte:29,
-    ventas:319682.32, varPct:-21.48, varMonto:-87437.23,
-    repAnual:6.58, promDiario:11023.53, promDiarioVarPct:-16.06,
-    pos:68.0, efec:32.0, transf:0.0, davi:124074.55, fico:93263.00,
-    hist:{2022:295812.65,2023:207148.25,2024:341595.89,2025:374760.65,2026:319682.32},
-    nuevos:57.00, recur:43.00, promPacDia:15.66, pagoXPac:711.69, diaFuerte:'Lunes',
+    label:'Septiembre 2026', y:2026, m:8, cerrado:true, actualizado:'30/9/2026',
+    ventas:333284.30, varPct:-18.11, varMonto:-73726.50,
+    repAnual:6.86, promDiario:11109.48, promDiarioVarPct:-15.38,
+    pos:68.2, efec:31.5, transf:0.3, davi:134051.55, fico:93263.00,
+    hist:{2022:295812.65,2023:207148.25,2024:341595.89,2025:374760.65,2026:333284.30},
+    nuevos:57.96, recur:42.04, promPacDia:15.7, pagoXPac:714.64, diaFuerte:'Lunes',
     jornada:{regular:93, extendido:7},
-    acum2025Periodo:3651603.13, // acumulado 2025 al 29 sep — estimado: cierres Ene-Ago 2025 exactos (L3,289,334.50, de Datos_Graficos) + sep 2025 prorrateado a 29/30 días, la hoja no expone el dato diario de 2025
-    acum2026Periodo:3424707.86, // acumulado 2026 al 29 sep (dato de Finanzas, "Ventas Actuales")
-    ext:{ pctMes:7, promDia:1.29, cobertura:3756.78, parcial:true, dias:[
-      [1,600,1],[2,72.80,1],[3,900,1],[4,0,0],[5,412,2],[6,0,0],[7,730,1],[8,0,0],[9,600,1],[10,0,0],[11,2725,2],[12,0,0],[13,0,0],[14,600,1],[15,0,0],[16,678,2],[17,1510,2],[18,0,0],[19,1062,3],[20,0,0],[21,0,0],[22,0,0],[23,2054,2],[24,1812.5,4],[25,1665,1],[26,2395,2],[27,0,0],[28,700,1],[29,4754,4] ] }
+    acum2026Periodo:3438309.87, // "Ventas Actuales" de la pestaña Tendencias 2026. acum2025Periodo se omite a propósito: con el mes cerrado, acum(V2025,8) da el mismo periodo exacto (ene–sep 2025 = L3,664,095.15) y ya no hace falta prorratear
+    notas:['<b>Dos cifras distintas para agosto.</b> La pestaña 08-2026 encabeza con <b>L407,010.80</b>, que es lo que muestra este panel, pero el bloque «Ventas (último trimestre)» de la pestaña 09-2026 cita agosto en <b>L407,119.55</b>, y el Sheet HISTOGRAMA coincide con esa cifra más alta. La diferencia es de <b>L108.75</b>. Este panel calcula la variación de septiembre contra L407,010.80 (−18.11%) para no contradecirse a sí mismo; la hoja de septiembre la expresa como −18% / −L73,835.25 porque parte de la cifra alta. Conviene que Finanzas confirme cuál queda como cierre de agosto.',
+           '<b>Errata en Datos_Graficos.</b> La fila de totales 2026 de esa pestaña pone julio en <b>L352,336.95</b>, L27,000 por debajo de los L379,336.95 que reportan la pestaña 07-2026 y el bloque de trimestre. El origen es la fila de Laboratorio de julio, que quedó en L14,657.75 en vez de L41,657.75. Este panel usa la cifra buena; la errata sólo afecta a las gráficas que leen Datos_Graficos.'],
+    ext:{ pctMes:7, promDia:1.28, cobertura:5406.78, parcial:false, dias:[
+      [1,600,1],[2,72.80,1],[3,900,1],[4,0,0],[5,412,2],[6,0,0],[7,730,1],[8,0,0],[9,600,1],[10,0,0],[11,2725,2],[12,0,0],[13,0,0],[14,600,1],[15,0,0],[16,678,2],[17,1510,2],[18,0,0],[19,1062,3],[20,0,0],[21,0,0],[22,0,0],[23,2054,2],[24,1812.5,4],[25,1665,1],[26,2395,2],[27,0,0],[28,700,1],[29,4754,4],[30,1650,1] ] }
   }
 };
 
@@ -766,6 +767,7 @@ function renderFnResumen(d){
     var t = extTotal(d.ext), p = extPac(d.ext);
     out += fn('<b>Horario Extendido:</b> ' + p + ' pacientes y ' + L(t) + ' facturados (' + d.ext.pctMes + '% del mes).' + (d.ext.cobertura!=null ? (d.ext.cobertura < 0 ? ' No cubre su costo fijo — déficit de ' + L(Math.abs(d.ext.cobertura)) + '.' : ' Cubre su costo fijo — superávit de ' + L(d.ext.cobertura) + '.') : ''), d.ext.cobertura!=null && d.ext.cobertura < 0);
   }
+  if(d.notas) d.notas.forEach(function(t){ out += fn(t, true); });
   document.getElementById('fn-resumen').innerHTML = out;
 }
 

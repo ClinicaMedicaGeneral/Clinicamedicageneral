@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>CMG · Plan de contenido septiembre 2026</title>
+<title>CMG · Planes de contenido mensuales</title>
 <link rel="icon" href="assets/isotipo-color.png">
 <style>
   :root{
@@ -89,6 +89,21 @@
   @keyframes spin{ to{transform:rotate(360deg);} }
   #cmg-gate-content{display:none;}
 
+  .month-picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0 4px}
+  .month-picker label{color:var(--teal);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700}
+  .month-picker select{
+    font-family:inherit;font-weight:800;font-size:15px;color:var(--navy);background:var(--neutro);
+    border:2px solid var(--amarillo);border-radius:20px;padding:7px 36px 7px 16px;cursor:pointer;
+    -webkit-appearance:none;appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23213C7D' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;
+  }
+  .mes-block{display:none}
+  .mes-block.activo{display:block}
+  .estado-mes{display:inline-block;background:var(--teal);color:#fff;font-size:10px;font-weight:800;
+    letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-top:4px}
+  .estado-mes.cerrado{background:#6b7290}
+  @media print{ .month-picker{display:none} .mes-block{display:block !important} }
   .adm-bar{
     max-width:1180px; margin:0 auto 14px;
     display:flex; align-items:center; justify-content:flex-end; gap:12px;
@@ -121,9 +136,299 @@
 
   <header>
     <div class="kicker">Clínica Médica General · Dirección Comercial</div>
-    <h1>Plan de contenido<br>Septiembre 2026</h1>
-    <div class="sub"><b>Del ticket al volumen.</b> Elaborado a partir del reporte ejecutivo de agosto 2026 y del dashboard de Meta Ads al 2 de septiembre · Emitido el 2 de septiembre de 2026 · Cubre del 3 al 30 de septiembre · Cerrado el 30 de septiembre con datos al 29</div>
+    <h1 id="mes-titulo">Plan de contenido<br>Octubre 2026</h1>
+    <div id="mes-estado"></div>
+    <div class="month-picker">
+      <label for="month-select">Mes</label>
+      <select id="month-select"></select>
+    </div>
+    <div class="sub" id="mes-sub">—</div>
   </header>
+
+  <!-- ══════════════════ OCTUBRE 2026 · PLAN VIGENTE ══════════════════ -->
+  <div class="mes-block activo" data-mes="2026-10">
+
+  <section>
+    <h2>Resumen ejecutivo</h2>
+    <div class="card resumen">
+      <p><b>1.</b> Octubre se enfoca en <b>recuperar volumen de días</b>: el problema de septiembre no fue de alcance sino de regularidad — la mitad de los días del mes quedaron bajo el piso de liquidez.</p>
+      <p><b>2.</b> El dato que lo obliga: <b>15 de 30 días (50.0%) cerraron bajo los L10,500</b>, contra 9 de 31 (29.0%) en agosto. Es el doble del disparador del 25% de la regla P5 y el peor registro del semestre.</p>
+      <p><b>3.</b> La meta del mes son <b>3 pacientes adicionales por día operado</b> — 93 en el mes. Sale por dos caminos independientes: la brecha de L64,806.12 contra la meta mensual dividida entre el ticket de L697.25 da 93 pacientes; y la meta de 19 pacientes/día contra los 15.93 de septiembre da 3.07 por día.</p>
+      <p><b>4.</b> Queda congelado únicamente el <b>Suero Complejo B</b> (regla P1, caída de 81.91% en julio sin causa confirmada). La Dirección confirmó que hay insumo de Vitamina C, Oxigenador Cerebral y Glutathione, así que los tres se liberan: su caída es de mensaje, no de disponibilidad.</p>
+      <p><b>5.</b> El riesgo principal es la <b>Semana Morazánica del 7 al 11</b>: cae exactamente sobre el valle de liquidez, con horario reducido a las 6 PM, mientras la campaña de alcance activa sigue comunicando atención hasta las 10 PM.</p>
+    </div>
+    <div class="nota riesgo"><b>Riesgos del mes:</b> (1) la Semana Morazánica del 7 al 11 suma horario reducido y salida de la ciudad sobre la semana que ya es la más débil del mes; (2) extracción de uña entra con fatiga de creativo confirmada por cuatro métricas en rojo — si el creativo nuevo no sale antes del 13, el pilar 2 se queda sin con qué; (3) los tres sueros liberados llevan dos meses cayendo: si el contenido educativo no los mueve, el problema deja de ser de mensaje y pasa a ser de catálogo; (4) cauterización perdió L13,220 en un mes y es la mayor caída absoluta de la cuenta, con la campaña a L0.06 de salir del rojo.</div>
+  </section>
+
+  <section>
+    <h2>Diagnóstico de septiembre · los cuatro indicadores cerraron bajo meta</h2>
+    <div class="diag">
+      <div><span>Venta total</span><strong>L333,284.30</strong><em>−18.14% vs agosto · meta L409,200</em></div>
+      <div><span>Promedio diario</span><strong>L11,109.48</strong><em>meta L13,200 · −15.8%</em></div>
+      <div><span>Ticket promedio</span><strong>L697.25</strong><em>meta L740 · agosto cumplió con L749.76</em></div>
+      <div><span>Pacientes por día</span><strong>15.93</strong><em>meta 19 · 478 pacientes en el mes</em></div>
+      <div><span>Días bajo L10,500</span><strong>15 de 30</strong><em>50.0% · agosto 29.0%</em></div>
+      <div><span>Días con meta de suero</span><strong>2 de 30</strong><em>agosto fueron 4 · meta L3,064/día</em></div>
+    </div>
+    <div class="nota"><b>Corrección sobre la hoja:</b> el Sheet marca 14 días bajo umbral porque no marcó el <b>22 de septiembre (L6,060.00)</b>, que sí está bajo el piso. Por valor son <b>15 de 30</b>. El mismo error existe en agosto, donde falta el 30/8 (L6,961.50) y el real es 9 de 31. Las dos cifras de este plan están contadas por valor, no por la casilla.</div>
+
+    <h2 style="margin-top:24px">Pilares y servicios · qué se movió</h2>
+    <table>
+      <thead><tr><th>Línea</th><th>Julio</th><th>Agosto</th><th>Septiembre</th><th>Variación</th><th>Lectura</th></tr></thead>
+      <tbody>
+        <tr><td><b>Servicios pilares</b></td><td>L96,325.00</td><td>L93,040.00</td><td>L77,170.00</td><td style="color:#F20F10;font-weight:700">−17.06%</td><td>Arrastrado por cauterización</td></tr>
+        <tr><td><b>Sueroterapias</b></td><td>L44,500.00</td><td>L53,550.00</td><td>L30,750.00</td><td style="color:#F20F10;font-weight:700">−42.58%</td><td>La mayor caída relativa del mes</td></tr>
+        <tr><td><b>Laboratorio</b></td><td>L41,657.75</td><td>L64,089.25</td><td>L36,706.75</td><td style="color:#F20F10;font-weight:700">−42.73%</td><td>Sin pauta de conversión todo el mes</td></tr>
+        <tr><td><b>Consultas</b></td><td>L68,700.00</td><td>L61,800.00</td><td>L61,800.00</td><td>0.00%</td><td>Cifra idéntica a agosto · por confirmar</td></tr>
+        <tr><td><b>Neto pilares</b></td><td>L251,189.17</td><td>L272,487.05</td><td>L206,426.75</td><td style="color:#F20F10;font-weight:700">−24.24%</td><td>Depende de la celda de consultas</td></tr>
+        <tr><td>Cauterización</td><td>L47,475.00</td><td>L47,690.00</td><td>L34,470.00</td><td style="color:#F20F10;font-weight:700">−27.72%</td><td>Mayor caída absoluta: −L13,220</td></tr>
+        <tr><td>Lavado de oído</td><td>L18,200.00</td><td>L25,600.00</td><td>L24,400.00</td><td>−4.69%</td><td>El más estable y el de mejor ROAS</td></tr>
+        <tr><td>Extracción de uña</td><td>L30,650.00</td><td>L19,750.00</td><td>L18,300.00</td><td style="color:#F20F10;font-weight:700">−7.34%</td><td>Segundo mes seguido cayendo con pauta</td></tr>
+        <tr><td>Electrocardiograma</td><td>L4,150.00</td><td>L3,500.00</td><td>L8,000.00</td><td style="color:#4E8273;font-weight:700">+128.57%</td><td>Único que creció · primer mes con pauta</td></tr>
+        <tr><td>Suero Boost</td><td>L18,900.00</td><td>L17,550.00</td><td>L17,550.00</td><td>0.00%</td><td>Plano tres meses · el mayor de la línea</td></tr>
+        <tr><td>Suero Oxigenador</td><td>L12,600.00</td><td>L19,600.00</td><td>L7,700.00</td><td style="color:#F20F10;font-weight:700">−60.71%</td><td>Pauta pausada el 12 sep · hay insumo</td></tr>
+        <tr><td>Suero Vitamina C</td><td>L3,000.00</td><td>L8,000.00</td><td>L1,000.00</td><td style="color:#F20F10;font-weight:700">−87.50%</td><td>Hay insumo · nunca tuvo pauta propia</td></tr>
+        <tr><td>Suero Glutathione</td><td>L8,250.00</td><td>L5,850.00</td><td>L1,950.00</td><td style="color:#F20F10;font-weight:700">−66.67%</td><td>Hay insumo · entra a sondeo</td></tr>
+        <tr><td>Suero Complejo B</td><td>L850.00</td><td>L2,550.00</td><td>L2,550.00</td><td>0.00%</td><td><b>Congelado por P1</b> · sin confirmar</td></tr>
+      </tbody>
+    </table>
+
+    <h2 style="margin-top:24px">Cruce de pauta contra venta · septiembre cerrado</h2>
+    <div class="cruce">
+      <div><h4>Invierte y vende · sostener</h4><p><b>Lavado de oído:</b> L2,146.80 de pauta, L24,400 de venta, <b>ROAS 11.37x</b> y el costo por conversación más bajo de la cuenta (L7.45). Es la única que Meta señala para escalar.<br><b>Cauterización:</b> L3,877.96, L34,470, <b>ROAS 8.89x</b>. Cayó 27.72% pero el retorno sigue siendo el segundo mejor.</p></div>
+      <div><h4>Invierte y no vende · regla P3</h4><p><b>Extracción de uña:</b> L3,876.57 de pauta y sólo L18,300 de venta, <b>ROAS 4.72x</b>. Dos meses seguidos cayendo con pauta activa y cuatro métricas en rojo a la vez (CTR −24.46%, costo por resultado +29.30%, costo por clic +80.37%, CPM +23.66%). Es problema de mensaje, no de presupuesto.</p></div>
+      <div><h4>Vende sin invertir · amplificar</h4><p><b>Suero Boost:</b> L17,550 sin un lempira de pauta, tres meses plano. <b>Laboratorio:</b> L36,706.75 sin pauta de conversión, sólo alcance desde el 25 sep. <b>Consultas:</b> L61,800, la línea más grande del acumulado anual (17.1%) y la que menos contenido recibe.</p></div>
+      <div><h4>Ni invierte ni vende · hueco de catálogo</h4><p><b>Vitamina C, Glutathione y Complejo B</b> suman L5,500 entre los tres. Vitamina C y Glutathione tienen insumo confirmado y entran a sondeo con peso mínimo (regla P10). Complejo B sigue congelado.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Mix del mes</h2>
+    <div class="mix">
+      <div><strong>40%</strong><span>Promocional</span></div>
+      <div><strong>40%</strong><span>Educativo / preventivo</span></div>
+      <div><strong>20%</strong><span>Emocional / comunidad</span></div>
+    </div>
+    <div class="nota"><b>Justificación numérica (regla P5):</b> el bloque promocional sube <b>10 puntos</b> sobre la base 50/30/20 — el máximo que permite la regla — porque los días bajo umbral pasaron de <b>29.0% (9 de 31) en agosto a 50.0% (15 de 30) en septiembre</b>, el doble del disparador del 25%. Los 10 puntos salen del bloque educativo, que baja de 50 a 40; el emocional no se mueve. La brecha mensual contra la meta de octubre (L409,200 = L13,200 × 31 días) frente al ritmo de septiembre (L344,393.88) es de <b>L64,806.12</b>, que al ticket de L697.25 equivale a <b>93 pacientes adicionales en el mes, 3.0 por día operado</b>.</div>
+    <div class="nota ok"><b>Dónde se ancla cada punto extra:</b> en septiembre los días débiles no fueron aleatorios. <b>Los cuatro martes del mes cerraron bajo umbral</b> (1, 8, 15 y 22), igual que tres de cuatro jueves (10, 17, 24) y tres de cuatro viernes (4, 18, 25). El día más fuerte de la semana se movió de sábado a <b>lunes</b>. Por eso los diez puntos promocionales se anclan a los <b>martes 6, 13, 20 y 27</b> y a los <b>jueves 15 y 29</b> y <b>viernes 2, 16 y 30</b> de octubre, y el anclaje semanal se corre al inicio de semana.</div>
+    <div class="nota"><b>La regla P6 no se dispara.</b> Exige dos meses seguidos de ticket bajo la meta y agosto la cumplió (L749.76 contra L740); septiembre es el primero por debajo (L697.25). Las piezas promocionales de octubre pueden llevar precio directo. Se vigila: si octubre vuelve a cerrar bajo L740, P6 se dispara para noviembre y todo el bloque promocional pasa a combos.</div>
+  </section>
+
+  <section>
+    <h2>Pilares del mes · cinco pilares, 100% del calendario</h2>
+    <div class="grid">
+      <div class="pilar">
+        <span class="peso">6 de 31 piezas · 19%</span>
+        <h3>1 · Cauterización, recuperar el pilar</h3>
+        <p><b>Necesidad:</b> cayó 27.72% en un mes (L47,690 → L34,470), la mayor caída absoluta de toda la cuenta: −L13,220.</p>
+        <p><b>Servicios:</b> cauterización y eliminación de verrugas, L200 por lesión.</p>
+        <p class="regla">Reglas P2 y P5 · presencia semanal del pilar y anclaje a días débiles</p>
+      </div>
+      <div class="pilar">
+        <span class="peso">4 de 31 piezas · 13%</span>
+        <h3>2 · Extracción de uña, ángulo nuevo</h3>
+        <p><b>Necesidad:</b> dos meses seguidos cayendo con pauta activa y fatiga de creativo confirmada por cuatro métricas. La objeción a atacar es el miedo al dolor y la duda sobre cuánto tarda.</p>
+        <p><b>Servicios:</b> extracción de uña, L500.</p>
+        <p class="regla">Reglas P3 y P11 · ángulo nuevo, contenido de objeción y flujo de WhatsApp</p>
+      </div>
+      <div class="pilar">
+        <span class="peso">10 de 31 piezas · 32%</span>
+        <h3>3 · Volumen de entrada</h3>
+        <p><b>Necesidad:</b> consulta es el 17.1% del acumulado anual y exige presencia semanal; lavado de oído tiene el mejor ROAS de la cuenta; laboratorio cayó 42.73% sin pauta de conversión.</p>
+        <p><b>Servicios:</b> consulta L300, lavado de oído L400, laboratorio, electrocardiograma L500 en paquete.</p>
+        <p class="regla">Reglas P2 y P8 · presencia del pilar mayor y cross-sell en toda pieza</p>
+      </div>
+      <div class="pilar">
+        <span class="peso">5 de 31 piezas · 16%</span>
+        <h3>4 · Sueroterapia, educar</h3>
+        <p><b>Necesidad:</b> la línea cayó 42.58% y sólo 2 de 30 días alcanzaron la meta de suero. Con insumo confirmado, la barrera es desconocimiento, no disponibilidad.</p>
+        <p><b>Servicios:</b> Boost L1350, Oxigenador L700, Vitamina C L1000, Glutathione L1500 en sondeo.</p>
+        <p class="regla">Reglas P7 y P10 · 60% educativo dentro del bloque y sondeo de los marginales</p>
+      </div>
+      <div class="pilar">
+        <span class="peso">6 de 31 piezas · 19%</span>
+        <h3>5 · Horario y Semana Morazánica</h3>
+        <p><b>Necesidad:</b> la franja nocturna aporta cerca del 7% de los ingresos, bajo el piso del 10%, y del 7 al 11 el horario se reduce a las 6 PM.</p>
+        <p><b>Servicios:</b> comunicación de horario, atención sin cita, parqueo.</p>
+        <p class="regla">Regla P9 · una de cada cuatro piezas menciona la franja nocturna, nunca del 7 al 11</p>
+      </div>
+    </div>
+    <div class="nota"><b>Por qué el pilar 2 pesa menos que los demás:</b> sus cuatro piezas salen todas <b>del 13 de octubre en adelante</b>, cuando entra el creativo nuevo. La regla P3 pide ángulo nuevo, no más alcance: publicar antes del 13 significaría repetir el carrusel que ya viene con cuatro métricas en rojo. El día 20 cuenta dentro del pilar 1 aunque la pieza cruza cauterización con lavado de oído.</div>
+  </section>
+
+  <section>
+    <h2>Restricción del mes · Semana Morazánica, horario confirmado por Dirección</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>Días</th><th>Horario</th><th>Qué puede decir el contenido</th></tr></thead>
+        <tbody>
+          <tr><td><b>Lunes 5 y martes 6</b></td><td>6:00 AM – 10:00 PM</td><td>Horario completo. Se puede y se debe mencionar la franja nocturna.</td></tr>
+          <tr><td><b>Miércoles 7, jueves 8 y viernes 9</b></td><td>8:00 AM – 6:00 PM</td><td style="color:#F20F10"><b>Prohibido mencionar las 10 PM.</b> La pieza lleva el horario reducido explícito.</td></tr>
+          <tr><td><b>Sábado 10</b></td><td>7:00 AM – 7:00 PM</td><td style="color:#F20F10"><b>Prohibido mencionar las 10 PM.</b> Se comunica el horario del día.</td></tr>
+          <tr><td><b>Domingo 11</b></td><td>8:00 AM – 6:00 PM</td><td style="color:#F20F10"><b>Prohibido mencionar las 10 PM.</b> Se comunica el horario del día.</td></tr>
+          <tr><td><b>Lunes 12 en adelante</b></td><td>6:00 AM – 10:00 PM</td><td>Vuelve el horario normal. La pieza del 12 lo anuncia.</td></tr>
+        </tbody>
+      </table>
+      <div class="nota riesgo"><b>Acción urgente antes del 7 de octubre:</b> la campaña de alcance <b>Horario Extendido - Octubre</b> está corriendo con mensaje de atención hasta las 10 PM y gastó L538.83 en septiembre con 84,670 impresiones. Del 7 al 11 ese mensaje contradice la operación. Hay que <b>pausarla el 6 por la noche y reactivarla el 12</b>, o sustituir el creativo por uno con el horario de Semana Morazánica. Es el único punto del plan que no admite demora.</div>
+      <div class="nota"><b>Dato incompleto:</b> la respuesta de Dirección termina con la palabra "Domingo" sin horario asociado, después del bloque de Semana Morazánica. Se asumió que corresponde al domingo 11 dentro del feriado. Si se refería a los domingos del resto del mes, hay que confirmarlo: cambia las piezas de los domingos 18 y 25.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Calendario día por día · 1 al 31 de octubre</h2>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Fecha</th><th>Día</th><th>Pilar</th><th>Servicio</th><th>Tipo</th><th>Formato</th><th>Titular propuesto</th><th>CTA</th><th>Canal</th></tr></thead>
+      <tbody>
+        <tr><td>1 oct</td><td>Jueves</td><td>1</td><td>Cauterización</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Esa verruga que llevas meses mirando se quita hoy. L200 por lesión</td><td>Escríbenos al WhatsApp y ven sin cita</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>2 oct</td><td>Viernes</td><td>3</td><td>Lavado de oído</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Oyes como si tuvieras el oído tapado. Lavado de oído L400 y sales oyendo claro</td><td>Escríbenos y ven hoy mismo, sin cita, hasta las 10 PM</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>3 oct</td><td>Sábado</td><td>5</td><td>Horario</td><td><span class="tag t-emo">Emocional</span></td><td>Carrusel</td><td>Sábado abierto de 7 AM a 7 PM. Tu salud no espera al lunes</td><td>Ven cuando puedas, te atendemos por orden de llegada</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>4 oct</td><td>Domingo</td><td>3</td><td>Consulta médica</td><td><span class="tag t-edu">Educativo</span></td><td>Post educativo</td><td>Cuatro señales de que esa gripe ya necesita consulta médica</td><td>Consulta L300. Escríbenos al WhatsApp</td><td>Facebook, Instagram</td></tr>
+        <tr><td>5 oct</td><td>Lunes</td><td>5</td><td>Horario Morazánica</td><td><span class="tag t-emo">Emocional</span></td><td>Post informativo · Plantilla A</td><td>Semana Morazánica: hoy y mañana te atendemos de 6 AM a 10 PM</td><td>Aprovecha el horario completo y ven sin cita</td><td>Facebook, Instagram, historias, TV sala de espera</td></tr>
+        <tr style="background:#FFF6DC"><td>6 oct</td><td>Martes</td><td>5</td><td>Horario Morazánica</td><td><span class="tag t-promo">Promocional</span></td><td>Post informativo · Plantilla A</td><td>Último día de horario completo: hoy hasta las 10 PM, mañana cerramos a las 6 PM</td><td>Ven hoy y resuelve antes del feriado. Escríbenos al WhatsApp</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>7 oct</td><td>Miércoles</td><td>5</td><td>Horario Morazánica</td><td><span class="tag t-edu">Educativo</span></td><td>Post informativo · Plantilla A</td><td>Del miércoles al viernes abrimos de 8 AM a 6 PM. Seguimos aquí en Semana Morazánica</td><td>Guarda el horario y escríbenos antes de venir</td><td>Facebook, Instagram, historias, TV sala de espera</td></tr>
+        <tr><td>8 oct</td><td>Jueves</td><td>3</td><td>Laboratorio</td><td><span class="tag t-edu">Educativo</span></td><td>Post educativo</td><td>Antes de viajar: tres exámenes que conviene tener al día</td><td>Cotiza tus exámenes por WhatsApp. Hoy hasta las 6 PM</td><td>Facebook, Instagram</td></tr>
+        <tr><td>9 oct</td><td>Viernes</td><td>1</td><td>Cauterización</td><td><span class="tag t-edu">Educativo</span></td><td>Post educativo</td><td>Por qué una verruga no se quita sola y qué pasa si la dejas crecer</td><td>Consulta tu caso por WhatsApp. Hoy hasta las 6 PM</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>10 oct</td><td>Sábado</td><td>5</td><td>Horario Morazánica</td><td><span class="tag t-sin">Sólo historias</span></td><td>Historias</td><td>Sin pieza de feed: feriado con la audiencia fuera de la ciudad. Historias con el horario del día, 7 AM a 7 PM</td><td>Ven sin cita, con parqueo en City Mall</td><td>Historias</td></tr>
+        <tr><td>11 oct</td><td>Domingo</td><td>3</td><td>Consulta médica</td><td><span class="tag t-sin">Sólo historias</span></td><td>Historias</td><td>Sin pieza de feed: último día del feriado, alcance orgánico mínimo. Historias con el horario 8 AM a 6 PM y recordatorio de consulta sin cita</td><td>Consulta L300, sin cita. Escríbenos al WhatsApp</td><td>Historias</td></tr>
+        <tr><td>12 oct</td><td>Lunes</td><td>3</td><td>Consulta médica</td><td><span class="tag t-edu">Educativo</span></td><td>Post educativo</td><td>Volvemos al horario de siempre: de 6 AM a 10 PM</td><td>Consulta L300, sin cita. Escríbenos al WhatsApp</td><td>Facebook, Instagram, historias</td></tr>
+        <tr style="background:#FFF6DC"><td>13 oct</td><td>Martes</td><td>2</td><td>Extracción de uña</td><td><span class="tag t-promo">Promocional</span></td><td>Video testimonio · <b>creativo nuevo</b></td><td>Llevas semanas cojeando por una uña enterrada. Se resuelve en una visita, L500</td><td>Escríbenos y te decimos qué esperar, paso a paso</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>14 oct</td><td>Miércoles</td><td>4</td><td>Suero Boost</td><td><span class="tag t-edu">Educativo</span></td><td>Post educativo</td><td>Por qué el Suero Boost se usa después del esfuerzo y no antes</td><td>Pregunta por el Suero Boost L1350 en WhatsApp</td><td>Facebook, Instagram</td></tr>
+        <tr style="background:#FFF6DC"><td>15 oct</td><td>Jueves</td><td>3</td><td>Lavado de oído + consulta</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Quincena: lavado de oído L400 y consulta médica L300, el mismo día</td><td>Escríbenos y ven sin cita, hasta las 10 PM</td><td>Facebook, Instagram, historias</td></tr>
+        <tr style="background:#FFF6DC"><td>16 oct</td><td>Viernes</td><td>1</td><td>Cauterización</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Quincena bien usada: quítate esa verruga desde L200 por lesión</td><td>Escríbenos al WhatsApp y ven hoy</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>17 oct</td><td>Sábado</td><td>2</td><td>Extracción de uña</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel · objeción</td><td>Duele menos de lo que te imaginas: así es una extracción de uña, paso a paso</td><td>Escríbenos y te explicamos antes de que vengas</td><td>Facebook, Instagram</td></tr>
+        <tr><td>18 oct</td><td>Domingo</td><td>3</td><td>Laboratorio</td><td><span class="tag t-sin">Sólo historias</span></td><td>Historias</td><td>Sin pieza de feed: antesala del pago público, el peso se reserva para el día 20. Historias de anticipación de laboratorio</td><td>Cotiza tu perfil de lípidos por WhatsApp</td><td>Historias</td></tr>
+        <tr><td>19 oct</td><td>Lunes</td><td>5</td><td>Horario nocturno</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>Sales del trabajo a las 8 PM y la clínica sigue abierta hasta las 10</td><td>Ven sin cita, por orden de llegada</td><td>Facebook, Instagram, historias después de 5 PM</td></tr>
+        <tr style="background:#FDD22C"><td><b>20 oct</b></td><td><b>Martes</b></td><td>1 y 3</td><td>Cauterización + lavado de oído</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Día de pago: resuelve hoy lo que vienes posponiendo. Cauterización L200, lavado de oído L400</td><td>Escríbenos desde temprano y ven sin cita, hasta las 10 PM</td><td>Facebook, Instagram, historias, TV sala de espera</td></tr>
+        <tr><td>21 oct</td><td>Miércoles</td><td>4</td><td>Suero Oxigenador</td><td><span class="tag t-edu">Educativo</span></td><td>Post educativo · ángulo nuevo</td><td>Te cuesta concentrarte y lo achacas al cansancio. El Suero Oxigenador Cerebral L700 se usa para eso</td><td>Pregunta si es para ti por WhatsApp</td><td>Facebook, Instagram</td></tr>
+        <tr><td>22 oct</td><td>Jueves</td><td>3</td><td>Electrocardiograma</td><td><span class="tag t-edu">Educativo</span></td><td>Post educativo</td><td>Qué mide un perfil de lípidos y por qué se pide junto al electrocardiograma</td><td>Cotiza el paquete por WhatsApp</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>23 oct</td><td>Viernes</td><td>4</td><td>Suero Vitamina C</td><td><span class="tag t-edu">Educativo</span></td><td>Post educativo</td><td>Para qué sirve realmente el Suero Vitamina C y cuándo conviene</td><td>Pregúntanos si es para ti por WhatsApp</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>24 oct</td><td>Sábado</td><td>2</td><td>Extracción de uña</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>Volver a caminar sin pensar en esa uña todo el día</td><td>Escríbenos y te explicamos cómo es. Sábado de 7 AM a 7 PM</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>25 oct</td><td>Domingo</td><td>4</td><td>Sueroterapia</td><td><span class="tag t-sin">Sólo historias</span></td><td>Historias</td><td>Sin pieza de feed: cuarto domingo, se cuida la frecuencia de la audiencia antes del cierre de mes. Historias de sueroterapia dentro de la ventana alta</td><td>Pregunta cuál suero te conviene por WhatsApp</td><td>Historias</td></tr>
+        <tr><td>26 oct</td><td>Lunes</td><td>4</td><td>Suero Boost</td><td><span class="tag t-edu">Educativo</span></td><td>Post educativo</td><td>Cuánto dura una sesión de sueroterapia y qué sientes después</td><td>Pregúntanos cuál te conviene por WhatsApp</td><td>Facebook, Instagram, historias</td></tr>
+        <tr style="background:#FFF6DC"><td>27 oct</td><td>Martes</td><td>1</td><td>Cauterización</td><td><span class="tag t-promo">Promocional</span></td><td>Video testimonio</td><td>En una visita y sin quirófano: así se quita una verruga. L200 por lesión</td><td>Escríbenos al WhatsApp y ven sin cita, hasta las 10 PM</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>28 oct</td><td>Miércoles</td><td>3</td><td>Adulto mayor</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real · Plantilla A</td><td>Si tienes 60 o más, aquí te atendemos con el tiempo que necesitas: consulta L225 y electrocardiograma L375</td><td>Escríbenos y ven con tu identidad</td><td>Facebook, Instagram, historias, TV sala de espera</td></tr>
+        <tr style="background:#FFF6DC"><td>29 oct</td><td>Jueves</td><td>2</td><td>Extracción de uña</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Cierra el mes caminando bien: extracción de uña L500</td><td>Escríbenos y ven hoy, hasta las 10 PM</td><td>Facebook, Instagram, historias</td></tr>
+        <tr style="background:#FFF6DC"><td>30 oct</td><td>Viernes</td><td>1</td><td>Cauterización</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Últimos días del mes para quitarte esa verruga: L200 por lesión</td><td>Escríbenos y ven sin cita</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>31 oct</td><td>Sábado</td><td>3</td><td>Consulta + laboratorio</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Cierre de mes: consulta médica L300 y cotiza tus exámenes el mismo día</td><td>Escríbenos y ven, de 7 AM a 7 PM</td><td>Facebook, Instagram, historias</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="nota"><b>Barra amarilla (20 de octubre):</b> es el día de mayor potencial del mes —pago de empleados públicos— y además cae martes, que fue el día que más falló en septiembre: los cuatro martes del mes cerraron bajo umbral. Se activa desde las 9 AM con la pieza de feed y se refuerza con historias cada tres horas hasta las 8 PM. No se espera el tráfico: se provoca.</div>
+    <div class="nota"><b>Filas en crema:</b> son los nueve anclajes promocionales de la regla P5, puestos sobre los días de la semana que fallaron en septiembre — martes 6, 13, 20 y 27; jueves 15 y 29; viernes 2, 16 y 30. Cada punto extra del bloque promocional está atado a uno de ellos.</div>
+    <div class="nota ok"><b>Octubre arranca con el calendario completo desde el día 1.</b> El plan de septiembre dejó anotado que debía entregarse antes del inicio del mes para no perder el eco del pago de fin de mes — los días 1 y 2 de septiembre quedaron sin publicación por eso, y los dos cerraron bajo umbral. Esta vez la pieza del 1 de octubre sale el mismo día 1.</div>
+  </section>
+
+  <section>
+    <h2>Cadencia semanal · 27 piezas de feed</h2>
+    <table>
+      <thead><tr><th>Semana</th><th>Feed</th><th>Promocional</th><th>Educativo</th><th>Emocional</th><th>Sólo historias</th></tr></thead>
+      <tbody>
+        <tr><td>1 al 4 de octubre</td><td>4</td><td>2</td><td>1</td><td>1</td><td>0</td></tr>
+        <tr><td>5 al 11 de octubre</td><td>5</td><td>1</td><td>3</td><td>1</td><td>2</td></tr>
+        <tr><td>12 al 18 de octubre</td><td>6</td><td>3</td><td>3</td><td>0</td><td>1</td></tr>
+        <tr><td>19 al 25 de octubre</td><td>6</td><td>1</td><td>3</td><td>2</td><td>1</td></tr>
+        <tr><td>26 al 31 de octubre</td><td>6</td><td>4</td><td>1</td><td>1</td><td>0</td></tr>
+        <tr><td><b>Total del mes</b></td><td><b>27</b></td><td><b>11</b></td><td><b>11</b></td><td><b>5</b></td><td><b>4</b></td></tr>
+      </tbody>
+    </table>
+    <div class="nota">El reparto cierra en <b>11 promocionales, 11 educativas y 5 emocionales</b> sobre 27 piezas de feed: 40.7% / 40.7% / 18.5%, que es el mix 40/40/20 del mes. Historias diarias los 31 días. Un video de TV de sala de espera. Dos flujos de WhatsApp, uno nuevo y uno revisado. Las cuatro filas de "sólo historias" llevan CTA igual que las demás: son días de menor peso, no días vacíos.</div>
+  </section>
+
+  <section>
+    <h2>Piezas de refuerzo</h2>
+    <div class="card">
+      <p><b>Video del TV de sala de espera.</b> 16:9, de 5 a 6 segundos por slide, transición suave de 0.8 segundos, loop continuo, Ken Burns sutil, música instrumental suave. Se actualizan tres slides este mes: <b>horario de Semana Morazánica del 7 al 11</b> (se retira el 12), <b>paquete de perfil de lípidos más electrocardiograma L500</b>, y <b>descuento de tercera edad</b> con consulta L225 y electrocardiograma L375. Sale al aire el 5 de octubre.</p>
+      <p><b>Historias.</b> Diarias. Las de franja nocturna se programan después de las 5 PM los días 1, 2, 5, 6, 12, 15, 16, 19, 20, 22, 23, 26, 27, 28, 29, 30 y 31 — <b>nunca del 7 al 11</b>, cuando la clínica cierra a las 6 PM. El 20 de octubre llevan refuerzo cada tres horas desde las 9 AM.</p>
+      <p><b>Flujos de WhatsApp.</b> Uno nuevo y uno revisado, ambos a cargo de <code>cmg-whatsapp-cro</code>. El revisado es el de <b>extracción de uña</b>: generó 306 conversaciones y sólo L18,300 de venta, la peor conversión de conversación a venta de la cuenta (L59.80 por conversación, contra L100.50 de cauterización). El nuevo es el del <b>paquete de lípidos más electrocardiograma</b>, con transferencia a la Lic. María del Carmen.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Presupuesto de pauta · L13,500 aprobados</h2>
+    <table>
+      <thead><tr><th>Campaña</th><th>Septiembre</th><th>Octubre</th><th>Cambio</th><th>Por qué</th></tr></thead>
+      <tbody>
+        <tr><td>Cauterizaciones 2026</td><td>L3,877.96</td><td>L3,900</td><td>sostener</td><td>Mayor volumen de la cuenta y ROAS 8.89x. Es el pilar que hay que recuperar, no recortar.</td></tr>
+        <tr><td>Extracción de Uña</td><td>L3,876.57</td><td>L3,400</td><td style="color:#F20F10;font-weight:700">−L476</td><td>Regla P3: con fatiga de creativo, más alcance encarece. Se baja hasta que corra el creativo nuevo del 13.</td></tr>
+        <tr><td>Lavado de Oído</td><td>L2,146.80</td><td>L2,600</td><td style="color:#4E8273;font-weight:700">+L453</td><td>Mejor ROAS de la cuenta (11.37x) y la única que Meta señala para escalar con delivery estable.</td></tr>
+        <tr><td>Electrocardiograma</td><td>L1,972.81</td><td>L1,900</td><td>sostener</td><td>Cruzó la línea de 4x por poco (4.06x). Se sostiene con el paquete y el ángulo de testimonio.</td></tr>
+        <tr><td>Horario Extendido · alcance</td><td>L538.83</td><td>L900</td><td style="color:#4E8273;font-weight:700">+L361</td><td>Es la única pauta con evidencia directa de mover facturación. <b>Pausar del 7 al 11.</b></td></tr>
+        <tr><td>Cotiza Laboratorio · alcance</td><td>L266.36</td><td>L600</td><td style="color:#4E8273;font-weight:700">+L334</td><td>Laboratorio cayó 42.73% y es la línea grande sin pauta de conversión.</td></tr>
+        <tr><td>Reserva</td><td>—</td><td>L200</td><td>—</td><td>Para reforzar cauterización o laboratorio según la lectura del día 15.</td></tr>
+        <tr><td><b>Total</b></td><td><b>L13,251.81</b></td><td><b>L13,500</b></td><td><b>+L248</b></td><td>Mismo nivel que septiembre, redistribuido hacia lo que rinde.</td></tr>
+      </tbody>
+    </table>
+    <div class="nota"><b>Nota de criterio:</b> Meta recomienda escalar presupuesto en cuatro campañas, entre ellas Extracción de Uña. Este plan <b>no sigue esa recomendación</b> para ese caso: la campaña tiene cuatro métricas de tendencia en rojo y su problema es el creativo. Escalar un creativo cansado sube el costo, no el resultado. Primero creativo nuevo, después presupuesto.</div>
+  </section>
+
+  <section>
+    <h2>KPIs de octubre · punto de partida septiembre 2026</h2>
+    <table>
+      <thead><tr><th>Indicador</th><th>Septiembre 2026</th><th>Meta octubre</th><th>Depende de</th></tr></thead>
+      <tbody>
+        <tr><td>Venta total</td><td>L333,284.30</td><td>L409,200</td><td>Todo el calendario</td></tr>
+        <tr><td>Promedio diario</td><td>L11,109.48</td><td>L13,200</td><td>Pilares 1 y 3</td></tr>
+        <tr><td>Ticket promedio</td><td>L697.25</td><td>L740</td><td>Pilares 2 y 4 · paquetes y sueros</td></tr>
+        <tr><td>Pacientes por día</td><td>15.93</td><td>19.0</td><td>Pilares 1 y 3 · 3 pacientes más por día</td></tr>
+        <tr><td>Días bajo L10,500</td><td>15 de 30 · 50.0%</td><td>8 de 31 o menos · 25%</td><td>Los nueve anclajes promocionales</td></tr>
+        <tr><td>Cauterización</td><td>L34,470.00</td><td>L45,000</td><td>Pilar 1</td></tr>
+        <tr><td>Lavado de oído</td><td>L24,400.00</td><td>L26,000</td><td>Pilar 3</td></tr>
+        <tr><td>Extracción de uña</td><td>L18,300.00</td><td>L20,000</td><td>Pilar 2 · creativo nuevo</td></tr>
+        <tr><td>Electrocardiograma</td><td>L8,000.00</td><td>L10,000</td><td>Pilar 3 · paquete, no electro suelto</td></tr>
+        <tr><td>Laboratorio</td><td>L36,706.75</td><td>L50,000</td><td>Pilar 3 · pauta de alcance y cotización</td></tr>
+        <tr><td>Sueroterapias</td><td>L30,750.00</td><td>L45,000</td><td>Pilar 4 · bloque educativo</td></tr>
+        <tr><td>Días con meta de suero</td><td>2 de 30</td><td>6 de 31</td><td>Pilar 4</td></tr>
+        <tr><td>Aporte del horario extendido</td><td>cerca del 7%</td><td>10%</td><td>Pilar 5 · historias nocturnas</td></tr>
+        <tr><td>ROAS de la cuenta</td><td>7.01x</td><td>7.0x o más</td><td>Toda la pauta</td></tr>
+        <tr><td>Costo por conversación</td><td>L11.43</td><td>L11.40 o menos</td><td>Creativo nuevo del pilar 2</td></tr>
+      </tbody>
+    </table>
+    <div class="nota"><b>Sobre el ROAS:</b> la meta está fijada con la fórmula de este panel (facturación de servicios con pauta directa ÷ gasto total de Meta). El Sheet calcula 8.15 para septiembre con otra base, y la diferencia incluye <b>L739.37 de gasto que el Sheet registra y Meta no</b>. Antes del cierre de octubre la Dirección Comercial debe definir cuál es la cifra oficial; hasta entonces la meta se lee contra 7.01x.</div>
+  </section>
+
+  <section>
+    <h2>Restricciones, datos faltantes y encargos</h2>
+    <div class="card">
+      <p><b>Congelado por regla P1:</b> <b>Suero Complejo B</b>. Cayó 81.91% en julio sin causa confirmada y en septiembre sigue plano en L2,550. No recibe ninguna pieza en octubre hasta que la Dirección confirme disponibilidad de insumo. Vitamina C, Oxigenador Cerebral y Glutathione <b>quedan liberados</b>: la Dirección confirmó insumo, así que su caída se trata como problema de mensaje y entran al pilar 4.</p>
+      <p><b>Fuera del calendario por estado de catálogo:</b> Suero Multivitamínico y Suero Vitamina D (pausados, sin ventas en 2026), Hígado Detox (retirado, por confirmar) y Beplenovax (en observación).</p>
+      <p><b>Datos faltantes de este plan:</b></p>
+      <ul>
+        <li><b>Consultas de septiembre.</b> La hoja marca L61,800.00 con 0.00% de variación, exactamente igual a agosto. Hay que confirmar si es dato medido o arrastre, porque el Neto Pilares depende de esa celda.</li>
+        <li><b>Precio de exámenes de laboratorio.</b> Variable según examen. Ninguna pieza publica cifra hasta confirmarla; las del 8, 18, 22 y 31 llevan "cotiza" en vez de precio.</li>
+        <li><b>Tasa de cierre de WhatsApp por servicio.</b> Se estima por facturación sobre conversaciones, que no es lo mismo. Mientras no se mida, la regla P11 se aplica con esa aproximación.</li>
+        <li><b>Diferencia de L739.37</b> entre el gasto que registra el Sheet (L13,991.18) y el que reporta Meta (L13,251.81) para septiembre, más 43 conversaciones de diferencia. Sin origen documentado.</li>
+        <li><b>Capacidad de agenda:</b> la Dirección confirmó que no hay límite relevante, así que la regla P4 se aplica en modo abierto y el peso se concentra en los días fuertes.</li>
+        <li><b>Servicios sin desglose propio</b> (regla P10): prueba de embarazo L250, citología de base líquida L500, aplicación intramuscular L80 e intravenosa L180. No aparecen desagregados en ningún reporte. Entran como refuerzo dentro de las piezas de consulta y laboratorio, sin pieza propia, hasta tener dato medible.</li>
+      </ul>
+      <p><b>Encargos a las skills hermanas:</b></p>
+      <ul>
+        <li><b>A <code>cmg-meta-ads-copywriter</code>:</b> Cauterización — ángulo de recuperación del pilar, L200 por lesión, L3,900. Extracción de uña — <b>ángulo nuevo obligatorio</b>, objeción a atacar: miedo al dolor y duda sobre cuánto tarda la visita, L500, L3,400. Lavado de oído — ángulo de escalado, L400, L2,600. Electrocardiograma — ángulo de paquete con perfil de lípidos y formato de testimonio, L500, L1,900. Horario Extendido y Cotiza Laboratorio — campañas de alcance, L900 y L600.</li>
+        <li><b>A <code>ai-ad-image-prompter</code>:</b> las 27 piezas de feed del calendario, con su servicio, titular y formato. Las marcadas Plantilla A llevan foto real de fondo, overlay navy, titular bicromático amarillo y blanco, precio grande en amarillo y franja inferior navy con punto amarillo para ubicación y punto verde para WhatsApp.</li>
+        <li><b>A <code>cmg-whatsapp-cro</code>:</b> revisar el flujo de <b>extracción de uña</b> (regla P11: 306 conversaciones y L18,300 de venta, la peor conversión de la cuenta) y crear el flujo del <b>paquete de lípidos más electrocardiograma</b>. En ambos, el objetivo es transferir con la Lic. María del Carmen.</li>
+        <li><b>De <code>cmg-ads-dashboard</code>:</b> consumido como insumo de este plan. El Panel de Ads quedó cerrado al 30 de septiembre en esta misma corrida.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Qué revisar el mes que viene</h2>
+    <div class="card">
+      <ul>
+        <li><b>Primero, los días bajo umbral.</b> Es el KPI del mes: pasó de 29.0% a 50.0% y la meta es volver a 25% o menos. Si no baja, el problema deja de ser de calendario y pasa a ser de propuesta.</li>
+        <li><b>Segundo, extracción de uña con creativo nuevo.</b> Noviembre define si la caída era fatiga de creativo —y entonces el creativo del 13 de octubre lo arregla— o si el servicio agotó su demanda. Es la decisión de si el pilar 2 sobrevive.</li>
+        <li><b>Tercero, sueroterapia con insumo confirmado.</b> Octubre es el mes de prueba: con insumo disponible y bloque educativo, si la línea no se recupera de los L30,750, la conclusión ya no es de mensaje.</li>
+        <li><b>Cuarto, el aporte del horario extendido.</b> Septiembre probó que la pauta de reconocimiento lo mueve: pasó de L573.18 a L1,902.80 por día. Octubre dirá si eso se sostiene un mes completo y llega al 10%.</li>
+        <li><b>Quinto, la cifra oficial de ROAS.</b> No se puede fijar meta de noviembre con tres formas de calcularlo. Hay que cerrar la diferencia de L739.37 de gasto antes del próximo plan.</li>
+      </ul>
+    </div>
+  </section>
+
+  </div><!-- /mes 2026-10 -->
+
+
+  <!-- ══════════════════ SEPTIEMBRE 2026 · MES CERRADO ══════════════════ -->
+  <div class="mes-block" data-mes="2026-09">
 
   <section>
     <h2>Ajustes sobre la marcha</h2>
@@ -409,6 +714,8 @@
     </div>
   </section>
 
+  </div><!-- /mes 2026-09 -->
+
   <footer>
     <b>Clínica Médica General</b> · City Mall Tegucigalpa · Sin cita, por orden de llegada, hasta las 10 PM · WhatsApp +504 3155-5162 · Cuidamos de tu salud
   </footer>
@@ -425,6 +732,59 @@
 <script src="cmg-staff.js"></script>
 
 <script>
+/* ═══════════════ REGISTRO DE MESES ═══════════════ */
+/* Cada plan mensual queda archivado como un bloque .mes-block con su data-mes.
+   Para archivar un mes nuevo: agregar su entrada acá (la más reciente primero)
+   y su bloque <div class="mes-block" data-mes="AAAA-MM"> en el HTML. */
+var MESES = [
+  {
+    key: '2026-10',
+    label: 'Octubre 2026',
+    estado: 'vigente',
+    titulo: 'Plan de contenido<br>Octubre 2026',
+    sub: '<b>Recuperar el volumen de días.</b> Elaborado a partir del cierre de septiembre 2026 (Sheet HISTOGRAMA, mes completo) y del Panel de Ads cerrado al 30 de septiembre · Emitido el 1 de octubre de 2026 · Cubre del 1 al 31 de octubre'
+  },
+  {
+    key: '2026-09',
+    label: 'Septiembre 2026',
+    estado: 'cerrado',
+    titulo: 'Plan de contenido<br>Septiembre 2026',
+    sub: '<b>Del ticket al volumen.</b> Elaborado a partir del reporte ejecutivo de agosto 2026 y del dashboard de Meta Ads al 2 de septiembre · Emitido el 2 de septiembre de 2026 · Cubrió del 3 al 30 de septiembre · Cerrado el 30 de septiembre con datos al 29'
+  }
+];
+
+function renderMes(key){
+  var d = null;
+  MESES.forEach(function(m){ if(m.key === key) d = m; });
+  if(!d) return;
+
+  document.querySelectorAll('.mes-block').forEach(function(b){
+    b.classList.toggle('activo', b.dataset.mes === key);
+  });
+
+  document.getElementById('mes-titulo').innerHTML = d.titulo;
+  document.getElementById('mes-estado').innerHTML = d.estado === 'vigente'
+    ? '<span class="estado-mes">Plan vigente</span>'
+    : '<span class="estado-mes cerrado">Mes cerrado</span>';
+  document.getElementById('mes-sub').innerHTML = d.sub;
+}
+
+function initSelector(){
+  var sel = document.getElementById('month-select');
+  MESES.forEach(function(m){
+    var o = document.createElement('option');
+    o.value = m.key;
+    o.textContent = m.label + (m.estado === 'vigente' ? ' · vigente' : ' · cerrado');
+    sel.appendChild(o);
+  });
+  sel.value = MESES[0].key;
+  sel.addEventListener('change', function(){
+    renderMes(sel.value);
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+  renderMes(MESES[0].key);
+}
+
 (function () {
   cmgAuth.onAuthStateChanged(function (user) {
     if (!user) {
@@ -436,6 +796,7 @@
       document.getElementById('adm-user-email').textContent = user.email;
       document.getElementById('cmg-gate-loader').style.display = 'none';
       document.getElementById('cmg-gate-content').style.display = 'block';
+      initSelector();
     });
   });
 

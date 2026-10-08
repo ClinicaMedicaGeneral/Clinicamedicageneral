@@ -310,8 +310,458 @@
 
 <div class="wrap">
 
+  <!-- ══════════ OCTUBRE 2026 · EN CURSO ══════════ -->
+  <div class="mes-block activo" data-mes="2026-10">
+
+  <div class="view-tabs">
+    <button class="tab-btn" data-view="hoy" onclick="switchView('hoy')">Hoy · mié 7 oct</button>
+    <button class="tab-btn active" data-view="acumulado" onclick="switchView('acumulado')">Acumulado 1–7 oct</button>
+    <button class="tab-btn" data-view="dias" onclick="switchView('dias')">Día a día</button>
+  </div>
+
+  <div id="view-hoy" style="display:none;">
+
+  <div class="kpi-strip" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Gasto del 7 oct</div>
+      <div class="kpi-value">L492.48</div>
+      <div class="kpi-sub">L412.57 de conversión + L79.91 de alcance</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Conversaciones</div>
+      <div class="kpi-value">29</div>
+      <div class="kpi-sub">5 campañas de conversión</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Costo por conversación</div>
+      <div class="kpi-value">L14.23</div>
+      <div class="kpi-sub">promedio del mes L11.54</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Impresiones</div>
+      <div class="kpi-value">29,013</div>
+      <div class="kpi-sub">11,204 de conversión + 17,809 de alcance</div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <h2>Campañas — solo hoy</h2>
+    <span class="section-note">mié 7 oct · contra su propio umbral</span>
+  </div>
+
+  <div class="campaign" style="animation-delay:.02s">
+    <div class="campaign-top">
+      <div class="rank">1</div>
+      <div class="campaign-name">Electrocardiograma</div>
+      <div class="status-pill status-escalar">ESCALAR</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 55.0%, var(--yellow) 55.0%, var(--yellow) 70.0%, var(--red) 70.0%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:42.2%"></div>
+      </div>
+      <div class="gauge-value">L8.45<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>3.47%</b></span>
+      <span class="chip">CPM <b>L33.09</b></span>
+      <span class="chip">Frecuencia <b>1.20</b></span>
+      <span class="chip">Gasto <b>L59.16</b></span>
+      <span class="chip">Resultados <b>7</b></span>
+    </div>
+    <div class="own-threshold">Su umbral (provisional, 35 días de historial): escalar &lt;L11.00 · mantener L11.00–L14.00 · revisar &gt;L14.00 — cuarto día verde seguido y la más barata de la cuenta hoy. Es la campaña que más cambió desde septiembre, cuando cerró en L19.34</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.08s">
+    <div class="campaign-top">
+      <div class="rank">2</div>
+      <div class="campaign-name">Lavado de Oído (ManyChat)</div>
+      <div class="status-pill status-mantener">MANTENER</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 58.0%, var(--yellow) 58.0%, var(--yellow) 78.5%, var(--red) 78.5%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:77.6%"></div>
+      </div>
+      <div class="gauge-value">L15.52<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>3.17%</b></span>
+      <span class="chip">CPM <b>L29.30</b></span>
+      <span class="chip">Frecuencia <b>1.21</b></span>
+      <span class="chip">Gasto <b>L77.59</b></span>
+      <span class="chip">Resultados <b>5</b></span>
+    </div>
+    <div class="own-threshold">Su umbral (16 meses de historial): escalar &lt;L11.60 · mantener L11.60–L15.70 · revisar &gt;L15.70 — su peor día del mes y el segundo fuera del verde. Con 5 conversaciones el valor está dentro del ruido de muestra chica y todavía sujeto a atribución</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.14s">
+    <div class="campaign-top">
+      <div class="rank">3</div>
+      <div class="campaign-name">Cauterizaciones 2026</div>
+      <div class="status-pill status-revisar">REVISAR</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 55.3%, var(--yellow) 55.3%, var(--yellow) 75.0%, var(--red) 75.0%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:88.7%"></div>
+      </div>
+      <div class="gauge-value">L13.31<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>2.93%</b></span>
+      <span class="chip">CPM <b>L36.10</b></span>
+      <span class="chip">Frecuencia <b>1.31</b></span>
+      <span class="chip">Gasto <b>L133.11</b></span>
+      <span class="chip">Resultados <b>10</b></span>
+    </div>
+    <div class="own-threshold">Su umbral (8 meses de historial): escalar &lt;L8.30 · mantener L8.30–L11.25 · revisar &gt;L11.25 — aporta el mayor volumen del día (10 conversaciones) y es su día más barato de octubre, pero igual queda en rojo. <b>Lleva 7 de 7 días en rojo</b>: esto ya no es un día malo</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.20s">
+    <div class="campaign-top">
+      <div class="rank">4</div>
+      <div class="campaign-name">Extracción de Uña</div>
+      <div class="status-pill status-revisar">REVISAR</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 55.4%, var(--yellow) 55.4%, var(--yellow) 75.0%, var(--red) 75.0%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:82.2%"></div>
+      </div>
+      <div class="gauge-value">L19.72<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>3.17%</b></span>
+      <span class="chip">CPM <b>L43.45</b></span>
+      <span class="chip">Frecuencia <b>1.24</b></span>
+      <span class="chip">Gasto <b>L98.59</b></span>
+      <span class="chip">Resultados <b>5</b></span>
+    </div>
+    <div class="own-threshold">Su umbral (10 meses de historial): escalar &lt;L13.30 · mantener L13.30–L18.00 · revisar &gt;L18.00 — su segundo día rojo del mes, con el CPM más alto de las cinco (L43.45). Con 5 conversaciones y dentro de la ventana de atribución, es muy probable que baje en los próximos dos días</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.26s">
+    <div class="campaign-top">
+      <div class="rank">5</div>
+      <div class="campaign-name">Remarketing Lavado de Oído</div>
+      <div class="status-pill status-revisar">REVISAR</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 55.3%, var(--yellow) 55.3%, var(--yellow) 75.0%, var(--red) 75.0%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:100.0%"></div>
+      </div>
+      <div class="gauge-value">L22.06<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>2.71%</b></span>
+      <span class="chip">CPM <b>L54.33</b></span>
+      <span class="chip">Frecuencia <b>1.23</b></span>
+      <span class="chip">Gasto <b>L44.12</b></span>
+      <span class="chip">Resultados <b>2</b></span>
+    </div>
+    <div class="own-threshold">Su umbral (referencia histórica): escalar &lt;L8.85 · mantener L8.85–L12.00 · revisar &gt;L12.00 — 2 conversaciones sobre L44.12. Es la más volátil de la cuenta por el tamaño de su audiencia, y ayer cerró en L6.34. Su acumulado (L9.60) es el mejor del mes: este día no lo contradice</div>
+  </div>
+
+  <div class="footnotes">
+    <div class="footnote alert">
+      <b>Muestra chica:</b> con 2 a 10 conversaciones por campaña en un día, el costo por conversación salta mucho de un día a otro. Un valor alto aislado no es señal de deterioro salvo que se repita varios días seguidos. A esto se suma que <b>las conversaciones de las últimas 24–48 h todavía se están atribuyendo</b>: los L22.06 de Remarketing y los L19.72 de Extracción de Uña de hoy casi con certeza bajan. La excepción es Cauterizaciones: sus L13.31 están en línea con los otros seis días del mes, así que ahí no hay nada que esperar.
+    </div>
+    <div class="footnote">
+      <b>Hoy la cuenta gastó L492.48</b> con 29,013 impresiones, que es lo que cuadra contra Ads Manager. De ese total, <b>L412.57</b> son de las 5 campañas de conversión y son los únicos que entran en el costo promedio; los otros <b>L79.91</b> son de las dos campañas de alcance, que aportan 17,809 impresiones pero por objetivo no generan conversaciones. El día quedó en L14.23, bastante por encima del promedio del mes (L11.54): es el día más caro de octubre hasta ahora y también el de menos volumen (29 conversaciones contra un promedio de 45). El día aún no cierra.
+    </div>
+    <div class="footnote">
+      <b>Electrocardiograma sostiene el día</b> y es la única en verde (L8.45 con 7 conversaciones, su cuarto día verde seguido). <b>Cauterizaciones</b> aporta el volumen — 10 de las 29 conversaciones — pero a L13.31, su valor más bajo del mes y aún en rojo. Un solo día no decide presupuesto; para eso está la vista de acumulado.
+    </div>
+  </div>
+
+  </div>
+
+  <div id="view-acumulado">
+
+  <div class="kpi-strip" style="margin-top:24px;">
+    <div class="kpi-card">
+      <div class="kpi-label">Gasto total del mes</div>
+      <div class="kpi-value">L4,570.64</div>
+      <div class="kpi-sub">5 de conversión + 2 de alcance · sin residual</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Conversaciones iniciadas</div>
+      <div class="kpi-value">313</div>
+      <div class="kpi-sub">5 campañas de conversión</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Costo promedio</div>
+      <div class="kpi-value">L11.54</div>
+      <div class="kpi-sub">sobre los L3,611.03 de conversión</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Impresiones</div>
+      <div class="kpi-value">326,911</div>
+      <div class="kpi-sub">alcance 222,850 · CPM L13.98</div>
+    </div>
+  </div>
+
+  <div class="cierre-banner">
+    <b>Octubre va en curso: 7 de 31 días.</b> Este acumulado llega hasta <b>hoy</b> porque Meta entrega en vivo — no se empareja con la fecha de corte del panel de facturación, que siempre va un día atrás. Dos cambios de estructura frente a septiembre: <b>Remarketing Lavado de Oído volvió a correr</b> el 2 de octubre, así que son 5 campañas de conversión y no 4, y <b>Oxigenador Cerebral sigue pausada con cero gasto</b>, de modo que este mes no hay gasto residual de campañas fuera de rotación: todo el gasto de la cuenta viene de campañas activas. Al ritmo de estos 7 días el mes proyecta <b>L20,242 de gasto y unas 1,386 conversaciones</b>, contra L13,251.81 y 1,039 en septiembre: la cuenta está corriendo 53% más presupuesto de conversión por día, repartido ahora en cinco campañas.
+  </div>
+
+  <div class="section-head">
+    <h2>Campañas, contra su propio umbral</h2>
+    <span class="section-note">1–7 oct · agrupadas por estado</span>
+  </div>
+
+  <div class="campaign" style="animation-delay:.02s">
+    <div class="campaign-top">
+      <div class="rank">1</div>
+      <div class="campaign-name">Lavado de Oído (ManyChat)</div>
+      <div class="status-pill status-escalar">ESCALAR</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 58.0%, var(--yellow) 58.0%, var(--yellow) 78.5%, var(--red) 78.5%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:50.1%"></div>
+      </div>
+      <div class="gauge-value">L10.02<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>2.69%</b></span>
+      <span class="chip">CPM <b>L30.00</b></span>
+      <span class="chip">Frecuencia <b>1.68</b></span>
+      <span class="chip">Gasto <b>L691.56</b></span>
+      <span class="chip">Resultados <b>69</b></span>
+    </div>
+    <div class="own-threshold">Su umbral (16 meses de historial): escalar &lt;L11.60 · mantener L11.60–L15.70 · revisar &gt;L15.70 — 69 conversaciones a L10.02, verde en 5 de los 7 días. Sigue cómoda dentro de su umbral, pero <b>subió 34% frente al cierre de septiembre (L7.45)</b> y su CTR cayó de 3.40% a 2.69%, raspando su línea verde de 2.6%. Su CPM (L30.00) está por encima del objetivo de L24. No es alarma todavía; es la campaña a vigilar porque es la base de la cuenta</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.08s">
+    <div class="campaign-top">
+      <div class="rank">2</div>
+      <div class="campaign-name">Electrocardiograma</div>
+      <div class="status-pill status-escalar">ESCALAR</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 55.0%, var(--yellow) 55.0%, var(--yellow) 70.0%, var(--red) 70.0%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:50.3%"></div>
+      </div>
+      <div class="gauge-value">L10.05<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>3.97%</b></span>
+      <span class="chip">CPM <b>L34.79</b></span>
+      <span class="chip">Frecuencia <b>1.99</b></span>
+      <span class="chip">Gasto <b>L462.51</b></span>
+      <span class="chip">Resultados <b>46</b></span>
+    </div>
+    <div class="own-threshold">Su umbral (provisional, 35 días de historial): escalar &lt;L11.00 · mantener L11.00–L14.00 · revisar &gt;L14.00 — <b>la mejora más grande de la cuenta</b>: de L19.34 al cierre de septiembre a L10.05 en octubre, de la más cara a la segunda más barata. Su CTR subió a 3.97%, el mejor de las cinco, y la frecuencia bajó de 2.57 a 1.99, saliendo de la zona amarilla. 46 conversaciones en 7 días contra 102 en los 28 de septiembre: más del doble de ritmo diario. Es el ángulo de testimonio que el panel de septiembre marcó para replicar, y funcionó</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.14s">
+    <div class="campaign-top">
+      <div class="rank">3</div>
+      <div class="campaign-name">Extracción de Uña</div>
+      <div class="status-pill status-escalar">ESCALAR</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 55.4%, var(--yellow) 55.4%, var(--yellow) 75.0%, var(--red) 75.0%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:51.9%"></div>
+      </div>
+      <div class="gauge-value">L12.46<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>3.44%</b></span>
+      <span class="chip">CPM <b>L35.09</b></span>
+      <span class="chip">Frecuencia <b>1.81</b></span>
+      <span class="chip">Gasto <b>L884.60</b></span>
+      <span class="chip">Resultados <b>71</b></span>
+    </div>
+    <div class="own-threshold">Su umbral (10 meses de historial): escalar &lt;L13.30 · mantener L13.30–L18.00 · revisar &gt;L18.00 — 71 conversaciones a L12.46, mejor que el L12.67 con que cerró septiembre, y <b>corta la racha de deterioro</b> que venía de dos cortes seguidos. Su CTR se recuperó de 3.19% a 3.44% y el CPM bajó de L44.78 a L35.09, justo las dos métricas que Meta marcaba en rojo por fatiga de creativo. Le quedan dos días rojos (sáb 3 L18.81 y mié 7 L19.72), el segundo aún sujeto a atribución</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.20s">
+    <div class="campaign-top">
+      <div class="rank">4</div>
+      <div class="campaign-name">Remarketing Lavado de Oído</div>
+      <div class="status-pill status-mantener">MANTENER</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 55.3%, var(--yellow) 55.3%, var(--yellow) 75.0%, var(--red) 75.0%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:60.0%"></div>
+      </div>
+      <div class="gauge-value">L9.60<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>4.64%</b></span>
+      <span class="chip">CPM <b>L38.82</b></span>
+      <span class="chip">Frecuencia <b>1.54</b></span>
+      <span class="chip">Gasto <b>L528.23</b></span>
+      <span class="chip">Resultados <b>55</b></span>
+    </div>
+    <div class="own-threshold">Su umbral (referencia histórica): escalar &lt;L8.85 · mantener L8.85–L12.00 · revisar &gt;L12.00 — <b>volvió del descanso el 2 de octubre</b> y en 6 días entregó 55 conversaciones a L9.60, el costo más bajo de la cuenta en el acumulado, con el <b>mejor CTR (4.64%)</b>. Por audiencia chica es también la más volátil: alterna días de L6.34 y L7.14 con días de L15.23 y L22.06. Su CPM (L38.82) está sobre la línea de L35, lo esperado al re-impactar engagers. Con 55 conversaciones ya tiene volumen para leerse en serio</div>
+  </div>
+
+  <div class="campaign" style="animation-delay:.26s">
+    <div class="campaign-top">
+      <div class="rank">5</div>
+      <div class="campaign-name">Cauterizaciones 2026</div>
+      <div class="status-pill status-revisar">REVISAR</div>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge-track" style="background:linear-gradient(to right, var(--green) 0%, var(--green) 55.3%, var(--yellow) 55.3%, var(--yellow) 75.0%, var(--red) 75.0%, var(--red) 100%)">
+        <div class="gauge-marker" style="left:96.7%"></div>
+      </div>
+      <div class="gauge-value">L14.50<span>/ conversación</span></div>
+    </div>
+    <div class="stat-chips">
+      <span class="chip">CTR <b>2.91%</b></span>
+      <span class="chip">CPM <b>L36.14</b></span>
+      <span class="chip">Frecuencia <b>2.10</b></span>
+      <span class="chip">Gasto <b>L1,044.13</b></span>
+      <span class="chip">Resultados <b>72</b></span>
+    </div>
+    <div class="own-threshold">Su umbral (8 meses de historial): escalar &lt;L8.30 · mantener L8.30–L11.25 · revisar &gt;L11.25 — <b>es el deterioro real del mes</b>, no un efecto de umbral exigente: pasó de L11.31 al cierre de septiembre a L14.50, y quedó <b>en rojo los 7 días, sin un solo día verde ni amarillo</b>. En septiembre alternaba y tuvo días de L6.14 y L8.25. Su CTR cayó de 3.64% a 2.91% — era el mejor de las cuatro y ahora es el peor — mientras el CPM se mantuvo (L37.49 → L36.14): el problema es que el anuncio dejó de enganchar, no que la subasta se encareció. Es la de mayor gasto de la cuenta (L1,044.13, el 29% del presupuesto de conversión), así que es la que más pesa en el promedio. Aquí sí corresponde creativo nuevo antes que presupuesto</div>
+  </div>
+
+  <div class="section-head">
+    <h2>Campañas de alcance</h2>
+    <span class="section-note">1–7 oct · no generan conversaciones, no se miden por costo por conversación</span>
+  </div>
+
+  <div class="legend" style="margin-top:0;">
+    <div class="table-scroll">
+    <table class="threshold-table">
+      <tr><th>Campaña</th><th>Gasto</th><th>Impresiones</th><th>Alcance</th><th>Frecuencia</th><th>CPM</th><th>CTR</th></tr>
+      <tr><td class="camp-name">Horario Extendido - Octubre</td><td>L636.74</td><td>148,246</td><td>116,383</td><td>1.27</td><td>L4.30</td><td>0.11%</td></tr>
+      <tr><td class="camp-name">Cotiza tus exámenes de Laboratorio</td><td>L322.87</td><td>74,604</td><td>59,234</td><td>1.26</td><td>L4.33</td><td>0.26%</td></tr>
+      <tr><td class="camp-name"><b>Subtotal alcance</b></td><td><b>L959.61</b></td><td><b>222,850</b></td><td><b>175,617</b></td><td><b>—</b></td><td><b>L4.31</b></td><td><b>0.16%</b></td></tr>
+    </table>
+    </div>
+    <p class="matrix-note">Las dos escalaron fuerte: en 7 días movieron <b>222,850 impresiones por L959.61</b> — el 68% de las impresiones del mes con el 21% del gasto — contra las 122,346 impresiones por L805.19 que hicieron en sus 6 días de septiembre. Su CPM bajó de L6.58 a <b>L4.31</b>, el más bajo que ha registrado la cuenta. El CTR de 0.16% es lo esperado del objetivo: no piden clic, piden recordación. Su efecto no se mide aquí sino en facturación — en septiembre el libro de Finanzas registró que la jornada extendida pasó de L573.18 por día sin pauta a L1,902.80 con pauta. <b>Para octubre ese contraste todavía no se puede calcular:</b> el libro de Finanzas no se pudo leer en esta corrida, así que esta tabla se queda en métricas de Meta.</p>
+  </div>
+
+  <div class="section-head">
+    <h2>Campañas fuera de rotación</h2>
+    <span class="section-note">sin gasto en octubre · no suman a ningún KPI</span>
+  </div>
+
+  <div class="legend" style="margin-top:0;">
+    <div class="table-scroll">
+    <table class="threshold-table">
+      <tr><th>Campaña</th><th>Estado</th><th>Gasto oct</th><th>Impresiones</th><th>Conversaciones</th><th>Último acumulado</th></tr>
+      <tr><td class="camp-name">Oxigenador Cerebral</td><td>pausada el 12 sep</td><td>L0.00</td><td>0</td><td>0</td><td class="zone-r">L16.54 (sep)</td></tr>
+      <tr><td class="camp-name">Sueroterapia Pilares</td><td>descartada</td><td>L0.00</td><td>0</td><td>0</td><td class="zone-y">L10.43 (sep)</td></tr>
+    </table>
+    </div>
+    <p class="matrix-note">A diferencia de septiembre, <b>este mes no hay gasto residual</b>: ninguna de las dos pausadas volvió a gastar un lempira en octubre. Por eso el total de "Día a día" (L3,611.03) y el KPI de "Gasto total del mes" (L4,570.64) difieren en exactamente <b>L959.61</b>, que es el gasto de las dos campañas de alcance y nada más. <b>Oxigenador Cerebral cumple 3 meses de historial propio en octubre</b>, el corte en que correspondía recalcularle el umbral con promedio ±15%, pero al no tener actividad en el mes no hay dato nuevo con que recalcular: conserva su umbral provisional y queda como referencia histórica hasta que vuelva a correr.</p>
+  </div>
+
+  </div>
+
+  <div id="view-dias" style="display:none;">
+
+  <div class="section-head">
+    <h2>Totales por día</h2>
+    <span class="section-note">1–7 oct · 5 campañas de conversión</span>
+  </div>
+
+  <div class="legend" style="margin-top:0;">
+    <div class="table-scroll">
+    <table class="threshold-table daily-matrix">
+      <tr><th>Día</th><th>Gasto</th><th>Conversaciones</th><th>Costo prom.</th><th>Impresiones</th></tr>
+      <tr><td class="camp-name">jue 1 oct</td><td>L486.77</td><td>38</td><td class="zone-y">L12.81</td><td>13,102</td></tr>
+      <tr><td class="camp-name">vie 2 oct</td><td>L510.76</td><td>46</td><td class="zone-y">L11.10</td><td>15,722</td></tr>
+      <tr><td class="camp-name day-strong">sáb 3 oct</td><td class="day-strong">L496.97</td><td class="day-strong">52</td><td class="zone-g day-strong">L9.56</td><td class="day-strong">15,805</td></tr>
+      <tr><td class="camp-name">dom 4 oct</td><td>L578.41</td><td>54</td><td class="zone-y">L10.71</td><td>19,045</td></tr>
+      <tr><td class="camp-name">lun 5 oct</td><td>L567.18</td><td>43</td><td class="zone-y">L13.19</td><td>15,451</td></tr>
+      <tr><td class="camp-name">mar 6 oct</td><td>L558.37</td><td>51</td><td class="zone-y">L10.95</td><td>13,732</td></tr>
+      <tr><td class="camp-name day-strong">mié 7 oct</td><td class="day-strong">L412.57</td><td class="day-strong">29</td><td class="zone-r day-strong">L14.23</td><td class="day-strong">11,204</td></tr>
+      <tr><td class="camp-name"><b>Total 1–7</b></td><td><b>L3,611.03</b></td><td><b>313</b></td><td><b>L11.54</b></td><td><b>104,061</b></td></tr>
+    </table>
+    </div>
+    <p class="matrix-note">Suma de las 5 campañas de conversión, que son las únicas que generan conversaciones. Difiere del KPI de "Gasto total del mes" (L4,570.64) en <b>L959.61</b>, que es íntegramente el gasto de las dos campañas de alcance (L636.74 Horario Extendido - Octubre y L322.87 Cotiza tus exámenes de Laboratorio). <b>Este mes no hay residual de campañas pausadas</b>, así que la diferencia se explica completa con esas dos. El <b>mié 7 oct va en curso</b> y el <b>mar 6 oct</b> está todavía dentro de la ventana de atribución de 24–48 h: ambos pueden bajar de costo cuando entren conversaciones rezagadas. Los días 1 al 5 ya se leen como cerrados.</p>
+  </div>
+
+  <div class="section-head">
+    <h2>Costo por conversación — campaña por día</h2>
+    <span class="section-note">color según el umbral propio de cada campaña</span>
+  </div>
+
+  <div class="legend" style="margin-top:0;">
+    <div class="table-scroll">
+    <table class="threshold-table daily-matrix">
+      <tr><th>Campaña</th><th>jue 1</th><th>vie 2</th><th>sáb 3</th><th>dom 4</th><th>lun 5</th><th>mar 6</th><th>mié 7</th></tr>
+      <tr>
+        <td class="camp-name">Lavado de Oído (ManyChat)</td>
+        <td class="zone-y">L12.10</td><td class="zone-g">L10.62</td><td class="zone-g">L9.62</td><td class="zone-g">L6.97</td><td class="zone-g">L10.22</td><td class="zone-g">L11.06</td><td class="zone-y">L15.52</td>
+      </tr>
+      <tr>
+        <td class="camp-name">Extracción de Uña</td>
+        <td class="zone-g">L10.67</td><td class="zone-g">L8.80</td><td class="zone-r">L18.81</td><td class="zone-g">L10.42</td><td class="zone-y">L14.98</td><td class="zone-y">L13.71</td><td class="zone-r">L19.72</td>
+      </tr>
+      <tr>
+        <td class="camp-name">Cauterizaciones 2026</td>
+        <td class="zone-r">L13.12</td><td class="zone-r">L13.79</td><td class="zone-r">L13.68</td><td class="zone-r">L16.91</td><td class="zone-r">L19.25</td><td class="zone-r">L13.62</td><td class="zone-r">L13.31</td>
+      </tr>
+      <tr>
+        <td class="camp-name">Remarketing Lavado de Oído</td>
+        <td>—</td><td class="zone-r">L12.25</td><td class="zone-g">L7.14</td><td class="zone-y">L9.44</td><td class="zone-r">L15.23</td><td class="zone-g">L6.34</td><td class="zone-r">L22.06</td>
+      </tr>
+      <tr>
+        <td class="camp-name">Electrocardiograma</td>
+        <td class="zone-r">L22.99</td><td class="zone-g">L10.10</td><td class="zone-g">L4.86</td><td class="zone-r">L22.32</td><td class="zone-g">L8.98</td><td class="zone-g">L9.84</td><td class="zone-g">L8.45</td>
+      </tr>
+    </table>
+    </div>
+    <p class="matrix-note">Verde / amarillo / rojo se leen contra el umbral de cada fila (ver "Umbrales por campaña" abajo), no entre campañas: los L13.31 del mié 7 son rojos para Cauterizaciones y serían verdes para Extracción de Uña. Guion (—) = campaña sin actividad o sin conversación atribuida ese día; el jue 1 oct de Remarketing es su último día de descanso antes de reactivarse.</p>
+  </div>
+
+  <div class="footnotes" style="margin-top:20px;">
+    <div class="footnote alert">
+      <b>Cauterizaciones lleva 7 de 7 días en rojo,</b> y es el hallazgo que más pesa de esta corrida. Ningún día bajó de L13.12 y el peor fue el <b>lun 5 oct (L19.25 con 8 conversaciones)</b>. En septiembre esta campaña alternaba y llegó a tocar L6.14 y L8.25; en octubre no tocó ni amarillo. No es atribución — los días 1 al 5 ya están cerrados y siguen caros. Con L1,044.13 de gasto es la campaña más grande de la cuenta, así que arrastra el promedio: si estuviera en su umbral de L11.25, el costo promedio del mes bajaría de L11.54 a cerca de L10.60.
+    </div>
+    <div class="footnote">
+      <b>El sáb 3 oct es el único día verde del mes</b> (L9.56 con 52 conversaciones): ese día Electrocardiograma hizo su mejor registro (L4.86 con 10 conversaciones) y Remarketing su segundo mejor (L7.14 con 17). El día de mayor volumen fue el <b>dom 4 oct (54 conversaciones a L10.71)</b>, y el más caro el <b>mié 7 oct (L14.23)</b>, que además va en curso.
+    </div>
+    <div class="footnote">
+      <b>Electrocardiograma dejó de ser la volátil de la cuenta.</b> En septiembre tuvo picos de L80.75 y L77.38; en octubre su peor día es L22.99 (jue 1) y lleva cinco verdes en siete días, incluido un L4.86. Ese cambio de comportamiento es lo que explica que su acumulado pasara de L19.34 a L10.05. El relevo de volatilidad lo tomó <b>Remarketing</b>, que por audiencia chica alterna L6.34 y L22.06 — normal al re-impactar engagers, y su acumulado de L9.60 sigue siendo el mejor de la cuenta.
+    </div>
+    <div class="footnote">
+      <b>Lavado de Oído se enfrió sin salirse del verde.</b> Cinco de siete días verdes, pero su acumulado pasó de L7.45 (septiembre cerrado) a L10.02, y sus dos amarillos son el primer día del mes (L12.10) y el último (L15.52). Como es la campaña base de la cuenta y la que Meta señalaba para escalar, conviene mirarla en la próxima corrida antes de decidir presupuesto: si el jue 1 y el mié 7 se vuelven patrón en vez de excepción, es su creativo el que empezó a cansarse.
+    </div>
+  </div>
+
+  </div>
+
+  <div class="legend">
+    <div class="section-head" style="margin:0;">
+      <h2 style="font-size:16px;">Umbrales por campaña</h2>
+      <span class="section-note">costo por conversación iniciada · calculado con histórico completo</span>
+    </div>
+    <table class="threshold-table">
+      <tr><th>Campaña</th><th>Historial</th><th class="zone-g">Escalar</th><th class="zone-y">Mantener</th><th class="zone-r">Revisar</th></tr>
+      <tr><td class="camp-name">Cauterizaciones 2026</td><td>8 meses</td><td class="zone-g">&lt; L8.30</td><td class="zone-y">L8.30–L11.25</td><td class="zone-r">&gt; L11.25</td></tr>
+      <tr><td class="camp-name">Lavado de Oído (ManyChat)</td><td>16 meses</td><td class="zone-g">&lt; L11.60</td><td class="zone-y">L11.60–L15.70</td><td class="zone-r">&gt; L15.70</td></tr>
+      <tr><td class="camp-name">Extracción de Uña</td><td>10 meses</td><td class="zone-g">&lt; L13.30</td><td class="zone-y">L13.30–L18.00</td><td class="zone-r">&gt; L18.00</td></tr>
+      <tr><td class="camp-name">Electrocardiograma</td><td>35 días (provisional)</td><td class="zone-g">&lt; L11.00</td><td class="zone-y">L11.00–L14.00</td><td class="zone-r">&gt; L14.00</td></tr>
+      <tr><td class="camp-name">Remarketing Lavado de Oído</td><td>referencia</td><td class="zone-g">&lt; L8.85</td><td class="zone-y">L8.85–L12.00</td><td class="zone-r">&gt; L12.00</td></tr>
+      <tr><td class="camp-name">Oxigenador Cerebral <span style="font-weight:400;color:#9298b0;">(pausada)</span></td><td>3 meses (provisional)</td><td class="zone-g">&lt; L11.40</td><td class="zone-y">L11.40–L15.45</td><td class="zone-r">&gt; L15.45</td></tr>
+    </table>
+  </div>
+
+  <div class="footnotes">
+    <div class="footnote">
+      <b>Siete días de octubre:</b> las 5 campañas de conversión suman <b>313 conversaciones a L11.54</b> promedio, apenas por encima del cierre de septiembre (L11.43) — aunque la comparación no es del todo pareja, porque septiembre es un mes completo y aquí van 7 días con una campaña más en rotación. Lo sostienen hacia abajo <b>Remarketing (L9.60)</b>, <b>Lavado de Oído (L10.02)</b> y <b>Electrocardiograma (L10.05)</b>; lo empuja hacia arriba una sola campaña, <b>Cauterizaciones (L14.50)</b>, que además es la de mayor gasto.
+    </div>
+    <div class="footnote">
+      <b>Lo que cambió respecto de la corrida anterior,</b> que fue el cierre de septiembre: Electrocardiograma mejoró de L19.34 a L10.05 y pasó de REVISAR a ESCALAR; Extracción de Uña mejoró de L12.67 a L12.46 y cortó su racha de deterioro; Remarketing volvió del descanso y entró directo como la más barata; Lavado de Oído empeoró de L7.45 a L10.02 sin salir del verde; y Cauterizaciones empeoró de L11.31 a L14.50, quedándose en rojo todos los días. Tres de cinco mejoraron, pero la que empeoró más es la que más presupuesto lleva.
+    </div>
+    <div class="footnote">
+      <b>Tres campañas son nuevas o re-entrantes y conviene leerlas con cuidado.</b> <b>Electrocardiograma</b> lleva 35 días de historial, así que su umbral sigue siendo provisional: al cumplir 3 meses, en los primeros días de diciembre, se recalcula con promedio ±15% como las demás. <b>Remarketing Lavado de Oído</b> acumuló 55 conversaciones en 6 días, suficiente para leerse en serio, pero su audiencia chica explica los saltos diarios. Las dos campañas de alcance — <b>Horario Extendido</b> y <b>Cotiza tus exámenes de Laboratorio</b> — no llevan umbral porque su objetivo no es conversación: suman gasto e impresiones para cuadrar con Ads Manager, nunca conversaciones ni costo promedio.
+    </div>
+    <div class="footnote alert">
+      <b>Esta corrida no pudo leer el libro de Finanzas,</b> así que el panel de octubre no incluye ROAS ni ninguna comparación de pauta contra venta, y el panel de facturación quedó con su corte anterior. Las cifras de esta vista son todas de Meta Ads y están completas; lo que falta es el otro lado de la ecuación. En cuanto el libro se pueda leer corresponde recalcular ROAS por campaña comparando <b>rangos equivalentes</b> — el gasto acumulado hasta el último día cerrado, no hasta hoy — porque dividir el gasto de hoy entre la venta de ayer sale mal por construcción.
+    </div>
+  </div>
+
+  </div><!-- /mes 2026-10 -->
+
   <!-- ══════════ SEPTIEMBRE 2026 · MES CERRADO ══════════ -->
-  <div class="mes-block activo" data-mes="2026-09">
+  <div class="mes-block" data-mes="2026-09">
 
   <div class="view-tabs">
     <button class="tab-btn" data-view="hoy" onclick="switchView('hoy')">Último día · mié 30 sep</button>
@@ -870,7 +1320,17 @@
    y su bloque <div class="mes-block" data-mes="AAAA-MM"> en el HTML. */
 var MESES = [
   {
+    key: '2026-10',
+    label: 'Octubre 2026',
+    estado: 'en curso',
+    pill: 'En curso · 1 – 7 de octubre, 2026',
+    vistas: true,
+    nota: 'Cada campaña se mide contra su propio umbral histórico (promedio ±15%), no contra un estándar único para todas. <b>Octubre va en curso:</b> el acumulado llega hasta hoy porque Meta entrega en vivo, y no se empareja con la fecha de corte del panel de facturación, que va un día atrás.',
+    gen: 'Generado el 7 de octubre, 2026 · acumulado 1–7 de octubre · Meta Ads · Clínica Médica General CMG'
+  },
+  {
     key: '2026-09',
+    estado: 'cerrado',
     label: 'Septiembre 2026',
     pill: 'Mes cerrado · 1 – 30 de septiembre, 2026',
     vistas: true,
@@ -879,6 +1339,7 @@ var MESES = [
   },
   {
     key: '2026-08',
+    estado: 'cerrado',
     label: 'Agosto 2026',
     pill: 'Mes cerrado · 1 – 31 de agosto, 2026',
     vistas: false,
@@ -923,7 +1384,7 @@ function initSelector(){
   MESES.forEach(function(m){
     var o = document.createElement('option');
     o.value = m.key;
-    o.textContent = m.label + ' · cerrado';
+    o.textContent = m.label + ' · ' + (m.estado || 'cerrado');
     sel.appendChild(o);
   });
   sel.value = MESES[0].key;

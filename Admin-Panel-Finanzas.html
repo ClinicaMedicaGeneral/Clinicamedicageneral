@@ -445,7 +445,7 @@
 
 // Ventas mensuales totales (año cerrado 2025, y 2026 hasta el corte)
 var V2025 = [426322.60,388369.57,495618.75,360856.35,355547.63,382252.10,488989.85,391377.65,374760.65,389722.55,402741.10,399314.33];
-var V2026 = [440023.30,335955.55,398372.45,331083.37,371811.55,441232.90,379336.95,407010.80,333284.30,93852.65];
+var V2026 = [440023.30,335955.55,398372.45,331083.37,371811.55,441232.90,379336.95,407010.80,333284.30,133853.90];
 var TOT2024 = 3617415.07;
 var TOT2025 = 4855873.11;
 var MES_NOMBRE = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -586,21 +586,22 @@ var DATA = {
       nota:'<b>Coincide con el Panel de Ads:</b> la campaña de Horario Extendido estuvo pausada del 13 de agosto al 24 de septiembre de 2026, y volvió a correr el 25 de septiembre como campaña de alcance ("Horario Extendido - Octubre", L428.69 gastados al 29 sep). Los cinco días con pauta activa (25 al 29 sep) facturaron L9,514.00 en jornada extendida, a L1,902.80 por día, contra L573.18 por día en los 24 días sin pauta (L13,756.30) — más del triple de ritmo diario. Son esos cinco días los que llevaron la cobertura de costo fijo de déficit a superávit.' }
   },
   '2026-10': {
-    label:'Octubre 2026', y:2026, m:9, cerrado:false, corte:'6 de octubre', actualizado:'6/10/2026', diasCorte:6,
-    ventas:93852.65, varPct:-71.84, varMonto:-239431.65,
-    repAnual:1.93, promDiario:15642.11, promDiarioVarPct:40.80,
-    pos:66.0, efec:33.3, transf:0.6, davi:44496.00, fico:17476.50,
-    hist:{2022:173825.75,2023:224619.38,2024:310849.97,2025:389722.55,2026:93852.65},
-    nuevos:52.03, recur:47.97, promPacDia:21, pagoXPac:740.05, diaFuerte:'Sábado',
-    jornada:{regular:91, extendido:9},
-    acum2025Periodo:3739525.32, // acumulado 2025 al 6 oct — estimado: cierres ene–sep 2025 exactos (L3,664,095.15) + octubre 2025 prorrateado a 6/31 días, la hoja no expone el dato diario de 2025
-    acum2026Periodo:3532162.52, // "Ventas Actuales" de la pestaña Tendencias 2026 (= L3,438,309.87 de ene–sep + L93,852.65 de octubre)
-    notas:['<b>El −71.84% no es una caída.</b> Son 6 días contra un mes completo de 30. El dato comparable es el ritmo diario: <b>L15,642.11</b> por día, <b>+40.80%</b> sobre septiembre, y el más alto de 2026 hasta ahora. Lo mismo vale para el 1.93% de representación anual, que arranca desde cero cada mes (piso de referencia: 8.33%).',
-           '<b>La comparación anual va prorrateada.</b> El acumulado 2025 del mismo periodo (L3,739,525.32) no es un dato de la hoja: son los cierres exactos de enero–septiembre 2025 más octubre 2025 repartido a 6 de 31 días. La hoja no expone la venta diaria de 2025. Medido así, 2026 va −5.55%; contra el octubre 2025 completo marcaría −12.9%, que sería comparar 6 días contra 31.',
-           '<b>Dos porcentajes distintos para Horario Extendido.</b> La hoja pone <b>9%</b> en «Ingresos por Jornada» y <b>7%</b> en el «Porcentaje Mensual» del bloque de Horario Extendido. El primero es la participación en facturación (L8,673.00 sobre L93,852.65 = 9.2%) y el segundo la de pacientes (8 de los atendidos del mes). Este panel usa el 9% donde habla de facturación.'],
-    ext:{ pctMes:9, promDia:1.33, cobertura:-10840.52, parcial:true, dias:[
-      [1,844,1],[2,925,2],[3,2220,1],[4,0,0],[5,3174,2],[6,1510,2] ],
-      nota:'<b>Seis días no deciden el mes.</b> El déficit de L10,840.52 es el acumulado de 6 días con L8,673.00 facturados en jornada extendida; septiembre también venía en rojo a mitad de mes y cerró con superávit de L5,406.78 gracias a los últimos cinco días. El ticket de jornada extendida (L1,084.13) ya va 46% arriba del regular (L740.05), así que el problema es volumen de días, no de precio. Conviene releerlo cerca del día 20.' }
+    label:'Octubre 2026', y:2026, m:9, cerrado:false, corte:'11 de octubre', actualizado:'11/10/2026', diasCorte:11,
+    ventas:133853.90, varPct:-59.84, varMonto:-199430.40,
+    repAnual:2.76, promDiario:12168.54, promDiarioVarPct:9.53,
+    pos:65.6, efec:33.9, transf:0.5, davi:44496.00, fico:43374.00,
+    hist:{2022:173825.75,2023:224619.38,2024:310849.97,2025:389722.55,2026:133853.90},
+    nuevos:53.07, recur:46.93, promPacDia:16, pagoXPac:724.79, diaFuerte:'Lunes',
+    jornada:{regular:94, extendido:6},
+    acum2025Periodo:3802383.80, // acumulado 2025 al 11 oct — estimado: cierres ene–sep 2025 exactos (L3,664,095.15) + octubre 2025 prorrateado a 11/31 días, la hoja no expone el dato diario de 2025
+    acum2026Periodo:3572163.76, // "Ventas Actuales" de la pestaña Tendencias 2026 (= L3,438,309.87 de ene–sep + L133,853.90 de octubre)
+    notas:['<b>El −59.84% no es una caída.</b> Son 11 días contra un mes completo de 30. El dato comparable es el ritmo diario: <b>L12,168.54</b> por día, <b>+9.53%</b> sobre septiembre. Lo mismo vale para el 2.76% de representación anual, que arranca desde cero cada mes (piso de referencia: 8.33%). <b>Pero el ritmo se enfrió:</b> el corte al 6 marcaba L15,642.11 por día y +40.80%; cinco días después el mes va menos de la mitad de ese margen y queda <b>7.8% abajo de la meta diaria de L13,200</b>.',
+           '<b>La comparación anual va prorrateada.</b> El acumulado 2025 del mismo periodo (L3,802,383.80) no es un dato de la hoja: son los cierres exactos de enero–septiembre 2025 más octubre 2025 repartido a 11 de 31 días. La hoja no expone la venta diaria de 2025. Medido así, 2026 va <b>−6.06%</b>. La celda de la hoja marca <b>−26.44%</b>, pero esa compara el acumulado 2026 contra el <b>año 2025 completo</b> (L4,855,873.11, enero a diciembre), no contra el mismo periodo: son 284 días contra 365.',
+           '<b>Dos porcentajes distintos para Horario Extendido.</b> La hoja pone <b>6%</b> en «Ingresos por Jornada» y <b>4%</b> en el «Porcentaje Mensual» del bloque de Horario Extendido. El primero es la participación en facturación (L8,673.00 sobre L133,853.90 = 6.5%) y el segundo la de pacientes (8 de los atendidos del mes). Este panel usa el 6% donde habla de facturación.',
+           '<b>Dos cifras conviene confirmarlas con Finanzas.</b> Primera: <b>Davivienda marca L44,496.00, exactamente lo mismo que en el corte al 6</b>, mientras Ficohsa pasó de L17,476.50 a L43,374.00. O esa terminal no cobró nada en cinco días, o su celda no se actualizó. Segunda: el conteo de pacientes del libro (promedio 16 por día, pago promedio L724.79) implica unos 185 atendidos, mientras el Sheet HISTOGRAMA registra <b>183</b> con un ticket de L731.44. La diferencia es de dos pacientes y no cambia ninguna lectura, pero explica por qué el panel de Ads y este no dan el mismo ticket al centavo: cada uno cita su propia fuente.'],
+    ext:{ pctMes:6, promDia:2, cobertura:-10840.52, parcial:true, dias:[
+      [1,844,1],[2,925,2],[3,2220,1],[4,0,0],[5,3174,2],[6,1510,2],[7,0,0],[8,0,0],[9,0,0],[10,0,0],[11,0,0] ],
+      nota:'<b>La jornada extendida lleva cinco días seguidos en cero.</b> Del 7 al 11 de octubre no facturó un lempira ni atendió un paciente, así que el total del mes sigue clavado en <b>L8,673.00 con 8 pacientes</b> — idéntico al corte al 6 — y el déficit contra el costo fijo de L19,513.52 se mantiene en <b>L10,840.52</b>. <b>Esto responde la pregunta que el panel de Ads venía haciendo:</b> la campaña Horario Extendido estuvo pausada del 8 al 11, pero <b>el derrumbe empezó el día 7, con la pauta todavía corriendo</b>, así que no se le puede cargar la caída a la pausa. Lo que sí queda claro es que sin pauta tampoco se recuperó. El ticket de jornada extendida (L1,084.13) sigue 50% arriba del regular (L724.79): el problema nunca fue el precio, es que no entra nadie. La campaña volvió a correr el 12; conviene releer esta tabla cuando el libro cargue del 12 en adelante, porque ahí sí hay comparación limpia.' }
   }
 };
 

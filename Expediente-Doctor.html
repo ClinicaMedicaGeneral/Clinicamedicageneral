@@ -6727,8 +6727,9 @@ summary.ed-meds-cat { list-style: revert; }
 
   /* Atenciones válidas en [inicio, fin), de cualquier tipo. Además de la consulta
      por 'fecha', recupera por createdAt los stubs viejos sin 'fecha' (así el
-     calendario es retroactivo) y descarta los stubs cuya prueba u orden de
-     laboratorio ya se borró — esos nunca se cobraron y descuadrarían el día. */
+     calendario es retroactivo) y descarta los stubs sin liquidar cuya prueba u
+     orden de laboratorio ya se borró — esos nunca se cobraron y descuadrarían el
+     día. Si ya se liquidó en Caja se mantiene: sí se facturó. */
   function traerAtencionesRango(inicio, fin) {
     var col = cmgDb.collection('consultas');
     return Promise.all([
@@ -6748,7 +6749,7 @@ summary.ed-meds-cat { list-style: revert; }
       return Promise.all(items.map(function (it) {
         var ref = it.resultadosPruebasId ? cmgDb.collection('resultadosPruebas').doc(it.resultadosPruebasId)
           : (it.examenesLaboratorioId ? cmgDb.collection('examenesLaboratorio').doc(it.examenesLaboratorioId) : null);
-        if (!ref) return true;
+        if (!ref || it.pagoLiquidadoEnCaja) return true;
         return ref.get().then(function (s) { return s.exists; }).catch(function () { return true; });
       })).then(function (existe) {
         return items.filter(function (it, i) { return existe[i] && getFechaMs(it); });
@@ -7822,11 +7823,7 @@ summary.ed-meds-cat { list-style: revert; }
               .then(function(){
                 showAlert('✓ Orden eliminada', 'success');
                 cargarLaboratorioPendientesGlobal();
-                /* Borrar también su entrada en Caja, si aún no se había liquidado —
-                   para no dejar un cobro pendiente de un examen que ya no existe. */
-                cmgDb.collection('consultas').where('examenesLaboratorioId', '==', id).get().then(function(stubs){
-                  stubs.forEach(function(s){ if (!s.data().pagoLiquidadoEnCaja) s.ref.delete(); });
-                });
+                borrarStubsCaja('examenesLaboratorioId', id);
               })
               .catch(function(err){ showAlert('Error: ' + err.message, 'error'); });
           });
@@ -7904,10 +7901,23 @@ summary.ed-meds-cat { list-style: revert; }
   /* ════════════════════════════════════════════════════════════
      ADMINISTRACIÓN DE ARCHIVOS (borrar / mover)
      ════════════════════════════════════════════════════════════ */
+  /* Borra la entrada de Caja (stub en 'consultas') de una prueba rápida u orden de
+     laboratorio recién borrada, si aún no se había liquidado — para no dejar un
+     cobro pendiente ni una atención en el calendario de algo que ya no existe.
+     firestore.rules solo lo permite si el documento de origen ya no existe, así
+     que siempre se llama DESPUÉS de borrarlo. Best-effort: no bloquea el borrado. */
+  function borrarStubsCaja(campo, id) {
+    return cmgDb.collection('consultas').where(campo, '==', id).get().then(function (stubs) {
+      return Promise.all(stubs.docs.filter(function (s) { return !s.data().pagoLiquidadoEnCaja; })
+        .map(function (s) { return s.ref.delete(); }));
+    }).catch(function (e) { console.warn('[CMG] No se pudo borrar la entrada de Caja:', e.message); });
+  }
+
   function borrarPrueba(id) {
     if (!confirm('¿Borrar esta prueba rápida? Esta acción no se puede deshacer.')) return;
     showOverlay('Borrando prueba...');
     cmgDb.collection('resultadosPruebas').doc(id).delete()
+      .then(function () { return borrarStubsCaja('resultadosPruebasId', id); })
       .then(function () {
         hideOverlay();
         showAlert('✓ Prueba borrada', 'success');
@@ -7925,6 +7935,7 @@ summary.ed-meds-cat { list-style: revert; }
       : Promise.resolve();
     promesaStorage
       .then(function () { return cmgDb.collection('examenesLaboratorio').doc(id).delete(); })
+      .then(function () { return borrarStubsCaja('examenesLaboratorioId', id); })
       .then(function () {
         hideOverlay();
         showAlert('✓ Examen borrado', 'success');

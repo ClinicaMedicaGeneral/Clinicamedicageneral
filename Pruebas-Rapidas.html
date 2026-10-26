@@ -1204,7 +1204,15 @@
             var id = this.getAttribute('data-eliminar-id');
             if (!confirm('¿Eliminar esta prueba pendiente? Esta acción no se puede deshacer (útil si se repitió por accidente).')) return;
             cmgDb.collection('resultadosPruebas').doc(id).delete()
-              .then(function(){ toast('✓ Prueba pendiente eliminada'); cargarPendientes(); })
+              .then(function(){
+                toast('✓ Prueba pendiente eliminada'); cargarPendientes();
+                /* Borrar también su entrada en Caja si no se ha liquidado (firestore.rules
+                   solo lo permite una vez borrada la prueba) — así no queda un cobro
+                   pendiente ni una atención en el calendario del Historial. */
+                cmgDb.collection('consultas').where('resultadosPruebasId', '==', id).get().then(function(stubs){
+                  stubs.forEach(function(s){ if (!s.data().pagoLiquidadoEnCaja) s.ref.delete(); });
+                }).catch(function(e){ console.warn('[CMG] No se pudo borrar la entrada de Caja:', e.message); });
+              })
               .catch(function(err){ toast('Error: ' + err.message); });
           });
         });

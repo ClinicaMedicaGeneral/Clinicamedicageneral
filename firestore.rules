@@ -218,10 +218,32 @@ service cloud.firestore {
       // una etapa temprana (antes de pasar a Caja/liquidación), para no arriesgar
       // un registro ya facturado o pagado. Caja NO puede borrar (isCaja() != isDoctor()
       // salvo que la cuenta también tenga rol 'enf').
+      // Excepción 2: el personal clínico puede borrar la entrada de Caja de una
+      // prueba rápida u orden de laboratorio que ya se borró (se repitió por
+      // accidente, etc.), para que no quede un cobro pendiente ni una atención en
+      // el calendario del Historial de algo que no existe. Solo si sigue sin
+      // liquidar y SOLO si el documento de origen ya no existe — por eso la app
+      // borra primero la prueba/orden y después su entrada de Caja.
       allow delete: if isAdmin()
         || (
           isDoctor()
           && resource.data.status in ['listo_enfermeria', 'preclinica', 'servicio']
+        )
+        || (
+          isDoctor()
+          && resource.data.get('pagoLiquidadoEnCaja', false) != true
+          && resource.data.get('tipoRegistro', '') == 'prueba-standalone'
+          && resource.data.status == 'pendiente_caja'
+          && resource.data.get('resultadosPruebasId', null) is string
+          && !exists(/databases/$(database)/documents/resultadosPruebas/$(resource.data.resultadosPruebasId))
+        )
+        || (
+          isDoctor()
+          && resource.data.get('pagoLiquidadoEnCaja', false) != true
+          && resource.data.get('tipoRegistro', '') in ['lab-standalone', 'lab-vinculado']
+          && resource.data.status in ['pendiente_caja', 'servicio-completo']
+          && resource.data.get('examenesLaboratorioId', null) is string
+          && !exists(/databases/$(database)/documents/examenesLaboratorio/$(resource.data.examenesLaboratorioId))
         );
 
       // Update:

@@ -1133,6 +1133,8 @@
             servicioNombre      : tipoPrueba,
             serviciosBrindados  : [tipoPrueba],
             doctorNombre        : data.creadoPorNombre || data.creadoPor,
+            /* 'fecha' hace que cuente como atención en el calendario del Historial */
+            fecha               : firebase.firestore.FieldValue.serverTimestamp(),
             fechaLocal          : fechaLocalPR,
             resultadosPruebasId : docRef.id,
             createdAt           : firebase.firestore.FieldValue.serverTimestamp()

@@ -6711,14 +6711,49 @@ summary.ed-meds-cat { list-style: revert; }
     return new Date(key + 'T00:00:00').toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: 'numeric' });
   }
   /* A diferencia del historial de un paciente, aquí SÍ cuentan las órdenes de
-     laboratorio (lab-standalone / lab-vinculado) como atención — es la única
-     vista donde deben aparecer como "paciente atendido" ese día. Solo se
-     excluyen las preclínicas pendientes y los stubs de prueba rápida (fuera
-     de alcance de esta vista por ahora). */
+     laboratorio (lab-standalone / lab-vinculado) y las pruebas rápidas
+     (prueba-standalone) como atención — es la única vista donde deben aparecer
+     como "paciente atendido" ese día, para que cuadre con lo facturado en Caja.
+     Solo se excluyen las preclínicas pendientes. */
   function esRegistroAtencionValido(data) {
     if (data.status === 'preclinica') return false;
-    if (data.tipoRegistro === 'prueba-standalone') return false;
     return true;
+  }
+
+  /* Stubs de Caja que se crearon sin campo 'fecha' (solo createdAt) y por eso no
+     salen en la consulta por 'fecha': las pruebas rápidas hasta oct-2026 y las
+     órdenes de laboratorio externas entre jul y sep-2026. */
+  var TIPOS_STUB_SIN_FECHA = ['prueba-standalone', 'lab-standalone'];
+
+  /* Atenciones válidas en [inicio, fin), de cualquier tipo. Además de la consulta
+     por 'fecha', recupera por createdAt los stubs viejos sin 'fecha' (así el
+     calendario es retroactivo) y descarta los stubs cuya prueba u orden de
+     laboratorio ya se borró — esos nunca se cobraron y descuadrarían el día. */
+  function traerAtencionesRango(inicio, fin) {
+    var col = cmgDb.collection('consultas');
+    return Promise.all([
+      col.where('fecha', '>=', inicio).where('fecha', '<', fin).get(),
+      col.where('createdAt', '>=', inicio).where('createdAt', '<', fin).get()
+    ]).then(function (snaps) {
+      var items = [];
+      snaps[0].forEach(function (doc) {
+        var data = doc.data();
+        if (esRegistroAtencionValido(data)) items.push(Object.assign({ _id: doc.id }, data));
+      });
+      snaps[1].forEach(function (doc) {
+        var data = doc.data();
+        if (data.fecha || TIPOS_STUB_SIN_FECHA.indexOf(data.tipoRegistro) === -1) return;
+        items.push(Object.assign({ _id: doc.id }, data));
+      });
+      return Promise.all(items.map(function (it) {
+        var ref = it.resultadosPruebasId ? cmgDb.collection('resultadosPruebas').doc(it.resultadosPruebasId)
+          : (it.examenesLaboratorioId ? cmgDb.collection('examenesLaboratorio').doc(it.examenesLaboratorioId) : null);
+        if (!ref) return true;
+        return ref.get().then(function (s) { return s.exists; }).catch(function () { return true; });
+      })).then(function (existe) {
+        return items.filter(function (it, i) { return existe[i] && getFechaMs(it); });
+      });
+    });
   }
 
   function renderHistorialCalendarioView(cont) {
@@ -6770,19 +6805,12 @@ summary.ed-meds-cat { list-style: revert; }
     var year = ref.getFullYear(), month = ref.getMonth();
     var inicio = new Date(year, month, 1, 0, 0, 0, 0);
     var fin = new Date(year, month + 1, 1, 0, 0, 0, 0);
-    return cmgDb.collection('consultas')
-      .where('fecha', '>=', inicio)
-      .where('fecha', '<', fin)
-      .get()
-      .then(function (snap) {
+    return traerAtencionesRango(inicio, fin)
+      .then(function (items) {
         var porDia = {};
-        snap.forEach(function (doc) {
-          var data = doc.data();
-          if (!esRegistroAtencionValido(data)) return;
-          var ms = getFechaMs(data);
-          if (!ms) return;
-          var key = fechaLocalStr(new Date(ms));
-          (porDia[key] = porDia[key] || []).push(Object.assign({ _id: doc.id }, data));
+        items.forEach(function (it) {
+          var key = fechaLocalStr(new Date(getFechaMs(it)));
+          (porDia[key] = porDia[key] || []).push(it);
         });
         Object.keys(porDia).forEach(function (k) {
           porDia[k].sort(function (a, b) { return getFechaMs(a) - getFechaMs(b); });
@@ -6860,7 +6888,8 @@ summary.ed-meds-cat { list-style: revert; }
       var esLab = it.tipoRegistro === 'lab-standalone' || it.tipoRegistro === 'lab-vinculado';
       var esServicio = it.status === 'servicio' || it.status === 'servicio-completo' ||
         it.tipoRegistro === 'servicio-standalone' || it.tipoRegistro === 'servicio-vinculado';
-      var tipoLabel = esLab ? '🔬 Laboratorio' : (esServicio ? '🛎️ Procedimiento' : '🩺 Consulta');
+      var esPrueba = it.tipoRegistro === 'prueba-standalone';
+      var tipoLabel = esPrueba ? '🧪 Prueba Rápida' : (esLab ? '🔬 Laboratorio' : (esServicio ? '🛎️ Procedimiento' : '🩺 Consulta'));
       return '<button type="button" class="ed-cal-pac-item" data-cal-pac="' + esc(it.codigoPaciente || '') + '">' +
         '<span class="ed-cal-pac-hora">' + hora + '</span>' +
         '<span class="ed-cal-pac-nombre">' + esc(it.pacienteNombre || '—') + '</span>' +
@@ -6915,18 +6944,13 @@ summary.ed-meds-cat { list-style: revert; }
     var inicio = dIni;
     var fin = new Date(dFin.getFullYear(), dFin.getMonth(), dFin.getDate() + 1, 0, 0, 0, 0);
     showOverlay('Buscando...');
-    cmgDb.collection('consultas').where('fecha', '>=', inicio).where('fecha', '<', fin).get()
-      .then(function (snap) {
+    traerAtencionesRango(inicio, fin)
+      .then(function (items) {
         hideOverlay();
         var porDia = {};
-        snap.forEach(function (doc) {
-          var data = doc.data();
-          if (!esRegistroAtencionValido(data)) return;
-          var ms = getFechaMs(data);
-          if (!ms) return;
-          var key = fechaLocalStr(new Date(ms));
-          (porDia[key] = porDia[key] || 0);
-          porDia[key]++;
+        items.forEach(function (it) {
+          var key = fechaLocalStr(new Date(getFechaMs(it)));
+          porDia[key] = (porDia[key] || 0) + 1;
         });
         renderResultadoRangoCalendario(porDia, desde, hasta);
       }).catch(function (err) {

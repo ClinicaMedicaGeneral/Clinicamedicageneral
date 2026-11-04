@@ -839,7 +839,7 @@ function renderExtendido(d){
       (d.jornada ? '<br>La hoja sí registra la jornada extendida como <b>' + d.jornada.extendido + '%</b> de los ingresos del mes, sin desglose diario.' : '') + '</div>';
     return;
   }
-  var t = extTotal(d.ext), p = extPac(d.ext), prom = t / p;
+  var t = extTotal(d.ext), p = extPac(d.ext), prom = p ? t / p : 0;
   var html = '<div class="kpi-strip" style="margin-top:24px;">' +
     kpi('Total facturado', L(t), d.ext.pctMes + '% de la facturación del mes') +
     kpi('Pacientes atendidos', p, (d.cerrado ? 'en el mes' : 'en ' + d.diasCorte + ' días') + ' · ' + d.ext.promDia + ' por día') +

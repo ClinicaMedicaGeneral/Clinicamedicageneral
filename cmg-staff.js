@@ -22,6 +22,13 @@
     'caja.clinicacmg@gmail.com'
   ]);
 
+  /* ── Ventas y Mercadeo: acceso SOLO a los paneles de Finanzas, Ads y
+     Contenido (Admin-Panel-*.html). No son staff: no entran a caja,
+     expedientes ni capacitación. ── */
+  var MERCADEO_EMAILS = [
+    'ventasymercadeocmg@gmail.com'
+  ];
+
   /* ── Lookup en Firestore /usuarios/{uid} ── */
   function firestoreRole(uid, cb) {
     var db = typeof cmgDb !== 'undefined' ? cmgDb : null;
@@ -43,6 +50,13 @@
       if (!user) { cb(false); return; }
       if (ADMIN_EMAILS.indexOf((user.email || '').toLowerCase()) !== -1) { cb(true); return; }
       firestoreRole(user.uid, function (rol) { cb(rol === 'admin'); });
+    },
+    // checkPaneles: acceso a Admin-Panel-Finanzas/Ads/Contenido.
+    // Admins + cuentas de Ventas y Mercadeo.
+    checkPaneles: function (user, cb) {
+      if (!user) { cb(false); return; }
+      if (MERCADEO_EMAILS.indexOf((user.email || '').toLowerCase()) !== -1) { cb(true); return; }
+      global.cmgStaff.checkAdmin(user, cb);
     },
     checkStaff: function (user, cb) {
       if (!user) { cb(false); return; }

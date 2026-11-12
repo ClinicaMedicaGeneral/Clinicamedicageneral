@@ -74,7 +74,7 @@
     @page{size:letter portrait;margin:12mm}
   }
 
-  /* ── Gate (acceso solo admins) ── */
+  /* ── Gate (admins + Ventas y Mercadeo) ── */
   #cmg-gate-loader{
     position:fixed; inset:0; background:var(--navy); z-index:999;
     display:flex; align-items:center; justify-content:center;
@@ -1290,7 +1290,7 @@ function initSelector(){
       window.location.href = 'Auth.html?returnTo=Admin-Panel-Contenido.html';
       return;
     }
-    cmgStaff.checkAdmin(user, function (ok) {
+    cmgStaff.checkPaneles(user, function (ok) {
       if (!ok) { window.location.href = 'Inicio.html'; return; }
       document.getElementById('adm-user-email').textContent = user.email;
       document.getElementById('cmg-gate-loader').style.display = 'none';

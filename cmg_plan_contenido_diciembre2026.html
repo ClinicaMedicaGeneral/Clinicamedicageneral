@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMG · Plan de contenido diciembre 2026</title>
+
+<style>
+  :root{
+    --navy:#213C7D; --amarillo:#FDD22C; --rojo:#F20F10; --teal:#599FB2;
+    --whatsapp:#25D366; --verde:#4E8273; --crema:#FFEED8; --neutro:#F6F7FB; --negro:#0A0F1F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--navy);color:var(--neutro);font-family:"Helvetica Neue",Arial,sans-serif;line-height:1.5;padding:32px 20px}
+  .wrap{max-width:1180px;margin:0 auto}
+  header{border-bottom:4px solid var(--amarillo);padding-bottom:20px;margin-bottom:32px}
+  header .kicker{color:var(--teal);font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:700}
+  header h1{color:var(--amarillo);font-size:42px;font-weight:900;text-transform:uppercase;line-height:1.05;margin:6px 0}
+  header .sub{color:var(--neutro);font-size:14px;opacity:.85}
+  section{margin-bottom:38px}
+  h2{color:var(--amarillo);font-size:13px;letter-spacing:2px;text-transform:uppercase;font-weight:800;border-left:4px solid var(--rojo);padding-left:10px;margin-bottom:14px}
+  .card{background:var(--neutro);color:var(--negro);border-radius:10px;padding:20px 22px}
+  .resumen p{margin-bottom:10px;font-size:15px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px}
+  .pilar{background:var(--neutro);color:var(--negro);border-radius:10px;padding:16px 18px;border-top:5px solid var(--teal)}
+  .pilar h3{font-size:16px;font-weight:800;color:var(--navy);margin-bottom:6px}
+  .pilar .peso{display:inline-block;background:var(--amarillo);color:var(--navy);font-weight:800;font-size:12px;padding:2px 9px;border-radius:20px;margin-bottom:8px}
+  .pilar p{font-size:13px;margin-bottom:5px}
+  .pilar .regla{color:var(--verde);font-weight:700;font-size:12px}
+  table{width:100%;border-collapse:collapse;background:var(--neutro);color:var(--negro);border-radius:10px;overflow:hidden;font-size:13px}
+  th{background:var(--navy);color:var(--amarillo);text-align:left;padding:10px;font-size:11px;letter-spacing:1px;text-transform:uppercase}
+  td{padding:9px 10px;border-bottom:1px solid #dde1ec;vertical-align:top}
+  tr:nth-child(even) td{background:#eef0f7}
+  tr.hito td{border-left:4px solid var(--rojo)}
+  .tag{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:2px 6px;border-radius:4px}
+  .t-edu{background:#dbe7ea;color:#2c5b68}
+  .t-promo{background:var(--amarillo);color:var(--navy)}
+  .t-emo{background:var(--crema);color:#8a5a12}
+  .mix{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .mix div{flex:1;min-width:150px;background:var(--neutro);color:var(--navy);border-radius:8px;padding:12px;text-align:center}
+  .mix strong{display:block;font-size:32px;font-weight:900}
+  .mix span{font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+  .nota{background:var(--crema);color:var(--negro);border-left:5px solid var(--amarillo);padding:12px 16px;border-radius:6px;font-size:13px;margin-top:12px}
+  .riesgo{border-left-color:var(--rojo)}
+  .ok{border-left-color:var(--verde)}
+  .diag{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+  .diag div{background:var(--neutro);color:var(--navy);border-radius:8px;padding:14px 16px}
+  .diag strong{display:block;font-size:22px;font-weight:900;color:var(--navy)}
+  .diag span{font-size:11px;letter-spacing:.5px;text-transform:uppercase;font-weight:700;color:var(--teal)}
+  .diag em{display:block;font-style:normal;font-size:12px;color:#556;margin-top:3px}
+  .cruce{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:12px;margin-top:6px}
+  .cruce div{background:var(--neutro);color:var(--negro);border-radius:10px;padding:14px 16px;border-top:4px solid var(--teal)}
+  .cruce h4{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--navy);font-weight:800;margin-bottom:6px}
+  .cruce p{font-size:12.5px;margin:0}
+  .t-sin{background:#e3e5ee;color:#4a5168}
+  tr.alto td{border-left:4px solid var(--amarillo)}
+  ul{padding-left:20px}
+  li{margin-bottom:5px;font-size:13.5px}
+  .card p{font-size:14px;margin-bottom:9px}
+  /* Ajustes sobre la marcha: entradas y viñetas desplegables (las arma colapsarAjustes()) */
+  .ajustes-bar{display:flex;justify-content:flex-end;margin:-6px 0 10px}
+  .ajustes-toggle{background:none;border:1px solid var(--amarillo);color:var(--amarillo);font-family:inherit;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;cursor:pointer}
+  .ajustes-toggle:hover{background:var(--amarillo);color:var(--navy)}
+  .ajuste{border-top:1px solid rgba(33,60,125,.14)}
+  .card > .ajuste:first-of-type{border-top:none}
+  .ajuste summary,.ajuste-li summary{cursor:pointer;list-style:none;position:relative;padding-left:22px}
+  .ajuste summary::-webkit-details-marker,.ajuste-li summary::-webkit-details-marker{display:none}
+  .ajuste summary::before,.ajuste-li summary::before{content:"";position:absolute;left:4px;width:0;height:0;border-left:6px solid var(--navy);border-top:4.5px solid transparent;border-bottom:4.5px solid transparent;transition:transform .15s}
+  .ajuste[open]>summary::before,.ajuste-li[open]>summary::before{transform:rotate(90deg)}
+  .ajuste>summary{padding-top:12px;padding-bottom:12px;font-size:14.5px;color:var(--navy)}
+  .ajuste>summary::before{top:19px}
+  .ajuste>summary .ajuste-n{font-size:12px;font-weight:400;color:#6b7390;margin-left:6px}
+  .ajuste-body{padding:0 0 12px 22px}
+  .ajuste-body>ul{list-style:none;padding-left:0}
+  .ajuste-li{margin-bottom:2px}
+  .ajuste-li>summary{padding-top:4px;padding-bottom:4px}
+  .ajuste-li>summary::before{top:10px;border-left-color:var(--teal)}
+  .ajuste-li>summary:hover b{text-decoration:underline}
+  .ajuste-li>div{padding:2px 0 8px 22px;color:#2b3147}
+  footer{border-top:2px solid var(--teal);padding-top:16px;margin-top:40px;font-size:12px;color:var(--teal)}
+  footer b{color:var(--amarillo)}
+  @media print{
+    body{background:#fff;color:#000;padding:0;font-size:11px}
+    header h1{color:#213C7D}
+    h2{color:#213C7D}
+    .card,.pilar,table{box-shadow:none}
+    th{background:#e6e9f2;color:#213C7D}
+    section{page-break-inside:avoid}
+    table{page-break-inside:auto;font-size:9.5px}
+    tr{page-break-inside:avoid}
+    footer{color:#213C7D}
+    footer b{color:#213C7D}
+    @page{size:letter portrait;margin:12mm}
+  }
+
+  /* ── Gate (admins + Ventas y Mercadeo) ── */
+  #cmg-gate-loader{
+    position:fixed; inset:0; background:var(--navy); z-index:999;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:12px;
+  }
+  #cmg-gate-loader .spinner{
+    width:34px; height:34px; border-radius:50%;
+    border:3px solid rgba(255,255,255,.15); border-top-color:var(--amarillo);
+    animation:spin .8s linear infinite;
+  }
+  #cmg-gate-loader p{font-size:13px; color:rgba(255,255,255,.65);}
+  @keyframes spin{ to{transform:rotate(360deg);} }
+  #cmg-gate-content{display:none;}
+
+  .month-picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0 4px}
+  .month-picker label{color:var(--teal);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700}
+  .month-picker select{
+    font-family:inherit;font-weight:800;font-size:15px;color:var(--navy);background:var(--neutro);
+    border:2px solid var(--amarillo);border-radius:20px;padding:7px 36px 7px 16px;cursor:pointer;
+    -webkit-appearance:none;appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23213C7D' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;
+  }
+  .mes-block{display:none}
+  .mes-block.activo{display:block}
+  .estado-mes{display:inline-block;background:var(--teal);color:#fff;font-size:10px;font-weight:800;
+    letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-top:4px}
+  .estado-mes.cerrado{background:#6b7290}
+  .estado-mes.pendiente{background:var(--amarillo);color:var(--navy)}
+  .estado-mes.aprobado{background:#4E8273}
+  @media print{ .month-picker{display:none} .mes-block{display:block !important} }
+  .adm-bar{
+    max-width:1180px; margin:0 auto 14px;
+    display:flex; align-items:center; justify-content:flex-end; gap:12px;
+  }
+  .adm-bar .who{font-size:12px; color:rgba(255,255,255,.65);}
+  .adm-bar .who strong{color:var(--amarillo);}
+  .adm-bar button{
+    border:1px solid rgba(255,255,255,.25); background:transparent; color:rgba(255,255,255,.75);
+    border-radius:20px; padding:6px 16px; font-size:12px; font-weight:600;
+    cursor:pointer; font-family:inherit; transition:all .18s;
+  }
+  .adm-bar button:hover{background:rgba(255,255,255,.1); color:#fff;}
+</style>
+</head>
+<body>
+<div class="wrap" style="max-width:1100px;margin:0 auto">
+  <header>
+    <h1>Plan de contenido<br>Diciembre 2026</h1>
+    <div><span class="estado-mes pendiente">Pendiente de aprobación</span></div>
+    <div class="sub"><b>Bienestar con sueroterapia, y ahora con Extrafinanciamiento Ficohsa.</b> Elaborado con noviembre al 19 (libro de Finanzas y Sheet HISTOGRAMA) y el Panel de Ads con corte al 21 · Emitido el 22 de noviembre de 2026 · Cubre del 1 al 31 de diciembre</div>
+  </header>
+  <!-- ══════════════════ DICIEMBRE 2026 · PENDIENTE DE APROBACIÓN ══════════════════ -->
+  <div class="mes-block activo" data-mes="2026-12">
+
+  <section>
+    <h2>Ajustes sobre la marcha</h2>
+    <div class="card">
+      <p><b>22 de noviembre · plan emitido, pendiente de aprobación.</b> Es el primer plan que se hace el mes anterior: sale nueve días antes de que empiece diciembre para que la Dirección lo apruebe y la producción (los dos videos propios y el video que se le pide a City Mall) esté lista el día 1. Todavía no hay ajustes. Cuando se apruebe, este plan queda como la versión de referencia y sólo cambia por ajustes sobre la marcha con dato que los justifique; cada fila cambiada va a decir qué decía la versión aprobada.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Resumen ejecutivo</h2>
+    <div class="card resumen">
+      <p><b>1.</b> Diciembre se enfoca en <b>bienestar con sueroterapia</b>, el promocional del mes, y ahora con una forma de pago nueva: <b>Extrafinanciamiento Ficohsa</b>. Es la línea que más crece sin pauta, en el mes de mayor disposición de gasto del año.</p>
+      <p><b>2.</b> El dato que lo obliga: con el corte al 19 de noviembre, sueroterapia ya facturó <b>L30,600.00</b>, más que todo octubre (L27,700.00), <b>+80.2% por día</b> y con Boost a +144.7%, sin un lempira de pauta. En cambio, los cuatro servicios con pauta venden entre 13.8% y 35.3% menos por día que en octubre. Y los días bajo el piso de L10,500 subieron a <b>36.8% (7 de 19)</b>, con jueves y viernes como los más flojos (regla P5).</p>
+      <p><b>3.</b> La meta del mes son <b>1.0 persona atendida más por día</b>, 31 en el mes. Sale de la brecha de L22,664.73 entre la facturación mensual que pide la meta mínima anual (L416,666.67) y el ritmo de noviembre llevado a 31 días (L12,709.74 × 31 = L394,001.94), dividida entre el ticket de L731.77.</p>
+      <p><b>4.</b> <b>No queda nada congelado.</b> La Dirección confirmó el 22 de noviembre que hay insumo para todos los servicios y sueros activos. Multivitamínico, Vitamina D e Hígado Detox siguen fuera por estado de catálogo, no por la regla P1.</p>
+      <p><b>5.</b> El riesgo principal es <b>el video de City Mall</b>: es la pieza que carga el promocional del mes, se produce afuera y tiene que estar entregado el <b>sábado 28 de noviembre</b> para publicarse el jueves 3. Si el plan no se aprueba a tiempo para pedirlo, el promocional arranca tarde. El segundo riesgo es publicar cuotas de Ficohsa sin confirmarlas: ninguna pieza dice plazos ni montos hasta tener las condiciones por escrito.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Diagnóstico de noviembre al 19 · los sueros crecen solos, lo pautado vende menos por día</h2>
+    <div class="diag">
+      <div><span>Venta al 19 de noviembre</span><strong>L241,485.02</strong><em>proyección a 30 días L381,292 (estimada) · octubre L403,111.45</em></div>
+      <div><span>Promedio diario</span><strong>L12,709.74</strong><em>meta L13,200 · −2.26% vs octubre</em></div>
+      <div><span>Ticket promedio</span><strong>L731.77</strong><em>meta L740 · octubre L704.74 · el libro dice L740.57</em></div>
+      <div><span>Personas atendidas por día</span><strong>17.37</strong><em>meta 19 · 330 en 19 días · octubre 18.45</em></div>
+      <div><span>Días bajo L10,500</span><strong>7 de 19</strong><em>36.8% · octubre 29.0%</em></div>
+      <div><span>Días con meta de suero</span><strong>5 de 19</strong><em>octubre 0 de 31 · meta L3,064/día</em></div>
+    </div>
+    <div class="nota"><b>Fuente del diagnóstico:</b> el plan se hace antes de que cierre noviembre, así que usa el mes en curso <b>hasta el jueves 19</b>, último día cargado: el libro de Finanzas (Última Actualización 19/11/2026, L241,485.02) y el Sheet HISTOGRAMA (L241,485.00) cuadran, y el Panel de Ads se recorta al mismo día. Octubre, cerrado, queda como referencia de mes completo. La proyección de noviembre a 30 días es <b>estimada</b> (ritmo del 1 al 19). Si el cierre real o el reporte ejecutivo de noviembre cambian alguna cifra, entra como ajuste sobre la marcha. Los días bajo el piso se cuentan por valor: la casilla del Sheet no marca el mié 18.</div>
+    <div class="nota"><b>El patrón de la semana se movió a jueves y viernes.</b> En noviembre, los jueves promedian <b>L8,828.87</b> (5, 12 y 19, los tres bajo L11,200 y el 19 el peor día del mes, L5,953.50) y los viernes <b>L8,297.25</b> (6 y 13, los dos bajo el piso). El sábado sigue siendo el más fuerte (L16,541.50) y el lunes 16 fue el mejor día del mes (L21,698.00). En octubre el día débil era el martes; los anclajes de diciembre se mueven a <b>jueves y viernes</b>.</div>
+
+    <h2 style="margin-top:24px">Pilares y servicios · qué se movió</h2>
+    <table>
+      <thead><tr><th>Línea</th><th>Septiembre</th><th>Octubre</th><th>Noviembre al 19</th><th>Venta/día vs oct</th><th>Lectura</th></tr></thead>
+      <tbody>
+        <tr><td><b>Servicios pilares</b></td><td>L85,170.00</td><td>L108,490.00</td><td>L46,600.00</td><td style="color:#F20F10;font-weight:700">−29.9%</td><td>Los cuatro servicios con pauta venden menos por día</td></tr>
+        <tr><td><b>Sueroterapias</b></td><td>L30,750.00</td><td>L27,700.00</td><td>L30,600.00</td><td style="color:#4E8273;font-weight:700">+80.2%</td><td>Ya pasó todo octubre en 19 días, sin pauta</td></tr>
+        <tr><td><b>Laboratorio</b></td><td>L36,706.75</td><td>L38,117.50</td><td>L23,987.00</td><td style="color:#4E8273;font-weight:700">+2.7%</td><td>Sin pauta desde el 4: del 4 al 17 vendió +23.4% por día</td></tr>
+        <tr><td><b>Jornada extendida</b></td><td>—</td><td>L27,317.00</td><td>L12,701.00</td><td style="color:#F20F10;font-weight:700">−24.1%</td><td>5.3% de la venta · vende más sin pauta que con ella</td></tr>
+        <tr><td>Cauterización</td><td>L34,470.00</td><td>L38,940.00</td><td>L15,850.00</td><td style="color:#F20F10;font-weight:700">−33.6%</td><td>ROAS 5.87x · frecuencia 2.73, el anuncio «V3» se gasta</td></tr>
+        <tr><td>Lavado de oído</td><td>L24,400.00</td><td>L36,800.00</td><td>L14,600.00</td><td style="color:#F20F10;font-weight:700">−35.3%</td><td>La pauta más barata (L9.02) y la que más cayó en venta</td></tr>
+        <tr><td>Extracción de uña</td><td>L18,300.00</td><td>L21,100.00</td><td>L11,150.00</td><td style="color:#F20F10;font-weight:700">−13.8%</td><td>Salió del rojo (ROAS 4.92x) con el refuerzo orgánico</td></tr>
+        <tr><td>Electrocardiograma</td><td>L8,000.00</td><td>L11,650.00</td><td>L5,000.00</td><td style="color:#F20F10;font-weight:700">−30.0%</td><td>Conversaciones baratas que no llegan a caja · ROAS 3.72x</td></tr>
+        <tr><td>Suero Boost</td><td>L17,550.00</td><td>L10,800.00</td><td>L16,200.00</td><td style="color:#4E8273;font-weight:700">+144.7%</td><td>El suero que más creció · la propuesta nueva funcionó</td></tr>
+        <tr><td>Suero Oxigenador</td><td>L7,700.00</td><td>L9,100.00</td><td>L6,300.00</td><td style="color:#4E8273;font-weight:700">+13.0%</td><td>Sigue vendiendo sin pauta</td></tr>
+        <tr><td>Suero Vitamina C</td><td>L1,000.00</td><td>L5,000.00</td><td>L2,000.00</td><td style="color:#F20F10;font-weight:700">−34.7%</td><td>Producto pequeño · funciona mejor en combo</td></tr>
+        <tr><td>Suero Complejo B</td><td>L2,550.00</td><td>L850.00</td><td>L850.00</td><td style="color:#4E8273;font-weight:700">+63.2%</td><td>Una venta en el mes · sondeo</td></tr>
+      </tbody>
+    </table>
+    <div class="nota"><b>Sobre la tabla:</b> sueroterapia se lee de su pestaña diaria (L30,600.00). La pestaña resumen clasifica L25,350.00 por suero y deja <b>L5,250.00 sin clasificar</b>, así que la suma de los sueros de abajo no llega al total de la línea. Consultas no tiene desglose de noviembre en el Sheet todavía.</div>
+
+    <h2 style="margin-top:24px">Cruce de pauta contra venta · 1 al 19 de noviembre</h2>
+    <div class="cruce">
+      <div><h4>Invierte y vende · sostener</h4><p><b>Lavado de oído:</b> L2,215.15 de pauta, L14,600 de venta, <b>ROAS 6.59x</b>, el costo por conversación más bajo de la cuenta (L9.02 al 21).<br><b>Cauterización:</b> L2,701.62, L15,850, <b>ROAS 5.87x</b>, con frecuencia 2.73 y cuatro días en rojo del 16 al 21: necesita creativo nuevo.<br><b>Extracción de uña:</b> L2,267.07, L11,150, <b>ROAS 4.92x</b>, mejorando.</p></div>
+      <div><h4>Invierte y no vende · problema de cierre</h4><p><b>Electrocardiograma:</b> L1,342.49 de pauta, L5,000 de venta, <b>ROAS 3.72x</b>. Del 16 al 19 trajo 24 conversaciones y <b>ningún electrocardiograma entró en caja</b>. El costo por conversación es verde (L10.98), así que es regla P11: el problema está en el chat, no en el alcance. Lavado de oído muestra lo mismo en menor medida: la conversación más barata y la venta que más cae.</p></div>
+      <div><h4>Vende sin invertir · amplificar</h4><p><b>Sueroterapias:</b> L30,600 sin pauta, Boost +144.7% por día. <b>Laboratorio:</b> la prueba de 14 días sin pauta terminó con +23.4% por día. <b>Jornada nocturna:</b> L7,836.00 en diez noches sin pauta contra L4,865.00 en nueve con pauta. Las tres reciben contenido orgánico; sueroterapia, además, es el promocional del mes.</p></div>
+      <div><h4>Ni invierte ni vende · hueco de catálogo</h4><p><b>Glutathione</b> (sin venta registrada en noviembre), <b>Complejo B</b> (una venta, L850) y los servicios sin desglose — prueba de embarazo, citología de base líquida y aplicaciones IM e IV — siguen con peso mínimo de sondeo (regla P10).</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Mix del mes</h2>
+    <div class="mix">
+      <div><strong>40%</strong><span>Educativo / preventivo</span></div>
+      <div><strong>40%</strong><span>Promocional</span></div>
+      <div><strong>20%</strong><span>Emocional / comunidad</span></div>
+    </div>
+    <div class="nota"><b>Justificación numérica (regla P5):</b> el bloque promocional sube <b>10 puntos</b> sobre la base 50/30/20 porque los días bajo el piso subieron de <b>29.0% (9 de 31) en octubre a 36.8% (7 de 19) en noviembre</b>, casi doce puntos sobre el disparador del 25%. En noviembre se subieron 5 puntos y la proporción empeoró, así que esta vez se usa el máximo que permite la regla. Los 10 puntos salen del bloque educativo; el emocional no se mueve. La brecha del mes contra la meta mínima mensual (L416,666.67) frente al ritmo de noviembre llevado a 31 días (L394,001.94) es de <b>L22,664.73</b>, que al ticket de L731.77 equivale a <b>31 personas atendidas más en el mes, 1.0 por día operado</b>.</div>
+    <div class="nota ok"><b>Dónde se anclan los puntos extra:</b> jueves y viernes fueron los días más débiles de noviembre (L8,828.87 y L8,297.25 de promedio). Las piezas promocionales que caen fuera de los tramos de pago van en el <b>jueves 3</b> (el video de City Mall), el <b>viernes 4</b> y el <b>jueves 10</b>, y el viernes 11 lleva el video propio de lavado de oído con «ven hoy sin cita».</div>
+    <div class="nota riesgo"><b>La regla P6 sigue activa.</b> El ticket del Sheet quedó bajo L740 por tercer mes (L704.51 en septiembre, L704.74 en octubre, L731.77 al 19 de noviembre; el libro marca L740.57, justo en la meta). Las <b>10 piezas promocionales son combos</b>: dos servicios en la misma visita, cada uno a su precio de lista. Ninguna publica descuento. <b>Extrafinanciamiento Ficohsa no es descuento</b>: es una forma de pago que acompaña a los combos de sueroterapia, así que no choca con la regla.</div>
+    <div class="nota"><b>Reparto real del calendario:</b> 26 piezas de feed — 11 educativas, 10 promocionales y 5 emocionales, es decir 42.3% / 38.5% / 19.2%. Es el 40/40/20 del mes redondeado a piezas enteras. <b>Dentro del bloque de sueroterapia</b> (8 piezas) van 5 educativas y 3 promocionales: 62.5% educativo, sobre el 60% que pide la regla P7 aunque el promocional del mes sea de sueros.</div>
+  </section>
+
+  <section>
+    <h2>Pilares del mes · cuatro pilares, 100% del calendario</h2>
+    <div class="grid">
+      <div class="pilar">
+        <span class="peso">8 de 26 piezas · 31%</span>
+        <h3>1 · Bienestar con sueroterapia</h3>
+        <p><b>Necesidad:</b> la línea vende sola (L30,600 al 19, +80.2% por día, Boost +144.7%) y diciembre es el mes de más gasto del año. Es el promocional mensual, con Extrafinanciamiento Ficohsa como forma de pago nueva.</p>
+        <p><b>Servicios:</b> Boost L1350, Oxigenador L700, Vitamina C L1000, Complejo B L850, siempre con consulta L300 en las piezas promocionales. Glutathione L1500 en sondeo por historias.</p>
+        <p class="regla">Promocional mensual comprometido · reglas P7 (62.5% educativo dentro del bloque) y P10</p>
+      </div>
+      <div class="pilar">
+        <span class="peso">7 de 26 piezas · 27%</span>
+        <h3>2 · Entrada, cruce y horario de fiestas</h3>
+        <p><b>Necesidad:</b> consulta es la línea más grande del acumulado anual (17%), lavado de oído trae las conversaciones más baratas y es la venta que más cae (−35.3%), y la franja nocturna aporta 5.3%, bajo el 10%. El 24 y el 25 cambian de horario.</p>
+        <p><b>Servicios:</b> consulta médica L300, lavado de oído L400, horario hasta las 10 PM y horario de Navidad.</p>
+        <p class="regla">Reglas P2, P8 y P9 · presencia semanal de consulta, cross-sell y franja nocturna</p>
+      </div>
+      <div class="pilar">
+        <span class="peso">6 de 26 piezas · 23%</span>
+        <h3>3 · Procedimientos de una visita</h3>
+        <p><b>Necesidad:</b> cauterización vende 33.6% menos por día con su anuncio en frecuencia 2.73; extracción de uña mejoró con el refuerzo orgánico (ROAS 3.78x → 4.92x). Las fiestas son un gancho natural: fotos, zapatos nuevos, reuniones.</p>
+        <p><b>Servicios:</b> cauterización L200 por lesión y extracción de uña L500, con consulta L300 en las piezas promocionales.</p>
+        <p class="regla">Reglas P6 y P3 preventiva · combos con consulta y creativo nuevo antes de que la caída se repita</p>
+      </div>
+      <div class="pilar">
+        <span class="peso">5 de 26 piezas · 19%</span>
+        <h3>4 · Chequeo de fin de año</h3>
+        <p><b>Necesidad:</b> laboratorio vende sin pauta (+23.4% por día en la prueba) y electrocardiograma trae conversaciones que no cierran: 24 entre el 16 y el 19, ningún electrocardiograma en caja.</p>
+        <p><b>Servicios:</b> exámenes de laboratorio (cotiza), perfil de lípidos (cotiza), electrocardiograma L500.</p>
+        <p class="regla">Reglas P8 y P11 · cross-sell desde consulta y piezas que invitan a venir sin pasar por el chat</p>
+      </div>
+    </div>
+    <div class="nota"><b>Franja nocturna (regla P9):</b> 8 de las 26 piezas (1, 4, 5, 10, 11, 18, 22 y 29) dicen «sin cita, por orden de llegada, hasta las 10 PM», más que la una de cada cuatro que pide la regla, y sus historias se programan después de las 5 PM. <b>Horario confirmado por la Dirección:</b> de lunes a sábado de 6 AM a 10 PM, domingo de 8 AM a 6 PM, <b>24 de diciembre de 7 AM a 7 PM y 25 de diciembre de 8 AM a 6 PM</b>. Ninguna pieza de domingo, del 24 ni del 25 menciona las 10 PM. El horario del <b>31 de diciembre</b> todavía no está confirmado: su pieza no publica horas.</div>
+  </section>
+
+  <section>
+    <h2>Regla de producción · 3 videos en el mes</h2>
+    <div class="card">
+      <p>Desde diciembre, cada mes lleva <b>exactamente 3 videos</b>: dos propios y uno que se le pide a la community manager de City Mall, que siempre es el promocional mensual. Todo lo demás es foto real, carrusel, post educativo, Plantilla A o historias. El loop del TV de sala de espera es un montaje de slides y no cuenta como video.</p>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Video</th><th>Quién lo produce</th><th>Pieza</th><th>Publicación</th><th>Entrega a más tardar</th><th>Por qué este</th></tr></thead>
+        <tbody>
+          <tr style="background:#FDD22C"><td><b>Promocional mensual</b></td><td><b>Community manager de City Mall</b></td><td>Sueroterapia con valoración médica + Extrafinanciamiento Ficohsa</td><td>Jueves 3 dic</td><td><b>Sábado 28 nov</b></td><td>Promocional comprometido por la Dirección. La línea que más crece sin pauta.</td></tr>
+          <tr><td>Video propio 1</td><td>CMG</td><td>Cauterización · testimonio, creativo nuevo</td><td>Miércoles 9 dic</td><td>Viernes 4 dic</td><td>La campaña llegó a frecuencia 2.73 y su venta cae 33.6% por día: el mismo video sirve de segundo creativo para la pauta.</td></tr>
+          <tr><td>Video propio 2</td><td>CMG</td><td>Lavado de oído · la visita de principio a fin</td><td>Viernes 11 dic</td><td>Lunes 7 dic</td><td>La conversación más barata de la cuenta y la venta que más cae (−35.3%): el video responde la duda antes del chat.</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p style="margin-top:12px"><b>Encargo a la community manager de City Mall.</b> Video vertical 9:16, de 20 a 30 segundos. <b>Mensaje central:</b> «Diciembre con energía: tu suero con valoración médica, y ahora lo puedes pagar con Extrafinanciamiento Ficohsa». <b>Precios en pantalla:</b> Suero Boost L1350, Suero Oxigenador L700, Suero Vitamina C L1000 y consulta L300. <b>Cierre:</b> «Escríbenos al WhatsApp +504 3155-5162 · City Mall Tegucigalpa · sin cita». <b>No debe mencionar</b> cuotas, plazos ni montos de Ficohsa hasta que estén confirmados por escrito, ni promesas de resultados. Se publica el jueves 3 y se reutiliza en historias el martes 15 y el domingo 20, y en el TV de sala de espera todo el mes.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Calendario día por día · 1 al 31 de diciembre</h2>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Fecha</th><th>Día</th><th>Pilar</th><th>Servicio</th><th>Tipo</th><th>Formato</th><th>Titular propuesto</th><th>CTA</th><th>Canal</th></tr></thead>
+      <tbody>
+        <tr style="background:#FFF6DC"><td>1 dic</td><td>Martes</td><td>2</td><td>Lavado de oído + consulta</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Empieza diciembre oyendo claro: lavado de oído L400 y consulta L300 en una sola visita</td><td>Ven sin cita, por orden de llegada, hasta las 10 PM</td><td>Facebook, Instagram, historias después de 5 PM</td></tr>
+        <tr><td>2 dic</td><td>Miércoles</td><td>1</td><td>Sueroterapia</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Qué pasa en una sesión de sueroterapia, paso a paso: valoración, aplicación y cuánto dura</td><td>Pregúntanos por WhatsApp cuál suero va contigo</td><td>Facebook, Instagram</td></tr>
+        <tr style="background:#FDD22C"><td><b>3 dic</b></td><td><b>Jueves</b></td><td>1</td><td>Sueroterapia + consulta · Extrafinanciamiento Ficohsa</td><td><span class="tag t-promo">Promocional</span></td><td><b>Video · City Mall</b> (promocional mensual)</td><td>Diciembre con energía: tu suero con valoración médica, y ahora lo puedes pagar con Extrafinanciamiento Ficohsa</td><td>Escríbenos al WhatsApp y te decimos cuál te conviene · ven sin cita hasta las 10 PM</td><td>Facebook, Instagram, historias, TV sala de espera</td></tr>
+        <tr style="background:#FFF6DC"><td>4 dic</td><td>Viernes</td><td>3</td><td>Cauterización + consulta</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Viernes de resolver pendientes: consulta L300 y cauterización L200 por lesión, en una sola visita</td><td>Ven hoy sin cita, por orden de llegada, hasta las 10 PM</td><td>Facebook, Instagram, historias después de 5 PM</td></tr>
+        <tr><td>5 dic</td><td>Sábado</td><td>2</td><td>Consulta médica</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>De compras en City Mall y alguien de la familia anda con molestias: te atendemos sin cita y con parqueo</td><td>Ven con los tuyos sin cita, por orden de llegada, hasta las 10 PM</td><td>Facebook, Instagram, historias después de 5 PM</td></tr>
+        <tr><td>6 dic</td><td>Domingo</td><td>1</td><td>Sueroterapia</td><td><span class="tag t-sin">Sólo historias</span></td><td>Historias</td><td>Sin pieza de feed: domingo, el peso se guarda para la semana. Historias: «¿Cuál suero va con tu diciembre?», con el video de City Mall</td><td>Pregúntanos por WhatsApp cuál te conviene · domingo de 8 AM a 6 PM</td><td>Historias</td></tr>
+        <tr><td>7 dic</td><td>Lunes</td><td>4</td><td>Laboratorio</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Chequeo de fin de año: tres exámenes que conviene hacerte antes de enero</td><td>Cotiza tus exámenes por WhatsApp y ven en ayunas de 6 AM a 10 AM</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>8 dic</td><td>Martes</td><td>1</td><td>Suero Boost</td><td><span class="tag t-edu">Educativo</span></td><td>Post educativo</td><td>Suero Boost: para quién es, qué lleva y en qué momento de tu semana conviene</td><td>Pregúntanos por WhatsApp si es para ti · L1350</td><td>Facebook, Instagram</td></tr>
+        <tr><td>9 dic</td><td>Miércoles</td><td>3</td><td>Cauterización</td><td><span class="tag t-edu">Educativo</span></td><td><b>Video propio 1</b> · testimonio, creativo nuevo</td><td>«Me quité las verrugas del cuello en una sola visita»: cómo fue, contado por quien lo vivió</td><td>Mándanos una foto por WhatsApp y te orientamos · L200 por lesión</td><td>Facebook, Instagram, historias</td></tr>
+        <tr style="background:#FFF6DC"><td>10 dic</td><td>Jueves</td><td>4</td><td>Electrocardiograma + consulta</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Antes de las fiestas, revisa tu corazón: consulta L300 y electrocardiograma L500 en la misma visita</td><td>Ven sin cita, por orden de llegada, hasta las 10 PM: te lo hacemos el mismo día</td><td>Facebook, Instagram, historias después de 5 PM</td></tr>
+        <tr><td>11 dic</td><td>Viernes</td><td>2</td><td>Lavado de oído</td><td><span class="tag t-edu">Educativo</span></td><td><b>Video propio 2</b> · la visita de principio a fin</td><td>Así es un lavado de oído en CMG: qué se siente, cuánto dura y cuándo lo necesitas</td><td>Ven hoy sin cita, por orden de llegada, hasta las 10 PM · L400</td><td>Facebook, Instagram, historias después de 5 PM</td></tr>
+        <tr><td>12 dic</td><td>Sábado</td><td>3</td><td>Extracción de uña</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>Estrena zapatos en Navidad sin pensar en esa uña</td><td>Escríbenos y te decimos qué esperar · L500 · hoy hasta las 10 PM</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>13 dic</td><td>Domingo</td><td>4</td><td>Laboratorio</td><td><span class="tag t-sin">Sólo historias</span></td><td>Historias</td><td>Sin pieza de feed: domingo. Historias: «Ayuno y exámenes: cómo prepararte para que el resultado salga bien»</td><td>Cotiza tus exámenes por WhatsApp · domingo de 8 AM a 6 PM</td><td>Historias</td></tr>
+        <tr><td>14 dic</td><td>Lunes</td><td>1</td><td>Suero Vitamina C · Complejo B</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Vitamina C o Complejo B: qué aporta cada suero en la temporada de fiestas</td><td>Pregúntanos por WhatsApp · Vitamina C L1000, Complejo B L850</td><td>Facebook, Instagram</td></tr>
+        <tr style="background:#FFF6DC"><td>15 dic</td><td>Martes</td><td>1</td><td>Suero Oxigenador + consulta · Extrafinanciamiento Ficohsa</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Quincena para ti: Suero Oxigenador L700 con consulta L300, y lo pagas con Extrafinanciamiento Ficohsa</td><td>Reserva tu sesión por WhatsApp</td><td>Facebook, Instagram, historias (con el video de City Mall)</td></tr>
+        <tr><td>16 dic</td><td>Miércoles</td><td>2</td><td>Consulta nocturna</td><td><span class="tag t-sin">Sólo historias</span></td><td>Historias</td><td>Sin pieza de feed: la semana ya lleva seis. Historias después de 5 PM: «Saliste tarde del trabajo: seguimos abiertos»</td><td>Ven sin cita, por orden de llegada, hasta las 10 PM</td><td>Historias después de 5 PM</td></tr>
+        <tr><td>17 dic</td><td>Jueves</td><td>3</td><td>Cauterización</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Antes de las fotos de fin de año: verrugas, lunares y callos, cuál se trata en una sola visita</td><td>Mándanos una foto por WhatsApp y te orientamos</td><td>Facebook, Instagram, historias</td></tr>
+        <tr style="background:#FFF6DC"><td>18 dic</td><td>Viernes</td><td>2 y 3</td><td>Consulta + cauterización o lavado de oído</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real</td><td>Fin de semana de pago: resuelve hoy lo que vienes posponiendo. Consulta L300 con cauterización L200 por lesión o lavado de oído L400</td><td>Escríbenos desde temprano y ven sin cita, por orden de llegada, hasta las 10 PM</td><td>Facebook, Instagram, historias, TV sala de espera</td></tr>
+        <tr><td>19 dic</td><td>Sábado</td><td>1</td><td>Suero Boost · Oxigenador</td><td><span class="tag t-edu">Educativo</span></td><td>Post educativo</td><td>Boost u Oxigenador: cuál va con tu diciembre, según cómo llegas al fin de semana</td><td>Pregúntanos por WhatsApp · Boost L1350, Oxigenador L700</td><td>Facebook, Instagram, historias</td></tr>
+        <tr style="background:#FDD22C"><td><b>20 dic</b></td><td><b>Domingo</b></td><td>1</td><td>Suero Boost + consulta · Extrafinanciamiento Ficohsa</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Día de pago: Suero Boost L1350 con consulta L300, y lo pagas con Extrafinanciamiento Ficohsa</td><td>Escríbenos desde temprano y ven hoy · domingo de 8 AM a 6 PM</td><td>Facebook, Instagram, historias (con el video de City Mall)</td></tr>
+        <tr><td>21 dic</td><td>Lunes</td><td>4</td><td>Perfil de lípidos · laboratorio</td><td><span class="tag t-edu">Educativo</span></td><td>Post educativo</td><td>Antes de las cenas de Navidad: qué te dice un perfil de lípidos y cuándo conviene hacerlo</td><td>Cotiza tu perfil de lípidos por WhatsApp y ven en ayunas de 6 AM a 10 AM</td><td>Facebook, Instagram</td></tr>
+        <tr style="background:#FFF6DC"><td>22 dic</td><td>Martes</td><td>3</td><td>Extracción de uña + consulta</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Llega a Navidad sin esa uña enterrada: consulta L300 y extracción L500 en la misma visita</td><td>Ven sin cita, por orden de llegada, hasta las 10 PM</td><td>Facebook, Instagram, historias después de 5 PM</td></tr>
+        <tr><td>23 dic</td><td>Miércoles</td><td>2</td><td>Horario de Navidad</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real del equipo</td><td>En Navidad también cuidamos de tu salud: el 24 te atendemos de 7 AM a 7 PM y el 25 de 8 AM a 6 PM</td><td>Guarda este horario y escríbenos al WhatsApp si lo necesitas</td><td>Facebook, Instagram, historias, TV sala de espera</td></tr>
+        <tr><td>24 dic</td><td>Jueves</td><td>2</td><td>Consulta médica</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real</td><td>Nochebuena: si algo no se siente bien, mejor revisarlo hoy y celebrar tranquilo</td><td>Ven hoy sin cita, de 7 AM a 7 PM</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>25 dic</td><td>Viernes</td><td>2</td><td>Navidad · consulta</td><td><span class="tag t-emo">Emocional</span></td><td>Post foto real del equipo</td><td>Feliz Navidad de parte de todo el equipo de CMG: gracias por dejarnos cuidar de tu salud este año</td><td>Hoy te atendemos de 8 AM a 6 PM, sin cita</td><td>Facebook, Instagram, historias</td></tr>
+        <tr style="background:#FFF6DC"><td>26 dic</td><td>Sábado</td><td>4</td><td>Consulta + laboratorio</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Arranca enero con resultados: consulta L300 y tus exámenes de laboratorio en la misma visita</td><td>Cotiza tus exámenes por WhatsApp y ven en ayunas de 6 AM a 10 AM</td><td>Facebook, Instagram, historias</td></tr>
+        <tr><td>27 dic</td><td>Domingo</td><td>1</td><td>Suero Glutathione</td><td><span class="tag t-sin">Sólo historias</span></td><td>Historias · <b>sondeo</b></td><td>Sin pieza de feed: domingo. Historias: «Suero Glutathione: qué es y a quién se le recomienda». L1500</td><td>Escríbenos y te decimos si es para ti · domingo de 8 AM a 6 PM</td><td>Historias</td></tr>
+        <tr><td>28 dic</td><td>Lunes</td><td>4</td><td>Electrocardiograma</td><td><span class="tag t-edu">Educativo</span></td><td>Post educativo</td><td>Cuatro señales del corazón que no conviene dejar para enero</td><td>Ven sin cita y te hacemos el electrocardiograma el mismo día · L500</td><td>Facebook, Instagram, historias</td></tr>
+        <tr style="background:#FFF6DC"><td>29 dic</td><td>Martes</td><td>3</td><td>Cauterización + consulta</td><td><span class="tag t-promo">Promocional</span></td><td>Post foto real · Plantilla A</td><td>Cierra el año sin esa verruga: consulta L300 y cauterización L200 por lesión, en una sola visita</td><td>Ven sin cita, por orden de llegada, hasta las 10 PM</td><td>Facebook, Instagram, historias después de 5 PM</td></tr>
+        <tr><td>30 dic</td><td>Miércoles</td><td>1</td><td>Sueroterapia</td><td><span class="tag t-edu">Educativo</span></td><td>Carrusel</td><td>Después de las fiestas: qué suero conviene para retomar el ritmo en enero</td><td>Pregúntanos por WhatsApp cuál va contigo · aplica Extrafinanciamiento Ficohsa</td><td>Facebook, Instagram</td></tr>
+        <tr><td>31 dic</td><td>Jueves</td><td>2</td><td>Consulta médica</td><td><span class="tag t-sin">Sólo historias</span></td><td>Historias</td><td>Sin pieza de feed: horario del 31 por confirmar con la Dirección. Historias: «Último día del año: cuidamos de tu salud también hoy»</td><td>Escríbenos al WhatsApp para confirmar el horario de hoy</td><td>Historias</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="nota"><b>Barras amarillas:</b> el <b>jueves 3</b> es el promocional mensual (video de City Mall) puesto sobre el día más débil de noviembre. El <b>domingo 20</b> es el pago de empleados públicos; como cae domingo, la Dirección tiene que confirmar si el pago se adelanta al viernes 18. Por eso el 18 ya lleva promocional de pago y el 20 sale desde temprano con el horario del domingo (8 AM a 6 PM).</div>
+    <div class="nota"><b>Filas en crema:</b> las otras 8 piezas promocionales, todas combos de dos servicios a precio de lista (regla P6). Los <b>anclajes de la regla P5</b> van en jueves y viernes (3, 4 y 10), y el resto sigue el mapa de liquidez: eco del pago (1), quincena (15), pago público (18 y 20), ventana alta antes de Navidad (22), después de Navidad (26) y cierre (29).</div>
+    <div class="nota riesgo"><b>El plan necesita aprobación antes del jueves 26 de noviembre.</b> Sin aprobación no se puede pedir el video a City Mall, y su entrega límite es el sábado 28. Si se aprueba tarde, el promocional mensual pasa del 3 al <b>martes 15</b> (quincena) y el 3 sale como post foto real con el mismo titular, sin agregar ningún video.</div>
+  </section>
+
+  <section>
+    <h2>Cadencia semanal · 26 piezas de feed</h2>
+    <table>
+      <thead><tr><th>Semana</th><th>Feed</th><th>Promocional</th><th>Educativo</th><th>Emocional</th><th>Sólo historias</th><th>Videos</th></tr></thead>
+      <tbody>
+        <tr><td>1 al 6 de diciembre</td><td>5</td><td>3</td><td>1</td><td>1</td><td>1</td><td>1 (City Mall)</td></tr>
+        <tr><td>7 al 13 de diciembre</td><td>6</td><td>1</td><td>4</td><td>1</td><td>1</td><td>2 (propios)</td></tr>
+        <tr><td>14 al 20 de diciembre</td><td>6</td><td>3</td><td>3</td><td>0</td><td>1</td><td>0</td></tr>
+        <tr><td>21 al 27 de diciembre</td><td>6</td><td>2</td><td>1</td><td>3</td><td>1</td><td>0</td></tr>
+        <tr><td>28 al 31 de diciembre</td><td>3</td><td>1</td><td>2</td><td>0</td><td>1</td><td>0</td></tr>
+        <tr><td><b>Total del mes</b></td><td><b>26</b></td><td><b>10</b></td><td><b>11</b></td><td><b>5</b></td><td><b>5</b></td><td><b>3</b></td></tr>
+      </tbody>
+    </table>
+    <div class="nota">Ninguna semana pasa de 6 piezas de feed. Historias diarias del 1 al 31. Tres videos, ni uno más. Un loop de TV de sala de espera. Dos flujos de WhatsApp, uno nuevo y uno revisado. Las cinco filas de «sólo historias» llevan CTA igual que las demás.</div>
+  </section>
+
+  <section>
+    <h2>Piezas de refuerzo</h2>
+    <div class="card">
+      <p><b>Video del TV de sala de espera.</b> 16:9, de 5 a 6 segundos por slide, transición suave de 0.8 segundos, loop continuo, Ken Burns sutil, música instrumental suave. Se actualizan tres slides: salen el de Día Mundial de la Diabetes y el de chequeo del corazón, y entran <b>sueroterapia con Extrafinanciamiento Ficohsa</b> (todo el mes, con cuadros del video de City Mall), <b>horario de Navidad: 24 de 7 AM a 7 PM y 25 de 8 AM a 6 PM</b> (del 14 al 25) y <b>chequeo de fin de año: consulta y laboratorio</b> (del 26 al 31). Sale al aire el 1 de diciembre.</p>
+      <p><b>Historias.</b> Diarias del 1 al 31. Las de franja nocturna se programan después de las 5 PM los días 1, 4, 5, 10, 11, 16, 18, 22 y 29. El 18 y el 20 llevan refuerzo cada tres horas desde las 8 AM. El video de City Mall se repite en historias el 6, el 15 y el 20. Las de los domingos 6, 13 y 27, la del miércoles 16 y la del jueves 31 son el contenido del día.</p>
+      <p><b>Flujos de WhatsApp.</b> Uno nuevo y uno revisado, los dos a cargo de <code>cmg-whatsapp-cro</code>. El nuevo es el de <b>sueroterapia con Extrafinanciamiento Ficohsa</b>: la persona llega desde el video de City Mall o las piezas del 15 y el 20, el flujo le pregunta para qué quiere el suero, le ofrece la valoración médica, le explica que puede pagar con Extrafinanciamiento Ficohsa y la transfiere con la Lic. María del Carmen para reservar. El revisado es el de <b>electrocardiograma</b> (regla P11): 24 conversaciones del 16 al 19 de noviembre sin ningún electrocardiograma en caja; el flujo tiene que llevar a la visita sin cita, no a una cotización.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Presupuesto de pauta · L13,500 aprobados</h2>
+    <table>
+      <thead><tr><th>Campaña</th><th>Noviembre (gastado al 21)</th><th>Diciembre</th><th>Por qué</th></tr></thead>
+      <tbody>
+        <tr><td>Cauterizaciones 2026</td><td>L2,917.65</td><td>L3,600</td><td>Mismo monto que noviembre. Frecuencia 2.73 y cuatro días en rojo del 16 al 21: el gasto pasa al video del 9 (creativo nuevo) en cuanto esté listo, en vez de subir presupuesto sobre «V3».</td></tr>
+        <tr><td>Lavado de Oído</td><td>L2,452.43</td><td>L3,300</td><td>La más barata (L9.02) pero la venta del servicio cae 35.3% por día: el problema es de cierre, no de alcance (P11). No sube; el video del 11 se suma como creativo.</td></tr>
+        <tr><td>Extracción de Uña</td><td>L2,435.61</td><td>L2,700</td><td>Salió del rojo en venta (ROAS 4.92x). Casi igual.</td></tr>
+        <tr><td>Electrocardiograma</td><td>L1,460.97</td><td>L1,500</td><td>ROAS 3.72x y conversaciones que no cierran (P11). Se sostiene, sin subir, hasta revisar el flujo de WhatsApp.</td></tr>
+        <tr><td><b>Sueroterapia · Extrafinanciamiento Ficohsa</b> <span style="color:#6b7290">(nueva, propuesta)</span></td><td>—</td><td>L1,700</td><td>Prueba del promocional mensual con el video de City Mall, a conversación de WhatsApp. La línea vende sin pauta, así que la prueba mide si la pauta suma algo encima: si el ROAS del suero no supera el de la línea sin pauta, se apaga el 15.</td></tr>
+        <tr><td><b>Horario de Navidad · alcance</b> <span style="color:#6b7290">(nueva, propuesta)</span></td><td>—</td><td>L700</td><td>Del 19 al 25, anuncia el horario del 24 y el 25. No genera conversaciones: no entra en el costo por conversación.</td></tr>
+        <tr><td>Horario Extendido · alcance</td><td>L914.79</td><td>L0</td><td>La jornada vende más sin pauta (L7,836.00 en diez noches) que con ella (L4,865.00 en nueve).</td></tr>
+        <tr><td>Cotiza Laboratorio · alcance</td><td>L166.41</td><td>L0</td><td>La prueba de 14 días sin pauta terminó con +23.4% por día. Se da de baja.</td></tr>
+        <tr><td><b>Total</b></td><td><b>L10,347.86</b></td><td><b>L13,500</b></td><td>Al ritmo del 16 al 21, noviembre cerraría cerca de L14,150 (estimado).</td></tr>
+      </tbody>
+    </table>
+    <div class="nota"><b>El monto es referencia, no tope.</b> Como en los meses anteriores, se lee como proporción entre campañas. Las dos campañas nuevas quedan como propuesta hasta que la Dirección apruebe el plan; si no se aprueban, sus L2,400 se reparten entre cauterización (con el video nuevo) y extracción de uña.</div>
+  </section>
+
+  <section>
+    <h2>KPIs de diciembre · punto de partida noviembre al 19</h2>
+    <table>
+      <thead><tr><th>Indicador</th><th>Noviembre al 19</th><th>Meta diciembre</th><th>Depende de</th></tr></thead>
+      <tbody>
+        <tr><td>Venta total</td><td>L241,485.02 · proyección L381,292 (estimada)</td><td>L416,667</td><td>Todo el calendario</td></tr>
+        <tr><td>Promedio diario</td><td>L12,709.74</td><td>L13,441</td><td>Pilares 1 y 2</td></tr>
+        <tr><td>Ticket promedio</td><td>L731.77 (Sheet) · L740.57 (libro)</td><td>L750</td><td>Las 10 piezas promocionales en combo (regla P6) y los sueros</td></tr>
+        <tr><td>Personas atendidas por día</td><td>17.37</td><td>18.4</td><td>Pilares 2 y 3 · 1.0 más por día</td></tr>
+        <tr><td>Días bajo L10,500</td><td>7 de 19 · 36.8%</td><td>7 de 31 o menos · 22.6%</td><td>Anclajes de jueves y viernes (3, 4, 10)</td></tr>
+        <tr><td>Sueroterapias</td><td>L30,600.00</td><td>L55,000</td><td>Pilar 1 · promocional mensual</td></tr>
+        <tr><td>Días con meta de suero (L3,064)</td><td>5 de 19</td><td>10 de 31</td><td>Pilar 1</td></tr>
+        <tr><td>Ventas de suero con Extrafinanciamiento Ficohsa</td><td>no existía</td><td>dato nuevo: medir</td><td>Pilar 1 · flujo de WhatsApp nuevo</td></tr>
+        <tr><td>Cauterización</td><td>L15,850.00</td><td>L32,000</td><td>Pilar 3 · video del 9</td></tr>
+        <tr><td>Lavado de oído</td><td>L14,600.00</td><td>L28,000</td><td>Pilar 2 · video del 11</td></tr>
+        <tr><td>Extracción de uña</td><td>L11,150.00</td><td>L19,000</td><td>Pilar 3</td></tr>
+        <tr><td>Electrocardiograma</td><td>L5,000.00</td><td>L9,000</td><td>Pilar 4 · flujo revisado</td></tr>
+        <tr><td>Laboratorio</td><td>L23,987.00</td><td>L38,000</td><td>Pilar 4 · sin pauta</td></tr>
+        <tr><td>Aporte del horario extendido</td><td>5.3%</td><td>6%</td><td>Regla P9 · 8 piezas con la franja nocturna</td></tr>
+        <tr><td>ROAS de la cuenta</td><td>7.35</td><td>8.0 o más</td><td>Reparto entre campañas · creativos nuevos</td></tr>
+        <tr><td>Costo por conversación</td><td>L11.96 (al 21)</td><td>L12.00 o menos</td><td>Creativos nuevos de cauterización y lavado</td></tr>
+      </tbody>
+    </table>
+    <div class="nota"><b>Las metas por servicio son de mes completo</b> y se comparan con el ritmo de noviembre: cauterización a L834 por día daría L25,860 en 31 días, así que L32,000 pide volver cerca del ritmo de octubre con el creativo nuevo. Sueroterapias a su ritmo de noviembre (L1,610.53 por día) cerraría en L49,926; los L55,000 son lo que se le pide al promocional mensual. Estas metas se revisan cuando cierre noviembre: si el cierre real cambia el punto de partida, entra como ajuste sobre la marcha.</div>
+  </section>
+
+  <section>
+    <h2>Restricciones, datos faltantes y encargos</h2>
+    <div class="card">
+      <p><b>Congelado por regla P1:</b> nada. La Dirección confirmó insumo para todos los servicios y sueros el 22 de noviembre.</p>
+      <p><b>Fuera del calendario por estado de catálogo:</b> Suero Multivitamínico y Suero Vitamina D (pausados), Hígado Detox (retirado, por confirmar) y Beplenovax (en observación).</p>
+      <p><b>Restricciones comprometidas:</b> el promocional mensual es <b>sueroterapia con Extrafinanciamiento Ficohsa</b>, en video de City Mall. El presupuesto de pauta es de <b>L13,500</b>. Horario del <b>24 de diciembre de 7 AM a 7 PM</b> y del <b>25 de 8 AM a 6 PM</b>.</p>
+      <p><b>Datos faltantes de este plan:</b></p>
+      <ul>
+        <li><b>Cierre de noviembre y reporte ejecutivo de noviembre.</b> El plan usa noviembre al 19 y una proyección estimada. El cierre real entra como ajuste.</li>
+        <li><b>Condiciones de Extrafinanciamiento Ficohsa.</b> Plazos, cuotas, monto mínimo y si aplica sólo con tarjeta Ficohsa. Hasta tenerlas por escrito, ninguna pieza publica cifras de financiamiento.</li>
+        <li><b>Horario del 31 de diciembre y del 1 de enero.</b> La pieza del 31 no publica horas hasta confirmarlo.</li>
+        <li><b>Fecha de pago de empleados públicos.</b> El 20 cae domingo: confirmar si se adelanta al viernes 18. También la fecha del décimo tercer mes, que puede mover el valle del 6 al 14.</li>
+        <li><b>Precio de los exámenes de laboratorio y del perfil de lípidos.</b> Variable según examen: las piezas del 7, 13, 21 y 26 llevan «cotiza».</li>
+        <li><b>Tasa de cierre de WhatsApp por servicio.</b> Se estima por venta sobre conversaciones; es la que hace falta para leer electrocardiograma y lavado de oído.</li>
+        <li><b>Consultas de noviembre.</b> El Sheet todavía no trae el desglose.</li>
+        <li><b>Servicios sin desglose propio</b> (regla P10): prueba de embarazo L250, citología de base líquida L500 y aplicaciones IM L80 e IV L180. Siguen dentro de las piezas de consulta.</li>
+        <li><b>Recalibración de la línea base.</b> Pendiente desde noviembre; se hace con los reportes de septiembre, octubre y noviembre.</li>
+      </ul>
+      <p><b>Encargos:</b></p>
+      <ul>
+        <li><b>A la community manager de City Mall:</b> el video del promocional mensual descrito en «Regla de producción», con entrega el <b>sábado 28 de noviembre</b>.</li>
+        <li><b>A <code>cmg-meta-ads-copywriter</code>:</b> Sueroterapia · Extrafinanciamiento Ficohsa — campaña nueva a conversación de WhatsApp sobre el video de City Mall, ángulo «bienestar con valoración médica», Boost L1350, Oxigenador L700, Vitamina C L1000, sin cuotas, L1,700. Cauterización — el video del 9 como segundo creativo, ángulo «todas en una sola visita», L200 por lesión, L3,600. Lavado de oído — el video del 11 como creativo, ángulo «qué se siente y cuánto dura», L400, L3,300. Extracción de uña — ángulo de fiestas (zapatos nuevos), L500, L2,700. Electrocardiograma — ángulo «te lo hacemos el mismo día, sin cita», L500, L1,500. Horario de Navidad — alcance del 19 al 25, L700.</li>
+        <li><b>A <code>ai-ad-image-prompter</code>:</b> las 23 piezas de feed que no son video, con su servicio, titular y formato. Llevan Plantilla A las del 1, 4, 10, 15, 20, 22, 26 y 29. Las del 23 y el 25 son foto real del equipo, no imagen generada.</li>
+        <li><b>A <code>cmg-whatsapp-cro</code>:</b> crear el flujo de <b>sueroterapia con Extrafinanciamiento Ficohsa</b> y revisar el de <b>electrocardiograma</b> (regla P11), los dos con transferencia a la Lic. María del Carmen.</li>
+        <li><b>De <code>cmg-ads-dashboard</code>:</b> consumido como insumo: Panel de Ads con corte al 21 de noviembre y cruce de pauta contra venta al 19. Desde la aprobación, la corrida diaria es la que ajusta este plan.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Qué revisar el mes que viene</h2>
+    <div class="card">
+      <ul>
+        <li><b>Primero, sueroterapia con Ficohsa.</b> Es el promocional del mes: cuánto vendió la línea contra los L55,000, cuántas ventas se pagaron con Extrafinanciamiento Ficohsa y si la campaña nueva sumó algo sobre lo que la línea ya vendía sin pauta.</li>
+        <li><b>Segundo, jueves y viernes.</b> Si los anclajes del 3, 4 y 10 no sacan esos días del piso, el problema no es la pieza del día sino el flujo de gente de esos días en City Mall.</li>
+        <li><b>Tercero, los dos videos propios.</b> Si el de cauterización bajó la frecuencia y el costo de su campaña, y si el de lavado de oído movió la venta del servicio, no sólo las conversaciones.</li>
+        <li><b>Cuarto, electrocardiograma.</b> Con el flujo revisado, la venta por conversación tiene que subir. Si no sube, la campaña se reduce en enero.</li>
+        <li><b>Quinto, el proceso nuevo.</b> Cuántos ajustes se le hicieron al plan aprobado y por qué: si fueron muchos, el plan de enero tiene que salir con más dato del mes en curso.</li>
+      </ul>
+    </div>
+  </section>
+
+  </div><!-- /mes 2026-12 -->
+  <footer>Clínica Médica General · <b>Cuidamos de tu salud</b> · City Mall Tegucigalpa</footer>
+</div>
+</body>
+</html>
